@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi Web · Menú sencillo</title>
+  <style>
+    :root{
+      --bg:#0c0f14; --ink:#e8eef7; --muted:#9aa7b4; --line:#232b36;
+      --brand1:#A60000; --brand2:#E43B3B;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    a{color:inherit;text-decoration:none}
+    header{
+      position:sticky;top:0;z-index:10;
+      display:flex;align-items:center;gap:.75rem;
+      padding:.75rem 1rem;border-bottom:1px solid var(--line);background:#0e1218cc;backdrop-filter:saturate(120%) blur(6px)
+    }
+    .btn{border:1px solid var(--line);background:#121722;border-radius:.75rem;padding:.55rem .7rem;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .logo{font-weight:800;letter-spacing:.3px}
+    .spacer{flex:1}
+    nav[hidden], .menu[hidden]{display:none}
+    nav, .menu{background:#0e1218;border-bottom:1px solid var(--line)}
+    nav a{display:block;padding:.9rem 1rem;border-top:1px solid #151b25}
+    main{max-width:900px;margin:0 auto;padding:1.25rem}
+    .card{border:1px solid var(--line);border-radius:1rem;padding:1rem;background:#0f141d}
+    .chip{display:inline-block;font-size:.85rem;border:1px solid var(--line);padding:.2rem .5rem;border-radius:1rem;color:var(--muted)}
+    footer{border-top:1px solid var(--line);padding:1rem;color:var(--muted);text-align:center}
+  </style>
+</head>
+<body>
+  <header>
+    <button class="btn" data-target="#mainNav" aria-expanded="false" aria-controls="mainNav">☰</button>
+    <div class="logo">Mi Web</div>
+    <div class="spacer"></div>
+    <h1 style="font-size:1rem;margin:0">Inicio</h1>
+    <div class="spacer"></div>
+    <button class="btn" data-target="#userMenu" aria-expanded="false" aria-controls="userMenu">⋯</button>
+  </header>
+
+  <nav id="mainNav" hidden>
+    <a href="#" data-page="inicio">Inicio</a>
+    <a href="#" data-page="equipos">Equipos</a>
+    <a href="#" data-page="incidencias">Incidencias</a>
+    <a href="#" data-page="inventario">Inventario</a>
+  </nav>
+
+  <div id="userMenu" class="menu" hidden>
+    <a href="#" id="btnPerfil">Mi perfil</a>
+    <a href="#" id="btnSalir">Salir</a>
+  </div>
+
+  <main>
+    <div class="card">
+      <p class="chip">Plantilla simple</p>
+      <h2 style="margin:.3rem 0 0">Todo funcionando sin líos</h2>
+      <p>Este archivo tiene un <strong>menú hamburguesa</strong> que se abre y se cierra bien, y otro menú de usuario. Sin dependencias y sin cosas raras.</p>
+      <ul>
+        <li>Si haces clic fuera, los menús se cierran.</li>
+        <li>No se duplican eventos ni se montan funciones.</li>
+        <li>Listo para subir a GitHub Pages.</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>© 2025 · Hecho con cariño</footer>
+
+  <script>
+    // Controlador único de menús (simple y sin duplicados)
+    (function(){
+      function $(sel,ctx){ return (ctx||document).querySelector(sel); }
+
+      function toggle(btn){
+        const sel = btn.getAttribute('data-target');
+        const panel = $(sel);
+        if(!panel) return;
+        const open = btn.getAttribute('aria-expanded') === 'true';
+        // Cierra todo antes
+        document.querySelectorAll('[aria-expanded="true"]').forEach(b=>{
+          const t = b.getAttribute('data-target');
+          const p = t && document.querySelector(t);
+          if(p){ p.hidden = true; b.setAttribute('aria-expanded','false'); }
+        });
+        // Abre/cierra el actual
+        panel.hidden = open;
+        btn.setAttribute('aria-expanded', String(!open));
+      }
+
+      document.addEventListener('click', function(ev){
+        const btn = ev.target.closest('[data-target]');
+        if(btn){ ev.preventDefault(); toggle(btn); return; }
+        // Clic fuera → cerrar
+        const inside = ev.target.closest('header, nav, .menu');
+        if(!inside){
+          document.querySelectorAll('[aria-expanded="true"]').forEach(b=>{
+            const t = b.getAttribute('data-target');
+            const p = t && document.querySelector(t);
+            if(p){ p.hidden = true; b.setAttribute('aria-expanded','false'); }
+          });
+        }
+      }, {capture:true});
+    })();
+  </script>
+</body>
+</html>
