@@ -1,74 +1,190 @@
-<!doctype html>
+  <!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CDL · Demo menús + Equipos</title>
+<title>CDL · CMMS v34</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#e8eef7; --line:#232b36;
+  --brand1:#A60000;--brand2:#E43B3B;
+  --ok:#16a34a;--warn:#f59e0b;--stop:#dc2626;
+  --ink:#e8eef7;--muted:#9aa7b4;--line:#232b36
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:#0c0f14;color:var(--ink);font-family:Inter,system-ui,sans-serif}
-.hidden{display:none!important}
-.container{max-width:980px;margin:0 auto;padding:1rem}
+body{
+  margin:0;background:#0c0f14;color:var(--ink);
+  font-family:Inter,system-ui,sans-serif
+}
+a{color:#9ec1ff;text-decoration:none}
+img{max-width:100%;display:block}
 
-/* ===== Header con logo difuminado y barra abajo ===== */
 header{
-  position:sticky; top:0; z-index:60;
-  background:#fff; color:#000; min-height:100px; isolation:isolate; overflow:visible;
+  position:sticky;
+  top:0;
+  z-index:60;
+  background:#fff;
+  color:#000;
+  overflow:visible;
+  isolation:isolate;       /* deja salir los paneles */
+  min-height:100px;       /* altura estable */
 }
 header::before{
-  content:""; position:absolute; inset:0;
+  content:"";
+  position:absolute;
+  inset:0;
   background:url('logo_mantenimiento.png') center no-repeat;
-  background-size:70%; opacity:.12; z-index:0; pointer-events:none;
+  background-size:70%;
+  opacity:.12;
+  z-index:0;
+  pointer-events:none;
 }
+/* Barra superior: pegada abajo */
 .nav{
-  display:flex; align-items:flex-end; gap:.8rem;
-  padding:.6rem .9rem .4rem; min-height:100px; position:relative; z-index:1;
+  display:flex;
+  align-items:flex-end;   /* ↓ pegas el contenido al borde inferior */
+  gap:.8rem;
+  padding:.6rem .9rem .4rem;  /* un poco menos abajo */
+  min-height:100px;       /* misma altura que el header */
+  position:relative;
+  z-index:1;              /* por encima del logo difuminado */
 }
 .grow{flex:1 1 auto}
 .rolechip{font-size:.72rem;font-weight:800;color:#000;opacity:.9}
+.logo{display:flex;align-items:center;gap:.8rem}
+.logo img{height:44px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.1))}
+.hero-title{display:flex;flex-direction:column}
+.hero-row{display:flex;align-items:baseline;gap:.6rem}
+.hero-cdl{font-weight:800;font-size:1.55rem;letter-spacing:.02em}
+.hero-panel{font-weight:700;color:#000;opacity:.9;margin-top:2px}
+.hero-fade{color:#000}
 
 /* Menús */
 .menu{position:relative}
-.mbtn{
-  border-radius:14px;background:#f1f1f1;color:#000;
-  border:1px solid #ccc;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.06);
-  padding:.5rem .7rem;font-weight:800;cursor:pointer
-}
 .panel{
-  position:absolute; right:0; top:calc(100% + 8px); z-index:1000;
-  background:#0f141c; color:#e8eef7;
-  border:1px solid #1e2a38; border-radius:16px;
-  box-shadow:0 18px 36px rgba(0,0,0,.5); min-width:280px; overflow:hidden;
+  position:absolute;
+  right:0;
+  top:calc(100% + 8px);
+  z-index:1000;                /* que no se pierda */
+  background:#0f141c;
+  border:1px solid #1e2a38;
+  border-radius:16px;
+  box-shadow:0 18px 36px rgba(0,0,0,.5);
+  min-width:280px;
+  overflow:hidden;
+  transform:translateZ(0);
 }
 .row{padding:.85rem 1rem;border-bottom:1px solid #1e2a38}
 .row:last-child{border-bottom:0}
 .actions{display:flex;gap:.55rem;flex-direction:column}
 .btn{border:0;border-radius:12px;padding:.6rem .9rem;font-weight:800;cursor:pointer}
+.mbtn{
+  border-radius:14px;background:#f1f1f1;color:#000;
+  border:1px solid #ccc;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.06)
+}
 #pagesPanel .btn{
   border-radius:999px;background:#0b0f15;color:#fff;border:1px solid #202a36;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 18px rgba(0,0,0,.35)
 }
 
-/* Tarjetas de equipos (simuladas) */
-.card{
-  background:#fff;color:#000;border:1px solid #ddd;border-radius:20px;
-  box-shadow:0 4px 12px rgba(0,0,0,.1); padding:1rem;margin:.55rem 0;
-  display:flex; gap:1rem; align-items:center; flex-wrap:wrap;
+/* Layout */
+.container{max-width:980px;margin:0 auto;padding:1rem}
+
+/* Cards claras sobre fondo oscuro */
+.card,.kpi,.tv-card{
+  background:#fff;color:#000;border:1px solid #ddd;
+  border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,.1);
+  padding:1rem;margin:.55rem 0
 }
+.name{font-weight:800;font-size:1.14rem;display:flex;align-items:center;gap:.4rem}
+.name .qr-s{
+  font-size:0;line-height:0;display:inline-block;border:1px solid #2a3442;border-radius:4px;
+  background:#0f141c;width:16px;height:16px;position:relative;margin-left:.35rem
+}
+.name .qr-s:before,.name .qr-s:after{content:"";position:absolute;background:#cbd5e1}
+.name .qr-s:before{inset:3px 3px auto auto;width:4px;height:4px}
+.name .qr-s:after{left:3px;bottom:3px;width:4px;height:4px}
+.sub{color:#475569}
 .pilot{width:18px;height:18px;border-radius:50%;
   box-shadow:0 0 0 3px #fff,0 0 0 6px rgba(0,0,0,.06),inset 0 -3px 6px rgba(0,0,0,.15)}
 .p-ok{background:#22c55e}
 .p-warn{background:#f59e0b}
 .p-stop{background:#ef4444}
-.name{font-weight:800;font-size:1.14rem}
-.sub{color:#475569}
-.badge-chip{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border-radius:999px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:800;color:#111827}
+.right{margin-left:auto;display:flex;gap:.55rem;flex-wrap:wrap}
+
+/* Botones “gloss” */
+.gloss{
+  display:inline-flex;align-items:center;gap:.55rem;padding:.6rem 1rem;border-radius:999px;
+  border:1px solid #d1d5db;background:linear-gradient(180deg,#f9fafb,#eef2f7);color:#111827;font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 2px 10px rgba(0,0,0,.06)
+}
+.gloss .dot{width:12px;height:12px;border-radius:999px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08)}
+.gloss.green .dot{background:radial-gradient(circle at 35% 30%,#6df49a,#22c55e 55%,#0e7a3a)}
+.gloss.yellow .dot{background:radial-gradient(circle at 35% 30%,#ffd56a,#f59e0b 55%,#8a4b00)}
+.gloss.red .dot{background:radial-gradient(circle at 35% 30%,#ff9e9e,#ef4444 55%,#7a1616)}
+.btn-mail.gloss{background:linear-gradient(180deg,#f7d4d4,#f1c3c3);border-color:#e5b4b4}
+
+/* Semáforo */
+.semaforo{
+  display:flex;align-items:center;gap:.8rem;
+  background:#f8fafc;border:1px solid #e2e8f0;border-radius:26px;padding:.5rem .6rem;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.05)
+}
+.semaforo .opt{position:relative;flex:1;display:flex;justify-content:center;align-items:center;height:44px;border-radius:22px;color:#0f172a;font-weight:800;cursor:pointer;user-select:none}
+.semaforo .opt .led{width:14px;height:14px;border-radius:999px;margin-right:.5rem}
+.semaforo .opt[data-k=ok] .led{background:radial-gradient(circle at 35% 30%,#6df49a,#22c55e 55%,#0e7a3a)}
+.semaforo .opt[data-k=warn] .led{background:radial-gradient(circle at 35% 30%,#ffd56a,#f59e0b 55%,#8a4b00)}
+.semaforo .opt[data-k=stop] .led{background:radial-gradient(circle at 35% 30%,#ff9e9e,#ef4444 55%,#7a1616)}
+.semaforo .opt.active{background:#e5ecf6;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.05)}
+
+/* Tablas dentro de tarjetas claras */
+table{width:100%;border-collapse:separate;border-spacing:0 8px}
+th,td{padding:.62rem .85rem;background:#fff;border-bottom:1px solid #e5e7eb}
+th{color:#111827}
+tr td:first-child,tr th:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px}
+tr td:last-child,tr th:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
+
+/* Paginación */
+.pager{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:flex-end;margin-top:.6rem;color:#111827}
+.page-btn{border:1px solid #d6d6d6;background:#f7f7f7;color:#000;cursor:pointer;border-radius:10px;padding:.35rem .6rem;font-weight:700}
+.page-btn.active{background:#e9e9e9}
+
+/* Badges e inventario */
+.badge-chip{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border-radius:999px;background:#f8fafc;border:1px solid #e2e8f0;box-shadow:inset 0 1px 0 rgba(255,255,255,.7);font-weight:800}
+.row-low{background:#fff0f0!important}
+.badge-low{background:#fde2e2;color:#b91c1c;border:1px solid #fecaca}
+
+/* Inputs */
+.inv-grid input,.form-grid input,.form-grid select,.form-grid textarea{
+  background:#f9fafb;border:1px solid #d1d5db;color:#111827;border-radius:12px;padding:.55rem .7rem
+}
+.pw-toggle{background:#f9fafb;border:1px solid #d1d5db}
+
+/* Toast */
+.toast{position:fixed;right:14px;bottom:14px;z-index:90;background:#0f172a;color:#fff;padding:.6rem .8rem;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.6)}
+
+/* TV */
+.tv-card{border:1px solid #e5e7eb}
+.tv-title{display:flex;align-items:center;gap:.6rem;margin:0 0 10px}
+.tv-title .dot{width:16px;height:16px;border-radius:50%}
+.tv-list{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto}
+.tv-item{padding:10px 12px;border-radius:12px;font-weight:700;background:#f8fafc;border:1px solid #e5e7eb}
+.tv-item.stop{border-color:#fecaca}
+.tv-item.warn{border-color:#fde68a}
+.tv-item.stock{border-color:#bfdbfe}
+.tv-legend{color:#334155;font-size:.9rem;margin-left:8px}
+
+.nowrap{white-space:nowrap}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.linkish{cursor:pointer}
+.hidden{display:none!important}
+
+/* Accesibilidad foco */
+button:focus, .linkish:focus, .page-btn:focus, select:focus, input:focus, textarea:focus {
+  outline:2px solid #60a5fa; outline-offset:2px
+}
 </style>
 </head>
 <body>
@@ -78,70 +194,264 @@ header::before{
     <!-- Menú de páginas -->
     <div class="menu">
       <button id="pagesBtn" class="mbtn" aria-label="Menú" aria-expanded="false">☰</button>
+
       <div id="pagesPanel" class="panel hidden" style="min-width:260px">
         <div class="row">
           <div class="actions">
             <button class="btn" onclick="nav('equipos')">Equipos</button>
-            <button class="btn" onclick="alert('Demo: otras páginas no incluidas')">Incidencias</button>
-            <button class="btn" onclick="alert('Demo: otras páginas no incluidas')">OT</button>
-            <button class="btn" onclick="alert('Demo: otras páginas no incluidas')">Inventario</button>
+            <button class="btn" id="mGruas" onclick="nav('gruas')">Puentes Grúa</button>
+            <button class="btn" id="mOtros" onclick="nav('otros')">Otros</button>
+            <button class="btn" id="mIncid" onclick="nav('incidencias')">Incidencias</button>
+            <button class="btn" id="mIndic" onclick="nav('indicadores')">Indicadores</button>
+            <button class="btn" id="mOT" onclick="nav('ot')">OT</button>
+            <button class="btn" id="mInv" onclick="nav('inventario')">Inventario</button>
+            <button class="btn" id="mTV" onclick="nav('tv')">Dashboard TV</button>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Título -->
-    <div style="display:flex;flex-direction:column">
-      <div style="display:flex;align-items:baseline;gap:.6rem">
-        <span style="font-weight:800;font-size:1.55rem;letter-spacing:.02em">CDL</span>
-        <span>·</span>
-        <span style="font-weight:700;color:#000;opacity:.9">Panel de control (demo)</span>
+    <!-- Logo/Título -->
+    <div class="logo" aria-label="Inicio">
+      <div class="hero-title">
+        <div class="hero-row">
+          <span class="hero-cdl">CDL</span>
+          <span class="hero-fade">·</span>
+          <span class="hero-panel">Panel de control</span>
+        </div>
       </div>
     </div>
-
     <div class="grow"></div>
-    <span id="roleChip" class="rolechip">Demo</span>
+    <span id="roleChip" class="rolechip">Invitado</span>
 
     <!-- Menú de usuario -->
     <div class="menu">
       <button id="userBtn" class="mbtn" aria-label="Usuario" aria-expanded="false">⋮</button>
       <div id="userPanel" class="panel hidden">
         <div class="row">
-          <strong>Usuario (demo)</strong>
+          <label class="small">Usuario</label>
+          <select id="userSelect">
+            <option value="invitado">Invitado</option>
+            <option value="admin">Administrador</option>
+            <option value="gerente">Gerente</option>
+            <option value="encargado">Encargado</option>
+            <option value="produccion">Producción</option>
+            <option value="rt11">RT1.1</option><option value="rt12">RT1.2</option>
+            <option value="rt21">RT2.1</option><option value="rt22">RT2.2</option>
+            <option value="rt31">RT3.1</option><option value="rt32">RT3.2</option>
+            <option value="tcoint">Tco.INT</option>
+            <option value="subc">Subcontrata</option>
+          </select>
+
+          <label class="small" style="margin-top:.4rem">Contraseña</label>
+          <div class="pw" style="display:flex;gap:.4rem;align-items:center">
+            <input id="userPass" type="password" placeholder="••••••••" style="flex:1">
+            <button type="button" class="pw-toggle" data-target="userPass" aria-label="Mostrar contraseña" aria-pressed="false">👁</button>
+          </div>
+
           <div class="actions" style="margin-top:.6rem">
-            <button class="btn" onclick="alert('Demo: login no implementado')">Entrar</button>
-            <button class="btn" onclick="alert('Demo: logout no implementado')">Salir</button>
+            <button class="btn gloss" onclick="login()"><span class="dot"></span>Entrar</button>
+            <button class="btn gloss" onclick="logout()">Salir</button>
           </div>
         </div>
-        <div class="row" style="font-size:.9rem;color:#cbd5e1">
-          Este panel es una demo mínima para comprobar que los menús se abren/cierra correctamente.
+
+        <div class="row">
+          <label class="small">Cambiar contraseña</label>
+          <div class="pw" style="display:flex;gap:.4rem;align-items:center">
+            <input id="oldPass" type="password" placeholder="Actual" style="flex:1">
+            <button type="button" class="pw-toggle" data-target="oldPass" aria-label="Mostrar contraseña" aria-pressed="false">👁</button>
+          </div>
+          <div class="pw" style="margin-top:.4rem;display:flex;gap:.4rem;align-items:center">
+            <input id="newPass" type="password" placeholder="Nueva" style="flex:1">
+            <button type="button" class="pw-toggle" data-target="newPass" aria-label="Mostrar contraseña" aria-pressed="false">👁</button>
+          </div>
+          <div class="actions" style="margin-top:.6rem">
+            <button class="btn gloss" onclick="changePwd()">Cambiar</button>
+          </div>
+          <div id="pwdMsg" class="small" style="margin-top:.4rem;color:#cbd5e1"></div>
         </div>
       </div>
     </div>
   </div>
 </header>
-
 <main class="container">
-  <!-- Página: Equipos (simulada) -->
   <section id="page-equipos">
-    <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;justify-content:center;margin:.4rem 0 1rem">
-      <span class="badge-chip"><span style="width:10px;height:10px;background:#22c55e;border-radius:50%"></span> En marcha</span>
-      <span class="badge-chip"><span style="width:10px;height:10px;background:#f59e0b;border-radius:50%"></span> Restricciones</span>
-      <span class="badge-chip"><span style="width:10px;height:10px;background:#ef4444;border-radius:50%"></span> Parada</span>
+    <div class="kpi" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;justify-content:center">
+      <span class="badge-chip"><span class="dot" style="background:#22c55e;border-radius:50%;width:10px;height:10px"></span> En marcha</span>
+      <span class="badge-chip"><span class="dot" style="background:#f59e0b;border-radius:50%;width:10px;height:10px"></span> Restricciones</span>
+      <span class="badge-chip"><span class="dot" style="background:#ef4444;border-radius:50%;width:10px;height:10px"></span> Parada</span>
     </div>
     <div id="equiposWrap"></div>
   </section>
+
+  <section id="page-gruas" class="hidden"><div id="gruasWrap"></div></section>
+  <section id="page-otros" class="hidden"><div id="otrosWrap"></div></section>
+
+  <section id="page-incidencias" class="hidden">
+    <div class="kpi">
+      <h3 style="margin:.2rem 0 .8rem">Registrar nueva incidencia</h3>
+      <div class="form-grid" style="display:grid;gap:10px;grid-template-columns:1fr 1fr">
+        <label>Equipo <select id="iEquipo"></select></label>
+        <label>Tipo <select id="iTipo"><option>Correctivo</option><option>Preventivo</option><option>Predictivo</option><option>Mejora</option></select></label>
+        <label>Resultado <select id="iRes"><option>Solucionado</option><option>Con restricciones</option><option>Parada</option></select></label>
+        <label>¿Repuesto? <select id="iRep"><option>No</option><option>Sí</option></select></label>
+        <label>Repuesto (txt) <input id="iRepTxt" placeholder="p.ej. THM6-20"></label>
+        <label>Horas de parada <input id="iHParo" type="number" value="0"></label>
+        <label>Horas de reparación <input id="iHRep" type="number" value="0"></label>
+        <label>Fecha inicio <input id="iInicio" type="datetime-local"></label>
+        <label>Fecha fin <input id="iFin" type="datetime-local"></label>
+        <label>Reportante <input id="iReport" placeholder="Nombre"></label>
+        <label>Intervenido por <input id="iAsignado" placeholder="Nombre técnico"></label>
+        <label style="grid-column:1/-1">Descripción <textarea id="iDesc" rows="3" placeholder="Breve descripción"></textarea></label>
+      </div>
+      <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button id="btnAddIncid" class="btn gloss" onclick="addIncid()"><span class="dot"></span>Añadir</button>
+        <button class="btn gloss" onclick="exportIncidCSV()" id="btnExportIncidCSV">Exportar CSV</button>
+        <button class="btn gloss" onclick="exportIncidPDF()" id="btnExportIncidPDF">Exportar PDF</button>
+      </div>
+    </div>
+
+    <div class="kpi" style="margin-top:12px">
+      <div class="filters" style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem">
+        <strong>Historial</strong>
+        <input id="filtroIncid" placeholder="Buscar…">
+        <select id="fEquipo" class="sel"><option value="">Equipo: todos</option></select>
+        <select id="fTipo" class="sel"><option value="">Tipo: todos</option></select>
+        <select id="fRes" class="sel"><option value="">Resultado: todos</option></select>
+        <button class="btn gloss" onclick="resetIncidFilters()">Limpiar</button>
+      </div>
+      <div id="incidTableWrap"></div>
+    </div>
+  </section>
+
+  <section id="page-indicadores" class="hidden">
+    <div class="kpi">
+      <h3>KPIs globales</h3>
+      <table>
+        <tr><th>KPI</th><th>Valor</th><th>Definición</th></tr>
+        <tr><td>MTTR (h)</td><td id="kpiMttrG">0</td><td>Tiempo medio de reparación.</td></tr>
+        <tr><td>MTBF (h)</td><td id="kpiMbfG">0</td><td>Tiempo medio entre fallos.</td></tr>
+        <tr><td>Disponibilidad (%)</td><td id="kpiDispG">0</td><td>Tiempo disponible / planificado.</td></tr>
+        <tr><td>OEE estimado (%)</td><td id="kpiOeeG">0</td><td>Calidad × Rendimiento × Disponibilidad aprox.</td></tr>
+      </table>
+      <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn gloss" onclick="exportKPIsCSV()" id="btnExportKPIPCSV">Descargar KPIs (CSV)</button>
+        <button class="btn gloss" onclick="exportKPIPDF()" id="btnExportKPIPDF">Descargar KPIs (PDF)</button>
+      </div>
+    </div>
+
+    <div class="kpi" style="margin-top:12px"><h3>MTTR semanal</h3><canvas id="chartMttr" height="150"></canvas></div>
+    <div class="kpi" style="margin-top:12px"><h3>MTBF semanal</h3><canvas id="chartMtbf" height="150"></canvas></div>
+    <div class="kpi" style="margin-top:12px"><h3>Disponibilidad semanal</h3><canvas id="chartDisp" height="150"></canvas></div>
+    <div class="kpi" style="margin-top:12px"><h3>OEE estimado semanal</h3><canvas id="chartOee" height="150"></canvas></div>
+  </section>
+
+  <section id="page-ot" class="hidden">
+    <div class="kpi">
+      <h3>Nueva OT</h3>
+      <div class="form-grid" style="display:grid;gap:10px;grid-template-columns:1fr 1fr">
+        <label>Equipo <select id="otEquipo"></select></label>
+        <label>Prioridad <select id="otPri">
+          <option value="R">Rojo (Urgente)</option>
+          <option value="N">Naranja (Alta)</option>
+          <option value="A">Amarillo (Preventivo)</option>
+          <option value="V">Verde (Predictivo)</option>
+        </select></label>
+        <label>Título <input id="otTitulo" placeholder="Breve título"></label>
+        <label>Asignado <input id="otAsign" placeholder="Nombre técnico"></label>
+        <label>Vencimiento <input id="otDue" type="date"></label>
+        <label>Adjunto (URL) <input id="otAdj" placeholder="https://…"></label>
+        <label style="grid-column:1/-1">Descripción <textarea id="otDesc" rows="3"></textarea></label>
+      </div>
+      <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button id="btnAddOT" class="btn gloss" onclick="addOT()">Crear OT</button>
+        <button class="btn gloss" id="btnExportOTPDF" onclick="exportOTPDF()">Exportar listado (PDF)</button>
+      </div>
+    </div>
+
+    <div class="kpi" style="margin-top:12px">
+      <h3>Listado OT</h3>
+      <div id="otTableWrap"></div>
+    </div>
+  </section>
+
+  <section id="page-inventario" class="hidden">
+    <div class="kpi">
+      <div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
+        <h3 style="margin:0">Inventario de repuestos</h3>
+        <div id="invAlertWrap" class="badge-chip hidden" style="background:#fde2e2;border-color:#fecaca;color:#7f1d1d;cursor:pointer" onclick="toggleInvAlerts()">Alertas</div>
+      </div>
+      <div id="invAlerts" class="hidden" style="margin:.6rem 0"></div>
+
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin:.6rem 0">
+        <input id="invSearch" placeholder="Buscar ref/nombre…" oninput="renderInv()">
+        <button class="btn gloss" onclick="exportInvCSV()" id="btnExportInvCSV">Exportar CSV</button>
+        <button class="btn gloss" id="btnExportInvQR" onclick="exportInvQRLabels()">Exportar QR</button>
+      </div>
+
+      <div id="invTableWrap"></div>
+
+      <div class="inv-grid" style="display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr 1fr;margin-top:12px">
+        <input id="invNombre" placeholder="Nombre repuesto">
+        <input id="invRef" placeholder="Referencia">
+        <input id="invStock" type="number" placeholder="Stock">
+        <input id="invMin" type="number" placeholder="Mínimo">
+      </div>
+      <div style="margin-top:.6rem">
+        <button id="btnAddInv" class="btn gloss" onclick="addInv()">Añadir</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="page-tv" class="hidden">
+    <div class="kpi" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;justify-content:space-between">
+      <h3 style="margin:0">Dashboard TV (alertas globales)</h3>
+      <div class="tv-legend">Actualiza cada <b>10 s</b></div>
+    </div>
+    <div class="tv-grid" style="display:grid;gap:16px;margin-top:10px">
+      <div class="tv-card"><h3 class="tv-title"><span class="dot" style="background:#ef4444"></span> Equipos PARADOS</h3><div id="tvParados" class="tv-list"></div></div>
+      <div class="tv-card"><h3 class="tv-title"><span class="dot" style="background:#f59e0b"></span> Equipos con RESTRICCIONES</h3><div id="tvRestr" class="tv-list"></div></div>
+      <div class="tv-card"><h3 class="tv-title"><span class="dot" style="background:#60a5fa"></span> Repuestos BAJO MÍNIMO</h3><div id="tvStock" class="tv-list"></div></div>
+    </div>
+  </section>
+
+  <section id="page-equipo" class="hidden"><div id="equipoDetail"></div></section>
+  <section id="page-repuesto" class="hidden"><div id="repuestoDetail"></div></section>
 </main>
 
-<footer style="text-align:center;padding:2rem 1rem;color:#9aa7b4">Demo · © CDL</footer>
+<footer style="text-align:center;padding:2rem 1rem;color:#9aa7b4">v34 · © CDL</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-/* ===== Utilidades mínimas ===== */
-const byId = id => document.getElementById(id);
-function show(id){const n=byId(id); if(n) n.classList.remove('hidden')}
-function hide(id){const n=byId(id); if(n) n.classList.add('hidden')}
 
-/* ===== HOTFIX Menús (abrir/cerrar) ===== */
+/* =========================
+   Config & utilidades
+========================= */
+
+const API_BASE="https://script.google.com/macros/s/AKfycbzTbSjFvHHDuJy8yDjynomMuLvwVIjf149wnLPUTFA6oTxx-qiN4ugTv7Lcgysm10ib/exec";
+
+const byId=id=>document.getElementById(id),
+     esc=s=>String(s||"").replace(/[&<>"']/g, m => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+}[m])),
+      fmt=n=>(Math.round((+n||0)*100)/100).toFixed(2),
+      /* CAMBIO: fecha siempre en horario de Madrid */
+      fmtDate=d=>new Date(d).toLocaleString("es-ES",{timeZone:"Europe/Madrid"}),
+      val=id=>byId(id).value,
+      setTxt=(id,v)=>byId(id).textContent=v;
+
+function show(id){const n=byId(id);if(n)n.classList.remove("hidden")}
+function hide(id){const n=byId(id);if(n)n.classList.add("hidden")}
+
+/* Helper roles simple */
+function requireRole(...roles){
+  const g=(currentUser?.group)||'guest';
+  return roles.includes(g);
+}
+
+// =========================
+// Menús (robustos y aislados) — HOTFIX
+// =========================
 const pagesBtn   = byId('pagesBtn');
 const userBtn    = byId('userBtn');
 const pagesPanel = byId('pagesPanel');
@@ -157,6 +467,7 @@ function closeAllMenus(){ closePanel(pagesPanel,pagesBtn); closePanel(userPanel,
 if(!document.documentElement.dataset.menusBound){
   document.documentElement.dataset.menusBound = '1';
 
+  // Helpers para varios tipos de input (click/touch/pointer)
   const onTap = (el, handler) => {
     ['click','pointerdown'].forEach(ev => el?.addEventListener(ev, e=>{
       if(ev==='pointerdown' && e.button && e.button!==0) return;
@@ -178,13 +489,13 @@ if(!document.documentElement.dataset.menusBound){
     isOpen(userPanel) ? closePanel(userPanel, userBtn) : openPanel(userPanel, userBtn);
   });
 
-  // No cerrar al interactuar dentro del panel
+  // Interacciones dentro de paneles (no cerrar)
   ['click','pointerdown'].forEach(ev=>{
     pagesPanel?.addEventListener(ev, e=>e.stopPropagation());
     userPanel ?.addEventListener(ev, e=>e.stopPropagation());
   });
 
-  // Cerrar al tocar/click fuera
+  // Cerrar al hacer tap/click FUERA
   const isInside = (t, el)=> !!el && (el===t || el.contains(t));
   document.addEventListener('pointerdown', (e)=>{
     const t=e.target;
@@ -193,7 +504,7 @@ if(!document.documentElement.dataset.menusBound){
     if(!enPages && !enUser) closeAllMenus();
   }, true);
 
-  // ESC cierra
+  // ESC = cerrar
   document.addEventListener('keydown', (e)=>{
     if(e.key === 'Escape') closeAllMenus();
   });
@@ -207,40 +518,920 @@ if(!document.documentElement.dataset.menusBound){
     });
   });
 
-  console.debug('[menus] bound OK (demo)');
+  console.debug('[menus] bound OK');
 }
 
-/* ===== Navegación mínima ===== */
+/* =========================
+   Roles
+========================= */
+const ROLE_MAP={"Administrador":"admin","Gerente":"gerente","Encargado":"encargado","Producción":"produccion","RT":"rt","Tco.INT":"tcoint","Subcontrata":"subc","Invitado":"guest"};
+let currentUser=JSON.parse(localStorage.getItem("CDL_USER")||'{"user":"invitado","rol":"Invitado","group":"guest"}');
+function setUser(u){currentUser=u;localStorage.setItem("CDL_USER",JSON.stringify(u));byId('roleChip').textContent=u.rol;applyRoleUI()}
+async function login(){
+  const user=byId('userSelect').value;const pass=byId('userPass').value||"";
+  const r=await apiPost({res:'auth',fn:'login',user,pass});
+  if(!r.ok){alert("Error login: "+(r.error||"desconocido"));return}
+  const group=ROLE_MAP[r.rol]||"guest";
+  setUser({user,rol:r.rol,group});
+  byId('userPanel').classList.add('hidden');byId('userPass').value="";
+}
+function logout(){setUser({user:"invitado",rol:"Invitado",group:"guest"})}
+async function changePwd(){
+  const user=byId('userSelect').value,old=byId('oldPass').value||"",nu=byId('newPass').value||"";
+  if(!old||!nu){byId('pwdMsg').textContent="Rellena ambas contraseñas.";return}
+  const r=await apiPost({res:'auth',fn:'changepwd',user,old,nu});
+  byId('pwdMsg').textContent=r.ok?"Contraseña cambiada.":"Error al cambiar (credenciales).";
+  if(r.ok){byId('oldPass').value="";byId('newPass').value=""}
+}
+function applyRoleUI(){
+  const g=currentUser.group;
+  const showIf=(id,cond)=>{const el=byId(id);if(!el)return;el.classList.toggle('hidden',!cond)};
+  // Menú (ocultar a invitados)
+  ['mIndic','mOT','mIncid','mInv','mGruas','mOtros','mTV'].forEach(id=>showIf(id,g!=="guest"));
+  // Exportaciones
+  ['btnExportIncidCSV','btnExportIncidPDF','btnExportKPIPCSV','btnExportKPIPDF','btnExportInvCSV','btnExportOTPDF']
+    .forEach(id=>{
+      const allowed = (g==="admin" || g==="gerente") || (id==='btnExportOTPDF' && g==='tcoint');
+      showIf(id, allowed);
+    });
+  if(byId('btnAddOT')) byId('btnAddOT').disabled = (g==="guest");
+}
+
+/* API helpers */
+async function apiGet(q){const r=await fetch(API_BASE+"?"+new URLSearchParams(q));return r.json()}
+async function apiPost(o){const r=await fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)});return r.json()}
+
+/* =========================
+   Navegación
+========================= */
+let CURRENT_PAGE='equipos';
 function nav(id){
-  // en esta demo solo existe 'equipos', simplemente cerramos menús
-  hide('pagesPanel'); hide('userPanel');
-  setExpanded(pagesBtn,false); setExpanded(userBtn,false);
-  window.scrollTo({top:0,behavior:'smooth'});
+  hide('pagesPanel'); 
+  hide('userPanel');
+  setExpanded(pagesBtn, false);
+  setExpanded(userBtn, false);
+
+  CURRENT_PAGE = id;
+  ['equipos','gruas','otros','incidencias','indicadores','ot','inventario','tv','equipo','repuesto']
+    .forEach(s => byId('page-'+s).classList.add('hidden'));
+  byId('page-'+id).classList.remove('hidden');
+
+  if(id==='equipos') loadState();
+  if(id==='gruas') renderSubGroup("Puentes Grúa","gruasWrap");
+  if(id==='otros') renderSubGroup("Otros (auxiliares)","otrosWrap");
+  if(id==='incidencias') loadIncid();
+  if(id==='indicadores'){ calcKPIs(); drawAllCharts(); }
+  if(id==='ot') loadOT();
+  if(id==='inventario') loadInv();
+  if(id==='tv') initTV();
+
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
-/* ===== Datos simulados + render ===== */
-const DEMO_EQUIPOS = [
-  { nombre:'Línea 1 · Pulido', grupo:'L1', estado:'En marcha' },
-  { nombre:'Línea 2 · Horno',  grupo:'L2', estado:'Restricciones' },
-  { nombre:'Prensa 5',         grupo:'Prensas', estado:'Parada' }
-];
-function statusKey(s){return s==='Parada'?'stop':(s==='Restricciones'?'warn':'ok')}
+/* =========================
+   Estado equipos
+========================= */
+let STATE=[];
+function statusKey(s){return s==="Parada"?"stop":(s==="Restricciones"?"warn":"ok")}
+async function loadState(){
+  try{
+    const j=await apiGet({res:'state',fn:'list'});
+    if(j.ok&&j.items.length){STATE=j.items;renderState();return}
+    await apiPost({res:'state',fn:'seed'});
+    const k=await apiGet({res:'state',fn:'list'});STATE=k.ok?k.items:[];renderState()
+  }catch(e){console.error(e)}
+}
+function groupItems(items){const by={};items.forEach(it=>{(by[it.grupo]??=[]).push(it)});return by}
+function renderState(){
+  const groups=groupItems(STATE);
+  const wrap=byId('equiposWrap');wrap.innerHTML="";
+  for(const[g,items] of Object.entries(groups)){
+    if(g.startsWith("Puentes Grúa")||g==="Otros (auxiliares)")continue;
+    wrap.appendChild(groupBlock(g,items))
+  }
+  if(!byId('page-gruas').classList.contains('hidden'))renderSubGroup("Puentes Grúa","gruasWrap");
+  if(!byId('page-otros').classList.contains('hidden'))renderSubGroup("Otros (auxiliares)","otrosWrap")
+}
+function groupBlock(title,items){
+  const d=document.createElement('div');
+  d.innerHTML=`<h3 style="margin:10px 0;color:#0f172a">${esc(title)}</h3>`;
+  items.forEach(eq=>d.appendChild(cardEquipo(eq)));
+  return d
+}
+function renderSubGroup(match,target){
+  const wrap=byId(target);wrap.innerHTML="";
+  const items=STATE.filter(x=>match==="Otros (auxiliares)"?x.grupo===match:x.grupo.startsWith(match));
+  const groups=groupItems(items);
+  for(const[g,arr] of Object.entries(groups)) wrap.appendChild(groupBlock(g,arr))
+}
 function cardEquipo(eq){
-  const el = document.createElement('div'); el.className='card';
-  el.innerHTML = `
-    <span class="pilot p-${statusKey(eq.estado)}"></span>
-    <div>
-      <div class="name">${eq.nombre}</div>
-      <div class="sub">${eq.grupo}</div>
+  const safeName = JSON.stringify(eq.nombre).slice(1,-1);
+  const el=document.createElement('div');el.className='card';
+  el.innerHTML=`
+    <div style="display:flex;gap:.7rem;align-items:center;min-width:240px">
+      <span class="pilot ${'p-'+statusKey(eq.estado)}"></span>
+      <div>
+        <div class="name linkish" onclick="openEquipoByName('${safeName}')">
+          ${esc(eq.nombre)} <span class="qr-s" title="QR"></span>
+        </div>
+        <div class="sub">${esc(eq.grupo)}</div>
+      </div>
     </div>
+    <div class="semaforo" data-name="${esc(eq.nombre)}">
+      <div class="opt ${statusKey(eq.estado)==='ok'?'active':''}" data-k="ok"><span class="led"></span>En marcha</div>
+      <div class="opt ${statusKey(eq.estado)==='warn'?'active':''}" data-k="warn"><span class="led"></span>Restricciones</div>
+      <div class="opt ${statusKey(eq.estado)==='stop'?'active':''}" data-k="stop"><span class="led"></span>Parada</div>
+    </div>
+    <div class="right">
+      <button class="btn gloss" onclick="estadoConIncid('${safeName}','Parada','programada')"><span class="dot"></span>Parada programada</button>
+      <button class="btn gloss btn-mail" onclick="accionParadaProlongada('${safeName}')"><span class="dot"></span>Parada prolongada</button>
+      <button class="btn gloss" onclick="openFicha('${safeName}')">Ficha</button>
+      <button class="btn gloss" onclick="estadoConIncid('${safeName}','Nueva')">Nueva incidencia</button>
+    </div>`;
+  setTimeout(()=>{
+    el.querySelectorAll('.semaforo .opt').forEach(o=>o.addEventListener('click',async e=>{
+      const name=el.querySelector('.semaforo').dataset.name;
+      const k=e.currentTarget.getAttribute('data-k');
+      const estado=k==='ok'?'En marcha':k==='warn'?'Restricciones':'Parada';
+      await setEstado(name,estado);
+      el.querySelectorAll('.semaforo .opt').forEach(x=>x.classList.remove('active'));
+      e.currentTarget.classList.add('active')
+    }))
+  },0);
+  return el
+}
+async function setEstado(name,estado){
+  if(currentUser.group==="guest"){alert("Inicia sesión para modificar estados.");return}
+  await apiPost({res:'state',fn:'set',name,estado,actor:currentUser.user});
+  const it=STATE.find(x=>x.nombre===name);if(it)it.estado=estado;renderState()
+}
+function estadoConIncid(name,estado,modo){
+  if(estado!=="Nueva"){setEstado(name,estado==="Parada"&&modo==="programada"?"Parada":estado)}
+  nav('incidencias');
+  setTimeout(()=>{
+    byId('iEquipo').value=name;
+    byId('iTipo').value=modo==="programada"?"Preventivo":"Correctivo";
+    byId('iRes').value=estado==="Restricciones"?"Con restricciones":(estado==="Nueva"?"Solucionado":"Parada");
+    byId('iDesc').focus()
+  },120)
+}
+async function accionParadaProlongada(name){
+  if(currentUser.group==="guest"){alert("Inicia sesión para marcar paradas.");return}
+  await apiPost({res:'alert',fn:'parada',equipo:name,actor:currentUser.user});
+  await loadState()
+}
+function openFicha(name){openEquipoByName(name)}
+
+/* =========================
+   Incidencias
+========================= */
+let INCIDS_ALL=[];let INCID_PAGE=1,INCID_PAGE_SIZE=10,INCID_SORT_KEY='fecha',INCID_SORT_DIR='desc',_INCID_LAST_Q="";
+function resetIncidFilters(){['fEquipo','fTipo','fRes','filtroIncid'].forEach(id=>{const el=byId(id);if(el)el.value=""});renderIncidTable()}
+
+async function addIncid(){
+  if(currentUser.group==="guest"){
+    alert("Inicia sesión para registrar incidencias.");
+    return;
+  }
+  const btn = byId('btnAddIncid'); if (btn) btn.disabled = true;
+
+  const item = {
+    equipo:      val('iEquipo'),
+    tipo:        val('iTipo'),
+    res:         val('iRes'),
+    rep:         val('iRep'),
+    repTxt:      (val('iRepTxt')||'').trim(),
+    hParo:       Number(val('iHParo')||0) || 0,
+    hRep:        Number(val('iHRep')||0) || 0,
+    inicio:      val('iInicio')||'',
+    fin:         val('iFin')||'',
+    reportante:  (val('iReport')||'').trim(),
+    asignado:    (val('iAsignado')||'').trim(),
+    adj:         '',
+    desc:        (val('iDesc')||'').trim()
+  };
+
+  if(!item.equipo){
+    alert("Selecciona un equipo.");
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  try{
+    const r = await apiPost({res:'incid', fn:'add', item, actor: currentUser.user});
+    if(!r?.ok){ throw new Error('No se pudo guardar'); }
+    toast('Incidencia registrada');
+    ['iRepTxt','iHParo','iHRep','iInicio','iFin','iReport','iAsignado','iDesc']
+      .forEach(id => { const el=byId(id); if(el){ el.value = (id==='iHParo'||id==='iHRep') ? 0 : '' }});
+    byId('iRep').value='No';
+    byId('iTipo').value='Correctivo';
+    byId('iRes').value='Solucionado';
+    await loadIncid();
+    await loadState();
+  }catch(err){
+    console.error(err);
+    alert('Error al registrar la incidencia.');
+  }finally{
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function loadIncid(){
+  const st = await apiGet({res:'state',fn:'list'}); 
+  STATE = st.ok ? st.items : [];
+  const inc = await apiGet({res:'incid',fn:'list'}); 
+  INCIDS_ALL = inc.ok ? inc.items : [];
+
+  byId('iEquipo').innerHTML = STATE.map(x=>`<option>${esc(x.nombre)}</option>`).join('');
+  buildIncidFilters();
+
+  if(!byId('filtroIncid').dataset.bound){
+    byId('filtroIncid').addEventListener('input',renderIncidTable);
+    ['fEquipo','fTipo','fRes'].forEach(id=>byId(id).addEventListener('change',renderIncidTable));
+    byId('filtroIncid').dataset.bound='1';
+  }
+  renderIncidTable();
+}
+
+/* CAMBIO: filtros normalizados */
+function buildIncidFilters(){
+  const equipos = [...new Set(INCIDS_ALL.map(x=>String(x.equipo||'').trim()))]
+    .sort((a,b)=>a.localeCompare(b,'es'));
+  const tipos   = [...new Set(INCIDS_ALL.map(x=>String(x.tipo||'').trim()))]
+    .sort((a,b)=>a.localeCompare(b,'es'));
+  const resul   = [...new Set(INCIDS_ALL.map(x=>String(x.res||'').trim()))]
+    .sort((a,b)=>a.localeCompare(b,'es'));
+
+  byId('fEquipo').innerHTML = `<option value="">Equipo: todos</option>` +
+    equipos.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  byId('fTipo').innerHTML   = `<option value="">Tipo: todos</option>` +
+    ["Correctivo","Preventivo","Predictivo","Mejora",...tipos].map(n=>`<option>${esc(n)}</option>`).join('');
+  byId('fRes').innerHTML    = `<option value="">Resultado: todos</option>` +
+    ["Solucionado","Con restricciones","Parada",...resul].map(n=>`<option>${esc(n)}</option>`).join('');
+}
+
+function setIncidPage(n){INCID_PAGE=Math.max(1,n);renderIncidTable()}
+function setIncidPageSize(n){INCID_PAGE_SIZE=+n||10;INCID_PAGE=1;renderIncidTable()}
+
+/* Encabezados con flechas */
+function thBtn(label,key,isIncid=true){
+  const act=(isIncid?INCID_SORT_KEY:OT_SORT_KEY)===key;
+  const dir=(isIncid?INCID_SORT_DIR:OT_SORT_DIR);
+  const dirCls=act?(dir==='asc'?'▲':'▼'):'↕';
+  const fn=isIncid?`setIncidSort('${key}')`:`setOTSort('${key}')`;
+  return `<button class="page-btn" onclick="${fn}">${label} ${dirCls}</button>`
+}
+function setIncidSort(key){
+  if(INCID_SORT_KEY===key){INCID_SORT_DIR=INCID_SORT_DIR==='asc'?'desc':'asc'}
+  else{INCID_SORT_KEY=key;INCID_SORT_DIR=(key==='fecha'?'desc':'asc')}
+  renderIncidTable()
+}
+
+function pagerControls(total,page,size,setter='setIncidPage',sizeSetter='setIncidPageSize'){
+  const pages=Math.max(1,Math.ceil(total/size));
+  const start=(page-1)*size+1;const end=Math.min(total,page*size);
+  let from=Math.max(1,page-2),to=Math.min(pages,from+4);from=Math.max(1,to-4);
+  const nums=[];for(let i=from;i<=to;i++)nums.push(`<button class="page-btn ${i===page?'active':''}" onclick="${setter}(${i})">${i}</button>`);
+  return `<div class="pager">
+    <div class="info">Mostrando ${total?start:0}–${end} de ${total}</div>
+    <label>Filas <select class="page-btn" onchange="${sizeSetter}(this.value)">
+      <option ${size===10?'selected':''}>10</option>
+      <option ${size===25?'selected':''}>25</option>
+      <option ${size===50?'selected':''}>50</option>
+    </select></label>
+    <button class="page-btn" onclick="${setter}(${page-1})" ${page<=1?'disabled':''}>‹</button>
+    ${nums.join('')}
+    <button class="page-btn" onclick="${setter}(${page+1})" ${page>=pages?'disabled':''}>›</button>
+  </div>`
+}
+function badgeTipo(t){
+  const k=(t||'').toLowerCase();
+  if(k.startsWith('corre'))return`<span class="badge-chip" style="background:#fff5f5;border-color:#fecaca">Correctivo</span>`;
+  if(k.startsWith('preven'))return`<span class="badge-chip" style="background:#eff6ff;border-color:#bfdbfe">Preventivo</span>`;
+  if(k.startsWith('pred'))return`<span class="badge-chip" style="background:#f5f3ff;border-color:#ddd6fe">Predictivo</span>`;
+  if(k.startsWith('mej'))return`<span class="badge-chip" style="background:#ecfdf5;border-color:#a7f3d0">Mejora</span>`;
+  return`<span class="badge-chip">${esc(t||'')}</span>`
+}
+function badgeRes(r){
+  const k = String(r||'').toLowerCase();
+  if (k.startsWith('solu'))
+    return `<span class="badge-chip" style="background:#ecfdf5;border-color:#a7f3d0">Solucionado</span>`;
+  if (k.includes('restr'))
+    return `<span class="badge-chip" style="background:#fff7ed;border-color:#fed7aa">Restricciones</span>`;
+  if (k.startsWith('para'))
+    return `<span class="badge-chip" style="background:#fff5f5;border-color:#fecaca">Parada</span>`;
+  return `<span class="badge-chip">${esc(r||'')}</span>`;
+}
+
+/* =========================
+   KPIs + Gráficos
+========================= */
+function groupByWeek(arr){
+  const g={};for(const x of arr){
+    const d=new Date(x.created);
+    const a=new Date(Date.UTC(d.getFullYear(),0,1));
+    const n=Math.floor((d-a)/86400000)+a.getUTCDay();
+    const w=`${d.getFullYear()}-W${Math.floor(n/7)+1}`;(g[w]??=[]).push(x)}
+  return g
+}
+function kpiMTTR(list){const s=list.reduce((p,x)=>p+(+x.hRep||0),0);const n=list.length||1;return s/n}
+function kpiMTBF(list){const horas=4*30*24;const fallas=list.length||1;return horas/fallas}
+function kpiDisp(list){const prodH=120;const perd=list.reduce((p,x)=>p+(+x.hParo||0),0);return Math.max(0,(prodH-perd)/prodH)}
+function kpiOEE(disp){return disp*0.9*0.98}
+function calcKPIs(){
+  const mttr=kpiMTTR(INCIDS_ALL),mtbf=kpiMTBF(INCIDS_ALL),disp=kpiDisp(INCIDS_ALL),oee=kpiOEE(disp);
+  setTxt('kpiMttrG',fmt(mttr));setTxt('kpiMbfG',fmt(mtbf));setTxt('kpiDispG',fmt(disp*100));setTxt('kpiOeeG',fmt(oee*100))
+}
+let charts={};
+function draw(id,labels,data,label){
+  const ctx=byId(id).getContext('2d');if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(ctx,{type:'line',data:{labels,datasets:[{label,borderWidth:2,pointRadius:0,data}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#0f172a'}},y:{ticks:{color:'#0f172a'}}}})}
+function drawAllCharts(){
+  const weeks=groupByWeek(INCIDS_ALL),labels=Object.keys(weeks).sort();
+  draw('chartMttr',labels,labels.map(w=>kpiMTTR(weeks[w])),'MTTR');
+  draw('chartMtbf',labels,labels.map(w=>kpiMTBF(weeks[w])),'MTBF');
+  draw('chartDisp',labels,labels.map(w=>kpiDisp(weeks[w])*100),'Disponibilidad %');
+  draw('chartOee',labels,labels.map(w=>kpiOEE(kpiDisp(weeks[w]))*100),'OEE %')
+}
+
+/* =========================
+   OT
+========================= */
+let OTS=[];let OT_PAGE=1,OT_PAGE_SIZE=10,OT_SORT_KEY='fecha',OT_SORT_DIR='desc';
+async function loadOT(){
+  const st=await apiGet({res:'state',fn:'list'});STATE=st.ok?st.items:[];
+  const ot=await apiGet({res:'ot',fn:'list'});OTS=ot.ok?ot.items:[];
+  byId('otEquipo').innerHTML=STATE.map(x=>`<option>${esc(x.nombre)}</option>`).join('');
+  renderOT()
+}
+function setOTSort(key){
+  if(OT_SORT_KEY===key){OT_SORT_DIR=(OT_SORT_DIR==='asc'?'desc':'asc')}
+  else{OT_SORT_KEY=key;OT_SORT_DIR=(key==='fecha'?'desc':'asc')}
+  renderOT()
+}
+function setOTPage(n){OT_PAGE=Math.max(1,n);renderOT()}
+function setOTPageSize(n){OT_PAGE_SIZE=+n||10;OT_PAGE=1;renderOT()}
+function renderOT(){
+  let arr=[...OTS];const dir=(OT_SORT_DIR==='asc'?1:-1);
+  arr.sort((a,b)=>{
+    let A,B;switch(OT_SORT_KEY){
+      case'fecha':A=new Date(a.created).getTime();B=new Date(b.created).getTime();break;
+      case'titulo':A=a.titulo||'';B=b.titulo||'';break;
+      case'prioridad':A=a.prioridad||'';B=b.prioridad||'';break;
+      case'asignado':A=a.asignado||'';B=b.asignado||'';break;
+      case'vence':A=a.vencimiento||'';B=b.vencimiento||'';break;
+      case'estado':A=a.estado||'';B=b.estado||'';break;
+      default:A=0;B=0
+    }
+    if(typeof A==='string'&&typeof B==='string')return A.localeCompare(B,'es')*dir;
+    return (A===B?0:(A>B?1:-1))*dir
+  });
+  const total=arr.length;const pages=Math.max(1,Math.ceil(total/OT_PAGE_SIZE));OT_PAGE=Math.min(OT_PAGE,pages);
+  const start=(OT_PAGE-1)*OT_PAGE_SIZE;arr=arr.slice(start,start+OT_PAGE_SIZE);
+  const rows=arr.map(o=>`<tr>
+    <td class="nowrap">${fmtDate(o.created)}</td>
+    <td><b>${esc(o.titulo||'')}</b><div class="sub">${esc(o.equipo)}</div></td>
+    <td>${esc(o.prioridad||'')}</td>
+    <td>${esc(o.asignado||'')}</td>
+    <td class="nowrap">${esc(o.vencimiento||'')}</td>
+    <td>${esc(o.estado||'')}</td>
+  </tr>`).join('');
+  byId('otTableWrap').innerHTML=`
+    <table>
+      <thead>
+        <tr>
+          <th>${thBtn('Fecha','fecha',false)}</th>
+          <th>${thBtn('OT','titulo',false)}</th>
+          <th>${thBtn('Prioridad','prioridad',false)}</th>
+          <th>${thBtn('Asignado','asignado',false)}</th>
+          <th>${thBtn('Vence','vence',false)}</th>
+          <th>${thBtn('Estado','estado',false)}</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${pagerControls(total,OT_PAGE,OT_PAGE_SIZE,'setOTPage','setOTPageSize')}
   `;
-  return el;
 }
-function renderEquipos(){
-  const wrap = byId('equiposWrap'); wrap.innerHTML='';
-  DEMO_EQUIPOS.forEach(e=>wrap.appendChild(cardEquipo(e)));
+async function addOT(){
+  if(currentUser.group==="guest"){alert("Tu rol no puede crear OT.");return}
+  if(!val('otEquipo')||!val('otPri')||!(val('otTitulo')||'').trim()||!val('otDue')){
+    alert('Completa los campos obligatorios');return}
+  const item={equipo:val('otEquipo'),prioridad:val('otPri'),titulo:val('otTitulo').trim(),asignado:val('otAsign'),vencimiento:val('otDue'),adj:val('otAdj'),desc:(val('otDesc')||'').trim()};
+  await apiPost({res:'ot',fn:'add',item,actor:currentUser.user});
+  toast('OT creada');['otTitulo','otAsign','otAdj','otDesc'].forEach(id=>byId(id).value='');await loadOT()
 }
-renderEquipos();
+function exportOTPDF(){
+  const g=currentUser.group;
+  if(!(g==="admin"||g==="gerente"||g==="tcoint")){ alert("No permitido"); return; }
+
+  const w=window.open('','_blank','noopener,noreferrer');
+  if(!w){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
+  w.opener = null;
+
+  const rows=OTS.map(o=>`<tr>
+    <td>${fmtDate(o.created)}</td>
+    <td>${esc(o.titulo||'')}</td>
+    <td>${esc(o.equipo||'')}</td>
+    <td>${esc(o.prioridad||'')}</td>
+    <td>${esc(o.asignado||'')}</td>
+    <td>${esc(o.vencimiento||'')}</td>
+  </tr>`).join('');
+
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>OT</title>
+  <style>body{font-family:Inter,sans-serif;padding:16px}
+  table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px}</style>
+  <h2>Órdenes de trabajo</h2>
+  <table><tr><th>Fecha</th><th>Título</th><th>Equipo</th><th>Prioridad</th><th>Asignado</th><th>Vence</th></tr>${rows}</table>`);
+  w.document.close();
+}
+
+/* =========================
+   Inventario
+========================= */
+let INV=[];let INV_PAGE=1,INV_PAGE_SIZE=10,INV_SORT_KEY='ref',INV_SORT_DIR='asc';
+const QR_SEL = new Set(); // Refs seleccionados para exportar QR
+
+async function loadInv(){
+  const j=await apiGet({res:'inv',fn:'list'});
+  INV=j.ok?j.items:[];
+  renderInv();
+  renderInvAlerts();
+}
+
+function toggleInvAlerts(){ byId('invAlerts').classList.toggle('hidden') }
+
+/* ——— Sincroniza el checkbox de cabecera con las filas visibles ——— */
+function syncInvHeader(){
+  const hdr = byId('invQrAll');
+  if(!hdr) return;
+
+  const checks = [...document.querySelectorAll('#invTableWrap .qrck')];
+  if(!checks.length){ hdr.checked = false; hdr.indeterminate = false; return; }
+
+  const refsVisible = checks.map(c => (c.closest('tr')?.querySelector('b')?.textContent || '').toUpperCase());
+  const allOn  = refsVisible.every(ref => QR_SEL.has(ref));
+  const noneOn = refsVisible.every(ref => !QR_SEL.has(ref));
+
+  hdr.checked = allOn;
+  hdr.indeterminate = !allOn && !noneOn;
+}
+
+function renderInvAlerts(){
+  const badge = byId('invAlertWrap');
+  const box   = byId('invAlerts');
+  if(!badge || !box) return;
+
+  const lows = (INV||[]).filter(x => (+x.stock||0) <= (+x.minimo||0));
+
+  if(!lows.length){
+    badge.classList.add('hidden');
+    badge.textContent = 'Alertas';
+    box.innerHTML = '';
+    return;
+  }
+
+  badge.classList.remove('hidden');
+  badge.textContent = `Alertas (${lows.length})`;
+
+  box.innerHTML = lows.map(x => `
+    <div class="badge-chip badge-low" style="display:inline-flex;margin:4px 6px 0 0">
+      <b style="margin-right:.35rem">${esc(String(x.ref||'').toUpperCase())}</b> ${esc(x.nombre||'')}
+      &nbsp;·&nbsp;<span>Stock: ${+x.stock||0}/${+x.minimo||0}</span>
+    </div>
+  `).join('');
+}
+
+function setInvSort(key){
+  if(INV_SORT_KEY===key){ INV_SORT_DIR=INV_SORT_DIR==='asc'?'desc':'asc' }
+  else{ INV_SORT_KEY=key; INV_SORT_DIR='asc' }
+  renderInv();
+}
+function setInvPage(n){ INV_PAGE=Math.max(1,n); renderInv() }
+function setInvPageSize(n){ INV_PAGE_SIZE=+n||10; INV_PAGE=1; renderInv() }
+
+function renderInv(){
+  const q=(byId('invSearch').value||"").toLowerCase();
+  let arr=INV.filter(x=>(String(x.nombre||'')+String(x.ref||'')).toLowerCase().includes(q));
+
+  const dir=(INV_SORT_DIR==='asc'?1:-1);
+  arr.sort((a,b)=>{
+    let A,B;switch(INV_SORT_KEY){
+      case'ref':A=a.ref||'';B=b.ref||'';break;
+      case'nombre':A=a.nombre||'';B=b.nombre||'';break;
+      case'stock':A=+a.stock||0;B=+b.stock||0;break;
+      case'minimo':A=+a.minimo||0;B=+b.minimo||0;break;
+      default:A=0;B=0
+    }
+    if(typeof A==='string'&&typeof B==='string')return A.localeCompare(B,'es')*dir;
+    return (A===B?0:(A>B?1:-1))*dir
+  });
+
+  const total=arr.length;
+  const pages=Math.max(1,Math.ceil(total/INV_PAGE_SIZE));
+  INV_PAGE=Math.min(INV_PAGE,pages);
+  const start=(INV_PAGE-1)*INV_PAGE_SIZE;
+  arr=arr.slice(start,start+INV_PAGE_SIZE);
+
+  const rows=arr.map(x=>{
+    const low=(+x.stock||0)<= (+x.minimo||0);
+    const refRaw = String(x.ref||'').toUpperCase();
+    const refEsc = JSON.stringify(refRaw).slice(1,-1);
+    const checked = QR_SEL.has(refRaw) ? 'checked' : '';
+    return `<tr class="${low?'row-low':''}">
+      <td class="num" style="text-align:center;width:54px">
+        <input class="qrck" type="checkbox" ${checked}
+          aria-label="Seleccionar ${esc(refRaw)}"
+          onchange="(this.checked?QR_SEL.add('${refEsc}'):QR_SEL.delete('${refEsc}')); syncInvHeader()">
+      </td>
+      <td>
+        <b>${esc(refRaw)}</b> <span class="qr-s" title="QR" onclick="openRepuestoByRef('${refEsc}')"></span>
+        <div class="sub">${esc(x.nombre||'')}</div>
+        ${low?`<div class="badge-low" style="display:inline-flex;gap:.35rem;padding:.18rem .5rem;border-radius:999px;font-weight:800">Bajo mínimo</div>`:''}
+      </td>
+      <td class="num"><span class="linkish" tabindex="0" onclick="editStock('${refEsc}',${+x.stock||0})">${+x.stock||0}</span></td>
+      <td class="num">${+x.minimo||0}</td>
+      <td>
+        <button class="btn gloss" onclick="delta('${refEsc}',-1)">–1</button>
+        <button class="btn gloss" onclick="delta('${refEsc}',+1)">+1</button>
+        <button class="btn gloss" onclick="openRepuestoByRef('${refEsc}')">QR</button>
+      </td>
+    </tr>`
+  }).join('');
+
+  const th=(label,key)=>`<button class="page-btn" onclick="setInvSort('${key}')">${label} ${INV_SORT_KEY===key?(INV_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button>`;
+
+  byId('invTableWrap').innerHTML=`
+    <table><thead><tr>
+      <th style="width:54px;text-align:center">
+        <input id="invQrAll" type="checkbox" aria-label="Seleccionar visibles"
+          onchange="
+            document.querySelectorAll('#invTableWrap .qrck').forEach(c=>{
+              c.checked = byId('invQrAll').checked;
+              const ref = (c.closest('tr')?.querySelector('b')||{}).textContent || '';
+              if(c.checked) QR_SEL.add(ref.toUpperCase()); else QR_SEL.delete(ref.toUpperCase());
+            });
+            syncInvHeader();
+          ">
+      </th>
+      <th>${th('Repuesto','ref')}</th>
+      <th>${th('Stock','stock')}</th>
+      <th>${th('Mínimo','minimo')}</th>
+      <th>Acciones</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    ${pagerControls(total,INV_PAGE,INV_PAGE_SIZE,'setInvPage','setInvPageSize')}
+  `;
+
+  renderInvAlerts();
+  syncInvHeader();
+}
+
+async function addInv(){
+  if(currentUser.group==="guest"){alert("Inicia sesión para añadir repuestos.");return}
+  const nombre=(val('invNombre')||'').trim(),
+        ref=(val('invRef')||'').trim().toUpperCase(),
+        stock=Number(val('invStock')),
+        minimo=Number(val('invMin'));
+  if(!ref||!nombre||!Number.isFinite(stock)||stock<0||!Number.isFinite(minimo)||minimo<0){
+    alert('Revisa los campos.');return
+  }
+  await apiPost({res:'inv',fn:'add',item:{nombre,ref,stock:Math.floor(stock),minimo:Math.floor(minimo)},actor:currentUser.user});
+  toast('Repuesto añadido');
+  ['invNombre','invRef','invStock','invMin'].forEach(id=>byId(id).value='');
+  await loadInv();
+}
+
+async function delta(ref,d){
+  if(currentUser.group==="guest"){alert("Inicia sesión para modificar stock.");return}
+  await apiPost({res:'inv',fn:'delta',ref,delta:+d||0,actor:currentUser.user});
+  await loadInv();
+}
+
+async function editStock(ref,cur){
+  if(currentUser.group==="guest"){alert("Inicia sesión para modificar stock.");return}
+  const nv=prompt("Nuevo stock para "+ref,cur); if(nv===null) return;
+  const num=parseInt(nv,10); if(!Number.isFinite(num)||num<0){alert("Valor inválido");return}
+  const it=INV.find(x=>String(x.ref).toUpperCase()===String(ref).toUpperCase()); if(!it) return;
+  const change=num-(+it.stock||0); if(!change) return;
+  await apiPost({res:'inv',fn:'delta',ref,delta:change,actor:currentUser.user});
+  await loadInv();
+}
+
+/* =========================
+   Dashboard TV
+========================= */
+let TV_TIMER=null;
+async function loadTVOnce(){
+  const st=await apiGet({res:'state',fn:'list'});STATE=st.ok?st.items:[];
+  const inv=await apiGet({res:'inv',fn:'list'});INV=inv.ok?inv.items:[];
+  renderTV();
+}
+function renderTV(){
+  const par=STATE.filter(x=>x.estado==='Parada');const res=STATE.filter(x=>x.estado==='Restricciones');const low=INV.filter(x=>+x.stock<=+x.minimo);
+  byId('tvParados').innerHTML=par.length?par.map(x=>`<div class="tv-item stop">PARADA — ${esc(x.nombre)}</div>`).join(''):`<div class="tv-item">Sin paradas</div>`;
+  byId('tvRestr').innerHTML=res.length?res.map(x=>`<div class="tv-item warn">RESTRICCIONES — ${esc(x.nombre)}</div>`).join(''):`<div class="tv-item">Sin restricciones</div>`;
+  byId('tvStock').innerHTML=low.length?low.map(x=>`<div class="tv-item stock">BAJO MÍNIMO — ${esc(x.ref)} · ${esc(x.nombre)} (${x.stock}/${x.minimo})</div>`).join(''):`<div class="tv-item">Stock correcto</div>`
+}
+function initTV(){
+  loadTVOnce();
+  if(TV_TIMER) clearInterval(TV_TIMER);
+  TV_TIMER=setInterval(loadTVOnce,10000);
+}
+
+/* =========================
+   Detalles (QR / routing)
+========================= */
+function slugify(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}
+function baseURL(){return location.origin+location.pathname}
+function ensureSectionsHidden(){['equipos','gruas','otros','incidencias','indicadores','ot','inventario','tv','equipo','repuesto'].forEach(s=>{const el=byId('page-'+s);if(el)el.classList.add('hidden')})}
+function openEquipoByName(name){const slug=slugify(name);location.hash=`#/equipo/${slug}`;renderEquipoBySlug(slug)}
+function openRepuestoByRef(ref){const code=encodeURIComponent(String(ref||'').toUpperCase());location.hash=`#/repuesto/${code}`;renderRepuestoByRef(code)}
+function renderEquipoBySlug(slug){
+  const eq=STATE.find(x=>slugify(x.nombre)===slug);
+  ensureSectionsHidden();const host=byId('page-equipo');host.classList.remove('hidden');
+  if(!eq){byId('equipoDetail').innerHTML=`<div class="kpi">Equipo no encontrado.</div>`;return}
+  const inc=INCIDS_ALL.filter(i=>i.equipo===eq.nombre).sort((a,b)=>new Date(b.created)-new Date(a.created));
+  const qrText=`${baseURL()}#/equipo/${slug}`;
+  const htmlInc=inc.length?inc.map(i=>`<tr><td class="nowrap">${fmtDate(i.created)}</td><td>${esc(i.tipo||'')}</td><td>${esc(i.res||'')}</td><td>${esc(i.desc||'')}</td><td class="num">${fmt(i.hParo||0)}</td><td class="num">${fmt(i.hRep||0)}</td></tr>`).join(''):`<tr><td colspan="6">Sin incidencias registradas.</td></tr>`;
+  const safeTitle = JSON.stringify(String(eq.nombre||'')).slice(1,-1);
+  byId('equipoDetail').innerHTML=`<div class="kpi"><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div id="eqQR" style="width:160px;height:160px;border:1px dashed #2a3442;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#0f141c"></div><div><h2 style="margin:.2rem 0">${esc(eq.nombre)}</h2><div class="sub">${esc(eq.grupo)}</div><div style="margin-top:.5rem"><code>${qrText}</code></div><div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn gloss" onclick="printQR('eqQR','${safeTitle}')">Imprimir etiqueta</button><button class="btn gloss" onclick="nav('equipos')">Volver</button></div></div></div></div><div class="kpi" style="margin-top:12px"><h3>Historial de incidencias — ${esc(eq.nombre)}</h3><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada</th><th>Reparación</th></tr></thead><tbody>${htmlInc}</tbody></table></div>`;
+  new QRCode(byId('eqQR'),{text:qrText,width:150,height:150,correctLevel:QRCode.CorrectLevel.M})
+}
+function renderRepuestoByRef(code){
+  const ref=decodeURIComponent(code).toUpperCase();
+  const it=INV.find(x=>String(x.ref).toUpperCase()===ref);
+  ensureSectionsHidden();const host=byId('page-repuesto');host.classList.remove('hidden');
+  if(!it){byId('repuestoDetail').innerHTML=`<div class="kpi">Repuesto no encontrado.</div>`;return}
+  const qrText=`${baseURL()}#/repuesto/${encodeURIComponent(ref)}`;
+  const safeRefTitle = JSON.stringify("REP-"+ref).slice(1,-1);
+  byId('repuestoDetail').innerHTML=`<div class="kpi"><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div id="repQR" style="width:160px;height:160px;border:1px dashed #2a3442;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#0f141c"></div><div><h2 style="margin:.2rem 0">${esc(it.nombre||'')}</h2><div class="sub"><b>Ref:</b> ${esc(ref)} · <b>Stock:</b> ${+it.stock||0} · <b>Mínimo:</b> ${+it.minimo||0}</div><div style="margin-top:.5rem"><code>${qrText}</code></div><div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn gloss" onclick="printQR('repQR','${safeRefTitle}')">Imprimir etiqueta</button><button class="btn gloss" onclick="nav('inventario')">Volver</button></div></div></div></div>`;
+  new QRCode(byId('repQR'),{text:qrText,width:150,height:150,correctLevel:QRCode.CorrectLevel.M})
+}
+function printQR(containerId,title){
+  const node=byId(containerId);
+  const img=node.querySelector('img')||node.querySelector('canvas');
+  const src=img.tagName==='CANVAS'?img.toDataURL('image/png'):img.src;
+
+  const w=window.open('','_blank','noopener,noreferrer');
+  if(!w){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
+  w.opener = null;
+
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>${esc(title)}</title>
+  <style>body{font-family:Inter,sans-serif;text-align:center;padding:16px}</style>
+  <h3>${esc(title)}</h3>
+  <img src="${src}" width="220" height="220">
+  <div style="margin-top:8px">${location.origin}${location.pathname}</div>`);
+  w.document.close(); w.focus(); w.print();
+}
+
+/* =========================
+   Exportaciones (CSV/PDF)
+========================= */
+function downloadText(filename, text, mime='text/plain'){
+  const blob = new Blob([text], {type: mime+';charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function toCSVCell(s){
+  var v = (s===undefined || s===null) ? '' : s;
+  return '"' + String(v).replace(/"/g,'""') + '"';
+}
+function exportIncidCSV(){
+  if(!INCIDS_ALL || !INCIDS_ALL.length){alert('No hay incidencias.');return}
+  const cols = ['created','equipo','tipo','res','desc','hParo','hRep','reportante','asignado'];
+  const header = cols.join(',');
+  const rows = INCIDS_ALL.map(x => cols.map(k => toCSVCell(x[k])).join(','));
+  downloadText('incidencias.csv',[header].concat(rows).join('\n'),'text/csv');
+}
+function exportIncidPDF(){
+  const w=window.open('','_blank','noopener,noreferrer');
+  if(!w){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
+  w.opener = null;
+
+  const rows=(INCIDS_ALL||[]).map(x=>`<tr>
+    <td>${fmtDate(x.created)}</td>
+    <td>${esc(x.equipo||'')}</td>
+    <td>${esc(x.tipo||'')}</td>
+    <td>${esc(x.res||'')}</td>
+    <td>${esc(x.desc||'')}</td>
+    <td class="num">${fmt(x.hParo||0)}</td>
+    <td class="num">${fmt(x.hRep||0)}</td>
+  </tr>`).join('');
+
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>Incidencias</title>
+  <style>body{font-family:Inter,Arial,sans-serif;padding:16px}
+  table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px}
+  h2{margin:0 0 10px}</style>
+  <h2>Incidencias</h2>
+  <table><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada (h)</th><th>Reparación (h)</th></tr>${rows}</table>`);
+  w.document.close(); w.focus(); w.print();
+}
+function exportKPIsCSV(){
+  const mttr = (INCIDS_ALL.reduce((p,x)=>p+(+x.hRep||0),0))/(INCIDS_ALL.length||1);
+  const horasPeriodo = 4*30*24;
+  const mtbf = horasPeriodo/(INCIDS_ALL.length||1);
+  const prodH = 120, perd = INCIDS_ALL.reduce((p,x)=>p+(+x.hParo||0),0);
+  const disp = Math.max(0,(prodH-perd)/prodH);
+  const oee  = disp*0.9*0.98;
+  const rows = [
+    ['KPI','Valor'],
+    ['MTTR (h)', mttr.toFixed(2)],
+    ['MTBF (h)', mtbf.toFixed(2)],
+    ['Disponibilidad (%)', (disp*100).toFixed(2)],
+    ['OEE estimado (%)', (oee*100).toFixed(2)]
+  ].map(r => r.map(toCSVCell).join(',')).join('\n');
+  downloadText('kpis.csv', rows, 'text/csv');
+}
+function exportKPIPDF(){
+  const mttr = (INCIDS_ALL.reduce((p,x)=>p+(+x.hRep||0),0))/(INCIDS_ALL.length||1);
+  const horasPeriodo = 4*30*24;
+  const mtbf = horasPeriodo/(INCIDS_ALL.length||1);
+  const prodH = 120, perd = INCIDS_ALL.reduce((p,x)=>p+(+x.hParo||0),0);
+  const disp = Math.max(0,(prodH-perd)/prodH);
+  const oee  = disp*0.9*0.98;
+
+  const w=window.open('','_blank','noopener,noreferrer');
+  if(!w){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
+  w.opener = null;
+
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>KPIs</title>
+  <style>body{font-family:Inter,Arial,sans-serif;padding:16px}
+  table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:13px}
+  h2{margin:0 0 10px}</style>
+  <h2>KPIs globales</h2>
+  <table>
+    <tr><th>KPI</th><th>Valor</th></tr>
+    <tr><td>MTTR (h)</td><td>${fmt(mttr)}</td></tr>
+    <tr><td>MTBF (h)</td><td>${fmt(mtbf)}</td></tr>
+    <tr><td>Disponibilidad (%)</td><td>${fmt(disp*100)}</td></tr>
+    <tr><td>OEE estimado (%)</td><td>${fmt(oee*100)}</td></tr>
+  </table>`);
+  w.document.close(); w.focus(); w.print();
+}
+function exportInvCSV(){
+  if(!INV || !INV.length){alert('No hay inventario.');return}
+  const cols=['ref','nombre','stock','minimo'];
+  const header=cols.join(',');
+  const rows=INV.map(x=>cols.map(k=>toCSVCell(x[k])).join(','));
+  downloadText('inventario.csv',[header].concat(rows).join('\n'),'text/csv');
+}
+
+/* =========================
+   Router por hash
+========================= */
+function handleHash(){
+  const h=location.hash||'';
+  const m1=h.match(/^#\/equipo\/([a-z0-9\-]+)$/);const m2=h.match(/^#\/repuesto\/(.+)$/);
+  if(m1){renderEquipoBySlug(m1[1]);return}
+  if(m2){renderRepuestoByRef(m2[1]);return}
+  ensureSectionsHidden();byId('page-'+CURRENT_PAGE).classList.remove('hidden')
+}
+window.addEventListener('hashchange',handleHash);
+
+/* =========================
+   Miscelánea
+========================= */
+function toast(txt,ms=2200){
+  const t=document.createElement('div');t.className='toast';t.textContent=txt;document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s'},ms);setTimeout(()=>t.remove(),ms+320)
+}
+function exportInvQRLabels(){
+  const chosen = QR_SEL.size
+    ? INV.filter(x => QR_SEL.has(String(x.ref||'').toUpperCase()))
+    : INV;
+
+  const items = (chosen||[]).map(x=>({ref:String(x.ref||'').toUpperCase(), nombre:String(x.nombre||'')}));
+  if(!items.length){ alert('No hay repuestos seleccionados ni inventario.'); return; }
+
+  const win=window.open('','_blank','noopener,noreferrer');
+  if(!win){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
+  win.opener = null;
+
+  win.document.write(`<!doctype html><meta charset="utf-8"><title>Etiquetas QR Inventario</title>
+  <style>
+    @media print { @page { size:A4; margin:10mm } }
+    body{font-family:Inter,system-ui,sans-serif;margin:12px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .card{border:1px solid #ddd;border-radius:8px;padding:10px;display:flex;gap:10px;align-items:center;break-inside:avoid}
+    .qr{width:90px;height:90px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center}
+    .meta{flex:1}
+    .ref{font-weight:800;font-size:14px}
+    .nom{color:#333;font-size:12px;margin-top:4px}
+    .url{color:#555;font-size:10px;margin-top:6px;word-break:break-all}
+  </style>
+  <h2>Etiquetas QR — Inventario</h2>
+  <div class="grid" id="grid"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+  <script>
+    const base='${location.origin}${location.pathname}';
+    const items=${'${JSON.stringify(items)}'};
+    const grid=document.getElementById('grid');
+    items.forEach(it=>{
+      const url=base+'#/repuesto/'+encodeURIComponent(it.ref);
+      const card=document.createElement('div'); card.className='card';
+      const qr=document.createElement('div'); qr.className='qr';
+      const meta=document.createElement('div'); meta.className='meta';
+      meta.innerHTML='<div class="ref">'+it.ref+'</div><div class="nom">'+(it.nombre||'')+'</div><div class="url">'+url+'</div>';
+      card.appendChild(qr); card.appendChild(meta); grid.appendChild(card);
+      new QRCode(qr,{text:url,width:88,height:88,correctLevel:QRCode.CorrectLevel.M});
+    });
+    setTimeout(()=>window.print(), 500);
+  <\/script>`);
+  win.document.close(); win.focus();
+}
 </script>
+
+<!-- =========================
+     Init
+========================= -->
+<script>
+  setUser(currentUser);
+  if(location.hash){handleHash()}else{nav('equipos')}
+
+  // Toggle mostrar/ocultar contraseña
+  document.querySelectorAll('.pw-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-target');
+      const el = document.getElementById(id);
+      if(!el) return;
+      const isPwd = el.type === 'password';
+      el.type = isPwd ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', String(isPwd)); // true cuando se muestra
+    });
+  });
+
+  loadState();
+</script>
+
+<!-- ===== PARCHE ROLES + ID ESTABLE (PEGAR TAL CUAL) ===== -->
+<script>
+function getCID(){
+  const KEY='CDL_CID';
+  let id = localStorage.getItem(KEY);
+  if(!id){
+    id = (crypto.randomUUID && crypto.randomUUID()) ||
+         ('cid_'+Date.now().toString(36)+Math.random().toString(36).slice(2));
+    localStorage.setItem(KEY,id);
+  }
+  return id;
+}
+const EMERGENCY_UNLOCK = true;
+
+(function initUserFallback(){
+  try{
+    let u = JSON.parse(localStorage.getItem('CDL_USER')||'null');
+    if(!u){
+      const cid = getCID();
+      u = { user: 'inv-'+cid.slice(-6), rol: 'Invitado', group: 'guest' };
+      localStorage.setItem('CDL_USER', JSON.stringify(u));
+    }
+    const chip = document.getElementById('roleChip');
+    if(chip){ chip.textContent = (u.rol||'Invitado')+' · '+getCID().slice(-6); }
+  }catch(_){}
+})();
+
+window.setUser = function(u){
+  try{
+    window.currentUser = u;
+    localStorage.setItem('CDL_USER', JSON.stringify(u));
+    const chip = document.getElementById('roleChip');
+    if(chip){ chip.textContent = (u.rol||u.user||'Usuario')+' · '+getCID().slice(-6); }
+    applyRoleUI();
+  }catch(_){}
+};
+
+window.applyRoleUI = function(){
+  const g = EMERGENCY_UNLOCK ? 'admin' : (JSON.parse(localStorage.getItem('CDL_USER')||'{}').group || 'guest');
+
+  ['mIndic','mOT','mIncid','mInv','mGruas','mOtros','mTV'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.classList.remove('hidden'); el.style.display=''; }
+  });
+
+  ['btnExportIncidCSV','btnExportIncidPDF','btnExportKPIPCSV','btnExportKPIPDF','btnExportInvCSV','btnExportOTPDF','btnExportInvQR']
+    .forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){
+        const allowed = (g==="admin" || g==="gerente");
+        if(id==='btnExportInvQR'){
+          el.classList.toggle('hidden', !allowed);
+        } else {
+          el.classList.remove('hidden');
+          el.style.display='';
+        }
+      }
+    });
+
+  const isGuest = (g==='guest' && !EMERGENCY_UNLOCK);
+  ['btnAddIncid','btnAddOT','btnExportInvQR','btnAddInv'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.disabled = !!isGuest; }
+  });
+};
+
+applyRoleUI();
+</script>
+
 </body>
 </html>
