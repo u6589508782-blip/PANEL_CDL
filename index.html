@@ -581,11 +581,11 @@ if(!document.documentElement.dataset.menusBound){
   document.documentElement.dataset.menusBound = '1';
 
   const onTap = (el, handler) => {
-    ['click','pointerdown'].forEach(ev => el?.addEventListener(ev, e=>{
-      if(ev==='pointerdown' && e.button && e.button!==0) return;
-      handler(e);
-    }));
-  };
+    const onTap = (el, handler) => {
+  el?.addEventListener('click', (e) => {
+    handler(e);
+  }, { passive: true });
+};
 
   // Botón de páginas
   onTap(pagesBtn, (e)=>{
@@ -602,14 +602,12 @@ if(!document.documentElement.dataset.menusBound){
   });
 
   // Dentro de paneles: no cerrar
-  ['click','pointerdown'].forEach(ev=>{
-    pagesPanel?.addEventListener(ev, e=>e.stopPropagation());
-    userPanel ?.addEventListener(ev, e=>e.stopPropagation());
-  });
+  pagesPanel?.addEventListener('click', e=>e.stopPropagation());
+userPanel ?.addEventListener('click', e=>e.stopPropagation());
 
   // Cerrar al tocar fuera
   const isInside = (t, el)=> !!el && (el===t || el.contains(t));
-  document.addEventListener('pointerdown', (e)=>{
+  document.addEventListener('click', (e)=>{
     const t=e.target;
     const enPages = isInside(t,pagesPanel) || isInside(t,pagesBtn);
     const enUser  = isInside(t,userPanel)  || isInside(t,userBtn);
