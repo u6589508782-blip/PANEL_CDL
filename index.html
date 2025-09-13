@@ -552,9 +552,9 @@ async function changePwd(){
   if(r.ok){byId('oldPass').value="";byId('newPass').value=""}
 }
 
-/* =========================
-   Menús (robustos y aislados)
-========================= */
+// =========================
+// Menús (robustos y aislados) — SOLO CLICK
+// =========================
 const pagesBtn   = byId('pagesBtn');
 const userBtn    = byId('userBtn');
 const pagesPanel = byId('pagesPanel');
@@ -576,43 +576,33 @@ function closePanel(panelEl, btnEl){
 function isOpen(panelEl){ return panelEl && !panelEl.classList.contains('hidden'); }
 function closeAllMenus(){ closePanel(pagesPanel, pagesBtn); closePanel(userPanel, userBtn); }
 
-// evitar múltiples bindings si se inyecta dos veces
 if(!document.documentElement.dataset.menusBound){
   document.documentElement.dataset.menusBound = '1';
 
-  const onTap = (el, handler) => {
-    const onTap = (el, handler) => {
-  el?.addEventListener('click', (e) => {
-    handler(e);
-  }, { passive: true });
-};
-
-  // Botón de páginas
-  onTap(pagesBtn, (e)=>{
+  // Abrir/cerrar con CLICK (sin pointerdown)
+  pagesBtn?.addEventListener('click', (e)=>{
     e.stopPropagation();
     closePanel(userPanel, userBtn);
     isOpen(pagesPanel) ? closePanel(pagesPanel, pagesBtn) : openPanel(pagesPanel, pagesBtn);
   });
-
-  // Botón de usuario
-  onTap(userBtn, (e)=>{
+  userBtn?.addEventListener('click', (e)=>{
     e.stopPropagation();
     closePanel(pagesPanel, pagesBtn);
     isOpen(userPanel) ? closePanel(userPanel, userBtn) : openPanel(userPanel, userBtn);
   });
 
-  // Dentro de paneles: no cerrar
+  // No cerrar al interactuar DENTRO del panel
   pagesPanel?.addEventListener('click', e=>e.stopPropagation());
-userPanel ?.addEventListener('click', e=>e.stopPropagation());
+  userPanel ?.addEventListener('click',  e=>e.stopPropagation());
 
-  // Cerrar al tocar fuera
+  // Cerrar al hacer click fuera (solo click)
   const isInside = (t, el)=> !!el && (el===t || el.contains(t));
   document.addEventListener('click', (e)=>{
     const t=e.target;
     const enPages = isInside(t,pagesPanel) || isInside(t,pagesBtn);
     const enUser  = isInside(t,userPanel)  || isInside(t,userBtn);
     if(!enPages && !enUser) closeAllMenus();
-  }, true);
+  });
 
   // ESC para cerrar
   document.addEventListener('keydown', (e)=>{
@@ -628,7 +618,6 @@ userPanel ?.addEventListener('click', e=>e.stopPropagation());
     });
   });
 }
-
 /* =========================
    Navegación
 ========================= */
