@@ -1,0 +1,1628 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CDL · CMMS v2025</title>
+
+<!-- PWA / iOS -->
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="theme-color" content="#0c0f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --brand1:#A60000;--brand2:#E43B3B;
+  --ok:#16a34a;--warn:#f59e0b;--stop:#dc2626;
+  --ink:#e8eef7;--muted:#9aa7b4;--line:#232b36;
+  --hdr-h:120px;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+
+/* ===== FONDO con degradado + watermark CDL ===== */
+body{
+  margin:0;color:var(--ink);
+  font-family:Inter,system-ui,sans-serif;
+  background:#0c0f14;
+  background-image:
+    radial-gradient(1200px 600px at 10% 0%, #111827 0%, #0e131b 45%, #0b0f15 100%);
+  background-attachment:fixed;
+  padding-top: var(--safe-top,0px);
+  padding-bottom: var(--safe-bottom,0px);
+  -webkit-text-size-adjust:100%;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.06;
+  background-repeat:no-repeat;background-position:calc(50% - 260px) 120px;
+  background-size:520px 520px;
+  background-image:url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520'>\
+    <defs><radialGradient id='g' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='%23ffffff'/><stop offset='100%' stop-color='%23e5e7eb'/></radialGradient></defs>\
+    <circle cx='260' cy='260' r='240' fill='url(%23g)' fill-opacity='.18'/>\
+    <text x='50%' y='54%' text-anchor='middle' font-family='Inter,system-ui,sans-serif' font-size='140' font-weight='800' fill='%23000000' fill-opacity='.25'>CDL</text>\
+  </svg>");
+}
+
+a{color:#9ec1ff;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ===== CABECERA ===== */
+header{
+  position:sticky; top:0; z-index:60;
+  background:#fff; color:#000; min-height:var(--hdr-h);
+  overflow:visible; isolation:isolate;
+  padding-top: var(--safe-top,0px);
+  transition: box-shadow .2s ease, background-color .2s ease;
+}
+header.scrolled{ box-shadow:0 8px 22px rgba(0,0,0,.18); }
+
+.nav{
+  display:flex; align-items:flex-end; gap:.8rem;
+  padding:.6rem .9rem .4rem; min-height:var(--hdr-h);
+  position:relative; z-index:1;
+}
+.menu-pages{ position:absolute; top:10px; left:10px; z-index:2; }
+.menu-user  { position:absolute; top:10px; right:10px; z-index:2; }
+.menu-pages #pagesBtn,
+.menu-user  #userBtn{
+  font-size:1.15rem; line-height:1; padding:.7rem 1rem; border-radius:14px;
+}
+
+/* Chip de rol */
+.rolechip{
+  position:absolute; top:14px; right:62px; z-index:2;
+  font-size:.78rem; font-weight:800; color:#111; background:#f2f4f8;
+  border:1px solid #d9dee6; padding:.25rem .5rem; border-radius:999px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+/* Título centrado y pegado abajo */
+.hero-title{
+  position:absolute; left:0; right:0; bottom:8px;
+  display:flex; align-items:flex-end; justify-content:center; text-align:center; z-index:1;
+}
+.hero-row.singleline{ display:inline-flex; align-items:flex-end; gap:.35rem }
+.hero-cdl{ font-weight:800; font-size:1.8rem; letter-spacing:.02em; line-height:1 }
+.hero-dot{ opacity:.9; transform:translateY(-1px) }
+.hero-panel{ font-weight:700; font-size:1.06rem; opacity:.95; white-space:nowrap }
+
+/* Menús */
+.menu{position:relative}
+.row{padding:.85rem 1rem;border-bottom:1px solid #1e2a38}
+.row:last-child{border-bottom:0}
+.actions{display:flex;gap:.55rem;flex-direction:column}
+
+/* Botones base */
+.btn{
+  -webkit-appearance:none;appearance:none;
+  border:0;border-radius:12px;padding:.6rem .9rem;font-weight:800;cursor:pointer
+}
+.mbtn{
+  -webkit-appearance:none;appearance:none;
+  font-size:1rem;padding:.65rem 1rem;border-radius:14px;
+  background:#f1f1f1;color:#000;border:1px solid #ccc;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.06)
+}
+#pagesPanel .btn{
+  border-radius:999px;background:#0b0f15;color:#fff;border:1px solid #202a36;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 18px rgba(0,0,0,.35)
+}
+
+/* Paneles menú */
+.panel{
+  position:absolute; right:0; top:calc(100% + 10px);
+  background:#0f141c; color:#fff; border:1px solid #1e2a38; border-radius:16px;
+  box-shadow:0 18px 36px rgba(0,0,0,.5); min-width:280px; overflow:hidden;
+  opacity:0; transform:translateY(-6px); pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease;
+}
+.panel:not(.hidden){ opacity:1; transform:translateY(0); pointer-events:auto; }
+@media (max-width:640px){
+  .panel{ position:fixed !important; left:10px; right:10px; top:calc(92px + var(--safe-top,0px)); max-width:none }
+  body.menu-open{ overflow:hidden }
+}
+
+/* Layout */
+.container{max-width:980px;margin:0 auto;padding:1rem}
+
+/* Toggle contraseña (con iconos ON/OFF) */
+.pw-toggle{
+  width:38px;height:38px;border-radius:10px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>\
+  <path d='M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z'/>\
+  <circle cx='12' cy='12' r='3'/>\
+  <path d='M3 3L21 21'/></svg>");
+  background-repeat:no-repeat;background-position:center;background-size:18px 18px;
+}
+.pw-toggle.on{
+  background-image:url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>\
+  <path d='M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z'/>\
+  <circle cx='12' cy='12' r='3'/></svg>");
+}
+.pw-toggle:active{transform:translateY(1px)}
+
+/* Cards */
+.card,.kpi,.tv-card{
+  background:#fff;color:#000;border:1px solid #ddd;
+  border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,.1);
+  padding:.85rem;margin:.55rem 0;
+}
+.name{font-weight:800;font-size:1.14rem;display:flex;align-items:center;gap:.4rem}
+
+/* QR mini */
+.name .qr-s{
+  width:18px;height:18px;border:1px solid #1f2937;border-radius:3px;margin-left:.35rem;
+  background:
+    linear-gradient(90deg,#0f141c 0 50%,#cbd5e1 50% 100%) 0 0/6px 6px,
+    linear-gradient(0deg,#0f141c 0 50%,#cbd5e1 50% 100%) 0 0/6px 6px,
+    radial-gradient(#0f141c 60%,transparent 61%) 3px 3px/6px 6px repeat;
+}
+
+/* Subtexto, pilotos de estado */
+.sub{color:#475569}
+.pilot{width:18px;height:18px;border-radius:50%;
+  box-shadow:0 0 0 3px #fff,0 0 0 6px rgba(0,0,0,.06),inset 0 -3px 6px rgba(0,0,0,.15)}
+.p-ok{background:#22c55e}
+.p-warn{background:#f59e0b}
+.p-stop{background:#ef4444}
+.right{margin-left:auto;display:flex;gap:.55rem;flex-wrap:wrap}
+
+/* ===== Botones metalizados ===== */
+.gloss{
+  -webkit-appearance:none;appearance:none;
+  display:inline-flex;align-items:center;gap:.55rem;
+  padding:.6rem 1rem;border-radius:999px;border:1px solid #d0d7e2;
+  background:linear-gradient(180deg,#ffffff,#eef2f7 55%,#e3e9f3);
+  color:#111827;font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 6px 18px rgba(0,0,0,.06);
+  background-clip:padding-box;
+}
+.gloss .dot{width:12px;height:12px;border-radius:999px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08)}
+.gloss.green  .dot{background:radial-gradient(circle at 35% 30%,#98f5bc,#22c55e 55%,#0e7a3a)}
+.gloss.yellow .dot{background:radial-gradient(circle at 35% 30%,#ffe08a,#f59e0b 55%,#8a4b00)}
+.gloss.red    .dot{background:radial-gradient(circle at 35% 30%,#ffc0c0,#ef4444 55%,#7a1616)}
+.btn-mail.gloss{background:linear-gradient(180deg,#ffe1e1,#f7cdcd 50%,#f0bcbc);border-color:#e7b2b2}
+
+/* Semáforo */
+.semaforo{display:flex;align-items:center;background:#eef2f7;border:1px solid #cfd8e3;border-radius:28px;padding:.35rem;gap:.4rem;position:relative;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.05)}
+.semaforo::before,.semaforo::after{content:"";position:absolute;top:50%;width:8px;height:8px;border-right:2px solid #6b7280;border-bottom:2px solid #6b7280;opacity:.65}
+.semaforo::before{left:10px;transform:translateY(-50%) rotate(135deg)}
+.semaforo::after{right:10px;transform:translateY(-50%) rotate(-45deg)}
+.semaforo .opt{position:relative;flex:1;display:flex;justify-content:center;align-items:center;height:40px;border-radius:22px;padding:0 .9rem;font-weight:800;background:#f7f9fc;border:1px solid #dbe3ef;color:#0f172a;white-space:nowrap;font-size:.92rem;cursor:pointer;user-select:none}
+.semaforo .opt .led{width:14px;height:14px;border-radius:999px;margin-right:.5rem}
+.semaforo .opt[data-k=ok]   .led{background:radial-gradient(circle at 35% 30%,#6df49a,#22c55e 55%,#0e7a3a)}
+.semaforo .opt[data-k=warn] .led{background:radial-gradient(circle at 35% 30%,#ffd56a,#f59e0b 55%,#8a4b00)}
+.semaforo .opt[data-k=stop] .led{background:radial-gradient(circle at 35% 30%,#ff9e9e,#ef4444 55%,#7a1616)}
+.semaforo .opt.active{background:linear-gradient(180deg,#ffffff,#e7eef8);border-color:#b5c4db;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 8px rgba(0,0,0,.07)}
+
+/* Tablas */
+table{width:100%;border-collapse:separate;border-spacing:0 8px}
+th,td{padding:.62rem .85rem;background:#fff;border-bottom:1px solid #e5e7eb}
+th{color:#111827}
+tr td:first-child,tr th:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px}
+tr td:last-child,tr th:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
+
+/* Paginación */
+.pager{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:flex-end;margin-top:.6rem;color:#111827}
+.page-btn{border:1px solid #d6d6d6;background:#f7f7f7;color:#000;cursor:pointer;border-radius:10px;padding:.35rem .6rem;font-weight:700}
+.page-btn.active{background:#e9e9e9}
+
+/* Badges e inventario */
+.badge-chip{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border-radius:999px;background:#f8fafc;border:1px solid #e5e7f0;box-shadow:inset 0 1px 0 rgba(255,255,255,.7);font-weight:800}
+.row-low{background:#fff0f0!important}
+.badge-low{background:#fde2e2;color:#b91c1c;border:1px solid #fecaca}
+
+/* Inputs */
+.inv-grid input,.form-grid input,.form-grid select,.form-grid textarea{background:#f9fafb;border:1px solid #d1d5db;color:#111827;border-radius:12px;padding:.55rem .7rem;font-size:16px}
+
+/* Toast */
+.toast{position:fixed;right:14px;bottom:calc(14px + var(--safe-bottom,0px));z-index:90;background:#0f172a;color:#fff;padding:.6rem .8rem;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.6)}
+
+/* TV */
+.tv-card{border:1px solid #e5e7eb}
+.tv-title{display:flex;align-items:center;gap:.6rem;margin:0 0 10px}
+.tv-title .dot{width:16px;height:16px;border-radius:50%}
+.tv-list{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(10px + var(--safe-bottom,0px))}
+.tv-item{padding:10px 12px;border-radius:12px;font-weight:700;background:#f8fafc;border:1px solid #e5e7eb}
+.tv-item.stop{border-color:#fecaca}
+.tv-item.warn{border-color:#fde68a}
+.tv-item.stock{border-color:#bfdbfe}
+.tv-legend{color:#334155;font-size:.9rem;margin-left:8px}
+
+.nowrap{white-space:nowrap}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.linkish{cursor:pointer}
+.hidden{display:none!important}
+
+/* Accesibilidad foco */
+button:focus,.linkish:focus,.page-btn:focus,select:focus,input:focus,textarea:focus{outline:2px solid #60a5fa;outline-offset:2px}
+
+/* ===== BLOQUE CAMBIOS 1 — Micro-ajustes visuales ===== */
+main h2{margin:.2rem 0 .6rem;font-size:1.25rem;letter-spacing:.01em}
+.btn.gloss:hover{filter:brightness(1.02)}
+.btn.gloss:active{transform:translateY(1px)}
+.mbtn:hover{background:#fafafa}
+table thead th{position:sticky;top:calc(var(--hdr-h) + var(--safe-top,0px));z-index:1}
+tbody tr:hover td{background:#f7f9fc}
+.linkish:hover{text-decoration:underline}
+
+/* Scrollbars discretas */
+.tv-list::-webkit-scrollbar{height:8px;width:8px}
+.tv-list::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px}
+.tv-list::-webkit-scrollbar-track{background:transparent}
+
+/* Responsive móvil */
+@media (max-width:640px){
+  .container{padding:.75rem}
+  .card,.kpi,.tv-card{border-radius:16px}
+  :root{--hdr-h:92px}
+}
+
+/* ===== BLOQUE CAMBIOS 2 — iOS bottom & móvil ===== */
+.toast{bottom:calc(14px + var(--safe-bottom,0px))}
+.tv-list{padding-bottom:calc(10px + var(--safe-bottom,0px))}
+.pager{margin-bottom:calc(.6rem + var(--safe-bottom,0px))}
+.fix-bottom{position:fixed;left:0;right:0;bottom:calc(0px + var(--safe-bottom,0px))}
+
+/* Reducir animaciones si el usuario lo pide */
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav" id="navBar">
+    <!-- Menú (hamburguesa) -->
+    <div class="menu menu-pages">
+      <button id="pagesBtn" class="mbtn" aria-label="Menú" aria-expanded="false">☰</button>
+      <div id="pagesPanel" class="panel hidden" style="min-width:260px">
+        <div class="row">
+          <div class="actions">
+            <button class="btn" onclick="nav('equipos')">Equipos</button>
+            <button class="btn" id="mGruas" onclick="nav('gruas')">Puentes Grúa</button>
+            <button class="btn" id="mOtros" onclick="nav('otros')">Otros</button>
+            <button class="btn" id="mIncid" onclick="nav('incidencias')">Incidencias</button>
+            <button class="btn" id="mIndic" onclick="nav('indicadores')">Indicadores</button>
+            <button class="btn" id="mOT" onclick="nav('ot')">OT</button>
+            <button class="btn" id="mInv" onclick="nav('inventario')">Inventario</button>
+            <button class="btn" id="mTV" onclick="nav('tv')">Dashboard TV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Título centrado y pegado abajo -->
+    <div class="hero-title">
+      <div class="hero-row singleline">
+        <span class="hero-cdl">CDL</span>
+        <span class="hero-dot">·</span>
+        <span class="hero-panel">Panel de control</span>
+      </div>
+    </div>
+
+    <!-- Chip de rol (arriba derecha) -->
+    <span id="roleChip" class="rolechip">Invitado</span>
+
+    <!-- Menú usuario (3 puntitos) -->
+    <div class="menu menu-user">
+      <button id="userBtn" class="mbtn" aria-label="Usuario" aria-expanded="false">⋮</button>
+      <div id="userPanel" class="panel hidden">
+        <div class="row">
+          <label class="small">Usuario</label>
+          <select id="userSelect">
+            <option value="invitado">Invitado</option>
+            <option value="admin">Administrador</option>
+            <option value="gerente">Gerente</option>
+            <option value="encargado">Encargado</option>
+            <option value="produccion">Producción</option>
+            <option value="rt11">RT1.1</option><option value="rt12">RT1.2</option>
+            <option value="rt21">RT2.1</option><option value="rt22">RT2.2</option>
+            <option value="rt31">RT3.1</option><option value="rt32">RT3.2</option>
+            <option value="tcoint">Tco.INT</option>
+            <option value="subc">Subcontrata</option>
+          </select>
+
+          <label class="small" style="margin-top:.4rem">Contraseña</label>
+          <div class="pw" style="display:flex;gap:.4rem;align-items:center">
+            <input id="userPass" type="password" placeholder="••••••••" style="flex:1">
+            <button type="button" class="pw-toggle" data-target="userPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
+          </div>
+
+          <div class="actions" style="margin-top:.6rem">
+            <button class="btn gloss" onclick="login()"><span class="dot"></span>Entrar</button>
+            <button class="btn gloss" onclick="logout()">Salir</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label class="small">Cambiar contraseña</label>
+          <div class="pw" style="display:flex;gap:.4rem;align-items:center">
+            <input id="oldPass" type="password" placeholder="Actual" style="flex:1">
+            <button type="button" class="pw-toggle" data-target="oldPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
+          </div>
+          <div class="pw" style="margin-top:.4rem;display:flex;gap:.4rem;align-items:center">
+            <input id="newPass" type="password" placeholder="Nueva" style="flex:1">
+            <button type="button" class="pw-toggle" data-target="newPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
+          </div>
+          <div class="actions" style="margin-top:.6rem">
+            <button class="btn gloss" onclick="changePwd()">Cambiar</button>
+          </div>
+          <div id="pwdMsg" class="small" style="margin-top:.4rem;color:#cbd5e1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <!-- === SECCIONES QUE ESPERA EL JS === -->
+
+  <!-- Estado de equipos -->
+  <section id="page-equipos">
+    <h2>Equipos</h2>
+    <div id="equiposWrap"></div>
+    <div class="right" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem">
+      <button id="btnExportIncidCSV" class="btn gloss" onclick="exportIncidCSV()">Incidencias CSV</button>
+      <button id="btnExportIncidPDF" class="btn gloss" onclick="exportIncidPDF()">Incidencias PDF</button>
+    </div>
+  </section>
+
+  <!-- Puentes grúa -->
+  <section id="page-gruas" class="hidden">
+    <h2>Puentes Grúa</h2>
+    <div id="gruasWrap"></div>
+  </section>
+
+  <!-- Otros equipos -->
+  <section id="page-otros" class="hidden">
+    <h2>Otros (auxiliares)</h2>
+    <div id="otrosWrap"></div>
+  </section>
+
+  <!-- Incidencias -->
+  <section id="page-incidencias" class="hidden">
+    <h2>Incidencias</h2>
+
+    <div class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.6rem">
+      <select id="iEquipo" title="Equipo"></select>
+      <select id="iTipo">
+        <option>Correctivo</option><option>Preventivo</option>
+        <option>Predictivo</option><option>Mejora</option>
+      </select>
+      <select id="iRes">
+        <option>Solucionado</option><option>Con restricciones</option><option>Parada</option>
+      </select>
+      <select id="iRep"><option>No</option><option>Sí</option></select>
+      <input  id="iRepTxt"  placeholder="Repuesto (si aplica)">
+      <input  id="iHParo"   type="number" step="0.1" value="0" placeholder="Horas parada">
+      <input  id="iHRep"    type="number" step="0.1" value="0" placeholder="Horas reparación">
+      <input  id="iInicio"  type="datetime-local" placeholder="Inicio">
+      <input  id="iFin"     type="datetime-local" placeholder="Fin">
+      <input  id="iReport"  placeholder="Reportante">
+      <input  id="iAsignado" placeholder="Asignado a">
+      <textarea id="iDesc" rows="2" placeholder="Descripción"></textarea>
+    </div>
+    <div class="actions" style="margin-top:.6rem">
+      <button id="btnAddIncid" class="btn gloss" onclick="addIncid()"><span class="dot"></span>Añadir incidencia</button>
+    </div>
+
+    <div style="margin:.8rem 0;display:flex;gap:.5rem;flex-wrap:wrap">
+      <input id="filtroIncid" placeholder="Buscar..." style="min-width:220px">
+      <select id="fEquipo"></select>
+      <select id="fTipo"></select>
+      <select id="fRes"></select>
+    </div>
+
+    <div id="incidTableWrap"></div>
+  </section>
+
+  <!-- Indicadores -->
+  <section id="page-indicadores" class="hidden">
+    <h2>Indicadores</h2>
+    <div class="kpi">MTTR: <b id="kpiMttrG">0</b> h</div>
+    <div class="kpi">MTBF: <b id="kpiMbfG">0</b> h</div>
+    <div class="kpi">Disponibilidad: <b id="kpiDispG">0</b> %</div>
+    <div class="kpi">OEE estimado: <b id="kpiOeeG">0</b> %</div>
+
+    <div class="card"><canvas id="chartMttr" height="120"></canvas></div>
+    <div class="card"><canvas id="chartMtbf" height="120"></canvas></div>
+    <div class="card"><canvas id="chartDisp" height="120"></canvas></div>
+    <div class="card"><canvas id="chartOee"  height="120"></canvas></div>
+
+    <div class="right" style="gap:.5rem">
+      <button id="btnExportKPIPCSV" class="btn gloss" onclick="exportKPIsCSV()">KPIs CSV</button>
+      <button id="btnExportKPIPDF"  class="btn gloss" onclick="exportKPIPDF()">KPIs PDF</button>
+    </div>
+  </section>
+
+  <!-- Órdenes de trabajo -->
+  <section id="page-ot" class="hidden">
+    <h2>OT</h2>
+
+    <div class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.6rem">
+      <select id="otEquipo" title="Equipo"></select>
+      <select id="otPri"><option>Alta</option><option>Media</option><option>Baja</option></select>
+      <input  id="otTitulo" placeholder="Título">
+      <input  id="otAsign"  placeholder="Asignado a">
+      <input  id="otDue"    type="date"  placeholder="Vence">
+      <input  id="otAdj"    placeholder="Adjunto (URL)">
+      <textarea id="otDesc" rows="2" placeholder="Descripción"></textarea>
+    </div>
+    <div class="actions" style="margin-top:.6rem">
+      <button id="btnAddOT" class="btn gloss" onclick="addOT()"><span class="dot"></span>Crear OT</button>
+      <button id="btnExportOTPDF" class="btn gloss" onclick="exportOTPDF()">Exportar OT PDF</button>
+    </div>
+
+    <div id="otTableWrap" style="margin-top:.6rem"></div>
+  </section>
+
+  <!-- Inventario -->
+  <section id="page-inventario" class="hidden">
+    <h2>Inventario</h2>
+
+    <div class="inv-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.6rem">
+      <input id="invNombre" placeholder="Nombre repuesto">
+      <input id="invRef"    placeholder="Referencia">
+      <input id="invStock"  type="number" min="0" step="1" placeholder="Stock">
+      <input id="invMin"    type="number" min="0" step="1" placeholder="Mínimo">
+    </div>
+    <div class="actions" style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+      <button id="btnAddInv" class="btn gloss" onclick="addInv()"><span class="dot"></span>Añadir repuesto</button>
+      <button id="btnExportInvCSV" class="btn gloss" onclick="exportInvCSV()">Exportar CSV</button>
+      <button id="btnExportInvQR"  class="btn gloss hidden" onclick="exportInvQRLabels()">Etiquetas QR</button>
+      <button id="invAlertWrap" class="btn gloss hidden" onclick="toggleInvAlerts()">Alertas</button>
+    </div>
+
+    <div class="card hidden" id="invAlerts" style="margin:.6rem 0"></div>
+
+    <div style="margin:.6rem 0">
+      <input id="invSearch" placeholder="Buscar repuesto..." oninput="renderInv()" style="min-width:240px">
+    </div>
+
+    <div id="invTableWrap"></div>
+  </section>
+
+  <!-- Dashboard TV -->
+  <section id="page-tv" class="hidden">
+    <h2>Dashboard TV</h2>
+    <div class="tv-card">
+      <div class="tv-title"><span class="dot" style="background:#ef4444"></span> Paradas <span class="tv-legend">(actualizado cada 10s)</span></div>
+      <div id="tvParados" class="tv-list"></div>
+    </div>
+    <div class="tv-card">
+      <div class="tv-title"><span class="dot" style="background:#f59e0b"></span> Restricciones</div>
+      <div id="tvRestr" class="tv-list"></div>
+    </div>
+    <div class="tv-card">
+      <div class="tv-title"><span class="dot" style="background:#60a5fa"></span> Stock bajo</div>
+      <div id="tvStock" class="tv-list"></div>
+    </div>
+  </section>
+
+  <!-- Detalle de equipo -->
+  <section id="page-equipo" class="hidden">
+    <div id="equipoDetail"></div>
+  </section>
+
+  <!-- Detalle de repuesto -->
+  <section id="page-repuesto" class="hidden">
+    <div id="repuestoDetail"></div>
+  </section>
+</main>
+
+<footer style="text-align:center;padding:2rem 1rem;color:#9aa7b4">© CDL MANTENIMIENTO </footer>
+
+<!-- Librerías -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+/* ========= CDL · CMMS v35 — JS limpio ========= */
+
+const API_BASE = "https://script.google.com/macros/s/AKfycbzxW6Q5Me2xdQQw7Nk_QBtRTVJTODxLD7EhiGciBoFCwZulaCYWR2TDabcVF1TBOPFt/exec";
+
+/* Utils */
+const byId = (id) => document.getElementById(id);
+const esc   = (s) => String(s || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+const fmt   = (n) => (Math.round((+n || 0) * 100) / 100).toFixed(2);
+const fmtDate = (d) => new Date(d).toLocaleString("es-ES", { timeZone: "Europe/Madrid" });
+const val   = (id) => byId(id).value;
+const setTxt = (id, v) => { const n = byId(id); if (n) n.textContent = v; };
+
+function show(id){ const n = byId(id); if (n) n.classList.remove("hidden"); }
+function hide(id){ const n = byId(id); if (n) n.classList.add("hidden"); }
+
+/* Ventanas emergentes seguras (iOS/Popup blockers) */
+function openPopupSafe(title="") {
+  const w = window.open("", "_blank", "noopener,noreferrer");
+  if(!w){ alert("La ventana emergente fue bloqueada por el navegador."); return null; }
+  try { w.opener = null; } catch(_) {}
+  if (title){
+    w.document.write("<!doctype html><meta charset='utf-8'><title>"+esc(title)+"</title>");
+    w.document.close();
+  }
+  return w;
+}
+
+/* Roles */
+function getCID(){
+  const KEY = "CDL_CID";
+  let id = localStorage.getItem(KEY);
+  if (!id) {
+    id = (crypto.randomUUID && crypto.randomUUID()) ||
+         ("cid_" + Date.now().toString(36) + Math.random().toString(36).slice(2));
+    localStorage.setItem(KEY, id);
+  }
+  return id;
+}
+const EMERGENCY_UNLOCK = false;
+
+const ROLE_MAP = {
+  "Administrador":"admin","Gerente":"gerente","Encargado":"encargado",
+  "Producción":"produccion","Tco.INT":"tcoint","Subcontrata":"subc","Invitado":"guest",
+  "RT":"rt","RT1.1":"rt","RT1.2":"rt","RT2.1":"rt","RT2.2":"rt","RT3.1":"rt","RT3.2":"rt"
+};
+
+let currentUser = JSON.parse(localStorage.getItem("CDL_USER") || '{"user":"invitado","rol":"Invitado","group":"guest"}');
+
+(function initUserFallback(){
+  try{
+    let u = JSON.parse(localStorage.getItem("CDL_USER") || "null");
+    if (!u) {
+      const cid = getCID();
+      u = { user: "inv-" + cid.slice(-6), rol: "Invitado", group: "guest" };
+      localStorage.setItem("CDL_USER", JSON.stringify(u));
+    }
+    const chip = byId("roleChip");
+    if (chip) chip.textContent = (u.rol || "Invitado") + " · " + getCID().slice(-6);
+    currentUser = u;
+  }catch(_){}
+})();
+
+window.setUser = function(u){
+  try{
+    window.currentUser = u;
+    localStorage.setItem("CDL_USER", JSON.stringify(u));
+    const chip = byId("roleChip");
+    if (chip) chip.textContent = (u.rol || u.user || "Usuario") + " · " + getCID().slice(-6);
+    applyRoleUI();
+  }catch(_){}
+};
+
+window.applyRoleUI = function(){
+  const g = EMERGENCY_UNLOCK ? "admin" : (JSON.parse(localStorage.getItem("CDL_USER") || "{}").group || "guest");
+
+  ["mIndic","mOT","mIncid","mInv","mGruas","mOtros","mTV"].forEach(id=>{
+    const el = byId(id);
+    if (el){ el.classList.remove("hidden"); el.style.display = ""; el.hidden = false; }
+  });
+
+  ["btnExportIncidCSV","btnExportIncidPDF","btnExportKPIPCSV","btnExportKPIPDF","btnExportInvCSV","btnExportOTPDF","btnExportInvQR"]
+  .forEach(id=>{
+    const el = byId(id);
+    if(!el) return;
+    const allowed = (g === "admin" || g === "gerente");
+    if (id === "btnExportInvQR" || id === "btnExportOTPDF") {
+      el.classList.toggle("hidden", !allowed);
+    } else {
+      el.classList.remove("hidden");
+      el.style.display = "";
+    }
+  });
+
+  const isGuest = (g === "guest" && !EMERGENCY_UNLOCK);
+  ["btnAddIncid","btnAddOT","btnExportInvQR","btnAddInv"].forEach(id=>{
+    const el = byId(id);
+    if (el) el.disabled = !!isGuest;
+  });
+};
+
+/* API */
+async function apiGet(q){ const r = await fetch(API_BASE + "?" + new URLSearchParams(q)); return r.json(); }
+async function apiPost(o){ const r = await fetch(API_BASE, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(o)}); return r.json(); }
+
+/* Auth */
+async function login(){
+  const user = byId("userSelect").value;
+  const pass = byId("userPass").value || "";
+  try{
+    const r = await apiPost({res:"auth", fn:"login", user, pass});
+    if(!r || !r.ok){
+      const code = (r && (r.code || r.error)) || "desconocido";
+      const MSG = {
+        badpass:"Usuario o contraseña incorrectos.",
+        nouser:"Usuario no encontrado.",
+        forbidden:"No tienes permiso para entrar.",
+        locked:"Cuenta bloqueada. Contacta con un administrador.",
+        rate:"Demasiados intentos. Inténtalo más tarde.",
+        desconocido:"Error de inicio de sesión."
+      };
+      alert(MSG[code] || ("Error login: " + code));
+      return;
+    }
+    const rawRol = r.rol || "Invitado";
+    const group  = ROLE_MAP[rawRol] || (rawRol.startsWith("RT") ? "rt" : "guest");
+    setUser({ user, rol: rawRol, group });
+    byId("userPanel").classList.add("hidden");
+    byId("userPass").value = "";
+  }catch(_){
+    alert("No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.");
+  }
+}
+function logout(){ setUser({ user:"invitado", rol:"Invitado", group:"guest" }); }
+async function changePwd(){
+  const user = byId("userSelect").value;
+  const old  = byId("oldPass").value || "";
+  const nu   = byId("newPass").value || "";
+  if(!old || !nu){ byId("pwdMsg").textContent = "Rellena ambas contraseñas."; return; }
+  const r = await apiPost({res:"auth", fn:"changepwd", user, old, nu});
+  byId("pwdMsg").textContent = r.ok ? "Contraseña cambiada." : "Error al cambiar (credenciales).";
+  if(r.ok){ byId("oldPass").value = ""; byId("newPass").value = ""; }
+}
+
+/* Menús (solo click) */
+const pagesBtn   = byId("pagesBtn");
+const userBtn    = byId("userBtn");
+const pagesPanel = byId("pagesPanel");
+const userPanel  = byId("userPanel");
+
+function setExpanded(btn, open){ if(btn) btn.setAttribute("aria-expanded", open ? "true" : "false"); }
+function openPanel(panelEl, btnEl){
+  if(panelEl) panelEl.classList.remove("hidden");
+  setExpanded(btnEl, true);
+  document.body.classList.add("menu-open");
+}
+function closePanel(panelEl, btnEl){
+  if(panelEl) panelEl.classList.add("hidden");
+  setExpanded(btnEl, false);
+  if (pagesPanel.classList.contains("hidden") && userPanel.classList.contains("hidden")){
+    document.body.classList.remove("menu-open");
+  }
+}
+function isOpen(panelEl){ return panelEl && !panelEl.classList.contains("hidden"); }
+function closeAllMenus(){ closePanel(pagesPanel, pagesBtn); closePanel(userPanel, userBtn); }
+
+if(!document.documentElement.dataset.menusBound){
+  document.documentElement.dataset.menusBound = "1";
+
+  pagesBtn?.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    closePanel(userPanel, userBtn);
+    isOpen(pagesPanel) ? closePanel(pagesPanel, pagesBtn) : openPanel(pagesPanel, pagesBtn);
+  });
+  userBtn?.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    closePanel(pagesPanel, pagesBtn);
+    isOpen(userPanel) ? closePanel(userPanel, userBtn) : openPanel(userPanel, userBtn);
+  });
+
+  pagesPanel?.addEventListener("click", (e)=> e.stopPropagation());
+  userPanel ?.addEventListener("click", (e)=> e.stopPropagation());
+
+  document.addEventListener("click", (e)=>{
+    const t = e.target;
+    const inside = (x, y)=> !!y && (y === x || y.contains(x));
+    const enPages = inside(t, pagesPanel) || inside(t, pagesBtn);
+    const enUser  = inside(t, userPanel)  || inside(t, userBtn);
+    if (!enPages && !enUser) closeAllMenus();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape") closeAllMenus();
+  });
+
+  [pagesBtn, userBtn].forEach((btn)=>{
+    btn?.setAttribute("role","button");
+    btn?.setAttribute("tabindex","0");
+    btn?.addEventListener("keydown", (e)=>{
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); btn.click(); }
+    });
+  });
+}
+
+/* Navegación */
+let CURRENT_PAGE = "equipos";
+function nav(id){
+  closeAllMenus();
+  CURRENT_PAGE = id;
+  ["equipos","gruas","otros","incidencias","indicadores","ot","inventario","tv","equipo","repuesto"]
+    .forEach(s => byId("page-" + s).classList.add("hidden"));
+  byId("page-" + id).classList.remove("hidden");
+
+  if (id === "equipos")     loadState();
+  if (id === "gruas")       renderSubGroup("Puentes Grúa","gruasWrap");
+  if (id === "otros")       renderSubGroup("Otros (auxiliares)","otrosWrap");
+  if (id === "incidencias") loadIncid();
+  if (id === "indicadores") loadIncid().then(()=>{ calcKPIs(); drawAllCharts(); });
+  if (id === "ot")          loadOT();
+  if (id === "inventario")  loadInv();
+  if (id === "tv")          initTV();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* Estado equipos */
+let STATE = [];
+function statusKey(s){ return s === "Parada" ? "stop" : (s === "Restricciones" ? "warn" : "ok"); }
+
+async function loadState(){
+  try{
+    const j = await apiGet({res:"state", fn:"list"});
+    if (j.ok && j.items.length){ STATE = j.items; renderState(); return; }
+    await apiPost({res:"state", fn:"seed"});
+    const k = await apiGet({res:"state", fn:"list"});
+    STATE = k.ok ? k.items : [];
+    renderState();
+  }catch(e){ console.error(e); }
+}
+function groupItems(items){
+  const by = {};
+  items.forEach(it => { (by[it.grupo] ??= []).push(it); });
+  return by;
+}
+function renderState(){
+  const groups = groupItems(STATE);
+  const wrap = byId("equiposWrap"); wrap.innerHTML = "";
+  for (const [g, items] of Object.entries(groups)){
+    if (g.startsWith("Puentes Grúa") || g === "Otros (auxiliares)") continue;
+    wrap.appendChild(groupBlock(g, items));
+  }
+  if (!byId("page-gruas").classList.contains("hidden")) renderSubGroup("Puentes Grúa", "gruasWrap");
+  if (!byId("page-otros").classList.contains("hidden")) renderSubGroup("Otros (auxiliares)", "otrosWrap");
+}
+function groupBlock(title, items){
+  const d = document.createElement("div");
+  d.innerHTML = `<h3 style="margin:10px 0;color:#0f172a">${esc(title)}</h3>`;
+  items.forEach(eq => d.appendChild(cardEquipo(eq)));
+  return d;
+}
+function renderSubGroup(match, target){
+  const wrap = byId(target); if (!wrap) return;
+  wrap.innerHTML = "";
+  const items = STATE.filter(x => match === "Otros (auxiliares)" ? x.grupo === match : x.grupo.startsWith(match));
+  const groups = groupItems(items);
+  for (const [g, arr] of Object.entries(groups)) wrap.appendChild(groupBlock(g, arr));
+}
+function cardEquipo(eq){
+  const safeName = JSON.stringify(eq.nombre).slice(1, -1);
+  const el = document.createElement("div"); el.className = "card";
+  el.innerHTML = `
+    <div style="display:flex;gap:.7rem;align-items:center;min-width:240px">
+      <span class="pilot ${"p-" + statusKey(eq.estado)}"></span>
+      <div>
+        <div class="name linkish" onclick="openEquipoByName('${safeName}')">
+          ${esc(eq.nombre)} <span class="qr-s" title="QR"></span>
+        </div>
+        <div class="sub">${esc(eq.grupo)}</div>
+      </div>
+    </div>
+    <div class="semaforo" data-name="${esc(eq.nombre)}">
+      <div class="opt ${statusKey(eq.estado)==="ok"?'active':''}" data-k="ok"><span class="led"></span>En marcha</div>
+      <div class="opt ${statusKey(eq.estado)==="warn"?'active':''}" data-k="warn"><span class="led"></span>Restricciones</div>
+      <div class="opt ${statusKey(eq.estado)==="stop"?'active':''}" data-k="stop"><span class="led"></span>Parada</div>
+    </div>
+    <div class="right">
+      <button class="btn gloss" onclick="estadoConIncid('${safeName}','Parada','programada')"><span class="dot"></span>Parada programada</button>
+      <button class="btn gloss btn-mail" onclick="accionParadaProlongada('${safeName}')"><span class="dot"></span>Parada prolongada</button>
+      <button class="btn gloss" onclick="openFicha('${safeName}')">Ficha</button>
+      <button class="btn gloss" onclick="estadoConIncid('${safeName}','Nueva')">Nueva incidencia</button>
+    </div>`;
+  setTimeout(()=>{
+    el.querySelectorAll(".semaforo .opt").forEach(o=>o.addEventListener("click", async (e)=>{
+      const name = el.querySelector(".semaforo").dataset.name;
+      const k = e.currentTarget.getAttribute("data-k");
+      const estado = k === "ok" ? "En marcha" : (k === "warn" ? "Restricciones" : "Parada");
+      await setEstado(name, estado);
+      el.querySelectorAll(".semaforo .opt").forEach(x=>x.classList.remove("active"));
+      e.currentTarget.classList.add("active");
+    }));
+  }, 0);
+  return el;
+}
+async function setEstado(name, estado){
+  if (currentUser.group === "guest"){ alert("Inicia sesión para modificar estados."); return; }
+  await apiPost({res:"state", fn:"set", name, estado, actor: currentUser.user});
+  const it = STATE.find(x => x.nombre === name); if (it) it.estado = estado;
+  renderState();
+}
+function estadoConIncid(name, estado, modo){
+  if (estado !== "Nueva"){ setEstado(name, estado === "Parada" && modo === "programada" ? "Parada" : estado); }
+  nav("incidencias");
+  setTimeout(()=>{
+    byId("iEquipo").value = name;
+    byId("iTipo").value   = (modo === "programada" ? "Preventivo" : "Correctivo");
+    byId("iRes").value    = (estado === "Restricciones" ? "Con restricciones" : (estado === "Nueva" ? "Solucionado" : "Parada"));
+    byId("iDesc").focus();
+  }, 120);
+}
+function openFicha(name){ openEquipoByName(name); }
+
+/* ========== INCIDENCIAS ========== */
+let INCIDS_ALL = [];
+let INCID_PAGE=1, INCID_PAGE_SIZE=10, INCID_SORT_KEY="fecha", INCID_SORT_DIR="desc";
+
+function resetIncidFilters(){
+  ["fEquipo","fTipo","fRes","filtroIncid"].forEach(id => { const el = byId(id); if (el) el.value = ""; });
+  renderIncidTable();
+}
+
+async function addIncid(){
+  if (currentUser.group === "guest"){ alert("Inicia sesión para registrar incidencias."); return; }
+  const btn = byId("btnAddIncid"); if (btn) btn.disabled = true;
+
+  const item = {
+    equipo: val("iEquipo"), tipo: val("iTipo"), res: val("iRes"),
+    rep: val("iRep"), repTxt: (val("iRepTxt") || "").trim(),
+    hParo: Number(val("iHParo") || 0) || 0, hRep: Number(val("iHRep") || 0) || 0,
+    inicio: val("iInicio") || "", fin: val("iFin") || "",
+    reportante: (val("iReport") || "").trim(), asignado: (val("iAsignado") || "").trim(),
+    adj: "", desc: (val("iDesc") || "").trim()
+  };
+
+  if (!item.equipo){ alert("Selecciona un equipo."); if (btn) btn.disabled = false; return; }
+
+  try{
+    const r = await apiPost({res:"incid", fn:"add", item, actor: currentUser.user});
+    if (!r?.ok) throw new Error("No se pudo guardar");
+    toast("Incidencia registrada");
+    ["iRepTxt","iHParo","iHRep","iInicio","iFin","iReport","iAsignado","iDesc"].forEach(id=>{
+      const el = byId(id); if (el) el.value = (id === "iHParo" || id === "iHRep") ? 0 : "";
+    });
+    byId("iRep").value = "No"; byId("iTipo").value = "Correctivo"; byId("iRes").value = "Solucionado";
+    await loadIncid(); await loadState();
+  }catch(err){
+    console.error(err); alert("Error al registrar la incidencia.");
+  }finally{
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function loadIncid(){
+  const st  = await apiGet({res:"state", fn:"list"});  STATE      = st.ok  ? st.items : [];
+  const inc = await apiGet({res:"incid", fn:"list"});  INCIDS_ALL = inc.ok ? inc.items : [];
+
+  byId("iEquipo").innerHTML = STATE.map(x => `<option>${esc(x.nombre)}</option>`).join("");
+  buildIncidFilters();
+
+  if (!byId("filtroIncid").dataset.bound){
+    byId("filtroIncid").addEventListener("input", renderIncidTable);
+    ["fEquipo","fTipo","fRes"].forEach(id => byId(id).addEventListener("change", renderIncidTable));
+    byId("filtroIncid").dataset.bound = "1";
+  }
+  renderIncidTable();
+}
+
+function renderIncidTable(){
+  const wrap = byId("incidTableWrap"); if (!wrap) return;
+
+  const q = (byId("filtroIncid").value || "").toLowerCase();
+  const fe = byId("fEquipo").value || "";
+  const ft = byId("fTipo").value   || "";
+  const fr = byId("fRes").value    || "";
+
+  const data = (INCIDS_ALL || []).filter(x=>{
+    const txt = (String(x.equipo||"")+String(x.tipo||"")+String(x.res||"")+String(x.desc||"")).toLowerCase();
+    return (!q || txt.includes(q)) &&
+           (!fe || x.equipo===fe) &&
+           (!ft || x.tipo===ft) &&
+           (!fr || x.res===fr);
+  });
+
+  const rows = data.slice(0, Math.min(data.length, 300)).map(x=>`
+    <tr>
+      <td class="nowrap">${fmtDate(x.created)}</td>
+      <td>${esc(x.equipo || "")}</td>
+      <td>${esc(x.tipo || "")}</td>
+      <td>${esc(x.res  || "")}</td>
+      <td>${esc(x.desc || "")}</td>
+      <td class="num">${fmt(x.hParo || 0)}</td>
+      <td class="num">${fmt(x.hRep  || 0)}</td>
+    </tr>`).join("");
+
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada</th><th>Reparación</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="7">Sin incidencias</td></tr>'}</tbody>
+    </table>`;
+}
+
+function buildIncidFilters(){
+  const equipos = [...new Set(INCIDS_ALL.map(x => String(x.equipo || "").trim()))].sort((a,b)=>a.localeCompare(b,"es"));
+  const tipos   = [...new Set(["Correctivo","Preventivo","Predictivo","Mejora", ...INCIDS_ALL.map(x=>String(x.tipo||"").trim())])].sort((a,b)=>a.localeCompare(b,"es"));
+  const resul   = [...new Set(["Solucionado","Con restricciones","Parada", ...INCIDS_ALL.map(x=>String(x.res||"").trim())])].sort((a,b)=>a.localeCompare(b,"es"));
+
+  byId("fEquipo").innerHTML = `<option value="">Equipo: todos</option>` + equipos.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  byId("fTipo").innerHTML   = `<option value="">Tipo: todos</option>`   + tipos.map(n => `<option>${esc(n)}</option>`).join("");
+  byId("fRes").innerHTML    = `<option value="">Resultado: todos</option>` + resul.map(n => `<option>${esc(n)}</option>`).join("");
+}
+
+/* ========== KPIs + CHARTS ========== */
+function groupByWeek(arr){
+  const g = {};
+  for (const x of arr){
+    const d = new Date(x.created);
+    const a = new Date(Date.UTC(d.getFullYear(), 0, 1));
+    const n = Math.floor((d - a) / 86400000) + a.getUTCDay();
+    const w = `${d.getFullYear()}-W${Math.floor(n/7) + 1}`;
+    (g[w] ??= []).push(x);
+  }
+  return g;
+}
+function kpiMTTR(list){ const s = list.reduce((p,x)=> p + (+x.hRep  || 0), 0); const n = list.length || 1; return s / n; }
+function kpiMTBF(list){ const horas = 4 * 30 * 24; const fallas = list.length || 1; return horas / fallas; }
+function kpiDisp(list){ const prodH = 120; const perd = list.reduce((p,x)=> p + (+x.hParo || 0), 0); return Math.max(0, (prodH - perd) / prodH); }
+function kpiOEE(disp){ return disp * 0.9 * 0.98; }
+
+function calcKPIs(){
+  const mttr = kpiMTTR(INCIDS_ALL), mtbf = kpiMTBF(INCIDS_ALL), disp = kpiDisp(INCIDS_ALL), oee = kpiOEE(disp);
+  setTxt("kpiMttrG", fmt(mttr)); setTxt("kpiMbfG", fmt(mtbf)); setTxt("kpiDispG", fmt(disp * 100)); setTxt("kpiOeeG", fmt(oee * 100));
+}
+
+let charts = {};
+function draw(id, labels, data, label){
+  const ctx = byId(id).getContext("2d");
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets: [{ label, borderWidth: 2, pointRadius: 0, data }] },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
+}
+function drawAllCharts(){
+  const weeks = groupByWeek(INCIDS_ALL);
+  const labels = Object.keys(weeks).sort((a,b)=>{
+    const [ya, wa] = a.split("-W").map(Number);
+    const [yb, wb] = b.split("-W").map(Number);
+    return ya === yb ? (wa - wb) : (ya - yb);
+  });
+  draw("chartMttr", labels, labels.map(w => kpiMTTR(weeks[w])), "MTTR");
+  draw("chartMtbf", labels, labels.map(w => kpiMTBF(weeks[w])), "MTBF");
+  draw("chartDisp", labels, labels.map(w => kpiDisp(weeks[w]) * 100), "Disponibilidad %");
+  draw("chartOee",  labels, labels.map(w => kpiOEE(kpiDisp(weeks[w])) * 100), "OEE %");
+}
+
+/* ========== ÓRDENES DE TRABAJO ========== */
+let OTS = [];
+let OT_PAGE=1, OT_PAGE_SIZE=10, OT_SORT_KEY="fecha", OT_SORT_DIR="desc";
+
+async function loadOT(){
+  const st = await apiGet({res:"state", fn:"list"}); STATE = st.ok ? st.items : [];
+  const ot = await apiGet({res:"ot", fn:"list"});     OTS   = ot.ok ? ot.items : [];
+  byId("otEquipo").innerHTML = STATE.map(x => `<option>${esc(x.nombre)}</option>`).join("");
+  renderOT();
+}
+
+function setOTSort(key){
+  if (OT_SORT_KEY === key){ OT_SORT_DIR = (OT_SORT_DIR === "asc" ? "desc" : "asc"); }
+  else { OT_SORT_KEY = key; OT_SORT_DIR = (key === "fecha" ? "desc" : "asc"); }
+  renderOT();
+}
+function setOTPage(n){ OT_PAGE = Math.max(1, n); renderOT(); }
+function setOTPageSize(n){ OT_PAGE_SIZE = +n || 10; OT_PAGE = 1; renderOT(); }
+
+function renderOT(){
+  let arr = [...OTS];
+  const dir = (OT_SORT_DIR === "asc" ? 1 : -1);
+  arr.sort((a,b)=>{
+    let A,B;
+    switch(OT_SORT_KEY){
+      case "fecha":     A = new Date(a.created).getTime(); B = new Date(b.created).getTime(); break;
+      case "titulo":    A = a.titulo || ""; B = b.titulo || ""; break;
+      case "prioridad": A = a.prioridad || ""; B = b.prioridad || ""; break;
+      case "asignado":  A = a.asignado  || ""; B = b.asignado  || ""; break;
+      case "vence":     A = a.vencimiento || ""; B = b.vencimiento || ""; break;
+      case "estado":    A = a.estado || ""; B = b.estado || ""; break;
+      default:          A = 0; B = 0;
+    }
+    if (typeof A === "string" && typeof B === "string") return A.localeCompare(B, "es") * dir;
+    return (A === B ? 0 : (A > B ? 1 : -1)) * dir;
+  });
+
+  const total = arr.length;
+  const pages = Math.max(1, Math.ceil(total / OT_PAGE_SIZE));
+  OT_PAGE = Math.min(OT_PAGE, pages);
+  const start = (OT_PAGE - 1) * OT_PAGE_SIZE;
+  arr = arr.slice(start, start + OT_PAGE_SIZE);
+
+  const rows = arr.map(o=>`
+    <tr>
+      <td class="nowrap">${fmtDate(o.created)}</td>
+      <td><b>${esc(o.titulo || "")}</b><div class="sub">${esc(o.equipo)}</div></td>
+      <td>${esc(o.prioridad || "")}</td>
+      <td>${esc(o.asignado  || "")}</td>
+      <td class="nowrap">${esc(o.vencimiento || "")}</td>
+      <td>${esc(o.estado || "")}</td>
+    </tr>`).join("");
+
+  byId("otTableWrap").innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th><button class="page-btn" onclick="setOTSort('fecha')">Fecha ${OT_SORT_KEY==='fecha'?(OT_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button></th>
+          <th><button class="page-btn" onclick="setOTSort('titulo')">OT ${OT_SORT_KEY==='titulo'?(OT_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button></th>
+          <th><button class="page-btn" onclick="setOTSort('prioridad')">Prioridad ${OT_SORT_KEY==='prioridad'?(OT_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button></th>
+          <th><button class="page-btn" onclick="setOTSort('asignado')">Asignado ${OT_SORT_KEY==='asignado'?(OT_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button></th>
+          <th><button class="page-btn" onclick="setOTSort('vence')">Vence ${OT_SORT_KEY==='vence'?(OT_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button></th>
+          <th><button class="page-btn" onclick="setOTSort('estado')">Estado ${OT_SORT_KEY==='estado'?(OT_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button></th>
+        </tr>
+      </thead>
+      <tbody>${rows || '<tr><td colspan="6">Sin órdenes de trabajo</td></tr>'}</tbody>
+    </table>
+    <div class="pager">
+      <button class="page-btn" onclick="setOTPage(${OT_PAGE-1})" ${OT_PAGE<=1?'disabled':''}>‹</button>
+      <span> Página ${OT_PAGE} </span>
+      <button class="page-btn" onclick="setOTPage(${OT_PAGE+1})" ${(OT_PAGE*OT_PAGE_SIZE)>=total?'disabled':''}>›</button>
+    </div>`;
+}
+
+/* ========== INVENTARIO ========== */
+let INV = [];
+let INV_PAGE=1, INV_PAGE_SIZE=10, INV_SORT_KEY="ref", INV_SORT_DIR="asc";
+const QR_SEL = new Set();
+
+async function loadInv(){
+  const j = await apiGet({res:"inv", fn:"list"});
+  INV = j.ok ? j.items : [];
+  renderInv();
+  renderInvAlerts();
+}
+function toggleInvAlerts(){ byId("invAlerts").classList.toggle("hidden"); }
+
+function syncInvHeader(){
+  const hdr = byId("invQrAll");
+  if(!hdr) return;
+  const checks = [...document.querySelectorAll("#invTableWrap .qrck")];
+  if(!checks.length){ hdr.checked = false; hdr.indeterminate = false; return; }
+  const refsVisible = checks.map(c => (c.closest("tr")?.querySelector("b")?.textContent || "").toUpperCase());
+  const allOn  = refsVisible.every(ref => QR_SEL.has(ref));
+  const noneOn = refsVisible.every(ref => !QR_SEL.has(ref));
+  hdr.checked = allOn;
+  hdr.indeterminate = !allOn && !noneOn;
+}
+function renderInvAlerts(){
+  const badge = byId("invAlertWrap");
+  const box   = byId("invAlerts");
+  if(!badge || !box) return;
+  const lows = (INV || []).filter(x => (+x.stock || 0) <= (+x.minimo || 0));
+  if(!lows.length){
+    badge.classList.add("hidden"); badge.textContent = "Alertas"; box.innerHTML = ""; return;
+  }
+  badge.classList.remove("hidden");
+  badge.textContent = `Alertas (${lows.length})`;
+  box.innerHTML = lows.map(x => `
+    <div class="badge-chip badge-low" style="display:inline-flex;margin:4px 6px 0 0">
+      <b style="margin-right:.35rem">${esc(String(x.ref || "").toUpperCase())}</b> ${esc(x.nombre || "")}
+      &nbsp;·&nbsp;<span>Stock: ${+x.stock || 0}/${+x.minimo || 0}</span>
+    </div>`).join("");
+}
+function setInvSort(key){
+  if (INV_SORT_KEY === key){ INV_SORT_DIR = (INV_SORT_DIR === "asc" ? "desc" : "asc"); }
+  else { INV_SORT_KEY = key; INV_SORT_DIR = "asc"; }
+  renderInv();
+}
+function setInvPage(n){ INV_PAGE = Math.max(1, n); renderInv(); }
+function setInvPageSize(n){ INV_PAGE_SIZE = +n || 10; INV_PAGE = 1; renderInv(); }
+
+function renderInv(){
+  const q = (byId("invSearch").value || "").toLowerCase();
+  let arr = INV.filter(x => (String(x.nombre || "") + String(x.ref || "")).toLowerCase().includes(q));
+
+  const dir = (INV_SORT_DIR === "asc" ? 1 : -1);
+  arr.sort((a,b)=>{
+    let A,B;
+    switch(INV_SORT_KEY){
+      case "ref":    A = a.ref || "";     B = b.ref || ""; break;
+      case "nombre": A = a.nombre || "";  B = b.nombre || ""; break;
+      case "stock":  A = +a.stock || 0;   B = +b.stock || 0; break;
+      case "minimo": A = +a.minimo || 0;  B = +b.minimo || 0; break;
+      default:       A = 0;               B = 0;
+    }
+    if (typeof A === "string" && typeof B === "string") return A.localeCompare(B,"es") * dir;
+    return (A === B ? 0 : (A > B ? 1 : -1)) * dir;
+  });
+
+  const total = arr.length;
+  const pages = Math.max(1, Math.ceil(total / INV_PAGE_SIZE));
+  INV_PAGE = Math.min(INV_PAGE, pages);
+  const start = (INV_PAGE - 1) * INV_PAGE_SIZE;
+  arr = arr.slice(start, start + INV_PAGE_SIZE);
+
+  const rows = arr.map(x=>{
+    const low = (+x.stock || 0) <= (+x.minimo || 0);
+    const refRaw = String(x.ref || "").toUpperCase();
+    const refEsc = JSON.stringify(refRaw).slice(1, -1);
+    const checked = QR_SEL.has(refRaw) ? "checked" : "";
+    return `<tr class="${low ? "row-low" : ""}">
+      <td class="num" style="text-align:center;width:54px">
+        <input class="qrck" type="checkbox" ${checked}
+          aria-label="Seleccionar ${esc(refRaw)}"
+          onchange="(this.checked?QR_SEL.add('${refEsc}'):QR_SEL.delete('${refEsc}')); syncInvHeader()">
+      </td>
+      <td>
+        <b>${esc(refRaw)}</b> <span class="qr-s" title="QR" onclick="openRepuestoByRef('${refEsc}')"></span>
+        <div class="sub">${esc(x.nombre || "")}</div>
+        ${low ? '<div class="badge-low" style="display:inline-flex;gap:.35rem;padding:.18rem .5rem;border-radius:999px;font-weight:800">Bajo mínimo</div>' : ''}
+      </td>
+      <td class="num"><span class="linkish" tabindex="0" onclick="editStock('${refEsc}',${+x.stock || 0})">${+x.stock || 0}</span></td>
+      <td class="num">${+x.minimo || 0}</td>
+      <td>
+        <button class="btn gloss" onclick="delta('${refEsc}',-1)">–1</button>
+        <button class="btn gloss" onclick="delta('${refEsc}',+1)">+1</button>
+        <button class="btn gloss" onclick="openRepuestoByRef('${refEsc}')">QR</button>
+      </td>
+    </tr>`;
+  }).join("");
+
+  const th = (label,key)=>`<button class="page-btn" onclick="setInvSort('${key}')">${label} ${INV_SORT_KEY===key?(INV_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button>`;
+
+  byId("invTableWrap").innerHTML = `
+    <table><thead><tr>
+      <th style="width:54px;text-align:center">
+        <input id="invQrAll" type="checkbox" aria-label="Seleccionar visibles"
+          onchange="
+            document.querySelectorAll('#invTableWrap .qrck').forEach(c=>{
+              c.checked = byId('invQrAll').checked;
+              const ref = (c.closest('tr')?.querySelector('b')||{}).textContent || '';
+              if(c.checked) QR_SEL.add(ref.toUpperCase()); else QR_SEL.delete(ref.toUpperCase());
+            });
+            syncInvHeader();
+          ">
+      </th>
+      <th>${th("Repuesto","ref")}</th>
+      <th>${th("Stock","stock")}</th>
+      <th>${th("Mínimo","minimo")}</th>
+      <th>Acciones</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    <div class="pager">
+      <button class="page-btn" onclick="setInvPage(${INV_PAGE-1})" ${INV_PAGE<=1?'disabled':''}>‹</button>
+      <span> Página ${INV_PAGE} </span>
+      <button class="page-btn" onclick="setInvPage(${INV_PAGE+1})" ${(INV_PAGE*INV_PAGE_SIZE)>=total?'disabled':''}>›</button>
+      <label> Filas
+        <select class="page-btn" onchange="setInvPageSize(this.value)">
+          <option ${INV_PAGE_SIZE==10?'selected':''}>10</option>
+          <option ${INV_PAGE_SIZE==25?'selected':''}>25</option>
+          <option ${INV_PAGE_SIZE==50?'selected':''}>50</option>
+        </select>
+      </label>
+    </div>`;
+
+  renderInvAlerts();
+  syncInvHeader();
+}
+async function addInv(){
+  if (currentUser.group === "guest"){ alert("Inicia sesión para añadir repuestos."); return; }
+  const nombre = (val("invNombre") || "").trim();
+  const ref    = (val("invRef")    || "").trim().toUpperCase();
+  const stock  = Number(val("invStock"));
+  const minimo = Number(val("invMin"));
+  if (!ref || !nombre || !Number.isFinite(stock) || stock < 0 || !Number.isFinite(minimo) || minimo < 0){
+    alert("Revisa los campos."); return;
+  }
+  await apiPost({res:"inv", fn:"add", item:{nombre, ref, stock:Math.floor(stock), minimo:Math.floor(minimo)}, actor: currentUser.user});
+  toast("Repuesto añadido");
+  ["invNombre","invRef","invStock","invMin"].forEach(id => byId(id).value = "");   
+  await loadInv();
+}
+async function delta(ref,d){
+  if (currentUser.group === "guest"){ alert("Inicia sesión para modificar stock."); return; }
+  await apiPost({res:"inv", fn:"delta", ref, delta:+d || 0, actor: currentUser.user});
+  await loadInv();
+}
+async function editStock(ref,cur){
+  if (currentUser.group === "guest"){ alert("Inicia sesión para modificar stock."); return; }
+  const nv = prompt("Nuevo stock para " + ref, cur); if (nv === null) return;
+  const num = parseInt(nv, 10); if (!Number.isFinite(num) || num < 0){ alert("Valor inválido"); return; }
+  const it = INV.find(x => String(x.ref).toUpperCase() === String(ref).toUpperCase()); if (!it) return;
+  const change = num - (+it.stock || 0); if (!change) return;
+  await apiPost({res:"inv", fn:"delta", ref, delta: change, actor: currentUser.user});
+  await loadInv();
+}
+
+/* ========== DASHBOARD TV ========== */
+let TV_TIMER = null;
+async function loadTVOnce(){
+  const st  = await apiGet({res:"state", fn:"list"}); STATE = st.ok ? st.items : [];
+  const inv = await apiGet({res:"inv", fn:"list"});   INV   = inv.ok ? inv.items : [];
+  renderTV();
+}
+function renderTV(){
+  const par = STATE.filter(x => x.estado === "Parada");
+  const res = STATE.filter(x => x.estado === "Restricciones");
+  const low = INV.filter(x => (+x.stock) <= (+x.minimo));
+  byId("tvParados").innerHTML = par.length ? par.map(x => `<div class="tv-item stop">PARADA — ${esc(x.nombre)}</div>`).join("") : `<div class="tv-item">Sin paradas</div>`;
+  byId("tvRestr").innerHTML   = res.length ? res.map(x => `<div class="tv-item warn">RESTRICCIONES — ${esc(x.nombre)}</div>`).join("") : `<div class="tv-item">Sin restricciones</div>`;
+  byId("tvStock").innerHTML   = low.length ? low.map(x => `<div class="tv-item stock">BAJO MÍNIMO — ${esc(x.ref)} · ${esc(x.nombre)} (${x.stock}/${x.minimo})</div>`).join("") : `<div class="tv-item">Stock correcto</div>`;
+}
+function initTV(){
+  loadTVOnce();
+  if (TV_TIMER) clearInterval(TV_TIMER);
+  TV_TIMER = setInterval(loadTVOnce, 10000);
+}
+
+/* ========== DETALLES (QR / routing) ========== */
+function slugify(s){
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+function baseURL(){ return location.origin + location.pathname; }
+
+function ensureSectionsHidden(){
+  const ids = ["equipos","gruas","otros","incidencias","indicadores","ot","inventario","tv","equipo","repuesto"];
+  ids.forEach((s)=>{
+    const el = byId("page-" + s);
+    if (el) el.classList.add("hidden");
+  });
+}
+function openEquipoByName(name){
+  const slug = slugify(name);
+  location.hash = `#/equipo/${slug}`;
+  renderEquipoBySlug(slug);
+}
+function openRepuestoByRef(ref){
+  const code = encodeURIComponent(String(ref || "").toUpperCase());
+  location.hash = `#/repuesto/${code}`;
+  renderRepuestoByRef(code);
+}
+
+function renderEquipoBySlug(slug){
+  const eq = STATE.find(x => slugify(x.nombre) === slug);
+  ensureSectionsHidden();
+  const host = byId("page-equipo"); host.classList.remove("hidden");
+  if (!eq){ byId("equipoDetail").innerHTML = `<div class="kpi">Equipo no encontrado.</div>`; return; }
+  const inc = INCIDS_ALL.filter(i => i.equipo === eq.nombre).sort((a,b)=> new Date(b.created) - new Date(a.created));
+  const qrText = `${baseURL()}#/equipo/${slug}`;
+  const htmlInc = inc.length ? inc.map(i =>
+    `<tr><td class="nowrap">${fmtDate(i.created)}</td><td>${esc(i.tipo||"")}</td><td>${esc(i.res||"")}</td><td>${esc(i.desc||"")}</td><td class="num">${fmt(i.hParo||0)}</td><td class="num">${fmt(i.hRep||0)}</td></tr>`
+  ).join("") : `<tr><td colspan="6">Sin incidencias registradas.</td></tr>`;
+  const safeTitle = JSON.stringify(String(eq.nombre || "")).slice(1,-1);
+  byId("equipoDetail").innerHTML = `
+    <div class="kpi">
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <div id="eqQR" style="width:160px;height:160px;border:1px dashed #2a3442;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#0f141c"></div>
+        <div>
+          <h2 style="margin:.2rem 0">${esc(eq.nombre)}</h2>
+          <div class="sub">${esc(eq.grupo)}</div>
+          <div style="margin-top:.5rem"><code>${qrText}</code></div>
+          <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn gloss" onclick="printQR('eqQR','${safeTitle}')">Imprimir etiqueta</button>
+            <button class="btn gloss" onclick="nav('equipos')">Volver</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="kpi" style="margin-top:12px">
+      <h3>Historial de incidencias — ${esc(eq.nombre)}</h3>
+      <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada</th><th>Reparación</th></tr></thead><tbody>${htmlInc}</tbody></table>
+    </div>`;
+  new QRCode(byId("eqQR"), { text: qrText, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.M });
+}
+
+function renderRepuestoByRef(code){
+  const ref = decodeURIComponent(code).toUpperCase();
+  const it  = INV.find(x => String(x.ref).toUpperCase() === ref);
+  ensureSectionsHidden();
+  const host = byId("page-repuesto"); host.classList.remove("hidden");
+  if (!it){ byId("repuestoDetail").innerHTML = `<div class="kpi">Repuesto no encontrado.</div>`; return; }
+  const qrText = `${baseURL()}#/repuesto/${encodeURIComponent(ref)}`;
+  const safeRefTitle = JSON.stringify("REP-" + ref).slice(1, -1);
+  byId("repuestoDetail").innerHTML = `
+    <div class="kpi">
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <div id="repQR" style="width:160px;height:160px;border:1px dashed #2a3442;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#0f141c"></div>
+        <div>
+          <h2 style="margin:.2rem 0">${esc(it.nombre || "")}</h2>
+          <div class="sub"><b>Ref:</b> ${esc(ref)} · <b>Stock:</b> ${+it.stock || 0} · <b>Mínimo:</b> ${+it.minimo || 0}</div>
+          <div style="margin-top:.5rem"><code>${qrText}</code></div>
+          <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn gloss" onclick="printQR('repQR','${safeRefTitle}')">Imprimir etiqueta</button>
+            <button class="btn gloss" onclick="nav('inventario')">Volver</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  new QRCode(byId("repQR"), { text: qrText, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.M });
+}
+
+/* ========== EXPORTS / IMPRESIÓN (usa openPopupSafe) ========== */
+function downloadText(filename, text, mime="text/plain"){
+  const blob = new Blob([text], { type: mime + ";charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function toCSVCell(s){ const v = (s === undefined || s === null) ? "" : s; return '"' + String(v).replace(/"/g,'""') + '"'; }
+
+/* Inventario CSV */
+function exportInvCSV(){
+  const q = (byId("invSearch").value || "").toLowerCase();
+  let arr = INV.filter(x => (String(x.nombre || "") + String(x.ref || "")).toLowerCase().includes(q));
+  const dir = (INV_SORT_DIR === "asc" ? 1 : -1);
+  arr.sort((a,b)=>{
+    let A,B;
+    switch(INV_SORT_KEY){
+      case "ref":    A = a.ref || "";     B = b.ref || ""; break;
+      case "nombre": A = a.nombre || "";  B = b.nombre || ""; break;
+      case "stock":  A = +a.stock || 0;   B = +b.stock || 0; break;
+      case "minimo": A = +a.minimo || 0;  B = +b.minimo || 0; break;
+      default:       A = 0;               B = 0;
+    }
+    if (typeof A === "string" && typeof B === "string") return A.localeCompare(B,"es") * dir;
+    return (A === B ? 0 : (A > B ? 1 : -1)) * dir;
+  });
+  if (!arr.length){ alert("No hay resultados para exportar."); return; }
+  const cols = ["ref","nombre","stock","minimo"];
+  const header = cols.join(",");
+  const lines = arr.map(x => [x.ref, x.nombre, x.stock, x.minimo].map(toCSVCell).join(","));
+  downloadText("inventario.csv", header + "\n" + lines.join("\n"), "text/csv");
+}
+
+/* Incidencias CSV */
+function exportIncidCSV(){
+  const q = (byId("filtroIncid").value || "").toLowerCase();
+  const fe = byId("fEquipo").value || "";
+  const ft = byId("fTipo").value   || "";
+  const fr = byId("fRes").value    || "";
+  const data = (INCIDS_ALL || []).filter(x=>{
+    const txt = (String(x.equipo||"")+String(x.tipo||"")+String(x.res||"")+String(x.desc||"")).toLowerCase();
+    return (!q || txt.includes(q)) && (!fe || x.equipo===fe) && (!ft || x.tipo===ft) && (!fr || x.res===fr);
+  });
+  const header = "fecha,equipo,tipo,resultado,descripcion,horas_paro,horas_reparacion";
+  const rows = data.map(x => [
+    fmtDate(x.created), x.equipo||"", x.tipo||"", x.res||"", x.desc||"", fmt(x.hParo||0), fmt(x.hRep||0)
+  ].map(toCSVCell).join(","));
+  if (!rows.length){ alert("Sin datos para exportar."); return; }
+  downloadText("incidencias.csv", header + "\n" + rows.join("\n"), "text/csv");
+}
+
+/* KPIs CSV (resumen + semanal) */
+function exportKPIsCSV(){
+  const weeks = groupByWeek(INCIDS_ALL);
+  const labels = Object.keys(weeks).sort((a,b)=>{
+    const [ya, wa] = a.split("-W").map(Number);
+    const [yb, wb] = b.split("-W").map(Number);
+    return ya === yb ? (wa - wb) : (ya - yb);
+  });
+  const header = "semana,mttr,mtbf,disp_pct,oee_pct";
+  const rows = labels.map(w => {
+    const d = weeks[w]; const disp = kpiDisp(d);
+    return [w, fmt(kpiMTTR(d)), fmt(kpiMTBF(d)), fmt(disp*100), fmt(kpiOEE(disp)*100)].join(",");
+  });
+  const overall = (()=>{ const disp = kpiDisp(INCIDS_ALL); return ["TOTAL", fmt(kpiMTTR(INCIDS_ALL)), fmt(kpiMTBF(INCIDS_ALL)), fmt(disp*100), fmt(kpiOEE(disp)*100)].join(","); })();
+  downloadText("kpis.csv", header + "\n" + rows.join("\n") + "\n" + overall, "text/csv");
+}
+
+/* Print-friendly helpers (PDF vía diálogo de imprimir) */
+function openPrintDoc(title, htmlBody){
+  const w = openPopupSafe(title || "Export");
+  if (!w) return;
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title||"Export")}</title>
+  <style>
+    body{font-family:Inter,system-ui,sans-serif;margin:24px;color:#111}
+    h1{margin:0 0 16px 0;font-size:20px}
+    table{border-collapse:collapse;width:100%}
+    th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}
+    th{background:#f3f4f6}
+    .mt{margin-top:12px}
+    @media print { .no-print{display:none} }
+  </style></head><body>
+  ${htmlBody}
+  <div class="no-print" style="margin-top:16px"><button onclick="window.print()">Imprimir</button></div>
+  </body></html>`);
+  w.document.close();
+  w.focus();
+}
+
+/* Incidencias PDF (print) */
+function exportIncidPDF(){
+  const q = (byId("filtroIncid").value || "").toLowerCase();
+  const fe = byId("fEquipo").value || "";
+  const ft = byId("fTipo").value   || "";
+  const fr = byId("fRes").value    || "";
+  const data = (INCIDS_ALL || []).filter(x=>{
+    const txt = (String(x.equipo||"")+String(x.tipo||"")+String(x.res||"")+String(x.desc||"")).toLowerCase();
+    return (!q || txt.includes(q)) && (!fe || x.equipo===fe) && (!ft || x.tipo===ft) && (!fr || x.res===fr);
+  });
+  const rows = data.map(x=>`<tr>
+    <td>${esc(fmtDate(x.created))}</td><td>${esc(x.equipo||"")}</td><td>${esc(x.tipo||"")}</td>
+    <td>${esc(x.res||"")}</td><td>${esc(x.desc||"")}</td><td style="text-align:right">${fmt(x.hParo||0)}</td><td style="text-align:right">${fmt(x.hRep||0)}</td></tr>`).join("");
+  openPrintDoc("Incidencias", `<h1>Incidencias</h1>
+  <table><thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada</th><th>Reparación</th></tr></thead>
+  <tbody>${rows || '<tr><td colspan="7">Sin datos</td></tr>'}</tbody></table>`);
+}
+
+/* KPIs PDF (print) */
+function exportKPIPDF(){
+  const disp = kpiDisp(INCIDS_ALL), oee = kpiOEE(disp);
+  const rows = `
+    <tr><td>MTTR</td><td style="text-align:right">${fmt(kpiMTTR(INCIDS_ALL))} h</td></tr>
+    <tr><td>MTBF</td><td style="text-align:right">${fmt(kpiMTBF(INCIDS_ALL))} h</td></tr>
+    <tr><td>Disponibilidad</td><td style="text-align:right">${fmt(disp*100)} %</td></tr>
+    <tr><td>OEE (estimado)</td><td style="text-align:right">${fmt(oee*100)} %</td></tr>`;
+  openPrintDoc("KPIs", `<h1>KPIs</h1><table><tbody>${rows}</tbody></table>
+  <p class="mt">* OEE estimado: disponibilidad × rendimiento 0.9 × calidad 0.98</p>`);
+}
+
+/* OT: crear y exportar */
+async function addOT(){
+  if (currentUser.group === "guest"){ alert("Inicia sesión para crear OT."); return; }
+  const item = {
+    equipo: val("otEquipo"),
+    prioridad: val("otPri"),
+    titulo: (val("otTitulo") || "").trim(),
+    asignado: (val("otAsign") || "").trim(),
+    vencimiento: val("otDue") || "",
+    adjunto: (val("otAdj") || "").trim(),
+    desc: (val("otDesc") || "").trim()
+  };
+  if (!item.titulo || !item.equipo){ alert("Faltan campos obligatorios (Equipo y Título)."); return; }
+  const r = await apiPost({res:"ot", fn:"add", item, actor: currentUser.user});
+  if (!r?.ok){ alert("No se pudo crear la OT."); return; }
+  toast("OT creada");
+  ["otTitulo","otAsign","otDue","otAdj","otDesc"].forEach(id=> byId(id).value = "");
+  await loadOT();
+}
+function exportOTPDF(){
+  const rows = (OTS || []).map(o=>`
+    <tr>
+      <td>${esc(fmtDate(o.created))}</td>
+      <td>${esc(o.titulo||"")}</td>
+      <td>${esc(o.equipo||"")}</td>
+      <td>${esc(o.prioridad||"")}</td>
+      <td>${esc(o.asignado||"")}</td>
+      <td>${esc(o.vencimiento||"")}</td>
+      <td>${esc(o.estado||"")}</td>
+    </tr>`).join("");
+  openPrintDoc("Órdenes de trabajo", `<h1>Órdenes de trabajo</h1>
+  <table><thead><tr><th>Fecha</th><th>OT</th><th>Equipo</th><th>Prioridad</th><th>Asignado</th><th>Vence</th><th>Estado</th></tr></thead>
+  <tbody>${rows || '<tr><td colspan="7">Sin datos</td></tr>'}</tbody></table>`);
+}
+
+/* Etiquetas QR (selección visible) */
+function exportInvQRLabels(){
+  const refs = [...QR_SEL]; if (!refs.length){ alert("No hay referencias seleccionadas."); return; }
+  const w = openPopupSafe("Etiquetas QR inventario"); if (!w) return;
+  const body = `
+    <h1 style="font:700 18px Inter,system-ui,sans-serif;margin:12px 0">Etiquetas QR — Inventario</h1>
+    <div id="qrs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px"></div>
+    <div class="no-print" style="margin-top:12px"><button onclick="print()">Imprimir</button></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+    <script>
+      const base = ${JSON.stringify(baseURL())};
+      const refs = ${JSON.stringify(refs)};
+      const host = document.getElementById('qrs');
+      refs.forEach(r=>{
+        const code = encodeURIComponent(String(r).toUpperCase());
+        const url = base + '#/repuesto/' + code;
+        const card = document.createElement('div');
+        card.style.cssText='border:1px solid #ddd;border-radius:12px;padding:10px;text-align:center';
+        const box = document.createElement('div'); box.style.cssText='width:130px;height:130px;margin:0 auto 8px';
+        const lab = document.createElement('div'); lab.style.cssText='font:800 14px Inter,system-ui,sans-serif';
+        lab.textContent = String(r).toUpperCase();
+        card.appendChild(box); card.appendChild(lab); host.appendChild(card);
+        new QRCode(box,{ text:url, width:128, height:128, correctLevel:QRCode.CorrectLevel.M });
+      });
+    <\/script>`;
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>Etiquetas QR</title>${body}`);
+  w.document.close();
+}
+
+/* Parada prolongada: lanzar email preformateado */
+function accionParadaProlongada(name){
+  const subj = encodeURIComponent("Aviso: Parada prolongada — " + name);
+  const body = encodeURIComponent(`Equipo: ${name}\nHora: ${new Date().toLocaleString("es-ES")}\nMotivo: \nAcción tomada: \nNecesidades: `);
+  location.href = `mailto:?subject=${subj}&body=${body}`;
+}
+
+/* Imprimir QR de un contenedor existente */
+function printQR(containerId, title){
+  const c = byId(containerId);
+  if (!c){ alert("No se encontró el QR."); return; }
+  const img = c.querySelector("img,canvas");
+  let dataURL = "";
+  try{
+    if (img && img.tagName === "IMG") dataURL = img.src;
+    else if (img && img.tagName === "CANVAS") dataURL = img.toDataURL("image/png");
+  }catch(_){}
+  const w = openPopupSafe(title || "QR");
+  if (!w) return;
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>${esc(title||"QR")}</title>
+  <style>body{margin:20px;font-family:Inter,system-ui,sans-serif;text-align:center}</style>
+  ${dataURL ? `<img src="${dataURL}" width="200" height="200">` : c.outerHTML}
+  <div class="no-print" style="margin-top:12px"><button onclick="print()">Imprimir</button></div>`);
+  w.document.close();
+}
+
+/* ========== TOAST + HEADER sombreado + toggles pwd ========== */
+let TOAST_TIMER=null;
+function toast(msg){
+  let t = byId("toast");
+  if (!t){ t = document.createElement("div"); t.id="toast"; t.className="toast"; t.textContent = msg; document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = "1"; clearTimeout(TOAST_TIMER);
+  TOAST_TIMER = setTimeout(()=>{ t.style.opacity = "0"; }, 2200);
+}
+
+function bindHeaderShadow(){
+  const hdr = document.querySelector("header");
+  const onScroll = ()=>{ if (window.scrollY > 2) hdr.classList.add("scrolled"); else hdr.classList.remove("scrolled"); };
+  onScroll(); window.addEventListener("scroll", onScroll, { passive:true });
+}
+
+function bindPwToggles(){
+  document.querySelectorAll(".pw-toggle").forEach(btn=>{
+    const targetId = btn.getAttribute("data-target");
+    btn.addEventListener("click", ()=>{
+      const inp = byId(targetId); if (!inp) return;
+      const on = inp.type === "password"; inp.type = on ? "text" : "password";
+      btn.classList.toggle("on", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  });
+}
+
+/* ========== ROUTER (hash) ========== */
+function handleHash(){
+  const h = location.hash || "";
+  const mEq = h.match(/^#\/equipo\/([^/?#]+)/);
+  const mRp = h.match(/^#\/repuesto\/([^/?#]+)/);
+  if (mEq){ renderEquipoBySlug(decodeURIComponent(mEq[1])); return; }
+  if (mRp){ renderRepuestoByRef(mRp[1]); return; }
+  // default: volver a la página actual
+  ensureSectionsHidden();
+  byId("page-" + (CURRENT_PAGE || "equipos")).classList.remove("hidden");
+}
+
+/* ========== INIT ========== */
+window.addEventListener("load", async ()=>{
+  bindHeaderShadow();
+  bindPwToggles();
+  applyRoleUI();
+
+  // datos iniciales
+  await loadState();
+  await loadIncid();
+  await loadOT();
+  await loadInv();
+
+  // página por defecto
+  nav("equipos");
+
+  // router
+  window.addEventListener("hashchange", handleHash);
+  handleHash();
+
+  // PWA: service worker (opcional)
+  if ("serviceWorker" in navigator){
+    try{ navigator.serviceWorker.register("/sw.js"); }catch(_){}
+  }
+});
+
+/* Pequeños extras de accesibilidad */
+document.addEventListener("keydown", (e)=>{
+  if (e.key === "/" && !/input|textarea|select/i.test(document.activeElement.tagName)){
+    const f = byId("filtroIncid") || byId("invSearch");
+    if (f){ e.preventDefault(); f.focus(); }
+  }
+});
+</script>
+
+</body>
+</html>
