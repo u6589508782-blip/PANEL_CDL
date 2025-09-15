@@ -10,7 +10,8 @@
 :root{
   --brand1:#A60000;--brand2:#E43B3B;
   --ok:#16a34a;--warn:#f59e0b;--stop:#dc2626;
-  --ink:#e8eef7;--muted:#9aa7b4;--line:#232b36
+  --ink:#e8eef7;--muted:#9aa7b4;--line:#232b36;
+  --hdr-h:120px;              /* ← altura de la cabecera */
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -21,90 +22,112 @@ body{
 a{color:#9ec1ff;text-decoration:none}
 img{max-width:100%;display:block}
 
+/* ===== CABECERA (versión final) ===== */
 header{
-  position:sticky;
-  top:0;
-  z-index:60;
-  background:#fff;
-  color:#000;
-  overflow:visible;
-  isolation:isolate;
-  min-height:100px;
+  position:sticky; top:0; z-index:60;
+  background:#fff; color:#000; min-height:var(--hdr-h);
+  overflow:visible; isolation:isolate;
 }
-header::before{
-  content:"";
-  position:absolute; inset:0;
-  background:url('logo_mantenimiento.png') center no-repeat;
-  background-size:70%;
-  opacity:.12; z-index:0; pointer-events:none;
-}
-/* Barra superior */
 .nav{
   display:flex; align-items:flex-end; gap:.8rem;
-  padding:.6rem .9rem .4rem; min-height:100px;
+  padding:.6rem .9rem .4rem; min-height:var(--hdr-h);
   position:relative; z-index:1;
 }
-.grow{flex:1 1 auto}
-.rolechip{font-size:.72rem;font-weight:800;color:#000;opacity:.9}
-.logo{display:flex;align-items:center;gap:.8rem}
-.logo img{height:44px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.1))}
-.hero-title{display:flex;flex-direction:column}
-.hero-row{display:flex;align-items:baseline;gap:.6rem}
-.hero-cdl{font-weight:800;font-size:1.55rem;letter-spacing:.02em}
-.hero-panel{font-weight:700;color:#000;opacity:.9;margin-top:2px}
-.hero-fade{color:#000}
+.menu-pages{ position:absolute; top:10px; left:10px; z-index:2; }
+.menu-user  { position:absolute; top:10px; right:10px; z-index:2; }
+.menu-pages #pagesBtn,
+.menu-user  #userBtn{
+  font-size:1.15rem; line-height:1; padding:.7rem 1rem; border-radius:14px;
+}
+/* Chip de rol arriba derecha */
+.rolechip{
+  position:absolute; top:14px; right:62px; z-index:2;
+  font-size:.78rem; font-weight:800; color:#111; background:#f2f4f8;
+  border:1px solid #d9dee6; padding:.25rem .5rem; border-radius:999px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+/* Título centrado y pegado abajo */
+.hero-title{
+  position:absolute; left:0; right:0; bottom:8px;
+  display:flex; align-items:flex-end; justify-content:center; text-align:center;
+  z-index:1;
+}
+.hero-row.singleline{ display:inline-flex; align-items:flex-end; gap:.35rem }
+.hero-cdl{ font-weight:800; font-size:1.8rem; letter-spacing:.02em; line-height:1 }
+.hero-dot{ opacity:.9; transform:translateY(-1px) }
+.hero-panel{ font-weight:700; font-size:1.06rem; opacity:.95; white-space:nowrap }
 
 /* Menús */
 .menu{position:relative}
-.panel{
-  position:absolute; right:0; top:calc(100% + 8px); z-index:1000;
-  background:#0f141c; color:#fff;
-  border:1px solid #1e2a38; border-radius:16px;
-  box-shadow:0 18px 36px rgba(0,0,0,.5);
-  min-width:280px; overflow:hidden;
-  transform:translateZ(0);
-}
-/* Parche iPhone */
-.panel{ transform:none !important; }
-@media (max-width: 640px){
-  .panel{
-    position:fixed !important; top:88px; left:8px; right:8px;
-    max-width:none; border-radius:16px;
-  }
-  #pagesPanel{ left:8px; right:auto; }
-  body.menu-open{ overflow:hidden; }
-}
-
 .row{padding:.85rem 1rem;border-bottom:1px solid #1e2a38}
 .row:last-child{border-bottom:0}
 .actions{display:flex;gap:.55rem;flex-direction:column}
 .btn{border:0;border-radius:12px;padding:.6rem .9rem;font-weight:800;cursor:pointer}
 .mbtn{
-  border-radius:14px;background:#f1f1f1;color:#000;
-  border:1px solid #ccc;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.06)
+  font-size:1rem; padding:.65rem 1rem; border-radius:14px;
+  background:#f1f1f1;color:#000;border:1px solid #ccc;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.06)
 }
 #pagesPanel .btn{
   border-radius:999px;background:#0b0f15;color:#fff;border:1px solid #202a36;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 18px rgba(0,0,0,.35)
 }
+/* Menús: animación y evitar tapar cabecera en móvil */
+.panel{
+  position:absolute; right:0; top:calc(100% + 10px);
+  background:#0f141c; color:#fff; border:1px solid #1e2a38; border-radius:16px;
+  box-shadow:0 18px 36px rgba(0,0,0,.5); min-width:280px; overflow:hidden;
+  opacity:0; transform:translateY(-6px); pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease;
+}
+.panel:not(.hidden){ opacity:1; transform:translateY(0); pointer-events:auto; }
+@media (max-width:640px){
+  .panel{ position:fixed !important; left:10px; right:10px; top:92px; max-width:none }
+  body.menu-open{ overflow:hidden }
+}
 
 /* Layout */
 .container{max-width:980px;margin:0 auto;padding:1rem}
 
-/* Cards claras */
+/* ==== PW toggle (ojo elegante) ==== */
+.pw-toggle{
+  width:38px;height:38px;border-radius:10px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>\
+  <path d='M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z'/>\
+  <circle cx='12' cy='12' r='3'/>\
+  <path d='M3 3L21 21'/></svg>");
+  background-repeat:no-repeat;background-position:center;background-size:18px 18px;
+}
+.pw-toggle.on{
+  background-image:url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>\
+  <path d='M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z'/>\
+  <circle cx='12' cy='12' r='3'/></svg>");
+}
+.pw-toggle:active{transform:translateY(1px)}
+
+/* Cards claras (ya compactas) */
 .card,.kpi,.tv-card{
   background:#fff;color:#000;border:1px solid #ddd;
   border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,.1);
-  padding:1rem;margin:.55rem 0
+  padding:.85rem;margin:.55rem 0;
 }
 .name{font-weight:800;font-size:1.14rem;display:flex;align-items:center;gap:.4rem}
+
+/* QR más reconocible (icono mini con patrón) */
 .name .qr-s{
-  font-size:0;line-height:0;display:inline-block;border:1px solid #2a3442;border-radius:4px;
-  background:#0f141c;width:16px;height:16px;position:relative;margin-left:.35rem
+  width:18px; height:18px; border:1px solid #1f2937; border-radius:3px; margin-left:.35rem;
+  background:
+    linear-gradient(90deg,#0f141c 0 50%,#cbd5e1 50% 100%) 0 0/6px 6px,
+    linear-gradient(0deg ,#0f141c 0 50%,#cbd5e1 50% 100%) 0 0/6px 6px,
+    radial-gradient(#0f141c 60%,transparent 61%) 3px 3px/6px 6px repeat;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 1px 0 rgba(0,0,0,.25);
 }
-.name .qr-s:before,.name .qr-s:after{content:"";position:absolute;background:#cbd5e1}
-.name .qr-s:before{inset:3px 3px auto auto;width:4px;height:4px}
-.name .qr-s:after{left:3px;bottom:3px;width:4px;height:4px}
+
 .sub{color:#475569}
 .pilot{width:18px;height:18px;border-radius:50%;
   box-shadow:0 0 0 3px #fff,0 0 0 6px rgba(0,0,0,.06),inset 0 -3px 6px rgba(0,0,0,.15)}
@@ -113,30 +136,52 @@ header::before{
 .p-stop{background:#ef4444}
 .right{margin-left:auto;display:flex;gap:.55rem;flex-wrap:wrap}
 
-/* Botones “gloss” */
+/* Botones “metalizados” (versión final) */
 .gloss{
   display:inline-flex;align-items:center;gap:.55rem;padding:.6rem 1rem;border-radius:999px;
-  border:1px solid #d1d5db;background:linear-gradient(180deg,#f9fafb,#eef2f7);color:#111827;font-weight:800;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 2px 10px rgba(0,0,0,.06)
+  border:1px solid #d0d7e2;
+  background:linear-gradient(180deg,#ffffff,#eef2f7 55%,#e3e9f3);
+  color:#111827; font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95), 0 6px 18px rgba(0,0,0,.06);
 }
-.gloss .dot{width:12px;height:12px;border-radius:999px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08)}
-.gloss.green .dot{background:radial-gradient(circle at 35% 30%,#6df49a,#22c55e 55%,#0e7a3a)}
-.gloss.yellow .dot{background:radial-gradient(circle at 35% 30%,#ffd56a,#f59e0b 55%,#8a4b00)}
-.gloss.red .dot{background:radial-gradient(circle at 35% 30%,#ff9e9e,#ef4444 55%,#7a1616)}
-.btn-mail.gloss{background:linear-gradient(180deg,#f7d4d4,#f1c3c3);border-color:#e5b4b4}
+.gloss .dot{width:12px;height:12px;border-radius:999px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.08)}
+.gloss.green  .dot{ background:radial-gradient(circle at 35% 30%,#98f5bc,#22c55e 55%,#0e7a3a) }
+.gloss.yellow .dot{ background:radial-gradient(circle at 35% 30%,#ffe08a,#f59e0b 55%,#8a4b00) }
+.gloss.red    .dot{ background:radial-gradient(circle at 35% 30%,#ffc0c0,#ef4444 55%,#7a1616) }
+.btn-mail.gloss{
+  background:linear-gradient(180deg,#ffe1e1,#f7cdcd 50%,#f0bcbc);
+  border-color:#e7b2b2;
+}
 
-/* Semáforo */
+/* Semáforo (versión final) */
 .semaforo{
-  display:flex;align-items:center;gap:.8rem;
-  background:#f8fafc;border:1px solid #e2e8f0;border-radius:26px;padding:.5rem .6rem;
+  display:flex;align-items:center;
+  background:#eef2f7; border:1px solid #cfd8e3; border-radius:28px;
+  padding:.35rem; gap:.4rem; position:relative;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.05)
 }
-.semaforo .opt{position:relative;flex:1;display:flex;justify-content:center;align-items:center;height:44px;border-radius:22px;color:#0f172a;font-weight:800;cursor:pointer;user-select:none}
+.semaforo::before, .semaforo::after{
+  content:""; position:absolute; top:50%; width:8px; height:8px;
+  border-right:2px solid #6b7280; border-bottom:2px solid #6b7280; opacity:.65;
+  transform:translateY(-50%) rotate(-45deg);
+}
+.semaforo::before{ left:10px; transform:translateY(-50%) rotate(135deg) }
+.semaforo::after { right:10px }
+.semaforo .opt{
+  position:relative;flex:1;display:flex;justify-content:center;align-items:center;
+  height:40px; border-radius:22px; padding:0 .9rem; font-weight:800;
+  background:#f7f9fc; border:1px solid #dbe3ef; color:#0f172a;
+  white-space:nowrap; font-size:.92rem; cursor:pointer; user-select:none
+}
 .semaforo .opt .led{width:14px;height:14px;border-radius:999px;margin-right:.5rem}
-.semaforo .opt[data-k=ok] .led{background:radial-gradient(circle at 35% 30%,#6df49a,#22c55e 55%,#0e7a3a)}
+.semaforo .opt[data-k=ok]   .led{background:radial-gradient(circle at 35% 30%,#6df49a,#22c55e 55%,#0e7a3a)}
 .semaforo .opt[data-k=warn] .led{background:radial-gradient(circle at 35% 30%,#ffd56a,#f59e0b 55%,#8a4b00)}
 .semaforo .opt[data-k=stop] .led{background:radial-gradient(circle at 35% 30%,#ff9e9e,#ef4444 55%,#7a1616)}
-.semaforo .opt.active{background:#e5ecf6;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.05)}
+.semaforo .opt.active{
+  background:linear-gradient(180deg,#ffffff,#e7eef8);
+  border-color:#b5c4db;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.07);
+}
 
 /* Tablas */
 table{width:100%;border-collapse:separate;border-spacing:0 8px}
@@ -159,7 +204,6 @@ tr td:last-child,tr th:last-child{border-top-right-radius:12px;border-bottom-rig
 .inv-grid input,.form-grid input,.form-grid select,.form-grid textarea{
   background:#f9fafb;border:1px solid #d1d5db;color:#111827;border-radius:12px;padding:.55rem .7rem
 }
-.pw-toggle{background:#f9fafb;border:1px solid #d1d5db}
 
 /* Toast */
 .toast{position:fixed;right:14px;bottom:14px;z-index:90;background:#0f172a;color:#fff;padding:.6rem .8rem;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.6)}
@@ -184,16 +228,58 @@ tr td:last-child,tr th:last-child{border-top-right-radius:12px;border-bottom-rig
 button:focus, .linkish:focus, .page-btn:focus, select:focus, input:focus, textarea:focus {
   outline:2px solid #60a5fa; outline-offset:2px
 }
+/* ===== BLOQUE CAMBIOS 1 — Micro-ajustes visuales ===== */
+
+/* 1) Sombra sutil en cabecera al hacer scroll */
+header{ transition: box-shadow .2s ease, background-color .2s ease; }
+header.scrolled{ box-shadow:0 8px 22px rgba(0,0,0,.18); }
+
+/* 2) Tipografía y ritmo vertical de títulos */
+main h2{
+  margin:.2rem 0 .6rem;
+  font-size:1.25rem;
+  letter-spacing:.01em;
+}
+
+/* 3) Botones “gloss”: hover/active suaves */
+.btn.gloss:hover{ filter:brightness(1.02); }
+.btn.gloss:active{ transform:translateY(1px); }
+
+/* 4) Botones de menú (hamburguesa/usuario): hover sutil */
+.mbtn:hover{ background:#fafafa; }
+
+/* 5) Tablas: cabecera sticky y hover de filas */
+table thead th{ position:sticky; top:var(--hdr-h); z-index:1; }
+tbody tr:hover td{ background:#f7f9fc; }
+
+/* 6) Enlaces tipo “linkish” más evidentes al pasar */
+.linkish:hover{ text-decoration:underline; }
+
+/* 7) Scrollbars discretas en listas TV (solo navegadores WebKit) */
+.tv-list::-webkit-scrollbar{ height:8px; width:8px; }
+.tv-list::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:6px; }
+.tv-list::-webkit-scrollbar-track{ background:transparent; }
+
+/* 8) Responsive: acolchado y radios algo menores en móvil */
+@media (max-width:640px){
+  .container{ padding:.75rem; }
+  .card,.kpi,.tv-card{ border-radius:16px; }
+  :root{ --hdr-h:92px; }
+}
+
+/* 9) Accesibilidad: reducir animaciones si el usuario lo pide */
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important; }
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="nav" id="navBar">
-    <!-- Menú de páginas -->
-    <div class="menu">
+    <!-- Menú (hamburguesa) -->
+    <div class="menu menu-pages">
       <button id="pagesBtn" class="mbtn" aria-label="Menú" aria-expanded="false">☰</button>
-
       <div id="pagesPanel" class="panel hidden" style="min-width:260px">
         <div class="row">
           <div class="actions">
@@ -210,22 +296,20 @@ button:focus, .linkish:focus, .page-btn:focus, select:focus, input:focus, textar
       </div>
     </div>
 
-    <!-- Logo/Título -->
-    <div class="logo" aria-label="Inicio">
-      <div class="hero-title">
-        <div class="hero-row">
-          <span class="hero-cdl">CDL</span>
-          <span class="hero-fade">·</span>
-          <span class="hero-panel">Panel de control</span>
-        </div>
+    <!-- Título centrado y pegado abajo -->
+    <div class="hero-title">
+      <div class="hero-row singleline">
+        <span class="hero-cdl">CDL</span>
+        <span class="hero-dot">·</span>
+        <span class="hero-panel">Panel de control</span>
       </div>
     </div>
 
-    <div class="grow"></div>
+    <!-- Chip de rol (arriba derecha) -->
     <span id="roleChip" class="rolechip">Invitado</span>
 
-    <!-- Menú de usuario -->
-    <div class="menu">
+    <!-- Menú usuario (3 puntitos) -->
+    <div class="menu menu-user">
       <button id="userBtn" class="mbtn" aria-label="Usuario" aria-expanded="false">⋮</button>
       <div id="userPanel" class="panel hidden">
         <div class="row">
@@ -246,7 +330,7 @@ button:focus, .linkish:focus, .page-btn:focus, select:focus, input:focus, textar
           <label class="small" style="margin-top:.4rem">Contraseña</label>
           <div class="pw" style="display:flex;gap:.4rem;align-items:center">
             <input id="userPass" type="password" placeholder="••••••••" style="flex:1">
-            <button type="button" class="pw-toggle" data-target="userPass" aria-label="Mostrar contraseña" aria-pressed="false">👁</button>
+            <button type="button" class="pw-toggle" data-target="userPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
           </div>
 
           <div class="actions" style="margin-top:.6rem">
@@ -259,11 +343,11 @@ button:focus, .linkish:focus, .page-btn:focus, select:focus, input:focus, textar
           <label class="small">Cambiar contraseña</label>
           <div class="pw" style="display:flex;gap:.4rem;align-items:center">
             <input id="oldPass" type="password" placeholder="Actual" style="flex:1">
-            <button type="button" class="pw-toggle" data-target="oldPass" aria-label="Mostrar contraseña" aria-pressed="false">👁</button>
+            <button type="button" class="pw-toggle" data-target="oldPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
           </div>
           <div class="pw" style="margin-top:.4rem;display:flex;gap:.4rem;align-items:center">
             <input id="newPass" type="password" placeholder="Nueva" style="flex:1">
-            <button type="button" class="pw-toggle" data-target="newPass" aria-label="Mostrar contraseña" aria-pressed="false">👁</button>
+            <button type="button" class="pw-toggle" data-target="newPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
           </div>
           <div class="actions" style="margin-top:.6rem">
             <button class="btn gloss" onclick="changePwd()">Cambiar</button>
@@ -438,52 +522,52 @@ button:focus, .linkish:focus, .page-btn:focus, select:focus, input:focus, textar
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-/* =========================
-   Config & utilidades
-========================= */
-const API_BASE="https://script.google.com/macros/s/AKfycbzTbSjFvHHDuJy8yDjynomMuLvwVIjf149wnLPUTFA6oTxx-qiN4ugTv7Lcgysm10ib/exec";
+/* ========= CDL · CMMS v34 — CLEAN BUILD (no minificado) ========= */
 
-const byId=id=>document.getElementById(id),
-      esc=s=>String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])),
-      fmt=n=>(Math.round((+n||0)*100)/100).toFixed(2),
-      fmtDate=d=>new Date(d).toLocaleString("es-ES",{timeZone:"Europe/Madrid"}),
-      val=id=>byId(id).value,
-      setTxt=(id,v)=>byId(id).textContent=v;
+const API_BASE = "https://script.google.com/macros/s/AKfycbzxW6Q5Me2xdQQw7Nk_QBtRTVJTODxLD7EhiGciBoFCwZulaCYWR2TDabcVF1TBOPFt/exec";
 
-function show(id){const n=byId(id);if(n)n.classList.remove("hidden")}
-function hide(id){const n=byId(id);if(n)n.classList.add("hidden")}
+/* Utils */
+const byId = (id) => document.getElementById(id);
+const esc   = (s) => String(s || "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+const fmt   = (n) => (Math.round((+n || 0) * 100) / 100).toFixed(2);
+const fmtDate = (d) => new Date(d).toLocaleString("es-ES", { timeZone: "Europe/Madrid" });
+const val   = (id) => byId(id).value;
+const setTxt = (id, v) => { const n = byId(id); if (n) n.textContent = v; };
 
-/* =========================
-   Roles (ID estable + UI)
-========================= */
+function show(id){ const n = byId(id); if (n) n.classList.remove("hidden"); }
+function hide(id){ const n = byId(id); if (n) n.classList.add("hidden"); }
+
+/* Roles */
 function getCID(){
-  const KEY='CDL_CID';
+  const KEY = "CDL_CID";
   let id = localStorage.getItem(KEY);
-  if(!id){
+  if (!id) {
     id = (crypto.randomUUID && crypto.randomUUID()) ||
-         ('cid_'+Date.now().toString(36)+Math.random().toString(36).slice(2));
-    localStorage.setItem(KEY,id);
+         ("cid_" + Date.now().toString(36) + Math.random().toString(36).slice(2));
+    localStorage.setItem(KEY, id);
   }
   return id;
 }
-const EMERGENCY_UNLOCK = true; // deja los menús visibles aunque seas guest
+const EMERGENCY_UNLOCK = false;
 
-const ROLE_MAP={
+const ROLE_MAP = {
   "Administrador":"admin","Gerente":"gerente","Encargado":"encargado",
-  "Producción":"produccion","RT":"rt","Tco.INT":"tcoint","Subcontrata":"subc","Invitado":"guest"
+  "Producción":"produccion","Tco.INT":"tcoint","Subcontrata":"subc","Invitado":"guest",
+  "RT":"rt","RT1.1":"rt","RT1.2":"rt","RT2.1":"rt","RT2.2":"rt","RT3.1":"rt","RT3.2":"rt"
 };
-let currentUser = JSON.parse(localStorage.getItem("CDL_USER")||'{"user":"invitado","rol":"Invitado","group":"guest"}');
+
+let currentUser = JSON.parse(localStorage.getItem("CDL_USER") || '{"user":"invitado","rol":"Invitado","group":"guest"}');
 
 (function initUserFallback(){
   try{
-    let u = JSON.parse(localStorage.getItem('CDL_USER')||'null');
-    if(!u){
+    let u = JSON.parse(localStorage.getItem("CDL_USER") || "null");
+    if (!u) {
       const cid = getCID();
-      u = { user: 'inv-'+cid.slice(-6), rol: 'Invitado', group: 'guest' };
-      localStorage.setItem('CDL_USER', JSON.stringify(u));
+      u = { user: "inv-" + cid.slice(-6), rol: "Invitado", group: "guest" };
+      localStorage.setItem("CDL_USER", JSON.stringify(u));
     }
-    const chip = document.getElementById('roleChip');
-    if(chip){ chip.textContent = (u.rol||'Invitado')+' · '+getCID().slice(-6); }
+    const chip = byId("roleChip");
+    if (chip) chip.textContent = (u.rol || "Invitado") + " · " + getCID().slice(-6);
     currentUser = u;
   }catch(_){}
 })();
@@ -491,198 +575,212 @@ let currentUser = JSON.parse(localStorage.getItem("CDL_USER")||'{"user":"invitad
 window.setUser = function(u){
   try{
     window.currentUser = u;
-    localStorage.setItem('CDL_USER', JSON.stringify(u));
-    const chip = document.getElementById('roleChip');
-    if(chip){ chip.textContent = (u.rol||u.user||'Usuario')+' · '+getCID().slice(-6); }
+    localStorage.setItem("CDL_USER", JSON.stringify(u));
+    const chip = byId("roleChip");
+    if (chip) chip.textContent = (u.rol || u.user || "Usuario") + " · " + getCID().slice(-6);
     applyRoleUI();
   }catch(_){}
 };
 
 window.applyRoleUI = function(){
-  const g = EMERGENCY_UNLOCK ? 'admin' : (JSON.parse(localStorage.getItem('CDL_USER')||'{}').group || 'guest');
+  const g = EMERGENCY_UNLOCK ? "admin" : (JSON.parse(localStorage.getItem("CDL_USER") || "{}").group || "guest");
 
-  // mostrar siempre los menús principales
-  ['mIndic','mOT','mIncid','mInv','mGruas','mOtros','mTV'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){ el.classList.remove('hidden'); el.style.display=''; el.hidden=false; }
+  ["mIndic","mOT","mIncid","mInv","mGruas","mOtros","mTV"].forEach(id=>{
+    const el = byId(id);
+    if (el){ el.classList.remove("hidden"); el.style.display = ""; el.hidden = false; }
   });
 
-  // exports visibles; restringe QR inventario si no admin/gerente
-  ['btnExportIncidCSV','btnExportIncidPDF','btnExportKPIPCSV','btnExportKPIPDF','btnExportInvCSV','btnExportOTPDF','btnExportInvQR']
-    .forEach(id=>{
-      const el=document.getElementById(id);
-      if(el){
-        const allowed = (g==="admin" || g==="gerente");
-        if(id==='btnExportInvQR'){
-          el.classList.toggle('hidden', !allowed);
-        } else {
-          el.classList.remove('hidden');
-          el.style.display='';
-        }
-      }
-    });
+  ["btnExportIncidCSV","btnExportIncidPDF","btnExportKPIPCSV","btnExportKPIPDF","btnExportInvCSV","btnExportOTPDF","btnExportInvQR"]
+  .forEach(id=>{
+    const el = byId(id);
+    if(!el) return;
+    const allowed = (g === "admin" || g === "gerente");
+    if (id === "btnExportInvQR" || id === "btnExportOTPDF") {
+      el.classList.toggle("hidden", !allowed);
+    } else {
+      el.classList.remove("hidden");
+      el.style.display = "";
+    }
+  });
 
-  const isGuest = (g==='guest' && !EMERGENCY_UNLOCK);
-  ['btnAddIncid','btnAddOT','btnExportInvQR','btnAddInv'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){ el.disabled = !!isGuest; }
+  const isGuest = (g === "guest" && !EMERGENCY_UNLOCK);
+  ["btnAddIncid","btnAddOT","btnExportInvQR","btnAddInv"].forEach(id=>{
+    const el = byId(id);
+    if (el) el.disabled = !!isGuest;
   });
 };
 
-/* =========================
-   Auth (login / logout / change pwd)
-========================= */
-async function apiGet(q){const r=await fetch(API_BASE+"?"+new URLSearchParams(q));return r.json()}
-async function apiPost(o){const r=await fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)});return r.json()}
+/* API */
+async function apiGet(q){ const r = await fetch(API_BASE + "?" + new URLSearchParams(q)); return r.json(); }
+async function apiPost(o){ const r = await fetch(API_BASE, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(o)}); return r.json(); }
 
+/* Auth */
 async function login(){
-  const user=byId('userSelect').value;const pass=byId('userPass').value||"";
-  const r=await apiPost({res:'auth',fn:'login',user,pass});
-  if(!r.ok){alert("Error login: "+(r.error||"desconocido"));return}
-  const group=ROLE_MAP[r.rol]||"guest";
-  setUser({user,rol:r.rol,group});
-  byId('userPanel').classList.add('hidden');byId('userPass').value="";
-}
-function logout(){setUser({user:"invitado",rol:"Invitado",group:"guest"})}
-async function changePwd(){
-  const user=byId('userSelect').value,old=byId('oldPass').value||"",nu=byId('newPass').value||"";
-  if(!old||!nu){byId('pwdMsg').textContent="Rellena ambas contraseñas.";return}
-  const r=await apiPost({res:'auth',fn:'changepwd',user,old,nu});
-  byId('pwdMsg').textContent=r.ok?"Contraseña cambiada.":"Error al cambiar (credenciales).";
-  if(r.ok){byId('oldPass').value="";byId('newPass').value=""}
-}
-
-// =========================
-// Menús (robustos y aislados) — SOLO CLICK
-// =========================
-const pagesBtn   = byId('pagesBtn');
-const userBtn    = byId('userBtn');
-const pagesPanel = byId('pagesPanel');
-const userPanel  = byId('userPanel');
-
-function setExpanded(btn, open){ btn?.setAttribute('aria-expanded', open ? 'true' : 'false'); }
-function openPanel(panelEl, btnEl){
-  panelEl?.classList.remove('hidden');
-  setExpanded(btnEl, true);
-  document.body.classList.add('menu-open');
-}
-function closePanel(panelEl, btnEl){
-  panelEl?.classList.add('hidden');
-  setExpanded(btnEl, false);
-  if (pagesPanel.classList.contains('hidden') && userPanel.classList.contains('hidden')){
-    document.body.classList.remove('menu-open');
+  const user = byId("userSelect").value;
+  const pass = byId("userPass").value || "";
+  try{
+    const r = await apiPost({res:"auth", fn:"login", user, pass});
+    if(!r || !r.ok){
+      const code = (r && (r.code || r.error)) || "desconocido";
+      const MSG = {
+        badpass:"Usuario o contraseña incorrectos.",
+        nouser:"Usuario no encontrado.",
+        forbidden:"No tienes permiso para entrar.",
+        locked:"Cuenta bloqueada. Contacta con un administrador.",
+        rate:"Demasiados intentos. Inténtalo más tarde.",
+        desconocido:"Error de inicio de sesión."
+      };
+      alert(MSG[code] || ("Error login: " + code));
+      return;
+    }
+    const rawRol = r.rol || "Invitado";
+    const group  = ROLE_MAP[rawRol] || (rawRol.startsWith("RT") ? "rt" : "guest");
+    setUser({ user, rol: rawRol, group });
+    byId("userPanel").classList.add("hidden");
+    byId("userPass").value = "";
+  }catch(_){
+    alert("No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.");
   }
 }
-function isOpen(panelEl){ return panelEl && !panelEl.classList.contains('hidden'); }
+function logout(){ setUser({ user:"invitado", rol:"Invitado", group:"guest" }); }
+async function changePwd(){
+  const user = byId("userSelect").value;
+  const old  = byId("oldPass").value || "";
+  const nu   = byId("newPass").value || "";
+  if(!old || !nu){ byId("pwdMsg").textContent = "Rellena ambas contraseñas."; return; }
+  const r = await apiPost({res:"auth", fn:"changepwd", user, old, nu});
+  byId("pwdMsg").textContent = r.ok ? "Contraseña cambiada." : "Error al cambiar (credenciales).";
+  if(r.ok){ byId("oldPass").value = ""; byId("newPass").value = ""; }
+}
+
+/* Menús (solo click) */
+const pagesBtn   = byId("pagesBtn");
+const userBtn    = byId("userBtn");
+const pagesPanel = byId("pagesPanel");
+const userPanel  = byId("userPanel");
+
+function setExpanded(btn, open){ if(btn) btn.setAttribute("aria-expanded", open ? "true" : "false"); }
+function openPanel(panelEl, btnEl){
+  if(panelEl) panelEl.classList.remove("hidden");
+  setExpanded(btnEl, true);
+  document.body.classList.add("menu-open");
+}
+function closePanel(panelEl, btnEl){
+  if(panelEl) panelEl.classList.add("hidden");
+  setExpanded(btnEl, false);
+  if (pagesPanel.classList.contains("hidden") && userPanel.classList.contains("hidden")){
+    document.body.classList.remove("menu-open");
+  }
+}
+function isOpen(panelEl){ return panelEl && !panelEl.classList.contains("hidden"); }
 function closeAllMenus(){ closePanel(pagesPanel, pagesBtn); closePanel(userPanel, userBtn); }
 
 if(!document.documentElement.dataset.menusBound){
-  document.documentElement.dataset.menusBound = '1';
+  document.documentElement.dataset.menusBound = "1";
 
-  // Abrir/cerrar con CLICK (sin pointerdown)
-  pagesBtn?.addEventListener('click', (e)=>{
+  pagesBtn?.addEventListener("click", (e)=>{
     e.stopPropagation();
     closePanel(userPanel, userBtn);
     isOpen(pagesPanel) ? closePanel(pagesPanel, pagesBtn) : openPanel(pagesPanel, pagesBtn);
   });
-  userBtn?.addEventListener('click', (e)=>{
+  userBtn?.addEventListener("click", (e)=>{
     e.stopPropagation();
     closePanel(pagesPanel, pagesBtn);
     isOpen(userPanel) ? closePanel(userPanel, userBtn) : openPanel(userPanel, userBtn);
   });
 
-  // No cerrar al interactuar DENTRO del panel
-  pagesPanel?.addEventListener('click', e=>e.stopPropagation());
-  userPanel ?.addEventListener('click',  e=>e.stopPropagation());
+  pagesPanel?.addEventListener("click", (e)=> e.stopPropagation());
+  userPanel ?.addEventListener("click", (e)=> e.stopPropagation());
 
-  // Cerrar al hacer click fuera (solo click)
-  const isInside = (t, el)=> !!el && (el===t || el.contains(t));
-  document.addEventListener('click', (e)=>{
-    const t=e.target;
-    const enPages = isInside(t,pagesPanel) || isInside(t,pagesBtn);
-    const enUser  = isInside(t,userPanel)  || isInside(t,userBtn);
-    if(!enPages && !enUser) closeAllMenus();
+  document.addEventListener("click", (e)=>{
+    const t = e.target;
+    const inside = (x, y)=> !!y && (y === x || y.contains(x));
+    const enPages = inside(t, pagesPanel) || inside(t, pagesBtn);
+    const enUser  = inside(t, userPanel)  || inside(t, userBtn);
+    if (!enPages && !enUser) closeAllMenus();
   });
 
-  // ESC para cerrar
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape') closeAllMenus();
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape") closeAllMenus();
   });
 
-  // Accesibilidad teclado
-  [pagesBtn,userBtn].forEach(btn=>{
-    btn?.setAttribute('role','button');
-    btn?.setAttribute('tabindex','0');
-    btn?.addEventListener('keydown', (e)=>{
-      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn.click(); }
+  [pagesBtn, userBtn].forEach((btn)=>{
+    btn?.setAttribute("role","button");
+    btn?.setAttribute("tabindex","0");
+    btn?.addEventListener("keydown", (e)=>{
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); btn.click(); }
     });
   });
 }
-/* =========================
-   Navegación
-========================= */
-let CURRENT_PAGE='equipos';
+
+/* Navegación */
+let CURRENT_PAGE = "equipos";
 function nav(id){
   closeAllMenus();
   CURRENT_PAGE = id;
-  ['equipos','gruas','otros','incidencias','indicadores','ot','inventario','tv','equipo','repuesto']
-    .forEach(s => byId('page-'+s).classList.add('hidden'));
-  byId('page-'+id).classList.remove('hidden');
+  ["equipos","gruas","otros","incidencias","indicadores","ot","inventario","tv","equipo","repuesto"]
+    .forEach(s => byId("page-" + s).classList.add("hidden"));
+  byId("page-" + id).classList.remove("hidden");
 
-  if(id==='equipos') loadState();
-  if(id==='gruas') renderSubGroup("Puentes Grúa","gruasWrap");
-  if(id==='otros') renderSubGroup("Otros (auxiliares)","otrosWrap");
-  if(id==='incidencias') loadIncid();
-  if(id==='indicadores'){ calcKPIs(); drawAllCharts(); }
-  if(id==='ot') loadOT();
-  if(id==='inventario') loadInv();
-  if(id==='tv') initTV();
+  if (id === "equipos")     loadState();
+  if (id === "gruas")       renderSubGroup("Puentes Grúa","gruasWrap");
+  if (id === "otros")       renderSubGroup("Otros (auxiliares)","otrosWrap");
+  if (id === "incidencias") loadIncid();
+  if (id === "indicadores") loadIncid().then(()=>{ calcKPIs(); drawAllCharts(); });
+  if (id === "ot")          loadOT();
+  if (id === "inventario")  loadInv();
+  if (id === "tv")          initTV();
 
-  window.scrollTo({top:0,behavior:"smooth"});
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-/* =========================
-   Estado equipos
-========================= */
-let STATE=[];
-function statusKey(s){return s==="Parada"?"stop":(s==="Restricciones"?"warn":"ok")}
+/* Estado equipos */
+let STATE = [];
+function statusKey(s){ return s === "Parada" ? "stop" : (s === "Restricciones" ? "warn" : "ok"); }
+
 async function loadState(){
   try{
-    const j=await apiGet({res:'state',fn:'list'});
-    if(j.ok&&j.items.length){STATE=j.items;renderState();return}
-    await apiPost({res:'state',fn:'seed'});
-    const k=await apiGet({res:'state',fn:'list'});STATE=k.ok?k.items:[];renderState()
-  }catch(e){console.error(e)}
+    const j = await apiGet({res:"state", fn:"list"});
+    if (j.ok && j.items.length){ STATE = j.items; renderState(); return; }
+    await apiPost({res:"state", fn:"seed"});
+    const k = await apiGet({res:"state", fn:"list"});
+    STATE = k.ok ? k.items : [];
+    renderState();
+  }catch(e){ console.error(e); }
 }
-function groupItems(items){const by={};items.forEach(it=>{(by[it.grupo]??=[]).push(it)});return by}
+function groupItems(items){
+  const by = {};
+  items.forEach(it => { (by[it.grupo] ??= []).push(it); });
+  return by;
+}
 function renderState(){
-  const groups=groupItems(STATE);
-  const wrap=byId('equiposWrap');wrap.innerHTML="";
-  for(const[g,items] of Object.entries(groups)){
-    if(g.startsWith("Puentes Grúa")||g==="Otros (auxiliares)")continue;
-    wrap.appendChild(groupBlock(g,items))
+  const groups = groupItems(STATE);
+  const wrap = byId("equiposWrap"); wrap.innerHTML = "";
+  for (const [g, items] of Object.entries(groups)){
+    if (g.startsWith("Puentes Grúa") || g === "Otros (auxiliares)") continue;
+    wrap.appendChild(groupBlock(g, items));
   }
-  if(!byId('page-gruas').classList.contains('hidden'))renderSubGroup("Puentes Grúa","gruasWrap");
-  if(!byId('page-otros').classList.contains('hidden'))renderSubGroup("Otros (auxiliares)","otrosWrap")
+  if (!byId("page-gruas").classList.contains("hidden")) renderSubGroup("Puentes Grúa", "gruasWrap");
+  if (!byId("page-otros").classList.contains("hidden")) renderSubGroup("Otros (auxiliares)", "otrosWrap");
 }
-function groupBlock(title,items){
-  const d=document.createElement('div');
-  d.innerHTML=`<h3 style="margin:10px 0;color:#0f172a">${esc(title)}</h3>`;
-  items.forEach(eq=>d.appendChild(cardEquipo(eq)));
-  return d
+function groupBlock(title, items){
+  const d = document.createElement("div");
+  d.innerHTML = `<h3 style="margin:10px 0;color:#0f172a">${esc(title)}</h3>`;
+  items.forEach(eq => d.appendChild(cardEquipo(eq)));
+  return d;
 }
-function renderSubGroup(match,target){
-  const wrap=byId(target);wrap.innerHTML="";
-  const items=STATE.filter(x=>match==="Otros (auxiliares)"?x.grupo===match:x.grupo.startsWith(match));
-  const groups=groupItems(items);
-  for(const[g,arr] of Object.entries(groups)) wrap.appendChild(groupBlock(g,arr))
+function renderSubGroup(match, target){
+  const wrap = byId(target); wrap.innerHTML = "";
+  const items = STATE.filter(x => match === "Otros (auxiliares)" ? x.grupo === match : x.grupo.startsWith(match));
+  const groups = groupItems(items);
+  for (const [g, arr] of Object.entries(groups)) wrap.appendChild(groupBlock(g, arr));
 }
 function cardEquipo(eq){
-  const safeName = JSON.stringify(eq.nombre).slice(1,-1);
-  const el=document.createElement('div');el.className='card';
-  el.innerHTML=`
+  const safeName = JSON.stringify(eq.nombre).slice(1, -1);
+  const el = document.createElement("div"); el.className = "card";
+  el.innerHTML = `
     <div style="display:flex;gap:.7rem;align-items:center;min-width:240px">
-      <span class="pilot ${'p-'+statusKey(eq.estado)}"></span>
+      <span class="pilot ${"p-" + statusKey(eq.estado)}"></span>
       <div>
         <div class="name linkish" onclick="openEquipoByName('${safeName}')">
           ${esc(eq.nombre)} <span class="qr-s" title="QR"></span>
@@ -691,9 +789,9 @@ function cardEquipo(eq){
       </div>
     </div>
     <div class="semaforo" data-name="${esc(eq.nombre)}">
-      <div class="opt ${statusKey(eq.estado)==='ok'?'active':''}" data-k="ok"><span class="led"></span>En marcha</div>
-      <div class="opt ${statusKey(eq.estado)==='warn'?'active':''}" data-k="warn"><span class="led"></span>Restricciones</div>
-      <div class="opt ${statusKey(eq.estado)==='stop'?'active':''}" data-k="stop"><span class="led"></span>Parada</div>
+      <div class="opt ${statusKey(eq.estado)==="ok"?'active':''}" data-k="ok"><span class="led"></span>En marcha</div>
+      <div class="opt ${statusKey(eq.estado)==="warn"?'active':''}" data-k="warn"><span class="led"></span>Restricciones</div>
+      <div class="opt ${statusKey(eq.estado)==="stop"?'active':''}" data-k="stop"><span class="led"></span>Parada</div>
     </div>
     <div class="right">
       <button class="btn gloss" onclick="estadoConIncid('${safeName}','Parada','programada')"><span class="dot"></span>Parada programada</button>
@@ -702,212 +800,218 @@ function cardEquipo(eq){
       <button class="btn gloss" onclick="estadoConIncid('${safeName}','Nueva')">Nueva incidencia</button>
     </div>`;
   setTimeout(()=>{
-    el.querySelectorAll('.semaforo .opt').forEach(o=>o.addEventListener('click',async e=>{
-      const name=el.querySelector('.semaforo').dataset.name;
-      const k=e.currentTarget.getAttribute('data-k');
-      const estado=k==='ok'?'En marcha':k==='warn'?'Restricciones':'Parada';
-      await setEstado(name,estado);
-      el.querySelectorAll('.semaforo .opt').forEach(x=>x.classList.remove('active'));
-      e.currentTarget.classList.add('active')
-    }))
-  },0);
-  return el
+    el.querySelectorAll(".semaforo .opt").forEach(o=>o.addEventListener("click", async (e)=>{
+      const name = el.querySelector(".semaforo").dataset.name;
+      const k = e.currentTarget.getAttribute("data-k");
+      const estado = k === "ok" ? "En marcha" : (k === "warn" ? "Restricciones" : "Parada");
+      await setEstado(name, estado);
+      el.querySelectorAll(".semaforo .opt").forEach(x=>x.classList.remove("active"));
+      e.currentTarget.classList.add("active");
+    }));
+  }, 0);
+  return el;
 }
-async function setEstado(name,estado){
-  if(currentUser.group==="guest"){alert("Inicia sesión para modificar estados.");return}
-  await apiPost({res:'state',fn:'set',name,estado,actor:currentUser.user});
-  const it=STATE.find(x=>x.nombre===name);if(it)it.estado=estado;renderState()
+async function setEstado(name, estado){
+  if (currentUser.group === "guest"){ alert("Inicia sesión para modificar estados."); return; }
+  await apiPost({res:"state", fn:"set", name, estado, actor: currentUser.user});
+  const it = STATE.find(x => x.nombre === name); if (it) it.estado = estado;
+  renderState();
 }
-function estadoConIncid(name,estado,modo){
-  if(estado!=="Nueva"){setEstado(name,estado==="Parada"&&modo==="programada"?"Parada":estado)}
-  nav('incidencias');
+function estadoConIncid(name, estado, modo){
+  if (estado !== "Nueva"){ setEstado(name, estado === "Parada" && modo === "programada" ? "Parada" : estado); }
+  nav("incidencias");
   setTimeout(()=>{
-    byId('iEquipo').value=name;
-    byId('iTipo').value=modo==="programada"?"Preventivo":"Correctivo";
-    byId('iRes').value=estado==="Restricciones"?"Con restricciones":(estado==="Nueva"?"Solucionado":"Parada");
-    byId('iDesc').focus()
-  },120)
+    byId("iEquipo").value = name;
+    byId("iTipo").value   = (modo === "programada" ? "Preventivo" : "Correctivo");
+    byId("iRes").value    = (estado === "Restricciones" ? "Con restricciones" : (estado === "Nueva" ? "Solucionado" : "Parada"));
+    byId("iDesc").focus();
+  }, 120);
 }
-async function accionParadaProlongada(name){
-  if(currentUser.group==="guest"){alert("Inicia sesión para marcar paradas.");return}
-  await apiPost({res:'alert',fn:'parada',equipo:name,actor:currentUser.user});
-  await loadState()
-}
-function openFicha(name){openEquipoByName(name)}
+function openFicha(name){ openEquipoByName(name); }
 
-/* =========================
-   Incidencias
-========================= */
-let INCIDS_ALL=[];let INCID_PAGE=1,INCID_PAGE_SIZE=10,INCID_SORT_KEY='fecha',INCID_SORT_DIR='desc';
-function resetIncidFilters(){['fEquipo','fTipo','fRes','filtroIncid'].forEach(id=>{const el=byId(id);if(el)el.value=""});renderIncidTable()}
+/* Incidencias */
+let INCIDS_ALL = [];
+let INCID_PAGE=1, INCID_PAGE_SIZE=10, INCID_SORT_KEY="fecha", INCID_SORT_DIR="desc";
+
+function resetIncidFilters(){
+  ["fEquipo","fTipo","fRes","filtroIncid"].forEach(id => { const el = byId(id); if (el) el.value = ""; });
+  renderIncidTable();
+}
 
 async function addIncid(){
-  if(currentUser.group==="guest"){ alert("Inicia sesión para registrar incidencias."); return; }
-  const btn = byId('btnAddIncid'); if (btn) btn.disabled = true;
+  if (currentUser.group === "guest"){ alert("Inicia sesión para registrar incidencias."); return; }
+  const btn = byId("btnAddIncid"); if (btn) btn.disabled = true;
 
   const item = {
-    equipo: val('iEquipo'), tipo: val('iTipo'), res: val('iRes'),
-    rep: val('iRep'), repTxt: (val('iRepTxt')||'').trim(),
-    hParo: Number(val('iHParo')||0)||0, hRep: Number(val('iHRep')||0)||0,
-    inicio: val('iInicio')||'', fin: val('iFin')||'',
-    reportante: (val('iReport')||'').trim(), asignado: (val('iAsignado')||'').trim(),
-    adj: '', desc: (val('iDesc')||'').trim()
+    equipo: val("iEquipo"), tipo: val("iTipo"), res: val("iRes"),
+    rep: val("iRep"), repTxt: (val("iRepTxt") || "").trim(),
+    hParo: Number(val("iHParo") || 0) || 0, hRep: Number(val("iHRep") || 0) || 0,
+    inicio: val("iInicio") || "", fin: val("iFin") || "",
+    reportante: (val("iReport") || "").trim(), asignado: (val("iAsignado") || "").trim(),
+    adj: "", desc: (val("iDesc") || "").trim()
   };
 
-  if(!item.equipo){ alert("Selecciona un equipo."); if (btn) btn.disabled = false; return; }
+  if (!item.equipo){ alert("Selecciona un equipo."); if (btn) btn.disabled = false; return; }
 
   try{
-    const r = await apiPost({res:'incid', fn:'add', item, actor: currentUser.user});
-    if(!r?.ok){ throw new Error('No se pudo guardar'); }
-    toast('Incidencia registrada');
-    ['iRepTxt','iHParo','iHRep','iInicio','iFin','iReport','iAsignado','iDesc'].forEach(id=>{
-      const el=byId(id); if(el){ el.value = (id==='iHParo'||id==='iHRep') ? 0 : '' }
+    const r = await apiPost({res:"incid", fn:"add", item, actor: currentUser.user});
+    if (!r?.ok) throw new Error("No se pudo guardar");
+    toast("Incidencia registrada");
+    ["iRepTxt","iHParo","iHRep","iInicio","iFin","iReport","iAsignado","iDesc"].forEach(id=>{
+      const el = byId(id); if (el) el.value = (id === "iHParo" || id === "iHRep") ? 0 : "";
     });
-    byId('iRep').value='No'; byId('iTipo').value='Correctivo'; byId('iRes').value='Solucionado';
+    byId("iRep").value = "No"; byId("iTipo").value = "Correctivo"; byId("iRes").value = "Solucionado";
     await loadIncid(); await loadState();
-  }catch(err){ console.error(err); alert('Error al registrar la incidencia.'); }
-  finally{ if (btn) btn.disabled = false; }
+  }catch(err){
+    console.error(err); alert("Error al registrar la incidencia.");
+  }finally{
+    if (btn) btn.disabled = false;
+  }
 }
 
 async function loadIncid(){
-  const st = await apiGet({res:'state',fn:'list'}); 
-  STATE = st.ok ? st.items : [];
-  const inc = await apiGet({res:'incid',fn:'list'}); 
-  INCIDS_ALL = inc.ok ? inc.items : [];
+  const st  = await apiGet({res:"state", fn:"list"});  STATE      = st.ok  ? st.items : [];
+  const inc = await apiGet({res:"incid", fn:"list"});  INCIDS_ALL = inc.ok ? inc.items : [];
 
-  byId('iEquipo').innerHTML = STATE.map(x=>`<option>${esc(x.nombre)}</option>`).join('');
+  byId("iEquipo").innerHTML = STATE.map(x => `<option>${esc(x.nombre)}</option>`).join("");
   buildIncidFilters();
 
-  if(!byId('filtroIncid').dataset.bound){
-    byId('filtroIncid').addEventListener('input',renderIncidTable);
-    ['fEquipo','fTipo','fRes'].forEach(id=>byId(id).addEventListener('change',renderIncidTable));
-    byId('filtroIncid').dataset.bound='1';
+  if (!byId("filtroIncid").dataset.bound){
+    byId("filtroIncid").addEventListener("input", renderIncidTable);
+    ["fEquipo","fTipo","fRes"].forEach(id => byId(id).addEventListener("change", renderIncidTable));
+    byId("filtroIncid").dataset.bound = "1";
   }
-
   renderIncidTable();
 }
 
 function renderIncidTable(){
-  const wrap = byId('incidTableWrap'); if(!wrap) return;
-  const rows = (INCIDS_ALL||[]).slice(0, Math.min(INCIDS_ALL.length, 10)).map(x=>`
+  const wrap = byId("incidTableWrap"); if (!wrap) return;
+  const rows = (INCIDS_ALL || []).slice(0, Math.min(INCIDS_ALL.length, 10)).map(x=>`
     <tr>
       <td class="nowrap">${fmtDate(x.created)}</td>
-      <td>${esc(x.equipo||'')}</td>
-      <td>${esc(x.tipo||'')}</td>
-      <td>${esc(x.res||'')}</td>
-      <td>${esc(x.desc||'')}</td>
-      <td class="num">${fmt(x.hParo||0)}</td>
-      <td class="num">${fmt(x.hRep||0)}</td>
-    </tr>
-  `).join('');
+      <td>${esc(x.equipo || "")}</td>
+      <td>${esc(x.tipo || "")}</td>
+      <td>${esc(x.res  || "")}</td>
+      <td>${esc(x.desc || "")}</td>
+      <td class="num">${fmt(x.hParo || 0)}</td>
+      <td class="num">${fmt(x.hRep  || 0)}</td>
+    </tr>`).join("");
   wrap.innerHTML = `
     <table>
-      <thead>
-        <tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada</th><th>Reparación</th></tr>
-      </thead>
+      <thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada</th><th>Reparación</th></tr></thead>
       <tbody>${rows || '<tr><td colspan="7">Sin incidencias</td></tr>'}</tbody>
-    </table>
-  `;
+    </table>`;
 }
 
-/* filtros normalizados */
 function buildIncidFilters(){
-  const equipos = [...new Set(INCIDS_ALL.map(x=>String(x.equipo||'').trim()))].sort((a,b)=>a.localeCompare(b,'es'));
-  const tipos   = [...new Set(INCIDS_ALL.map(x=>String(x.tipo||'').trim()))].sort((a,b)=>a.localeCompare(b,'es'));
-  const resul   = [...new Set(INCIDS_ALL.map(x=>String(x.res||'').trim()))].sort((a,b)=>a.localeCompare(b,'es'));
+  const equipos = [...new Set(INCIDS_ALL.map(x => String(x.equipo || "").trim()))].sort((a,b)=>a.localeCompare(b,"es"));
+  const tipos   = [...new Set(["Correctivo","Preventivo","Predictivo","Mejora", ...INCIDS_ALL.map(x=>String(x.tipo||"").trim())])].sort((a,b)=>a.localeCompare(b,"es"));
+  const resul   = [...new Set(["Solucionado","Con restricciones","Parada", ...INCIDS_ALL.map(x=>String(x.res||"").trim())])].sort((a,b)=>a.localeCompare(b,"es"));
 
-  byId('fEquipo').innerHTML = `<option value="">Equipo: todos</option>` + equipos.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
-  byId('fTipo').innerHTML   = `<option value="">Tipo: todos</option>` + ["Correctivo","Preventivo","Predictivo","Mejora",...tipos].map(n=>`<option>${esc(n)}</option>`).join('');
-  byId('fRes').innerHTML    = `<option value="">Resultado: todos</option>` + ["Solucionado","Con restricciones","Parada",...resul].map(n=>`<option>${esc(n)}</option>`).join('');
+  byId("fEquipo").innerHTML = `<option value="">Equipo: todos</option>` + equipos.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  byId("fTipo").innerHTML   = `<option value="">Tipo: todos</option>`   + tipos.map(n => `<option>${esc(n)}</option>`).join("");
+  byId("fRes").innerHTML    = `<option value="">Resultado: todos</option>` + resul.map(n => `<option>${esc(n)}</option>`).join("");
 }
 
-/* sort/paginación (stub visual – tabla simple usa top-10) */
-function setIncidSort(key){
-  if(INCID_SORT_KEY===key){INCID_SORT_DIR=INCID_SORT_DIR==='asc'?'desc':'asc'}
-  else{INCID_SORT_KEY=key;INCID_SORT_DIR=(key==='fecha'?'desc':'asc')}
-  renderIncidTable()
-}
-
-/* =========================
-   KPIs + Gráficos
-========================= */
+/* KPIs + Charts */
 function groupByWeek(arr){
-  const g={};for(const x of arr){
-    const d=new Date(x.created);
-    const a=new Date(Date.UTC(d.getFullYear(),0,1));
-    const n=Math.floor((d-a)/86400000)+a.getUTCDay();
-    const w=`${d.getFullYear()}-W${Math.floor(n/7)+1}`;(g[w]??=[]).push(x)}
-  return g
+  const g = {};
+  for (const x of arr){
+    const d = new Date(x.created);
+    const a = new Date(Date.UTC(d.getFullYear(), 0, 1));
+    const n = Math.floor((d - a) / 86400000) + a.getUTCDay();
+    const w = `${d.getFullYear()}-W${Math.floor(n/7) + 1}`;
+    (g[w] ??= []).push(x);
+  }
+  return g;
 }
-function kpiMTTR(list){const s=list.reduce((p,x)=>p+(+x.hRep||0),0);const n=list.length||1;return s/n}
-function kpiMTBF(list){const horas=4*30*24;const fallas=list.length||1;return horas/fallas}
-function kpiDisp(list){const prodH=120;const perd=list.reduce((p,x)=>p+(+x.hParo||0),0);return Math.max(0,(prodH-perd)/prodH)}
-function kpiOEE(disp){return disp*0.9*0.98}
+function kpiMTTR(list){ const s = list.reduce((p,x)=> p + (+x.hRep  || 0), 0); const n = list.length || 1; return s / n; }
+function kpiMTBF(list){ const horas = 4 * 30 * 24; const fallas = list.length || 1; return horas / fallas; }
+function kpiDisp(list){ const prodH = 120; const perd = list.reduce((p,x)=> p + (+x.hParo || 0), 0); return Math.max(0, (prodH - perd) / prodH); }
+function kpiOEE(disp){ return disp * 0.9 * 0.98; }
+
 function calcKPIs(){
-  const mttr=kpiMTTR(INCIDS_ALL),mtbf=kpiMTBF(INCIDS_ALL),disp=kpiDisp(INCIDS_ALL),oee=kpiOEE(disp);
-  setTxt('kpiMttrG',fmt(mttr));setTxt('kpiMbfG',fmt(mtbf));setTxt('kpiDispG',fmt(disp*100));setTxt('kpiOeeG',fmt(oee*100))
+  const mttr = kpiMTTR(INCIDS_ALL), mtbf = kpiMTBF(INCIDS_ALL), disp = kpiDisp(INCIDS_ALL), oee = kpiOEE(disp);
+  setTxt("kpiMttrG", fmt(mttr)); setTxt("kpiMbfG", fmt(mtbf)); setTxt("kpiDispG", fmt(disp * 100)); setTxt("kpiOeeG", fmt(oee * 100));
 }
-let charts={};
-function draw(id,labels,data,label){
-  const ctx=byId(id).getContext('2d');if(charts[id])charts[id].destroy();
-  charts[id]=new Chart(ctx,{type:'line',data:{labels,datasets:[{label,borderWidth:2,pointRadius:0,data}]},
-    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#0f172a'}},y:{ticks:{color:'#0f172a'}}}})}
+
+let charts = {};
+function draw(id, labels, data, label){
+  const ctx = byId(id).getContext("2d");
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets: [{ label, borderWidth: 2, pointRadius: 0, data }] },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
+}
 function drawAllCharts(){
   const weeks = groupByWeek(INCIDS_ALL);
   const labels = Object.keys(weeks).sort((a,b)=>{
-    const [ya, wa] = a.split('-W').map(Number);
-    const [yb, wb] = b.split('-W').map(Number);
-    return ya===yb ? wa-wb : ya-yb;
+    const [ya, wa] = a.split("-W").map(Number);
+    const [yb, wb] = b.split("-W").map(Number);
+    return ya === yb ? (wa - wb) : (ya - yb);
   });
-  draw('chartMttr',labels,labels.map(w=>kpiMTTR(weeks[w])),'MTTR');
-  draw('chartMtbf',labels,labels.map(w=>kpiMTBF(weeks[w])),'MTBF');
-  draw('chartDisp',labels,labels.map(w=>kpiDisp(weeks[w])*100),'Disponibilidad %');
-  draw('chartOee',labels,labels.map(w=>kpiOEE(kpiDisp(weeks[w]))*100),'OEE %')
+  draw("chartMttr", labels, labels.map(w => kpiMTTR(weeks[w])), "MTTR");
+  draw("chartMtbf", labels, labels.map(w => kpiMTBF(weeks[w])), "MTBF");
+  draw("chartDisp", labels, labels.map(w => kpiDisp(weeks[w]) * 100), "Disponibilidad %");
+  draw("chartOee",  labels, labels.map(w => kpiOEE(kpiDisp(weeks[w])) * 100), "OEE %");
 }
 
-/* =========================
-   OT
-========================= */
-let OTS=[];let OT_PAGE=1,OT_PAGE_SIZE=10,OT_SORT_KEY='fecha',OT_SORT_DIR='desc';
+/* OT */
+let OTS = [];
+let OT_PAGE=1, OT_PAGE_SIZE=10, OT_SORT_KEY="fecha", OT_SORT_DIR="desc";
+
 async function loadOT(){
-  const st=await apiGet({res:'state',fn:'list'});STATE=st.ok?st.items:[];
-  const ot=await apiGet({res:'ot',fn:'list'});OTS=ot.ok?ot.items:[];
-  byId('otEquipo').innerHTML=STATE.map(x=>`<option>${esc(x.nombre)}</option>`).join('');
-  renderOT()
+  const st = await apiGet({res:"state", fn:"list"}); STATE = st.ok ? st.items : [];
+  const ot = await apiGet({res:"ot", fn:"list"});     OTS   = ot.ok ? ot.items : [];
+  byId("otEquipo").innerHTML = STATE.map(x => `<option>${esc(x.nombre)}</option>`).join("");
+  renderOT();
 }
+
 function setOTSort(key){
-  if(OT_SORT_KEY===key){OT_SORT_DIR=(OT_SORT_DIR==='asc'?'desc':'asc')}
-  else{OT_SORT_KEY=key;OT_SORT_DIR=(key==='fecha'?'desc':'asc')}
-  renderOT()
+  if (OT_SORT_KEY === key){ OT_SORT_DIR = (OT_SORT_DIR === "asc" ? "desc" : "asc"); }
+  else { OT_SORT_KEY = key; OT_SORT_DIR = (key === "fecha" ? "desc" : "asc"); }
+  renderOT();
 }
-function setOTPage(n){OT_PAGE=Math.max(1,n);renderOT()}
-function setOTPageSize(n){OT_PAGE_SIZE=+n||10;OT_PAGE=1;renderOT()}
+function setOTPage(n){ OT_PAGE = Math.max(1, n); renderOT(); }
+function setOTPageSize(n){ OT_PAGE_SIZE = +n || 10; OT_PAGE = 1; renderOT(); }
+
 function renderOT(){
-  let arr=[...OTS];const dir=(OT_SORT_DIR==='asc'?1:-1);
+  let arr = [...OTS];
+  const dir = (OT_SORT_DIR === "asc" ? 1 : -1);
   arr.sort((a,b)=>{
-    let A,B;switch(OT_SORT_KEY){
-      case'fecha':A=new Date(a.created).getTime();B=new Date(b.created).getTime();break;
-      case'titulo':A=a.titulo||'';B=b.titulo||'';break;
-      case'prioridad':A=a.prioridad||'';B=b.prioridad||'';break;
-      case'asignado':A=a.asignado||'';B=b.asignado||'';break;
-      case'vence':A=a.vencimiento||'';B=b.vencimiento||'';break;
-      case'estado':A=a.estado||'';B=b.estado||'';break;
-      default:A=0;B=0
+    let A,B;
+    switch(OT_SORT_KEY){
+      case "fecha":     A = new Date(a.created).getTime(); B = new Date(b.created).getTime(); break;
+      case "titulo":    A = a.titulo || ""; B = b.titulo || ""; break;
+      case "prioridad": A = a.prioridad || ""; B = b.prioridad || ""; break;
+      case "asignado":  A = a.asignado  || ""; B = b.asignado  || ""; break;
+      case "vence":     A = a.vencimiento || ""; B = b.vencimiento || ""; break;
+      case "estado":    A = a.estado || ""; B = b.estado || ""; break;
+      default:          A = 0; B = 0;
     }
-    if(typeof A==='string'&&typeof B==='string')return A.localeCompare(B,'es')*dir;
-    return (A===B?0:(A>B?1:-1))*dir
+    if (typeof A === "string" && typeof B === "string") return A.localeCompare(B, "es") * dir;
+    return (A === B ? 0 : (A > B ? 1 : -1)) * dir;
   });
-  const total=arr.length;const pages=Math.max(1,Math.ceil(total/OT_PAGE_SIZE));OT_PAGE=Math.min(OT_PAGE,pages);
-  const start=(OT_PAGE-1)*OT_PAGE_SIZE;arr=arr.slice(start,start+OT_PAGE_SIZE);
-  const rows=arr.map(o=>`<tr>
-    <td class="nowrap">${fmtDate(o.created)}</td>
-    <td><b>${esc(o.titulo||'')}</b><div class="sub">${esc(o.equipo)}</div></td>
-    <td>${esc(o.prioridad||'')}</td>
-    <td>${esc(o.asignado||'')}</td>
-    <td class="nowrap">${esc(o.vencimiento||'')}</td>
-    <td>${esc(o.estado||'')}</td>
-  </tr>`).join('');
-  byId('otTableWrap').innerHTML=`
+
+  const total = arr.length;
+  const pages = Math.max(1, Math.ceil(total / OT_PAGE_SIZE));
+  OT_PAGE = Math.min(OT_PAGE, pages);
+  const start = (OT_PAGE - 1) * OT_PAGE_SIZE;
+  arr = arr.slice(start, start + OT_PAGE_SIZE);
+
+  const rows = arr.map(o=>`
+    <tr>
+      <td class="nowrap">${fmtDate(o.created)}</td>
+      <td><b>${esc(o.titulo || "")}</b><div class="sub">${esc(o.equipo)}</div></td>
+      <td>${esc(o.prioridad || "")}</td>
+      <td>${esc(o.asignado  || "")}</td>
+      <td class="nowrap">${esc(o.vencimiento || "")}</td>
+      <td>${esc(o.estado || "")}</td>
+    </tr>`).join("");
+
+  byId("otTableWrap").innerHTML = `
     <table>
       <thead>
         <tr>
@@ -919,138 +1023,93 @@ function renderOT(){
           <th><button class="page-btn" onclick="setOTSort('estado')">Estado ${OT_SORT_KEY==='estado'?(OT_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button></th>
         </tr>
       </thead>
-      <tbody>${rows||''}</tbody>
+      <tbody>${rows || '<tr><td colspan="6">Sin órdenes de trabajo</td></tr>'}</tbody>
     </table>
     <div class="pager">
       <button class="page-btn" onclick="setOTPage(${OT_PAGE-1})" ${OT_PAGE<=1?'disabled':''}>‹</button>
       <span> Página ${OT_PAGE} </span>
       <button class="page-btn" onclick="setOTPage(${OT_PAGE+1})" ${(OT_PAGE*OT_PAGE_SIZE)>=total?'disabled':''}>›</button>
-    </div>
-  `;
-}
-async function addOT(){
-  if(currentUser.group==="guest"){alert("Tu rol no puede crear OT.");return}
-  if(!val('otEquipo')||!val('otPri')||!(val('otTitulo')||'').trim()||!val('otDue')){
-    alert('Completa los campos obligatorios');return}
-  const item={equipo:val('otEquipo'),prioridad:val('otPri'),titulo:val('otTitulo').trim(),asignado:val('otAsign'),vencimiento:val('otDue'),adj:val('otAdj'),desc:(val('otDesc')||'').trim()};
-  await apiPost({res:'ot',fn:'add',item,actor:currentUser.user});
-  toast('OT creada');['otTitulo','otAsign','otAdj','otDesc'].forEach(id=>byId(id).value='');await loadOT()
-}
-function exportOTPDF(){
-  const g=currentUser.group;
-  if(!(g==="admin"||g==="gerente"||g==="tcoint")){ alert("No permitido"); return; }
-
-  const w=window.open('','_blank','noopener,noreferrer');
-  if(!w){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
-  w.opener = null;
-
-  const rows=OTS.map(o=>`<tr>
-    <td>${fmtDate(o.created)}</td>
-    <td>${esc(o.titulo||'')}</td>
-    <td>${esc(o.equipo||'')}</td>
-    <td>${esc(o.prioridad||'')}</td>
-    <td>${esc(o.asignado||'')}</td>
-    <td>${esc(o.vencimiento||'')}</td>
-  </tr>`).join('');
-
-  w.document.write(`<!doctype html><meta charset="utf-8"><title>OT</title>
-  <style>body{font-family:Inter,sans-serif;padding:16px}
-  table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px}</style>
-  <h2>Órdenes de trabajo</h2>
-  <table><tr><th>Fecha</th><th>Título</th><th>Equipo</th><th>Prioridad</th><th>Asignado</th><th>Vence</th></tr>${rows}</table>`);
-  w.document.close();
+    </div>`;
 }
 
-/* =========================
-   Inventario
-========================= */
-let INV=[];let INV_PAGE=1,INV_PAGE_SIZE=10,INV_SORT_KEY='ref',INV_SORT_DIR='asc';
-const QR_SEL = new Set(); // Refs seleccionados para exportar QR
+/* Inventario */
+let INV = [];
+let INV_PAGE=1, INV_PAGE_SIZE=10, INV_SORT_KEY="ref", INV_SORT_DIR="asc";
+const QR_SEL = new Set();
 
 async function loadInv(){
-  const j=await apiGet({res:'inv',fn:'list'});
-  INV=j.ok?j.items:[];
+  const j = await apiGet({res:"inv", fn:"list"});
+  INV = j.ok ? j.items : [];
   renderInv();
   renderInvAlerts();
 }
-function toggleInvAlerts(){ byId('invAlerts').classList.toggle('hidden') }
+function toggleInvAlerts(){ byId("invAlerts").classList.toggle("hidden"); }
 
-/* header checkbox sync */
 function syncInvHeader(){
-  const hdr = byId('invQrAll');
+  const hdr = byId("invQrAll");
   if(!hdr) return;
-
-  const checks = [...document.querySelectorAll('#invTableWrap .qrck')];
+  const checks = [...document.querySelectorAll("#invTableWrap .qrck")];
   if(!checks.length){ hdr.checked = false; hdr.indeterminate = false; return; }
-
-  const refsVisible = checks.map(c => (c.closest('tr')?.querySelector('b')?.textContent || '').toUpperCase());
+  const refsVisible = checks.map(c => (c.closest("tr")?.querySelector("b")?.textContent || "").toUpperCase());
   const allOn  = refsVisible.every(ref => QR_SEL.has(ref));
   const noneOn = refsVisible.every(ref => !QR_SEL.has(ref));
-
   hdr.checked = allOn;
   hdr.indeterminate = !allOn && !noneOn;
 }
 function renderInvAlerts(){
-  const badge = byId('invAlertWrap');
-  const box   = byId('invAlerts');
+  const badge = byId("invAlertWrap");
+  const box   = byId("invAlerts");
   if(!badge || !box) return;
-
-  const lows = (INV||[]).filter(x => (+x.stock||0) <= (+x.minimo||0));
-
+  const lows = (INV || []).filter(x => (+x.stock || 0) <= (+x.minimo || 0));
   if(!lows.length){
-    badge.classList.add('hidden');
-    badge.textContent = 'Alertas';
-    box.innerHTML = '';
-    return;
+    badge.classList.add("hidden"); badge.textContent = "Alertas"; box.innerHTML = ""; return;
   }
-
-  badge.classList.remove('hidden');
+  badge.classList.remove("hidden");
   badge.textContent = `Alertas (${lows.length})`;
-
   box.innerHTML = lows.map(x => `
     <div class="badge-chip badge-low" style="display:inline-flex;margin:4px 6px 0 0">
-      <b style="margin-right:.35rem">${esc(String(x.ref||'').toUpperCase())}</b> ${esc(x.nombre||'')}
-      &nbsp;·&nbsp;<span>Stock: ${+x.stock||0}/${+x.minimo||0}</span>
-    </div>
-  `).join('');
+      <b style="margin-right:.35rem">${esc(String(x.ref || "").toUpperCase())}</b> ${esc(x.nombre || "")}
+      &nbsp;·&nbsp;<span>Stock: ${+x.stock || 0}/${+x.minimo || 0}</span>
+    </div>`).join("");
 }
 function setInvSort(key){
-  if(INV_SORT_KEY===key){ INV_SORT_DIR=INV_SORT_DIR==='asc'?'desc':'asc' }
-  else{ INV_SORT_KEY=key; INV_SORT_DIR='asc' }
+  if (INV_SORT_KEY === key){ INV_SORT_DIR = (INV_SORT_DIR === "asc" ? "desc" : "asc"); }
+  else { INV_SORT_KEY = key; INV_SORT_DIR = "asc"; }
   renderInv();
 }
-function setInvPage(n){ INV_PAGE=Math.max(1,n); renderInv() }
-function setInvPageSize(n){ INV_PAGE_SIZE=+n||10; INV_PAGE=1; renderInv() }
+function setInvPage(n){ INV_PAGE = Math.max(1, n); renderInv(); }
+function setInvPageSize(n){ INV_PAGE_SIZE = +n || 10; INV_PAGE = 1; renderInv(); }
 
 function renderInv(){
-  const q=(byId('invSearch').value||"").toLowerCase();
-  let arr=INV.filter(x=>(String(x.nombre||'')+String(x.ref||'')).toLowerCase().includes(q));
+  const q = (byId("invSearch").value || "").toLowerCase();
+  let arr = INV.filter(x => (String(x.nombre || "") + String(x.ref || "")).toLowerCase().includes(q));
 
-  const dir=(INV_SORT_DIR==='asc'?1:-1);
+  const dir = (INV_SORT_DIR === "asc" ? 1 : -1);
   arr.sort((a,b)=>{
-    let A,B;switch(INV_SORT_KEY){
-      case'ref':A=a.ref||'';B=b.ref||'';break;
-      case'nombre':A=a.nombre||'';B=b.nombre||'';break;
-      case'stock':A=+a.stock||0;B=+b.stock||0;break;
-      case'minimo':A=+a.minimo||0;B=+b.minimo||0;break;
-      default:A=0;B=0
+    let A,B;
+    switch(INV_SORT_KEY){
+      case "ref":    A = a.ref || "";     B = b.ref || ""; break;
+      case "nombre": A = a.nombre || "";  B = b.nombre || ""; break;
+      case "stock":  A = +a.stock || 0;   B = +b.stock || 0; break;
+      case "minimo": A = +a.minimo || 0;  B = +b.minimo || 0; break;
+      default:       A = 0;               B = 0;
     }
-    if(typeof A==='string'&&typeof B==='string')return A.localeCompare(B,'es')*dir;
-    return (A===B?0:(A>B?1:-1))*dir
+    if (typeof A === "string" && typeof B === "string") return A.localeCompare(B,"es") * dir;
+    return (A === B ? 0 : (A > B ? 1 : -1)) * dir;
   });
 
-  const total=arr.length;
-  const pages=Math.max(1,Math.ceil(total/INV_PAGE_SIZE));
-  INV_PAGE=Math.min(INV_PAGE,pages);
-  const start=(INV_PAGE-1)*INV_PAGE_SIZE;
-  arr=arr.slice(start,start+INV_PAGE_SIZE);
+  const total = arr.length;
+  const pages = Math.max(1, Math.ceil(total / INV_PAGE_SIZE));
+  INV_PAGE = Math.min(INV_PAGE, pages);
+  const start = (INV_PAGE - 1) * INV_PAGE_SIZE;
+  arr = arr.slice(start, start + INV_PAGE_SIZE);
 
-  const rows=arr.map(x=>{
-    const low=(+x.stock||0)<= (+x.minimo||0);
-    const refRaw = String(x.ref||'').toUpperCase();
-    const refEsc = JSON.stringify(refRaw).slice(1,-1);
-    const checked = QR_SEL.has(refRaw) ? 'checked' : '';
-    return `<tr class="${low?'row-low':''}">
+  const rows = arr.map(x=>{
+    const low = (+x.stock || 0) <= (+x.minimo || 0);
+    const refRaw = String(x.ref || "").toUpperCase();
+    const refEsc = JSON.stringify(refRaw).slice(1, -1);
+    const checked = QR_SEL.has(refRaw) ? "checked" : "";
+    return `<tr class="${low ? "row-low" : ""}">
       <td class="num" style="text-align:center;width:54px">
         <input class="qrck" type="checkbox" ${checked}
           aria-label="Seleccionar ${esc(refRaw)}"
@@ -1058,22 +1117,22 @@ function renderInv(){
       </td>
       <td>
         <b>${esc(refRaw)}</b> <span class="qr-s" title="QR" onclick="openRepuestoByRef('${refEsc}')"></span>
-        <div class="sub">${esc(x.nombre||'')}</div>
-        ${low?`<div class="badge-low" style="display:inline-flex;gap:.35rem;padding:.18rem .5rem;border-radius:999px;font-weight:800">Bajo mínimo</div>`:''}
+        <div class="sub">${esc(x.nombre || "")}</div>
+        ${low ? '<div class="badge-low" style="display:inline-flex;gap:.35rem;padding:.18rem .5rem;border-radius:999px;font-weight:800">Bajo mínimo</div>' : ''}
       </td>
-      <td class="num"><span class="linkish" tabindex="0" onclick="editStock('${refEsc}',${+x.stock||0})">${+x.stock||0}</span></td>
-      <td class="num">${+x.minimo||0}</td>
+      <td class="num"><span class="linkish" tabindex="0" onclick="editStock('${refEsc}',${+x.stock || 0})">${+x.stock || 0}</span></td>
+      <td class="num">${+x.minimo || 0}</td>
       <td>
         <button class="btn gloss" onclick="delta('${refEsc}',-1)">–1</button>
         <button class="btn gloss" onclick="delta('${refEsc}',+1)">+1</button>
         <button class="btn gloss" onclick="openRepuestoByRef('${refEsc}')">QR</button>
       </td>
-    </tr>`
-  }).join('');
+    </tr>`;
+  }).join("");
 
-  const th=(label,key)=>`<button class="page-btn" onclick="setInvSort('${key}')">${label} ${INV_SORT_KEY===key?(INV_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button>`;
+  const th = (label,key)=>`<button class="page-btn" onclick="setInvSort('${key}')">${label} ${INV_SORT_KEY===key?(INV_SORT_DIR==='asc'?'▲':'▼'):'↕'}</button>`;
 
-  byId('invTableWrap').innerHTML=`
+  byId("invTableWrap").innerHTML = `
     <table><thead><tr>
       <th style="width:54px;text-align:center">
         <input id="invQrAll" type="checkbox" aria-label="Seleccionar visibles"
@@ -1086,9 +1145,9 @@ function renderInv(){
             syncInvHeader();
           ">
       </th>
-      <th>${th('Repuesto','ref')}</th>
-      <th>${th('Stock','stock')}</th>
-      <th>${th('Mínimo','minimo')}</th>
+      <th>${th("Repuesto","ref")}</th>
+      <th>${th("Stock","stock")}</th>
+      <th>${th("Mínimo","minimo")}</th>
       <th>Acciones</th>
     </tr></thead><tbody>${rows}</tbody></table>
     <div class="pager">
@@ -1102,183 +1161,244 @@ function renderInv(){
           <option ${INV_PAGE_SIZE==50?'selected':''}>50</option>
         </select>
       </label>
-    </div>
-  `;
+    </div>`;
 
   renderInvAlerts();
   syncInvHeader();
 }
 async function addInv(){
-  if(currentUser.group==="guest"){alert("Inicia sesión para añadir repuestos.");return}
-  const nombre=(val('invNombre')||'').trim(),
-        ref=(val('invRef')||'').trim().toUpperCase(),
-        stock=Number(val('invStock')),
-        minimo=Number(val('invMin'));
-  if(!ref||!nombre||!Number.isFinite(stock)||stock<0||!Number.isFinite(minimo)||minimo<0){
-    alert('Revisa los campos.');return
+  if (currentUser.group === "guest"){ alert("Inicia sesión para añadir repuestos."); return; }
+  const nombre = (val("invNombre") || "").trim();
+  const ref    = (val("invRef")    || "").trim().toUpperCase();
+  const stock  = Number(val("invStock"));
+  const minimo = Number(val("invMin"));
+  if (!ref || !nombre || !Number.isFinite(stock) || stock < 0 || !Number.isFinite(minimo) || minimo < 0){
+    alert("Revisa los campos."); return;
   }
-  await apiPost({res:'inv',fn:'add',item:{nombre,ref,stock:Math.floor(stock),minimo:Math.floor(minimo)},actor:currentUser.user});
-  toast('Repuesto añadido');
-  ['invNombre','invRef','invStock','invMin'].forEach(id=>byId(id).value='');
+  await apiPost({res:"inv", fn:"add", item:{nombre, ref, stock:Math.floor(stock), minimo:Math.floor(minimo)}, actor: currentUser.user});
+  toast("Repuesto añadido");
+  ["invNombre","invRef","invStock","invMin"].forEach(id => byId(id).value = "");
   await loadInv();
 }
 async function delta(ref,d){
-  if(currentUser.group==="guest"){alert("Inicia sesión para modificar stock.");return}
-  await apiPost({res:'inv',fn:'delta',ref,delta:+d||0,actor:currentUser.user});
+  if (currentUser.group === "guest"){ alert("Inicia sesión para modificar stock."); return; }
+  await apiPost({res:"inv", fn:"delta", ref, delta:+d || 0, actor: currentUser.user});
   await loadInv();
 }
 async function editStock(ref,cur){
-  if(currentUser.group==="guest"){alert("Inicia sesión para modificar stock.");return}
-  const nv=prompt("Nuevo stock para "+ref,cur); if(nv===null) return;
-  const num=parseInt(nv,10); if(!Number.isFinite(num)||num<0){alert("Valor inválido");return}
-  const it=INV.find(x=>String(x.ref).toUpperCase()===String(ref).toUpperCase()); if(!it) return;
-  const change=num-(+it.stock||0); if(!change) return;
-  await apiPost({res:'inv',fn:'delta',ref,delta:change,actor:currentUser.user});
+  if (currentUser.group === "guest"){ alert("Inicia sesión para modificar stock."); return; }
+  const nv = prompt("Nuevo stock para " + ref, cur); if (nv === null) return;
+  const num = parseInt(nv, 10); if (!Number.isFinite(num) || num < 0){ alert("Valor inválido"); return; }
+  const it = INV.find(x => String(x.ref).toUpperCase() === String(ref).toUpperCase()); if (!it) return;
+  const change = num - (+it.stock || 0); if (!change) return;
+  await apiPost({res:"inv", fn:"delta", ref, delta: change, actor: currentUser.user});
   await loadInv();
 }
 
-/* =========================
-   Dashboard TV
-========================= */
-let TV_TIMER=null;
+/* TV */
+let TV_TIMER = null;
 async function loadTVOnce(){
-  const st=await apiGet({res:'state',fn:'list'});STATE=st.ok?st.items:[];
-  const inv=await apiGet({res:'inv',fn:'list'});INV=inv.ok?inv.items:[];
+  const st  = await apiGet({res:"state", fn:"list"}); STATE = st.ok ? st.items : [];
+  const inv = await apiGet({res:"inv", fn:"list"});   INV   = inv.ok ? inv.items : [];
   renderTV();
 }
 function renderTV(){
-  const par=STATE.filter(x=>x.estado==='Parada');const res=STATE.filter(x=>x.estado==='Restricciones');const low=INV.filter(x=>+x.stock<=+x.minimo);
-  byId('tvParados').innerHTML=par.length?par.map(x=>`<div class="tv-item stop">PARADA — ${esc(x.nombre)}</div>`).join(''):`<div class="tv-item">Sin paradas</div>`;
-  byId('tvRestr').innerHTML=res.length?res.map(x=>`<div class="tv-item warn">RESTRICCIONES — ${esc(x.nombre)}</div>`).join(''):`<div class="tv-item">Sin restricciones</div>`;
-  byId('tvStock').innerHTML=low.length?low.map(x=>`<div class="tv-item stock">BAJO MÍNIMO — ${esc(x.ref)} · ${esc(x.nombre)} (${x.stock}/${x.minimo})</div>`).join(''):`<div class="tv-item">Stock correcto</div>`
+  const par = STATE.filter(x => x.estado === "Parada");
+  const res = STATE.filter(x => x.estado === "Restricciones");
+  const low = INV.filter(x => (+x.stock) <= (+x.minimo));
+  byId("tvParados").innerHTML = par.length ? par.map(x => `<div class="tv-item stop">PARADA — ${esc(x.nombre)}</div>`).join("") : `<div class="tv-item">Sin paradas</div>`;
+  byId("tvRestr").innerHTML   = res.length ? res.map(x => `<div class="tv-item warn">RESTRICCIONES — ${esc(x.nombre)}</div>`).join("") : `<div class="tv-item">Sin restricciones</div>`;
+  byId("tvStock").innerHTML   = low.length ? low.map(x => `<div class="tv-item stock">BAJO MÍNIMO — ${esc(x.ref)} · ${esc(x.nombre)} (${x.stock}/${x.minimo})</div>`).join("") : `<div class="tv-item">Stock correcto</div>`;
 }
 function initTV(){
   loadTVOnce();
-  if(TV_TIMER) clearInterval(TV_TIMER);
-  TV_TIMER=setInterval(loadTVOnce,10000);
+  if (TV_TIMER) clearInterval(TV_TIMER);
+  TV_TIMER = setInterval(loadTVOnce, 10000);
 }
 
-/* =========================
-   Detalles (QR / routing)
-========================= */
-function slugify(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}
-function baseURL(){return location.origin+location.pathname}
-function ensureSectionsHidden(){['equipos','gruas','otros','incidencias','indicadores','ot','inventario','tv','equipo','repuesto'].forEach(s=>{const el=byId('page-'+s);if(el)el.classList.add('hidden')})}
-function openEquipoByName(name){const slug=slugify(name);location.hash=\`#/equipo/\${slug}\`;renderEquipoBySlug(slug)}
-function openRepuestoByRef(ref){const code=encodeURIComponent(String(ref||'').toUpperCase());location.hash=\`#/repuesto/\${code}\`;renderRepuestoByRef(code)}
+/* Detalles (QR / routing) — LAS 3 FUNCIONES LIMPIAS */
+function slugify(s){
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+function baseURL(){ return location.origin + location.pathname; }
+
+function ensureSectionsHidden(){
+  const ids = ["equipos","gruas","otros","incidencias","indicadores","ot","inventario","tv","equipo","repuesto"];
+  ids.forEach((s)=>{
+    const el = byId("page-" + s);
+    if (el) el.classList.add("hidden");
+  });
+}
+function openEquipoByName(name){
+  const slug = slugify(name);
+  location.hash = `#/equipo/${slug}`;
+  renderEquipoBySlug(slug);
+}
+function openRepuestoByRef(ref){
+  const code = encodeURIComponent(String(ref || "").toUpperCase());
+  location.hash = `#/repuesto/${code}`;
+  renderRepuestoByRef(code);
+}
+
 function renderEquipoBySlug(slug){
-  const eq=STATE.find(x=>slugify(x.nombre)===slug);
-  ensureSectionsHidden();const host=byId('page-equipo');host.classList.remove('hidden');
-  if(!eq){byId('equipoDetail').innerHTML=\`<div class="kpi">Equipo no encontrado.</div>\`;return}
-  const inc=INCIDS_ALL.filter(i=>i.equipo===eq.nombre).sort((a,b)=>new Date(b.created)-new Date(a.created));
-  const qrText=\`\${baseURL()}#/equipo/\${slug}\`;
-  const htmlInc=inc.length?inc.map(i=>\`<tr><td class="nowrap">\${fmtDate(i.created)}</td><td>\${esc(i.tipo||'')}</td><td>\${esc(i.res||'')}</td><td>\${esc(i.desc||'')}</td><td class="num">\${fmt(i.hParo||0)}</td><td class="num">\${fmt(i.hRep||0)}</td></tr>\`).join(''):\`<tr><td colspan="6">Sin incidencias registradas.</td></tr>\`;
-  const safeTitle = JSON.stringify(String(eq.nombre||'')).slice(1,-1);
-  byId('equipoDetail').innerHTML=\`<div class="kpi"><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div id="eqQR" style="width:160px;height:160px;border:1px dashed #2a3442;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#0f141c"></div><div><h2 style="margin:.2rem 0">\${esc(eq.nombre)}</h2><div class="sub">\${esc(eq.grupo)}</div><div style="margin-top:.5rem"><code>\${qrText}</code></div><div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn gloss" onclick="printQR('eqQR','\${safeTitle}')">Imprimir etiqueta</button><button class="btn gloss" onclick="nav('equipos')">Volver</button></div></div></div></div><div class="kpi" style="margin-top:12px"><h3>Historial de incidencias — \${esc(eq.nombre)}</h3><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada</th><th>Reparación</th></tr></thead><tbody>\${htmlInc}</tbody></table></div>\`;
-  new QRCode(byId('eqQR'),{text:qrText,width:150,height:150,correctLevel:QRCode.CorrectLevel.M})
+  const eq = STATE.find(x => slugify(x.nombre) === slug);
+  ensureSectionsHidden();
+  const host = byId("page-equipo"); host.classList.remove("hidden");
+  if (!eq){ byId("equipoDetail").innerHTML = `<div class="kpi">Equipo no encontrado.</div>`; return; }
+  const inc = INCIDS_ALL.filter(i => i.equipo === eq.nombre).sort((a,b)=> new Date(b.created) - new Date(a.created));
+  const qrText = `${baseURL()}#/equipo/${slug}`;
+  const htmlInc = inc.length ? inc.map(i =>
+    `<tr><td class="nowrap">${fmtDate(i.created)}</td><td>${esc(i.tipo||"")}</td><td>${esc(i.res||"")}</td><td>${esc(i.desc||"")}</td><td class="num">${fmt(i.hParo||0)}</td><td class="num">${fmt(i.hRep||0)}</td></tr>`
+  ).join("") : `<tr><td colspan="6">Sin incidencias registradas.</td></tr>`;
+  const safeTitle = JSON.stringify(String(eq.nombre || "")).slice(1,-1);
+  byId("equipoDetail").innerHTML = `
+    <div class="kpi">
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <div id="eqQR" style="width:160px;height:160px;border:1px dashed #2a3442;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#0f141c"></div>
+        <div>
+          <h2 style="margin:.2rem 0">${esc(eq.nombre)}</h2>
+          <div class="sub">${esc(eq.grupo)}</div>
+          <div style="margin-top:.5rem"><code>${qrText}</code></div>
+          <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn gloss" onclick="printQR('eqQR','${safeTitle}')">Imprimir etiqueta</button>
+            <button class="btn gloss" onclick="nav('equipos')">Volver</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="kpi" style="margin-top:12px">
+      <h3>Historial de incidencias — ${esc(eq.nombre)}</h3>
+      <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada</th><th>Reparación</th></tr></thead><tbody>${htmlInc}</tbody></table>
+    </div>`;
+  new QRCode(byId("eqQR"), { text: qrText, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.M });
 }
+
 function renderRepuestoByRef(code){
-  const ref=decodeURIComponent(code).toUpperCase();
-  const it=INV.find(x=>String(x.ref).toUpperCase()===ref);
-  ensureSectionsHidden();const host=byId('page-repuesto');host.classList.remove('hidden');
-  if(!it){byId('repuestoDetail').innerHTML=\`<div class="kpi">Repuesto no encontrado.</div>\`;return}
-  const qrText=\`\${baseURL()}#/repuesto/\${encodeURIComponent(ref)}\`;
-  const safeRefTitle = JSON.stringify("REP-"+ref).slice(1,-1);
-  byId('repuestoDetail').innerHTML=\`<div class="kpi"><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div id="repQR" style="width:160px;height:160px;border:1px dashed #2a3442;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#0f141c"></div><div><h2 style="margin:.2rem 0">\${esc(it.nombre||'')}</h2><div class="sub"><b>Ref:</b> \${esc(ref)} · <b>Stock:</b> \${+it.stock||0} · <b>Mínimo:</b> \${+it.minimo||0}</div><div style="margin-top:.5rem"><code>\${qrText}</code></div><div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn gloss" onclick="printQR('repQR','\${safeRefTitle}')">Imprimir etiqueta</button><button class="btn gloss" onclick="nav('inventario')">Volver</button></div></div></div></div>\`;
-  new QRCode(byId('repQR'),{text:qrText,width:150,height:150,correctLevel:QRCode.CorrectLevel.M})
+  const ref = decodeURIComponent(code).toUpperCase();
+  const it  = INV.find(x => String(x.ref).toUpperCase() === ref);
+  ensureSectionsHidden();
+  const host = byId("page-repuesto"); host.classList.remove("hidden");
+  if (!it){ byId("repuestoDetail").innerHTML = `<div class="kpi">Repuesto no encontrado.</div>`; return; }
+  const qrText = `${baseURL()}#/repuesto/${encodeURIComponent(ref)}`;
+  const safeRefTitle = JSON.stringify("REP-" + ref).slice(1, -1);
+  byId("repuestoDetail").innerHTML = `
+    <div class="kpi">
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <div id="repQR" style="width:160px;height:160px;border:1px dashed #2a3442;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#0f141c"></div>
+        <div>
+          <h2 style="margin:.2rem 0">${esc(it.nombre || "")}</h2>
+          <div class="sub"><b>Ref:</b> ${esc(ref)} · <b>Stock:</b> ${+it.stock || 0} · <b>Mínimo:</b> ${+it.minimo || 0}</div>
+          <div style="margin-top:.5rem"><code>${qrText}</code></div>
+          <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn gloss" onclick="printQR('repQR','${safeRefTitle}')">Imprimir etiqueta</button>
+            <button class="btn gloss" onclick="nav('inventario')">Volver</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  new QRCode(byId("repQR"), { text: qrText, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.M });
 }
-function printQR(containerId,title){
-  const node=byId(containerId);
-  const img=node.querySelector('img')||node.querySelector('canvas');
-  const src=img.tagName==='CANVAS'?img.toDataURL('image/png'):img.src;
 
-  const w=window.open('','_blank','noopener,noreferrer');
-  if(!w){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
-  w.opener = null;
-
-  w.document.write(`<!doctype html><meta charset="utf-8"><title>${esc(title)}</title>
-  <style>body{font-family:Inter,sans-serif;text-align:center;padding:16px}</style>
-  <h3>${esc(title)}</h3>
-  <img src="${src}" width="220" height="220">
-  <div style="margin-top:8px">${location.origin}${location.pathname}</div>`);
-  w.document.close(); w.focus(); w.print();
-}
-
-/* =========================
-   Exportaciones (CSV/PDF)
-========================= */
-function downloadText(filename, text, mime='text/plain'){
-  const blob = new Blob([text], {type: mime+';charset=utf-8'});
+/* Export */
+function downloadText(filename, text, mime="text/plain"){
+  const blob = new Blob([text], { type: mime + ";charset=utf-8" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = filename;
+  const a = document.createElement("a"); a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
-function toCSVCell(s){
-  var v = (s===undefined || s===null) ? '' : s;
-  return '"' + String(v).replace(/"/g,'""') + '"';
+function toCSVCell(s){ const v = (s === undefined || s === null) ? "" : s; return '"' + String(v).replace(/"/g,'""') + '"'; }
+function exportInvCSV(){
+  // 1) Filtrar según el buscador actual
+  const q = (byId("invSearch").value || "").toLowerCase();
+  let arr = INV.filter(x => (String(x.nombre || "") + String(x.ref || "")).toLowerCase().includes(q));
+
+  // 2) Ordenar igual que la tabla (usa INV_SORT_KEY / INV_SORT_DIR)
+  const dir = (INV_SORT_DIR === "asc" ? 1 : -1);
+  arr.sort((a,b)=>{
+    let A,B;
+    switch(INV_SORT_KEY){
+      case "ref":    A = a.ref || "";     B = b.ref || ""; break;
+      case "nombre": A = a.nombre || "";  B = b.nombre || ""; break;
+      case "stock":  A = +a.stock || 0;   B = +b.stock || 0; break;
+      case "minimo": A = +a.minimo || 0;  B = +b.minimo || 0; break;
+      default:       A = 0;               B = 0;
+    }
+    if (typeof A === "string" && typeof B === "string") return A.localeCompare(B,"es") * dir;
+    return (A === B ? 0 : (A > B ? 1 : -1)) * dir;
+  });
+
+  if (!arr.length){ alert("No hay resultados para exportar."); return; }
+
+  // 3) Construir CSV
+  const cols = ["ref","nombre","stock","minimo"];
+  const header = cols.join(",");
+
+  const rows = arr.map(x => [
+    toCSVCell(String(x.ref || "").toUpperCase()),
+    toCSVCell(x.nombre || ""),
+    toCSVCell(+x.stock || 0),
+    toCSVCell(+x.minimo || 0)
+  ].join(","));
+
+  const csvBody = [header].concat(rows).join("\n");
+  const csv = "\ufeff" + csvBody; // BOM UTF-8 para Excel
+  const fname = `inventario_${new Date().toISOString().slice(0,10)}.csv`;
+
+  downloadText(fname, csv, "text/csv");
 }
 function exportIncidCSV(){
-  if(!INCIDS_ALL || !INCIDS_ALL.length){alert('No hay incidencias.');return}
-  const cols = ['created','equipo','tipo','res','desc','hParo','hRep','reportante','asignado'];
-  const header = cols.join(',');
-  const rows = INCIDS_ALL.map(x => cols.map(k => toCSVCell(x[k])).join(','));
-  downloadText('incidencias.csv',[header].concat(rows).join('\n'),'text/csv');
+  if (!INCIDS_ALL || !INCIDS_ALL.length){ alert("No hay incidencias."); return; }
+  const cols = ["created","equipo","tipo","res","desc","hParo","hRep","reportante","asignado"];
+  const header = cols.join(",");
+  const rows = INCIDS_ALL.map(x => cols.map(k => toCSVCell(x[k])).join(","));
+  downloadText("incidencias.csv", [header].concat(rows).join("\n"), "text/csv");
 }
 function exportIncidPDF(){
-  const w=window.open('','_blank','noopener,noreferrer');
-  if(!w){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
+  const w = window.open("", "_blank", "noopener,noreferrer"); if(!w){ alert("La ventana emergente fue bloqueada."); return; }
   w.opener = null;
-
-  const rows=(INCIDS_ALL||[]).map(x=>`<tr>
-    <td>${fmtDate(x.created)}</td>
-    <td>${esc(x.equipo||'')}</td>
-    <td>${esc(x.tipo||'')}</td>
-    <td>${esc(x.res||'')}</td>
-    <td>${esc(x.desc||'')}</td>
-    <td class="num">${fmt(x.hParo||0)}</td>
-    <td class="num">${fmt(x.hRep||0)}</td>
-  </tr>`).join('');
-
+  const rows = (INCIDS_ALL || []).map(x=>`
+    <tr>
+      <td>${fmtDate(x.created)}</td><td>${esc(x.equipo || "")}</td><td>${esc(x.tipo || "")}</td>
+      <td>${esc(x.res || "")}</td><td>${esc(x.desc || "")}</td>
+      <td class="num">${fmt(x.hParo || 0)}</td><td class="num">${fmt(x.hRep || 0)}</td>
+    </tr>`).join("");
   w.document.write(`<!doctype html><meta charset="utf-8"><title>Incidencias</title>
-  <style>body{font-family:Inter,Arial,sans-serif;padding:16px}
-  table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px}
-  h2{margin:0 0 10px}</style>
-  <h2>Incidencias</h2>
-  <table><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada (h)</th><th>Reparación (h)</th></tr>${rows}</table>`);
+  <style>body{font-family:Inter,Arial,sans-serif;padding:16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px}h2{margin:0 0 10px}</style>
+  <h2>Incidencias</h2><table><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Resultado</th><th>Descripción</th><th>Parada (h)</th><th>Reparación (h)</th></tr>${rows}</table>`);
   w.document.close(); w.focus(); w.print();
 }
 function exportKPIsCSV(){
-  const mttr = (INCIDS_ALL.reduce((p,x)=>p+(+x.hRep||0),0))/(INCIDS_ALL.length||1);
-  const horasPeriodo = 4*30*24;
-  const mtbf = horasPeriodo/(INCIDS_ALL.length||1);
-  const prodH = 120, perd = INCIDS_ALL.reduce((p,x)=>p+(+x.hParo||0),0);
-  const disp = Math.max(0,(prodH-perd)/prodH);
-  const oee  = disp*0.9*0.98;
+  const mttr = (INCIDS_ALL.reduce((p,x)=> p + (+x.hRep || 0), 0)) / (INCIDS_ALL.length || 1);
+  const horasPeriodo = 4 * 30 * 24;
+  const mtbf = horasPeriodo / (INCIDS_ALL.length || 1);
+  const prodH = 120, perd = INCIDS_ALL.reduce((p,x)=> p + (+x.hParo || 0), 0);
+  const disp = Math.max(0, (prodH - perd) / prodH);
+  const oee  = disp * 0.9 * 0.98;
   const rows = [
-    ['KPI','Valor'],
-    ['MTTR (h)', mttr.toFixed(2)],
-    ['MTBF (h)', mtbf.toFixed(2)],
-    ['Disponibilidad (%)', (disp*100).toFixed(2)],
-    ['OEE estimado (%)', (oee*100).toFixed(2)]
-  ].map(r => r.map(toCSVCell).join(',')).join('\n');
-  downloadText('kpis.csv', rows, 'text/csv');
+    ["KPI","Valor"],
+    ["MTTR (h)", mttr.toFixed(2)],
+    ["MTBF (h)", mtbf.toFixed(2)],
+    ["Disponibilidad (%)", (disp*100).toFixed(2)],
+    ["OEE estimado (%)", (oee*100).toFixed(2)]
+  ].map(r => r.map(toCSVCell).join(",")).join("\n");
+  downloadText("kpis.csv", rows, "text/csv");
 }
 function exportKPIPDF(){
-  const mttr = (INCIDS_ALL.reduce((p,x)=>p+(+x.hRep||0),0))/(INCIDS_ALL.length||1);
-  const horasPeriodo = 4*30*24;
-  const mtbf = horasPeriodo/(INCIDS_ALL.length||1);
-  const prodH = 120, perd = INCIDS_ALL.reduce((p,x)=>p+(+x.hParo||0),0);
-  const disp = Math.max(0,(prodH-perd)/prodH);
-  const oee  = disp*0.9*0.98;
-
-  const w=window.open('','_blank','noopener,noreferrer');
-  if(!w){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
+  const mttr = (INCIDS_ALL.reduce((p,x)=> p + (+x.hRep || 0), 0)) / (INCIDS_ALL.length || 1);
+  const horasPeriodo = 4 * 30 * 24;
+  const mtbf = horasPeriodo / (INCIDS_ALL.length || 1);
+  const prodH = 120, perd = INCIDS_ALL.reduce((p,x)=> p + (+x.hParo || 0), 0);
+  const disp = Math.max(0, (prodH - perd) / prodH);
+  const oee  = disp * 0.9 * 0.98;
+  const w = window.open("", "_blank", "noopener,noreferrer"); if(!w){ alert("La ventana emergente fue bloqueada."); return; }
   w.opener = null;
-
   w.document.write(`<!doctype html><meta charset="utf-8"><title>KPIs</title>
-  <style>body{font-family:Inter,Arial,sans-serif;padding:16px}
-  table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:13px}
-  h2{margin:0 0 10px}</style>
+  <style>body{font-family:Inter,Arial,sans-serif;padding:16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:13px}h2{margin:0 0 10px}</style>
   <h2>KPIs globales</h2>
   <table>
     <tr><th>KPI</th><th>Valor</th></tr>
@@ -1289,57 +1409,45 @@ function exportKPIPDF(){
   </table>`);
   w.document.close(); w.focus(); w.print();
 }
-function exportInvCSV(){
-  if(!INV || !INV.length){alert('No hay inventario.');return}
-  const cols=['ref','nombre','stock','minimo'];
-  const header=cols.join(',');
-  const rows=INV.map(x=>cols.map(k=>toCSVCell(x[k])).join(','));
-  downloadText('inventario.csv',[header].concat(rows).join('\n'),'text/csv');
-}
 
-/* =========================
-   Router por hash
-========================= */
+/* Router por hash */
 function handleHash(){
-  const h=location.hash||'';
-  const m1=h.match(/^#\/equipo\/([a-z0-9\-]+)$/);
-  const m2=h.match(/^#\/repuesto\/(.+)$/);
-  if(m1){renderEquipoBySlug(m1[1]);return}
-  if(m2){renderRepuestoByRef(m2[1]);return}
-  ensureSectionsHidden();byId('page-'+CURRENT_PAGE).classList.remove('hidden')
+  closeAllMenus();
+  const h = location.hash || "";
+  const m1 = h.match(/^#\/equipo\/([a-z0-9\-]+)$/);
+  const m2 = h.match(/^#\/repuesto\/(.+)$/);
+  if (m1){ renderEquipoBySlug(m1[1]); return; }
+  if (m2){ renderRepuestoByRef(m2[1]); return; }
+  ensureSectionsHidden(); byId("page-" + CURRENT_PAGE).classList.remove("hidden");
 }
-window.addEventListener('hashchange',handleHash);
+window.addEventListener("hashchange", handleHash);
 
-/* =========================
-   Miscelánea
-========================= */
+/* Miscelánea */
 function toast(msg){
-  const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);
-  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s'},2200);setTimeout(()=>t.remove(),2520)
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity = "0"; t.style.transition = "opacity .3s"; }, 2200);
+  setTimeout(()=> t.remove(), 2520);
+}
+function printQR(containerId, title){
+  const node = byId(containerId);
+  const img  = node.querySelector("img") || node.querySelector("canvas");
+  const src  = img.tagName === "CANVAS" ? img.toDataURL("image/png") : img.src;
+  const w = window.open("", "_blank", "noopener,noreferrer"); if(!w){ alert("La ventana emergente fue bloqueada."); return; }
+  w.opener = null;
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>${esc(title)}</title>
+  <style>body{font-family:Inter,sans-serif;text-align:center;padding:16px}</style>
+  <h3>${esc(title)}</h3><img src="${src}" width="220" height="220"><div style="margin-top:8px">${location.origin}${location.pathname}</div>`);
+  w.document.close(); w.focus(); w.print();
 }
 function exportInvQRLabels(){
-  const chosen = QR_SEL.size ? INV.filter(x => QR_SEL.has(String(x.ref||'').toUpperCase())) : INV;
-  const items = (chosen||[]).map(x=>({ref:String(x.ref||'').toUpperCase(), nombre:String(x.nombre||'')}));
-  if(!items.length){ alert('No hay repuestos seleccionados ni inventario.'); return; }
-
-  const win=window.open('','_blank','noopener,noreferrer');
-  if(!win){ alert('La ventana emergente fue bloqueada por el navegador.'); return; }
+  const chosen = QR_SEL.size ? INV.filter(x => QR_SEL.has(String(x.ref || "").toUpperCase())) : INV;
+  const items  = (chosen || []).map(x => ({ ref:String(x.ref || "").toUpperCase(), nombre:String(x.nombre || "") }));
+  if (!items.length){ alert("No hay repuestos seleccionados ni inventario."); return; }
+  const win = window.open("", "_blank", "noopener,noreferrer"); if(!win){ alert("La ventana emergente fue bloqueada."); return; }
   win.opener = null;
-
   win.document.write(`<!doctype html><meta charset="utf-8"><title>Etiquetas QR Inventario</title>
-  <style>
-    @media print { @page { size:A4; margin:10mm } }
-    body{font-family:Inter,system-ui,sans-serif;margin:12px}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .card{border:1px solid #ddd;border-radius:8px;padding:10px;display:flex;gap:10px;align-items:center;break-inside:avoid}
-    .qr{width:90px;height:90px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center}
-    .meta{flex:1}
-    .ref{font-weight:800;font-size:14px}
-    .nom{color:#333;font-size:12px;margin-top:4px}
-    .url{color:#555;font-size:10px;margin-top:6px;word-break:break-all}
-  </style>
-  <h2>Etiquetas QR — Inventario</h2>
-  <div class="grid" id="grid"></div>
+  <style>@media print{ @page{ size:A4; margin:10mm } } body{font-family:Inter,system-ui,sans-serif;margin:12px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.card{border:1px solid #ddd;border-radius:8px;padding:10px;display:flex;gap:10px;align-items:center;break-inside:avoid}.qr{width:90px;height:90px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center}.meta{flex:1}.ref{font-weight:800;font-size:14px}.nom{color:#333;font-size:12px;margin-top:4px}.url{color:#555;font-size:10px;margin-top:6px;word-break:break-all}</style>
+  <h2>Etiquetas QR — Inventario</h2><div class="grid" id="grid"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
   <script>
     const base='${location.origin}${location.pathname}';
@@ -1354,33 +1462,232 @@ function exportInvQRLabels(){
       card.appendChild(qr); card.appendChild(meta); grid.appendChild(card);
       new QRCode(qr,{text:url,width:88,height:88,correctLevel:QRCode.CorrectLevel.M});
     });
-    setTimeout(()=>window.print(), 500);
+    setTimeout(()=>window.print(),500);
   <\/script>`);
   win.document.close(); win.focus();
 }
 
-/* =========================
-   INIT (una sola vez)
-========================= */
-applyRoleUI();
-setUser(currentUser);
-
-if(location.hash){handleHash()}else{nav('equipos')}
-
-// Toggle mostrar/ocultar contraseña
-document.querySelectorAll('.pw-toggle').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const id = btn.getAttribute('data-target');
-    const el = document.getElementById(id);
-    if(!el) return;
-    const isPwd = el.type === 'password';
-    el.type = isPwd ? 'text' : 'password';
-    btn.setAttribute('aria-pressed', String(isPwd));
+/* ===== Helpers OT: orden y página actual ===== */
+function getOTSOrdered(){
+  let arr = [...OTS];
+  const dir = (OT_SORT_DIR === "asc" ? 1 : -1);
+  arr.sort((a,b)=>{
+    let A,B;
+    switch(OT_SORT_KEY){
+      case "fecha":     A = new Date(a.created).getTime(); B = new Date(b.created).getTime(); break;
+      case "titulo":    A = a.titulo || ""; B = b.titulo || ""; break;
+      case "prioridad": A = a.prioridad || ""; B = b.prioridad || ""; break;
+      case "asignado":  A = a.asignado  || ""; B = b.asignado  || ""; break;
+      case "vence":     A = a.vencimiento || ""; B = b.vencimiento || ""; break;
+      case "estado":    A = a.estado || ""; B = b.estado || ""; break;
+      default:          A = 0; B = 0;
+    }
+    if (typeof A === "string" && typeof B === "string") return A.localeCompare(B, "es") * dir;
+    return (A === B ? 0 : (A > B ? 1 : -1)) * dir;
   });
-});
+  return arr;
+}
+function getOTCurrentPage(){
+  const ordered = getOTSOrdered();
+  const total = ordered.length;
+  const pages = Math.max(1, Math.ceil(total / OT_PAGE_SIZE));
+  const page  = Math.min(Math.max(1, OT_PAGE), pages);
+  const start = (page - 1) * OT_PAGE_SIZE;
+  return ordered.slice(start, start + OT_PAGE_SIZE);
+}
 
-// Primer load
-loadState();
+/* ===== Funciones añadidas (versión final) ===== */
+
+/**
+ * Parada prolongada: registra incidencia (Correctivo, Parada),
+ * cambia estado del equipo a Parada y (opcional) abre correo.
+ */
+async function accionParadaProlongada(nombreEquipo){
+  if (currentUser.group === "guest"){ alert("Inicia sesión para registrar incidencias."); return; }
+
+  const horasStr = prompt(`Horas estimadas de PARADA para "${nombreEquipo}" (ej. 4.5):`, "1");
+  if (horasStr === null) return;
+  const hParo = Number(horasStr);
+  if (!Number.isFinite(hParo) || hParo < 0){ alert("Valor de horas no válido."); return; }
+
+  const comentario = prompt("Comentario / detalle (opcional):", "") || "";
+
+  try{
+    const item = {
+      equipo: nombreEquipo,
+      tipo: "Correctivo",
+      res: "Parada",
+      rep: "No",
+      repTxt: "",
+      hParo,
+      hRep: 0,
+      inicio: "",
+      fin: "",
+      reportante: currentUser.user,
+      asignado: "",
+      adj: "",
+      desc: `Parada prolongada${comentario ? " — " + comentario : ""}`
+    };
+    const r = await apiPost({res:"incid", fn:"add", item, actor: currentUser.user});
+    if (!r?.ok) throw new Error();
+    toast("Parada prolongada registrada");
+    await loadIncid();
+    await setEstado(nombreEquipo, "Parada");
+  }catch(_){
+    alert("Error al registrar la incidencia de parada prolongada.");
+    return;
+  }
+
+  // (Opcional) Email: rellena MAIL_TO para activar
+  const MAIL_TO = ""; // ej.: "mantenimiento@empresa.com, jefeturno@empresa.com"
+  if (MAIL_TO){
+    const asunto = `Parada prolongada — ${nombreEquipo}`;
+    const cuerpo  = [
+      `Equipo: ${nombreEquipo}`,
+      `Estado: PARADA`,
+      `Horas estimadas: ${hParo}`,
+      comentario ? `Comentario: ${comentario}` : "",
+      "",
+      `Registrado por: ${currentUser.user}`,
+      `Fecha: ${fmtDate(Date.now())}`
+    ].filter(Boolean).join("\n");
+    const url = `mailto:${encodeURIComponent(MAIL_TO)}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    try{ window.location.href = url; }catch(_){}
+  }
+}
+
+/**
+ * Crea una Orden de Trabajo a partir del formulario de OT.
+ */
+async function addOT(){
+  if (currentUser.group === "guest"){ alert("Inicia sesión para crear OT."); return; }
+
+  const equipo   = (byId("otEquipo")?.value || "").trim();
+  const prioridad= (byId("otPri")?.value || "Media").trim();
+  const titulo   = (byId("otTitulo")?.value || "").trim();
+  const asignado = (byId("otAsign")?.value || "").trim();
+  const vence    = (byId("otDue")?.value || "").trim();     // yyyy-mm-dd
+  const adj      = (byId("otAdj")?.value || "").trim();
+  const desc     = (byId("otDesc")?.value || "").trim();
+
+  if (!equipo || !titulo){
+    alert("Debes indicar al menos 'Equipo' y 'Título'.");
+    return;
+  }
+
+  const item = {
+    equipo,
+    prioridad,
+    titulo,
+    asignado,
+    vencimiento: vence,
+    adjunto: adj,
+    descripcion: desc,
+    estado: "Abierta"
+  };
+
+  try{
+    const r = await apiPost({res:"ot", fn:"add", item, actor: currentUser.user});
+    if (!r?.ok) throw new Error();
+    toast("OT creada");
+    ["otTitulo","otAsign","otDue","otAdj","otDesc"].forEach(id => { const el = byId(id); if (el) el.value = ""; });
+    await loadOT();
+  }catch(_){
+    alert("Error al crear la OT.");
+  }
+}
+
+/**
+ * Exporta las OT respetando **orden y paginación visibles**.
+ * (Para exportar todo: usa getOTSOrdered() en vez de getOTCurrentPage()).
+ */
+function exportOTPDF(){
+  const data = getOTCurrentPage();   // página visible
+  if (!data || !data.length){
+    alert("No hay órdenes de trabajo para exportar.");
+    return;
+  }
+
+  const rows = data.map(o => `
+    <tr>
+      <td>${fmtDate(o.created)}</td>
+      <td><b>${esc(o.titulo || "")}</b><div style="color:#64748b;font-size:11px">${esc(o.equipo || "")}</div></td>
+      <td>${esc(o.prioridad || "")}</td>
+      <td>${esc(o.asignado  || "")}</td>
+      <td>${esc(o.vencimiento || "")}</td>
+      <td>${esc(o.estado || "")}</td>
+    </tr>
+  `).join("");
+
+  const w = window.open("", "_blank", "noopener,noreferrer");
+  if(!w){ alert("La ventana emergente fue bloqueada."); return; }
+  w.opener = null;
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>Órdenes de Trabajo</title>
+  <style>
+    @media print{ @page { size: A4; margin: 12mm } }
+    body{font-family:Inter,Arial,sans-serif;padding:16px}
+    h2{margin:0 0 10px}
+    .meta{color:#64748b;font-size:12px;margin:6px 0 12px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #ddd;padding:6px;font-size:12px;vertical-align:top}
+    th{background:#f8fafc}
+    td div{line-height:1.2}
+  </style>
+  <h2>Órdenes de Trabajo</h2>
+  <div class="meta">
+    Orden: <b>${esc(OT_SORT_KEY)}</b> (${esc(OT_SORT_DIR)})
+    &nbsp;·&nbsp; Página: <b>${OT_PAGE}</b>
+    &nbsp;·&nbsp; Filas por página: <b>${OT_PAGE_SIZE}</b>
+  </div>
+  <table>
+    <tr>
+      <th>Fecha</th><th>OT</th><th>Prioridad</th><th>Asignado</th><th>Vence</th><th>Estado</th>
+    </tr>
+    ${rows}
+  </table>`);
+  w.document.close();
+  w.focus();
+  w.print();
+}
+/* Mostrar contraseña mientras se mantiene pulsado */
+function bindPwToggles(){
+  document.querySelectorAll('.pw-toggle').forEach(btn=>{
+    const targetId = btn.getAttribute('data-target');
+    const input = document.getElementById(targetId);
+    if(!input) return;
+
+    const show = ()=>{ input.type='text'; btn.classList.add('on'); btn.setAttribute('aria-pressed','true'); };
+    const hide = ()=>{ input.type='password'; btn.classList.remove('on'); btn.setAttribute('aria-pressed','false'); };
+
+    // Soporta iPhone (pointer/touch) y teclado
+    btn.addEventListener('pointerdown', e=>{ e.preventDefault(); show(); });
+    ['pointerup','pointercancel','pointerleave','blur'].forEach(ev=>btn.addEventListener(ev, hide));
+    btn.addEventListener('touchstart', e=>{ e.preventDefault(); show(); }, {passive:false});
+    btn.addEventListener('touchend', hide);
+    btn.addEventListener('keydown', e=>{ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); show(); }});
+    btn.addEventListener('keyup', hide);
+  });
+}
+
+/* INIT */
+setUser(currentUser);
+bindPwToggles();
+
+(async ()=>{
+  const h = location.hash || "";
+  const esEquipo   = /^#\/equipo\//.test(h);
+  const esRepuesto = /^#\/repuesto\//.test(h);
+  if (esEquipo)    { await loadState(); await loadIncid(); handleHash(); }
+  else if (esRepuesto){ await loadInv(); handleHash(); }
+  else { nav("equipos"); }
+})();
+/* Sombra dinámica para la cabecera en scroll */
+(function(){
+  const hdr = document.querySelector('header');
+  const onScroll = ()=> hdr && hdr.classList.toggle('scrolled', window.scrollY > 4);
+  window.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
+})();
 </script>
 
 </body>
