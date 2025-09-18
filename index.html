@@ -777,11 +777,6 @@ function closePanel(panelEl, btnEl){
   }
 }
 
-  // Restaurar el foco donde estaba (sin auto scroll en iOS)
-  if (last && typeof last.focus === "function"){
-    try { last.focus({ preventScroll:true }); } catch(_) { last.focus(); }
-  }
-}
 function isOpen(panelEl){ return panelEl && !panelEl.classList.contains("hidden"); }
 function closeAllMenus(){ closePanel(pagesPanel, pagesBtn); closePanel(userPanel, userBtn); }
 
