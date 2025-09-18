@@ -429,6 +429,53 @@ body.menu-open{ overflow:hidden; }
 body.menu-open{ overscroll-behavior: none; }
 html.menu-open{ overscroll-behavior: none; }
 #userPanel.menu-full{ touch-action: none; }
+/* ===== FIX 1: Logo de la línea acotado ===== */
+#page-equipos .brand-wrap{
+  height:auto; padding:.35rem 0 .2rem; overflow:hidden;
+}
+#page-equipos .brand-wrap img{
+  display:block;
+  height:auto;
+  max-height:56px;                 /* antes 80px: más bajo en móvil */
+  max-width:min(92vw,520px);       /* evita que se desborde en horizontal */
+  width:auto;
+  margin:0 auto;
+  object-fit:contain;
+}
+
+/* ===== FIX 2: Menú de usuario compacto (sin overlay) ===== */
+#userPanel.menu-full{
+  position:absolute !important;
+  left:auto !important; right:10px !important; top:52px !important; bottom:auto !important;
+  background:transparent !important;           /* quita fondo negro a pantalla completa */
+  padding:0 !important;
+  z-index:200;
+  display:block !important;
+}
+#userPanel.menu-full .row{
+  width:300px !important; max-width:calc(100vw - 24px);
+  background:#0f141c; color:#e5e7eb;
+  border:1px solid #2a3442; border-radius:12px;
+  margin:0; padding:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+}
+body.menu-open, html.menu-open{ overflow:auto !important; overscroll-behavior:auto !important; }
+
+/* Cerrar al tocar fuera (ya lo hace el JS), pero evitamos ocupar toda la pantalla */
+#userPanel.menu-full::before{ content:none !important; }
+
+/* ===== FIX 3: Fondo de cabecera reencuadrado ===== */
+header::before{
+  background-position:center calc(36px + var(--safe-top,0px)) !important;
+  background-size:clamp(160px, 38vw, 240px) !important;  /* tamaño contenido */
+  opacity:.16 !important;
+}
+header .nav{ min-height: var(--hdr-h); }
+
+/* Opcional: si el título quedara muy pegado en iOS con notch */
+@supports(padding:max(0px)){
+  header{ padding-top: max(var(--safe-top,0px), 8px); }
+}
 
 </style>
 </head>
