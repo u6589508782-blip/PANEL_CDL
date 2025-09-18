@@ -133,8 +133,7 @@ header{
 }
 </style>
 <style id="hotfix-cdl">
-
-/* Oculta cualquier elemento marcado como .hidden */
+/* ——— utilidades ——— */
 .hidden{ display:none !important; }
 button.mbtn{
   background:none !important;
@@ -142,7 +141,8 @@ button.mbtn{
   color:#222 !important;
   -webkit-appearance:none;
 }
-/* ==== 1) Botones de cabecera: posición y estilo plano ==== */
+
+/* ——— cabecera: posiciones y botones ——— */
 header .menu-pages{ position:absolute; left:12px; top:10px; bottom:auto; }
 header .menu-user { position:absolute; right:14px; top:26px; } /* bajo el rol */
 
@@ -152,28 +152,38 @@ header .menu-user  #userBtn.mbtn{
   padding:.42rem !important; margin:0; line-height:1; border-radius:8px !important;
 }
 
-/* Separación visual del título “CDL” respecto al hamburguesa */
+/* separa el título del botón hamburguesa */
 .hero-title{ padding-left:28px; }
 
-/* ==== 2) Rol mucho más pequeño ==== */
+/* rol compacto */
 #roleChip{
   font-size:.72rem !important; font-weight:700;
   position:absolute; right:14px; top:6px;
   background:none; border:0; color:#222;
 }
 
-/* ==== 3) Panel de usuario colocado bajo el rol y tamaño contenido ==== */
-#userPanel{
-  position:absolute !important;
-  right:10px !important; top:52px !important;
-  min-width:260px;
+/* panel de usuario anclado bajo la cabecera (modo overlay) */
+#userPanel.menu-full{
+  position:fixed !important;
+  left:0; right:0;
+  top: calc(var(--safe-top,0px) + var(--hdr-h));
+  bottom: var(--safe-bottom,0px);
+  z-index: 2000;
+  background: rgba(0,0,0,1);
+  display:flex; justify-content:center; padding:12px;
+  overflow:auto;
+}
+#userPanel.menu-full .row{
+  width:min(33vw, 420px);
+  background:#0f141c; color:#e5e7eb;
+  border:1px solid #2a3442; border-radius:14px; padding:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+}
+@media (max-width:520px){
+  #userPanel.menu-full .row{ width:100%; border-radius:0; height:100%; }
 }
 
-/* ==== 4) Ocultar de verdad los paneles cuando están .hidden ==== */
-.panel.hidden{ display:none !important; opacity:0 !important; transform:none !important; }
-
-/* ==== 5) Menú hamburguesa a pantalla completa, sin cápsulas y con separadores difusos ==== */
-/* Menú hamburguesa: pantalla completa (único) */
+/* panel hamburguesa a pantalla completa */
 #pagesPanel.menu-full{
   position:fixed !important;
   left:0; right:0;
@@ -202,75 +212,39 @@ header .menu-user  #userBtn.mbtn{
   color:var(--brand2);
   text-shadow:0 0 6px rgba(255,0,0,.5);
 }
-/* ===== (FIX-SEMAFORO) contraste y tocabilidad mejorados ===== */
+
+/* evita scroll del fondo con overlays */
+body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
+
+/* accesibilidad: oculta realmente paneles al cerrar */
+.panel.hidden{ display:none !important; opacity:0 !important; transform:none !important; }
+
+/* ——— semáforo (clicable y visible) ——— */
 .semaforo{
   background:#f8fafc; border:1px solid #cbd5e1; border-radius:26px;
   padding:.4rem; gap:.5rem;
 }
 .semaforo .opt{
-  flex:1; min-height:44px;                   /* iOS hit target */
-  display:flex; align-items:center; justify-content:center;
-  font-weight:800; font-size:.95rem; color:#334155;
-  border-radius:20px;                         /* pills */
+  flex:1; min-height:44px; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:.95rem; color:#334155; border-radius:20px; cursor:pointer;
 }
-.semaforo .opt.active{
-  background:#fee2e2;                         /* relleno visible */
-  outline:2px solid #b91c1c; outline-offset:-2px;
-  color:#7a0f0f;
-}
-.semaforo .opt{ cursor:pointer; }
-.semaforo .opt:focus-visible{
-  outline:2px solid #0ea5e9;
-  outline-offset:2px;
-}
-/* estados por clave (opcional) */
+.semaforo .opt.active{ background:#fee2e2; outline:2px solid #b91c1c; outline-offset:-2px; color:#7a0f0f; }
+.semaforo .opt:focus-visible{ outline:2px solid #0ea5e9; outline-offset:2px; }
 .semaforo .opt[data-k="ok"].active    { background:#dcfce7; outline-color:#16a34a; color:#14532d; }
 .semaforo .opt[data-k="warn"].active  { background:#fef3c7; outline-color:#f59e0b; color:#7c4a03; }
 .semaforo .opt[data-k="stop"].active  { background:#fee2e2; outline-color:#dc2626; color:#7a1616; }
-/* MENÚ USUARIO: overlay a pantalla completa (versión única) */
-#userPanel.menu-full{
-  position:fixed !important;
-  left:0; right:0;
-  top: calc(var(--safe-top,0px) + var(--hdr-h));
-  bottom: var(--safe-bottom,0px);
-  z-index: 2000;
-  background: rgba(0,0,0,1);
-  display:flex; justify-content:center; padding:12px;
-}
-#userPanel.menu-full .row{
-  width:min(33vw, 420px);
-  background:#0f141c; color:#e5e7eb;
-  border:1px solid #2a3442; border-radius:14px; padding:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
-}
-@media (max-width:520px){
-  #userPanel.menu-full .row{ width:100%; border-radius:0; height:100%; }
-}
 
-/* Evitar que el contenido se mueva / haga scroll cuando hay overlays */
-body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
-/* Utilidades mínimas que faltaban */
+/* ——— tablas/paginador/utilidades ——— */
 .dot{display:inline-block;width:10px;height:10px;border-radius:999px;vertical-align:-1px}
 .sub{color:var(--muted);font-size:.9rem}
 .right{display:flex;justify-content:flex-end;gap:.5rem;flex-wrap:wrap}
 .small{font-size:.85rem;color:var(--muted)}
 .grp-title{margin:1rem 0 .5rem;font:800 1.05rem/1.2 Inter,system-ui,sans-serif;color:#e5e7eb}
-
-/* Sombrado del header al hacer scroll (ya lo activas por JS) */
 header.scrolled{box-shadow:0 6px 18px rgba(0,0,0,.22)}
-/* ——— 1) Altura cabecera ——— */
 :root{ --hdr-h:120px; --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
-
-/* ——— 2) Pilotos de estado ——— */
 .pilot{ width:14px; height:14px; border-radius:50%; display:inline-block; box-shadow:0 0 0 2px rgba(0,0,0,.08) inset; }
-.p-ok{   background:var(--ok); }
-.p-warn{ background:var(--warn); }
-.p-stop{ background:var(--stop); }
-
-/* ——— 3) Enlace “de texto” ——— */
+.p-ok{background:var(--ok)} .p-warn{background:var(--warn)} .p-stop{background:var(--stop)}
 .linkish{ text-decoration:underline; text-underline-offset:2px; cursor:pointer }
-
-/* ——— 4) Tablas y paginador ——— */
 table{ width:100%; border-collapse:collapse; }
 th,td{ border:1px solid #cfd3da; padding:.45rem .55rem; text-align:left; }
 thead th{ background:#eef1f6; color:#111; }
@@ -279,7 +253,7 @@ thead th{ background:#eef1f6; color:#111; }
 .pager{ display:flex; align-items:center; gap:.6rem; margin-top:.6rem }
 .page-btn{ background:#f3f4f6; border:1px solid #cfd3da; padding:.25rem .55rem; border-radius:8px; cursor:pointer }
 
-/* ——— 5) TV cards y toast ——— */
+/* ——— TV cards y toast ——— */
 .tv-card{ background:#0f141c; border:1px solid #2a3442; border-radius:14px; padding:12px; margin:.6rem 0; }
 .tv-title{ font-weight:800; margin-bottom:.35rem }
 .tv-list{ display:flex; flex-direction:column; gap:.25rem }
@@ -287,23 +261,44 @@ thead th{ background:#eef1f6; color:#111; }
 .tv-item.stop{ outline:2px solid var(--stop) }
 .tv-item.warn{ outline:2px solid var(--warn) }
 .tv-item.stock{ outline:2px solid #60a5fa }
-
 .toast{
   position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
   background:#111827; color:#fff; padding:.55rem .9rem; border-radius:10px;
   box-shadow:0 10px 30px rgba(0,0,0,.35);
   opacity:0; transition:opacity .25s; z-index:2000;
 }
-/* Logo de mantenimiento en cabecera (único) */
+
+/* ——— cabecera: imagen de fondo por detrás del título ——— */
 header::before{
   content:"";
-  position:absolute; inset:0; z-index:0;
-  background: url("logo_mantenimiento.png")
-              no-repeat center top / clamp(180px, 34vw, 280px);
-  opacity:.18; pointer-events:none;
+  position:absolute; inset:0; z-index:0;           /* detrás del .nav */
+  background: url("logo_mantenimiento.png") no-repeat center 8px / clamp(180px, 30vw, 240px);
+  opacity:.20; pointer-events:none;
 }
 header .nav{ position:relative; z-index:1; min-height: var(--hdr-h); }
 
+/* ——— iOS FIX: imagen Línea Kaltenbach no gigante ——— */
+#page-equipos .brand-wrap{
+  display:flex; align-items:center; justify-content:center;
+  height:80px; padding:.25rem 0 .1rem;
+}
+#page-equipos .brand-wrap img{
+  max-height:80px; width:auto; height:auto; display:block;
+  margin:0 auto; object-fit:contain;
+}
+#page-equipos .brand-wrap.fallback{
+  background:#0f141c; color:#e5e7eb; font-weight:800; letter-spacing:.04em;
+  display:flex; align-items:center; justify-content:center;
+}
+#page-equipos .brand-wrap.fallback::before{ content:"LÍNEA KALTENBACH"; }
+
+/* ——— iOS FIX: hamburguesa más grande ——— */
+header .menu-pages #pagesBtn.mbtn{
+  font-size:28px !important;
+  width:44px; height:44px; line-height:44px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
 </style>
 </head>
 <body>
@@ -727,38 +722,64 @@ document.addEventListener("keydown", (e)=>{
 });
 function setExpanded(btn, open){ if(btn) btn.setAttribute("aria-expanded", open ? "true" : "false"); }
 function openPanel(panelEl, btnEl){
-  if(panelEl){
-    panelEl.classList.remove("hidden");
-    if (panelEl === pagesPanel || panelEl === userPanel) {
-      panelEl.classList.add("menu-full");
-    }
-    // A11y para el panel de usuario
-    if (panelEl === userPanel){
-      panelEl.setAttribute("role","dialog");
-      panelEl.setAttribute("aria-modal","true");
-      panelEl.setAttribute("aria-labelledby","roleChip");
-      panelEl._lastFocus = document.activeElement;
-      const focusable = panelEl.querySelector('input,select,textarea,button,[tabindex]:not([tabindex="-1"])');
-      focusable?.focus();
-    }
+  if(!panelEl) return;
+
+  // Mostrar panel
+  panelEl.classList.remove("hidden");
+
+  // Ambos menús usan el modo overlay a pantalla completa
+  if (panelEl === pagesPanel || panelEl === userPanel) {
+    panelEl.classList.add("menu-full");
   }
+
+  // Accesibilidad y foco SEGURO (sin auto-abrir <select> en iOS)
+  if (panelEl === userPanel){
+    panelEl.setAttribute("role","dialog");
+    panelEl.setAttribute("aria-modal","true");
+    panelEl.setAttribute("aria-labelledby","roleChip");
+    panelEl._lastFocus = document.activeElement;
+
+    // Foco: evita <select>, prioriza botones
+    const focusables = [...panelEl.querySelectorAll(
+      'button,[href],input:not([type="hidden"]),textarea,[tabindex]:not([tabindex="-1"])'
+    )].filter(el => !el.disabled && el.offsetParent !== null);
+    const preferred = focusables.find(el => el.matches('.btn, .gloss, [type="button"]')) || focusables[0];
+    preferred?.focus?.({ preventScroll:true });
+  }
+
   setExpanded(btnEl, true);
   document.body.classList.add("menu-open");
-  document.documentElement.classList.add("menu-open"); 
-  }
+  document.documentElement.classList.add("menu-open");
+}
+
 function closePanel(panelEl, btnEl){
-  if(panelEl){
-    panelEl.classList.add("hidden");
-    if (panelEl === pagesPanel || panelEl === userPanel) panelEl.classList.remove("menu-full");
-    if (panelEl === userPanel){
-      panelEl.removeAttribute("role"); panelEl.removeAttribute("aria-modal"); panelEl.removeAttribute("aria-labelledby");
-      panelEl._lastFocus?.focus?.();
-    }
+  if(!panelEl) return;
+  const last = panelEl._lastFocus;
+
+  panelEl.classList.add("hidden");
+  panelEl.classList.remove("menu-full");
+
+  if (panelEl === userPanel){
+    panelEl.removeAttribute("role");
+    panelEl.removeAttribute("aria-modal");
+    panelEl.removeAttribute("aria-labelledby");
   }
+
   setExpanded(btnEl, false);
+
   if (pagesPanel.classList.contains("hidden") && userPanel.classList.contains("hidden")){
     document.body.classList.remove("menu-open");
     document.documentElement.classList.remove("menu-open");
+  }
+
+  if (last && typeof last.focus === "function"){
+    try { last.focus({ preventScroll:true }); } catch(_) { last.focus(); }
+  }
+}
+
+  // Restaurar el foco donde estaba (sin auto scroll en iOS)
+  if (last && typeof last.focus === "function"){
+    try { last.focus({ preventScroll:true }); } catch(_) { last.focus(); }
   }
 }
 function isOpen(panelEl){ return panelEl && !panelEl.classList.contains("hidden"); }
