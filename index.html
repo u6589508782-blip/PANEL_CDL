@@ -17,12 +17,10 @@
 
 <style>
 :root{
-  --brand1:#A60000; --brand2:#E43B3B;
+  --brand1:#A60000;   /* rojo oscuro */
+  --brand2:#E43B3B;   /* rojo principal */
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
   --ink:#e8eef7; --muted:#9aa7b4; --line:#232b36;
-  --hdr-h:120px;
-  --safe-top: env(safe-area-inset-top);
-  --safe-bottom: env(safe-area-inset-bottom);
 }
 
 /* ===== FONDO global metalizado + watermark CDL ===== */
@@ -74,40 +72,6 @@ header{
 /* ===== Menú hamburguesa ===== */
 .menu-pages{
   position:absolute; left:18px; bottom:12px;
-}
-#pagesPanel.menu-full{
-  position:fixed; left:0; right:0;
-  top:calc(var(--safe-top,0px) + var(--hdr-h));
-  bottom:var(--safe-bottom,0px);
-  display:flex; flex-direction:column;
-  justify-content:space-evenly;
-  background:linear-gradient(180deg,#0b0f15,#121820 60%,#0b0f15);
-  border-top:2px solid #222;
-  box-shadow:inset 0 20px 40px rgba(255,255,255,.08),0 -10px 30px rgba(0,0,0,.5);
-}
-#pagesPanel.menu-full .btn{
-  background:none; border:0;
-  color:#fff; font-weight:900;
-  font-size:clamp(18px,3vh,28px);
-  text-transform:uppercase;
-  text-align:center;
-  letter-spacing:.05em;
-  padding:1.2rem 0;
-  position:relative;
-}
-#pagesPanel.menu-full .btn:hover{
-  color:var(--brand2);
-  text-shadow:0 0 6px rgba(255,0,0,.5);
-}
-
-/* Separadores difusos */
-#pagesPanel.menu-full .btn + .btn::before{
-  content:"";
-  position:absolute; top:0; left:0; right:0; height:2px;
-  background:radial-gradient(circle at 50% 50%,
-    rgba(255,255,255,0.9) 0%,
-    rgba(255,255,255,0.5) 30%,
-    rgba(255,255,255,0.0) 100%);
 }
 
 /* ===== Menú usuario (3 puntos debajo del rol) ===== */
@@ -169,6 +133,7 @@ header{
 }
 </style>
 <style id="hotfix-cdl">
+
 /* Oculta cualquier elemento marcado como .hidden */
 .hidden{ display:none !important; }
 button.mbtn{
@@ -208,14 +173,16 @@ header .menu-user  #userBtn.mbtn{
 .panel.hidden{ display:none !important; opacity:0 !important; transform:none !important; }
 
 /* ==== 5) Menú hamburguesa a pantalla completa, sin cápsulas y con separadores difusos ==== */
+/* Menú hamburguesa: pantalla completa (único) */
 #pagesPanel.menu-full{
-  position:fixed !important; left:0; right:0;
-  top:calc(var(--safe-top,0px) + var(--hdr-h));
-  bottom:var(--safe-bottom,0px);
-  background:linear-gradient(180deg,#0b0f15,#121820 60%,#0b0f15);
-  border-top:2px solid #222;
-  box-shadow:inset 0 20px 40px rgba(255,255,255,.08),0 -10px 30px rgba(0,0,0,.45);
-  display:flex; flex-direction:column; justify-content:space-evenly; padding:0 12px;
+  position:fixed !important;
+  left:0; right:0;
+  top: calc(var(--safe-top,0px) + var(--hdr-h)) !important;
+  bottom: var(--safe-bottom,0px);
+  z-index: 900;
+  background: linear-gradient(180deg,#0b0f15,#121820 60%,#0b0f15);
+  border-top: 2px solid #222;
+  box-shadow: inset 0 20px 40px rgba(255,255,255,.08), 0 -10px 30px rgba(0,0,0,.45);
 }
 #pagesPanel.menu-full .row{ border:0; padding:0; height:100%; }
 #pagesPanel.menu-full .actions{
@@ -229,118 +196,12 @@ header .menu-user  #userBtn.mbtn{
 }
 #pagesPanel.menu-full .btn + .btn::before{
   content:""; position:absolute; top:0; left:0; right:0; height:2px;
-  background:radial-gradient(circle at 50% 50%,
-    rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 30%, rgba(255,255,255,0) 100%);
+  background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 30%, rgba(255,255,255,0) 100%);
 }
 #pagesPanel.menu-full .btn:hover{
   color:var(--brand2);
   text-shadow:0 0 6px rgba(255,0,0,.5);
 }
-
-/* ==== 6) Tarjetas más compactas: que se vean 3 a la vez y semáforo responsive ==== */
-.card{
-  padding:.9rem !important; border-radius:16px !important;
-  margin:.55rem 0 !important;
-  background:linear-gradient(180deg,#fefefe,#e5e7eb);
-  box-shadow:0 4px 12px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.8);
-}
-@media (min-width: 920px){
-  /* en viewport típico 920–1080px caben 3+ tarjetas en scroll inicial */
-  .card{ min-height:150px; }
-}
-@media (max-width: 360px){ /* iPhone SE */
-  .card{ padding:.75rem !important; }
-}
-
-/* Orden de botones: “Parada programada” + “Parada prolongada” en primera línea, */
-.card .right{ gap:.5rem; flex-wrap:wrap; }
-.card .btn.gloss.btn-mail{ order:2; } /* “Parada prolongada” a la derecha de programada */
-
-/* Botón de alerta más rojo y con ! visual */
-.btn.gloss.btn-mail{
-  background:linear-gradient(180deg,#ffdede,#ffb3b3);
-  border-color:#e88; color:#7a1616;
-}
-.btn.gloss.red-alert{
-  background:linear-gradient(180deg,#ff4d4d,#b91c1c);
-  color:#fff; border:1px solid #7a1616;
-}
-
-/* ==== 7) Logo de fondo: visible pero detrás de todo ==== */
-body::before{
-  z-index:0 !important; opacity:.18 !important;
-  background-position:center 120px !important;
-  background-size:580px 580px !important;
-}
-
-/* ==== 8) Icono QR más legible (si tu css previo no lo trae) ==== */
-.qr-s{
-  width:18px; height:18px; display:inline-block; vertical-align:-3px;
-  background:url("data:image/svg+xml;utf8,\
-  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'><path d='M3 3h7v7H3V3zm1 1v5h5V4H4zm9-1h7v7h-7V3zm1 1v5h5V4h-5zm-1 9h7v7h-7v-7zm1 1v5h5v-5h-5zM3 13h7v7H3v-7zm1 1v5h5v-5H4z'/></svg>") no-repeat center/contain;
-}
-/* ====== (A1) Hamburguesa más grande ====== */
-header .menu-pages #pagesBtn.mbtn{
-  font-size:28px !important;
-  width:44px; height:44px; line-height:44px;
-  display:inline-flex; align-items:center; justify-content:center;
-}
-
-/* ====== (A2) “CDL · Panel de control” en negro y alineado a una línea ====== */
-.hero-row.singleline{ align-items:baseline; gap:.4rem; }
-.hero-cdl{ color:#111 !important; }
-.hero-dot{ color:#111; opacity:.9; }
-.hero-panel{ color:#111; }
-
-/* ====== (A3) Logo de mantenimiento como fondo de CABECERA ====== */
-/* guarda la imagen como:  logo_mantenimiento.png  (o cambia la ruta) */
-header{ position:sticky; /* ya estaba */ }
-/* Logo de fondo cabecera (más grande y visible en Safari) */
-header::before{
-  content:"";
-  position:absolute; inset:0; z-index:0;
-  /* tamaño aumentado y responsivo */
-  background: url("logo_mantenimiento.png")
-              no-repeat center calc(10px + var(--safe-top,0px)) /
-              clamp(180px, 36vw, 280px);
-  opacity:.16;
-  pointer-events:none;
-}
-header .nav{
-  position:relative;
-  z-index:1;
-  min-height: var(--hdr-h); /* <- clave para que exista “suelo” */
-}
-/* Título EQUIPOS */
-#page-equipos > h2{
-  text-transform:uppercase; text-align:center; color:#fff;
-  margin:.6rem 0 .6rem;
-}
-
-/* Banda con logo (80px) */
-#page-equipos .brand-wrap{
-  display:flex; align-items:center; justify-content:center;
-  height:80px;
-  padding:.25rem 0 .1rem;
-}
-#page-equipos .brand-wrap img{
-  max-height:80px; width:auto; height:auto; display:block;
-  margin:0 auto; object-fit:contain;
-}
-
-/* Fallback si falla la imagen */
-#page-equipos .brand-wrap.fallback{
-  background:#0f141c;
-  color:#e5e7eb; font-weight:800; letter-spacing:.04em;
-  display:flex; align-items:center; justify-content:center;
-}
-#page-equipos .brand-wrap.fallback::before{ content:"LÍNEA KALTENBACH"; }
-
-/* Títulos de grupo (solo en Equipos) */
-#page-equipos #equiposWrap h3{
-  text-transform:uppercase; color:#fff; margin:10px 0;
-}
-
 /* ===== (FIX-SEMAFORO) contraste y tocabilidad mejorados ===== */
 .semaforo{
   background:#f8fafc; border:1px solid #cbd5e1; border-radius:26px;
@@ -366,116 +227,82 @@ header .nav{
 .semaforo .opt[data-k="ok"].active    { background:#dcfce7; outline-color:#16a34a; color:#14532d; }
 .semaforo .opt[data-k="warn"].active  { background:#fef3c7; outline-color:#f59e0b; color:#7c4a03; }
 .semaforo .opt[data-k="stop"].active  { background:#fee2e2; outline-color:#dc2626; color:#7a1616; }
-/* ===== Menú de usuario: overlay oscuro a pantalla completa ===== */
+/* MENÚ USUARIO: overlay a pantalla completa (versión única) */
 #userPanel.menu-full{
   position:fixed !important;
   left:0; right:0;
-  top:calc(var(--safe-top,0px) + var(--hdr-h));   /* arranca justo bajo la cabecera */
-  bottom:var(--safe-bottom,0px);
-  background:#000;                                /* negro opaco */
-  z-index:200;                                    /* por encima del header */
-  display:flex;
-  justify-content:center;                         /* centro la “hoja” (cámbialo a flex-end si la quieres a la derecha) */
-  padding:12px;
+  top: calc(var(--safe-top,0px) + var(--hdr-h));
+  bottom: var(--safe-bottom,0px);
+  z-index: 2000;
+  background: rgba(0,0,0,1);
+  display:flex; justify-content:center; padding:12px;
 }
-/* “Hoja” del propio menú (usa tus .row existentes como tarjetas) */
 #userPanel.menu-full .row{
-  width: min(33vw, 420px);     /* ~un tercio en desktop, máx 420px */
-  background:#0f141c;
-  color:#e5e7eb;
-  border:1px solid #2a3442;
-  border-radius:14px;
-  padding:12px;
-  margin:0 6px 10px;
+  width:min(33vw, 420px);
+  background:#0f141c; color:#e5e7eb;
+  border:1px solid #2a3442; border-radius:14px; padding:12px;
   box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
 }
-
-/* Tipos y controles en modo oscuro */
-#userPanel.menu-full label.small{ color:#cbd5e1; }
-#userPanel.menu-full input,
-#userPanel.menu-full select,
-#userPanel.menu-full textarea{
-  background:#0b1220;
-  color:#e5e7eb;
-  border:1px solid #2a3442;
-  border-radius:10px;
-  padding:.55rem .6rem;
-}
-#userPanel.menu-full .pw-toggle{ filter:invert(1) opacity(.85); }
-#userPanel.menu-full .btn.gloss{
-  background:linear-gradient(180deg,#1f2937,#111827) !important;
-  border-color:#374151 !important;
-  color:#fff !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 6px 18px rgba(0,0,0,.3) !important;
+@media (max-width:520px){
+  #userPanel.menu-full .row{ width:100%; border-radius:0; height:100%; }
 }
 
-/* En modo “overlay”, ignoramos la posición absoluta pequeña del menú */
-#userPanel{ transition: none; }  /* evita animaciones raras al abrir/cerrar */
-/* Ajuste responsive menú usuario en móviles */
-@media (max-width: 520px){
-  #userPanel.menu-full .row{
-    width: 100% !important;
-    max-width: none !important;
-    border-radius: 0;
-    margin: 0;
-    height: 100%;
-  }
-}
+/* Evitar que el contenido se mueva / haga scroll cuando hay overlays */
+body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
+/* Utilidades mínimas que faltaban */
+.dot{display:inline-block;width:10px;height:10px;border-radius:999px;vertical-align:-1px}
+.sub{color:var(--muted);font-size:.9rem}
+.right{display:flex;justify-content:flex-end;gap:.5rem;flex-wrap:wrap}
+.small{font-size:.85rem;color:var(--muted)}
+.grp-title{margin:1rem 0 .5rem;font:800 1.05rem/1.2 Inter,system-ui,sans-serif;color:#e5e7eb}
 
-/* Evita scroll del contenido cuando hay overlay abierto */
-body.menu-open{ overflow:hidden; }
+/* Sombrado del header al hacer scroll (ya lo activas por JS) */
+header.scrolled{box-shadow:0 6px 18px rgba(0,0,0,.22)}
+/* ——— 1) Altura cabecera ——— */
+:root{ --hdr-h:120px; --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
 
-/* Quita rebotes/pull-to-refresh y gestos raros en el overlay */
-body.menu-open{ overscroll-behavior: none; }
-html.menu-open{ overscroll-behavior: none; }
-#userPanel.menu-full{ touch-action: none; }
-/* ===== FIX 1: Logo de la línea acotado ===== */
-#page-equipos .brand-wrap{
-  height:auto; padding:.35rem 0 .2rem; overflow:hidden;
-}
-#page-equipos .brand-wrap img{
-  display:block;
-  height:auto;
-  max-height:56px;                 /* antes 80px: más bajo en móvil */
-  max-width:min(92vw,520px);       /* evita que se desborde en horizontal */
-  width:auto;
-  margin:0 auto;
-  object-fit:contain;
-}
+/* ——— 2) Pilotos de estado ——— */
+.pilot{ width:14px; height:14px; border-radius:50%; display:inline-block; box-shadow:0 0 0 2px rgba(0,0,0,.08) inset; }
+.p-ok{   background:var(--ok); }
+.p-warn{ background:var(--warn); }
+.p-stop{ background:var(--stop); }
 
-/* ===== FIX 2: Menú de usuario compacto (sin overlay) ===== */
-#userPanel.menu-full{
-  position:absolute !important;
-  left:auto !important; right:10px !important; top:52px !important; bottom:auto !important;
-  background:transparent !important;           /* quita fondo negro a pantalla completa */
-  padding:0 !important;
-  z-index:200;
-  display:block !important;
-}
-#userPanel.menu-full .row{
-  width:300px !important; max-width:calc(100vw - 24px);
-  background:#0f141c; color:#e5e7eb;
-  border:1px solid #2a3442; border-radius:12px;
-  margin:0; padding:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
-}
-body.menu-open, html.menu-open{ overflow:auto !important; overscroll-behavior:auto !important; }
+/* ——— 3) Enlace “de texto” ——— */
+.linkish{ text-decoration:underline; text-underline-offset:2px; cursor:pointer }
 
-/* Cerrar al tocar fuera (ya lo hace el JS), pero evitamos ocupar toda la pantalla */
-#userPanel.menu-full::before{ content:none !important; }
+/* ——— 4) Tablas y paginador ——— */
+table{ width:100%; border-collapse:collapse; }
+th,td{ border:1px solid #cfd3da; padding:.45rem .55rem; text-align:left; }
+thead th{ background:#eef1f6; color:#111; }
+.num{ text-align:right }
+.nowrap{ white-space:nowrap }
+.pager{ display:flex; align-items:center; gap:.6rem; margin-top:.6rem }
+.page-btn{ background:#f3f4f6; border:1px solid #cfd3da; padding:.25rem .55rem; border-radius:8px; cursor:pointer }
 
-/* ===== FIX 3: Fondo de cabecera reencuadrado ===== */
+/* ——— 5) TV cards y toast ——— */
+.tv-card{ background:#0f141c; border:1px solid #2a3442; border-radius:14px; padding:12px; margin:.6rem 0; }
+.tv-title{ font-weight:800; margin-bottom:.35rem }
+.tv-list{ display:flex; flex-direction:column; gap:.25rem }
+.tv-item{ padding:.4rem .5rem; border-radius:8px; background:#0b1220 }
+.tv-item.stop{ outline:2px solid var(--stop) }
+.tv-item.warn{ outline:2px solid var(--warn) }
+.tv-item.stock{ outline:2px solid #60a5fa }
+
+.toast{
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+  background:#111827; color:#fff; padding:.55rem .9rem; border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+  opacity:0; transition:opacity .25s; z-index:2000;
+}
+/* Logo de mantenimiento en cabecera (único) */
 header::before{
-  background-position:center calc(36px + var(--safe-top,0px)) !important;
-  background-size:clamp(160px, 38vw, 240px) !important;  /* tamaño contenido */
-  opacity:.16 !important;
+  content:"";
+  position:absolute; inset:0; z-index:0;
+  background: url("logo_mantenimiento.png")
+              no-repeat center top / clamp(180px, 34vw, 280px);
+  opacity:.18; pointer-events:none;
 }
-header .nav{ min-height: var(--hdr-h); }
-
-/* Opcional: si el título quedara muy pegado en iOS con notch */
-@supports(padding:max(0px)){
-  header{ padding-top: max(var(--safe-top,0px), 8px); }
-}
+header .nav{ position:relative; z-index:1; min-height: var(--hdr-h); }
 
 </style>
 </head>
@@ -1248,14 +1075,20 @@ function buildIncidFilters(){
 }
 
 /* ========== KPIs + CHARTS ========== */
+function isoWeekKey(d){
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = (date.getUTCDay() + 6) % 7;           // Lunes=0
+  date.setUTCDate(date.getUTCDate() - dayNum + 3);     // al jueves ISO
+  const week1 = new Date(Date.UTC(date.getUTCFullYear(), 0, 4));
+  const week = 1 + Math.round(((date - week1) / 86400000 - 3 + ((week1.getUTCDay()+6)%7)) / 7);
+  return `${date.getUTCFullYear()}-W${String(week).padStart(2,"0")}`;
+}
 function groupByWeek(arr){
   const g = {};
   for (const x of arr){
     const d = new Date(x.created);
-    const a = new Date(Date.UTC(d.getFullYear(), 0, 1));
-    const n = Math.floor((d - a) / 86400000) + a.getUTCDay();
-    const w = `${d.getFullYear()}-W${Math.floor(n/7) + 1}`;
-    (g[w] ??= []).push(x);
+    const k = isoWeekKey(d);
+    (g[k] ??= []).push(x);
   }
   return g;
 }
@@ -1895,11 +1728,8 @@ window.addEventListener("load", async ()=>{
   bindPwToggles();
   applyRoleUI();
 
-  // datos iniciales
-  await loadState();
-  await loadIncid();
-  await loadOT();
-  await loadInv();
+  // datos iniciales en paralelo
+  await Promise.all([loadState(), loadIncid(), loadOT(), loadInv()]);
 
   // página por defecto
   nav("equipos");
@@ -1913,7 +1743,6 @@ window.addEventListener("load", async ()=>{
     try{ navigator.serviceWorker.register("/sw.js"); }catch(_){}
   }
 });
-
 /* Pequeños extras de accesibilidad */
 document.addEventListener("keydown", (e)=>{
   if (e.key === "/" && !/input|textarea|select/i.test(document.activeElement.tagName)){
