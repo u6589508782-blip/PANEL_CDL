@@ -376,6 +376,19 @@ header .nav{
 
 /* Sube un pelín los botones de menú para que no “empujen” el título */
 .menu-pages{ left:14px; bottom:12px; }
+/* --- Ajuste logo cabecera (centrado y mayor) --- */
+header::before{
+  background-position: center 45% !important;            /* centrado, un pelín arriba */
+  background-size: clamp(280px, 45vw, 440px) !important; /* más grande */
+  opacity:.32 !important;                                 /* un poco más visible (opcional) */
+}
+
+/* --- Asegurar que los menús queden por encima y reciban el click --- */
+.menu-pages, .menu-user{ z-index: 3 !important; position: absolute; }
+
+/* El título puede cubrir el botón; evita que intercepte el click */
+.hero-title{ z-index: 1 !important; pointer-events: none !important; }
+.hero-title *{ pointer-events: auto; } /* permite seleccionar el texto si hace falta */
 </style>
 <style>
 /* Utilidades visuales mínimas */
