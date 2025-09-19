@@ -265,7 +265,7 @@ header::before{
   content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
   background:url("logo_mantenimiento.png") no-repeat
              center calc(6px + var(--safe-top,0px)) / clamp(200px,38vw,320px);
-  opacity:.14;
+  opacity:.28;
   -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.95) 0%, rgba(0,0,0,.55) 35%, rgba(0,0,0,0) 78%);
           mask-image:linear-gradient(to bottom, rgba(0,0,0,.95) 0%, rgba(0,0,0,.55) 35%, rgba(0,0,0,0) 78%);
 }
@@ -356,6 +356,26 @@ th,td{
   }
   .toast{ transition:none !important; }
 }
+/* === FIX: anclar contenido de cabecera === */
+header .nav{
+  position: relative;                 /* contenedor posicionado */
+  min-height: var(--hdr-h);           /* altura real de cabecera */
+}
+
+/* Por si el alto resulta pequeño en móviles estrechos, asegúralo */
+@media (max-width:480px){
+  :root{ --hdr-h: 140px; }            /* fallback inicial; luego JS lo ajusta */
+}
+
+/* Asegura que el título queda pegado abajo del área de cabecera */
+.hero-title{
+  position: absolute;
+  left: 0; right: 0; bottom: 8px;
+  display: flex; justify-content: center;
+}
+
+/* Sube un pelín los botones de menú para que no “empujen” el título */
+.menu-pages{ left:14px; bottom:12px; }
 </style>
 <style>
 /* Utilidades visuales mínimas */
@@ -1287,7 +1307,6 @@ function renderOT(){
     </thead>
     <tbody>${rows || '<tr><td colspan="6">Sin órdenes de trabajo</td></tr>'}</tbody>
   </table>
-
   <div class="pager">
     <button class="page-btn"
             onclick="setOTPage(${OT_PAGE-1})"
@@ -1302,6 +1321,7 @@ function renderOT(){
             ${OT_PAGE>=pages?'disabled':''}>›</button>
   </div>
 `;
+}
 
 /* ========== INVENTARIO ========== */
 let INV = [];
@@ -1833,6 +1853,22 @@ function handleHash(){
   ensureSectionsHidden();
   byId("page-" + (CURRENT_PAGE || "equipos")).classList.remove("hidden");
 }
+/* === FIX: sincronizar --hdr-h con la altura real del header (iOS safe areas) === */
+function syncHeaderHeightVar(){
+  const h = document.querySelector('header')?.offsetHeight || 120;
+  document.documentElement.style.setProperty('--hdr-h', h + 'px');
+}
+window.addEventListener('load', syncHeaderHeightVar);
+window.addEventListener('resize', syncHeaderHeightVar);
+window.addEventListener('orientationchange', syncHeaderHeightVar);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderHeightVar);
+
+/* Llama también cuando se abre un menú (por si varía con el teclado/zoom) */
+const _openPanel = openPanel;
+openPanel = function(panelEl, btnEl){
+  syncHeaderHeightVar();
+  _openPanel(panelEl, btnEl);
+};
 
 /* ========== INIT ========== */
 window.addEventListener("load", async ()=>{
