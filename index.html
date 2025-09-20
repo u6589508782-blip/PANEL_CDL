@@ -18,279 +18,181 @@
 
 <style>
 :root{
-  --brand1:#A60000;   /* rojo oscuro */
-  --brand2:#E43B3B;   /* rojo principal */
+  --brand1:#A60000; --brand2:#E43B3B;
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
   --ink:#e8eef7; --muted:#9aa7b4; --line:#232b36;
   --hdr-h:120px;
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 }
-
-/* ===== FONDO global metalizado + watermark CDL ===== */
-body{
-  margin:0;
-  font-family:Inter,system-ui,sans-serif;
-  background:linear-gradient(180deg,#0c0f14,#11161e 60%,#0c0f14);
-  color:var(--ink);
-  padding-top: var(--safe-top,0px);
-  padding-bottom: var(--safe-bottom,0px);
-  -webkit-text-size-adjust:100%;
+/* Botón chip con mini-QR integrado */
+.btn-chip.qr{ display:inline-flex; align-items:center; gap:.35rem; }
+.btn-chip.qr::after{
+  content:""; width:14px; height:14px; display:inline-block;
+  background:
+    radial-gradient(#000 33%, transparent 34%) 0 0/7px 7px,
+    conic-gradient(#000 25%, transparent 0) 0 0/7px 7px,
+    linear-gradient(#000 0 0) 0 0/7px 7px;
+  filter: invert(1) brightness(.95);
+  border-radius:2px; box-shadow:0 0 0 1px rgba(255,255,255,.35) inset;
 }
-body::before{
-  content:"";
-  position:fixed;inset:0;z-index:0;
-  pointer-events:none;opacity:.18;
-  background-repeat:no-repeat;
-  background-position:center 120px;
-  background-size:580px 580px;
-  background-image:url("data:image/svg+xml;utf8,\
-  <svg xmlns='http://www.w3.org/2000/svg' width='580' height='580' viewBox='0 0 580 580'>\
-    <defs><radialGradient id='g' cx='50%' cy='50%' r='50%'>\
-      <stop offset='0%' stop-color='%23ffffff'/>\
-      <stop offset='100%' stop-color='%239ca3af'/>\
-    </radialGradient></defs>\
-    <circle cx='290' cy='290' r='270' fill='url(%23g)' fill-opacity='.35'/>\
-    <text x='50%' y='54%' text-anchor='middle' font-family='Inter,system-ui,sans-serif' font-size='150' font-weight='800' fill='%23ffffff' fill-opacity='.38'>CDL</text>\
-  </svg>");
-}
-
-/* ===== CABECERA con logo metalizado ===== */
-header{
-  position:sticky; top:0; z-index:1200 !important;
-  background:linear-gradient(180deg,#f9fafb,#e5e7eb);
-  color:#000; min-height:var(--hdr-h);
-  isolation:isolate;
-  padding-top: var(--safe-top,0px);
-  box-shadow:0 4px 10px rgba(0,0,0,.18);
-}
-/* imagen de fondo SIEMPRE arriba, fuera del texto */
-.hero-title{
-  position:absolute; left:0; right:0; bottom:8px; /* queda por debajo del logo */
-  display:flex; justify-content:center;
-}
-.hero-row.singleline{ display:flex; gap:.35rem }
-.hero-cdl{ font-weight:900; font-size:1.9rem; letter-spacing:.02em; color:var(--brand1); }
-.hero-dot{ opacity:.9 }
-.hero-panel{ font-weight:700; font-size:1.1rem; color:#111 }
-
-/* ===== Menú hamburguesa ===== */
-.menu-pages{ position:absolute; left:18px; bottom:12px; }
-
-/* ===== Menú usuario (3 puntos debajo del rol) ===== */
-.rolechip{
-  position:absolute; right:14px; top:8px;
-  font-size:.78rem; font-weight:700;
-  color:#222; background:none; border:0;
-}
-.menu-user{ position:absolute; right:14px; top:26px; }
-.menu-user #userBtn{
-  font-size:1.3rem; padding:0; margin:0;
-  background:none; border:0; color:#222;
-}
-/* ===== QR símbolo más claro ===== */
-.qr-s{
-  width:18px;
-  height:18px;
-  display:inline-block;
-  background:url("data:image/svg+xml;utf8,\
-  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'><path d='M3 3h7v7H3V3zm1 1v5h5V4H4zm9-1h7v7h-7V3zm1 1v5h5V4h-5zm-1 9h7v7h-7v-7zm1 1v5h5v-5h-5zM3 13h7v7H3v-7zm1 1v5h5v-5H4z'/></svg>") no-repeat center/contain;
-  /* El SVG es negro; con invert() se ve claro sobre fondo claro/oscuro */
-  filter: invert(1) opacity(.9);
-  cursor: pointer;
-  transition: filter .15s ease, transform .15s ease;
-}
-.qr-s:hover{
-  filter: invert(1) sepia(1) saturate(6) hue-rotate(190deg) brightness(1.1);
-  transform: scale(1.08);
-}
-
-/* (NOTA) Las reglas de overlays/menus y el estilo de la imagen se consolidan en el hotfix de abajo */
+/* Ocultar el antiguo icono de “cuadradillos” si aún aparece */
+.qr-s{ display:none !important; }
 </style>
 
 <style id="hotfix-cdl">
-/* ===== UX TUNE — CDL (bloque único, limpio) ===============================
-   Exterior claro; tarjetas “grafito cepillado” compactas (+ variante Wallet)
-   Semáforo horizontal y sutil; títulos en MAYÚSCULAS centrados
-   Grid responsive (2 col. tablets, 3 col. desktop); foco accesible
-   ======================================================================== */
+/* ===== HOTFIX CDL (compacto y limpio) ===== */
 
-/* ---------- Utilidades ---------- */
-.hidden{ display:none !important; }
-.linkish{ text-decoration:underline; text-underline-offset:2px; cursor:pointer }
-.small{ font-size:.85rem; color:#9aa7b4 }
-.num{ text-align:right }
-.nowrap{ white-space:nowrap }
+/* Utilidades */
+.hidden{display:none!important}
+.linkish{text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.small{font-size:.85rem;color:#9aa7b4}
+.num{text-align:right}
+.nowrap{white-space:nowrap}
 
-/* ---------- Variables (tema) ---------- */
+/* Tema grafito */
 :root{
-  /* Grafito cepillado */
-  --grafito-top:#2b2f36;      /* superior */
-  --grafito-bot:#1d2127;      /* inferior */
-  --grafito-line:#3a414b;     /* borde */
-  --brush-stripe:repeating-linear-gradient(90deg,
-      rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px,
-      rgba(255,255,255,0) 3px);
-  --brush-noise:radial-gradient(circle at 30% -20%,
-      rgba(255,255,255,.06), rgba(255,255,255,0) 60%);
-
-  --ink-hi:#e5e7eb;           /* texto claro sobre oscuro */
-  --ink-sub:#93a4b5;          /* subtítulos */
-  --accent:#60a5fa;           /* foco accesible */
-
+  --grafito-top:#2b2f36; --grafito-bot:#1d2127; --grafito-line:#3a414b;
+  --brush-stripe:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,rgba(255,255,255,0) 3px);
+  --brush-noise:radial-gradient(circle at 30% -20%,rgba(255,255,255,.06),rgba(255,255,255,0) 60%);
+  --ink-hi:#e5e7eb; --ink-sub:#93a4b5; --accent:#60a5fa;
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
 }
 
-/* ---------- Fondo exterior claro (todas las páginas) ---------- */
-#page-equipos,#page-gruas,#page-otros,
-#page-incidencias,#page-indicadores,
-#page-ot,#page-inventario,#page-tv{
-  background:linear-gradient(180deg,#f3f4f6,#e5e7eb);
-  margin:0 calc(50% - 50vw);      /* full-bleed suave */
-  padding:10px 14px 18px;
-  border-top:1px solid #dde3ea;
+/* Fondo global + watermark nuevo */
+body{
+  margin:0; font-family:Inter,system-ui,sans-serif; color:var(--ink);
+  padding-top:var(--safe-top,0px); padding-bottom:var(--safe-bottom,0px);
+  -webkit-text-size-adjust:100%;
+  background-image:
+    url("logo_mantenimiento.png"),
+    linear-gradient(180deg,#0c0f14,#11161e 60%,#0c0f14);
+  background-repeat:no-repeat,no-repeat;
+  background-position:center 40%,center;
+  background-size:clamp(220px,32vw,360px),cover;
+  background-attachment:fixed;
 }
 
-/* ---------- Títulos (caps + centrado) ---------- */
-main section>h2,.grp-title{
-  text-transform:uppercase;
-  text-align:center;
-  letter-spacing:.06em;
-  color:#0f172a;
+/* Header: logo de fondo y layout */
+header::before{
+  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:url("logo_mantenimiento.png") no-repeat center 45%/clamp(280px,45vw,440px);
+  opacity:.32;
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.95) 0%,rgba(0,0,0,.55) 35%,rgba(0,0,0,0) 78%);
+          mask-image:linear-gradient(to bottom,rgba(0,0,0,.95) 0%,rgba(0,0,0,.55) 35%,rgba(0,0,0,0) 78%);
 }
-main section>h2{ margin:.4rem 0 .3rem; }
-.grp-title{ margin:.6rem 0 .5rem; font-weight:800; }
+.hero-title{
+  position:absolute; left:0; right:0; bottom:8px;
+  display:flex; justify-content:center;
+}
+.menu-pages{ position:absolute; left:12px; top:50%; transform:translateY(-50%); }
+.menu-pages, .menu-user{ z-index:3!important; position:absolute; }
+.hero-title{ z-index:1!important; pointer-events:none!important; }
+.hero-title *{ pointer-events:auto; }
+.hero-cdl{ color:#111!important; font-weight:900; }
+.hero-row.singleline{ display:flex; align-items:center; gap:.45rem; }
+.hero-panel{ font-size:1.05rem; line-height:1; align-self:center; }
 
-/* ---------- Tarjeta “grafito cepillado” (compacta) ---------- */
+/* Cabecera compacta */
+:root{ --hdr-h:104px; }
+@media (max-width:480px){ :root{ --hdr-h:112px; } }
+header .nav{ position:relative; min-height:var(--hdr-h); } /* ← llave correcta */
+
+/* Tarjetas grafito */
 .card{
-  position:relative;
-  color:var(--ink-hi);
-  border-radius:16px;
-  padding:.5rem .6rem;                 /* compacto: caben ~3 a primera vista */
-  margin:.5rem 0;
-  border:1px solid var(--grafito-line);
-  background:
-    var(--brush-noise),
-    var(--brush-stripe),
-    linear-gradient(180deg,var(--grafito-top),var(--grafito-bot));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.07),
-    inset 0 -1px 0 rgba(0,0,0,.5),
-    0 6px 18px rgba(0,0,0,.35);
+  position:relative; color:var(--ink-hi); border-radius:16px;
+  padding:.5rem .6rem; margin:.5rem 0; border:1px solid var(--grafito-line);
+  background:var(--brush-noise),var(--brush-stripe),linear-gradient(180deg,var(--grafito-top),var(--grafito-bot));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.5), 0 6px 18px rgba(0,0,0,.35);
 }
 .card .name{ font-size:.95rem; font-weight:900; letter-spacing:.01em; line-height:1.15; }
-.card .sub{
-  color:var(--ink-sub);
-  text-transform:uppercase;
-  text-align:center;
-  letter-spacing:.04em;
-  margin-top:.18rem;
-}
+.card .sub{ color:var(--ink-sub); text-transform:uppercase; text-align:center; letter-spacing:.04em; margin-top:.18rem; }
 .pilot{ width:12px; height:12px; border-radius:50%; display:inline-block; box-shadow:0 0 0 2px rgba(0,0,0,.08) inset; }
 .p-ok{background:var(--ok)} .p-warn{background:var(--warn)} .p-stop{background:var(--stop)}
+.card.wallet{ background:linear-gradient(180deg,#171a20,#0f1217); border:1px solid rgba(255,255,255,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 28px rgba(0,0,0,.45); }
+.card.wallet::after{ content:""; position:absolute; inset:-1px; border-radius:18px; box-shadow:0 0 0 1px rgba(255,255,255,.08); pointer-events:none; }
 
-/* ---------- Variante “Apple Wallet” (borde claro + interior más oscuro)
-   Añade .wallet a cualquier .card para activarla -------------------------- */
-.card.wallet{
-  background:linear-gradient(180deg,#171a20,#0f1217);
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 28px rgba(0,0,0,.45);
-}
-.card.wallet::after{
-  content:""; position:absolute; inset:-1px; border-radius:18px;
-  box-shadow:0 0 0 1px rgba(255,255,255,.08); pointer-events:none;
-}
-
-/* ---------- Acciones (chips mini, centradas) ---------- */
+/* Acciones */
 .right{ display:flex; justify-content:center; gap:.35rem; flex-wrap:wrap; }
 .btn.gloss{
-  display:inline-flex; align-items:center; gap:.5rem;
-  padding:.32rem .55rem; font-weight:800; border-radius:999px;
-  background:linear-gradient(180deg,#fdfdfd,#dfe3eb);
-  border:1px solid #bbb;
+  display:inline-flex; align-items:center; gap:.5rem; padding:.32rem .55rem; font-weight:800; border-radius:999px;
+  background:linear-gradient(180deg,#fdfdfd,#dfe3eb); border:1px solid #bbb;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 12px rgba(0,0,0,.12);
 }
 .btn.gloss.btn-mail{ color:#7a1616; background:linear-gradient(180deg,#ffefef,#f8b5b5); border-color:#f29494; }
 
-/* ---------- Semáforo horizontal y sutil ---------- */
-.semaforo{
-  display:flex; align-items:center; gap:.32rem;
-  padding:.24rem; border-radius:999px;
-  background:#0b1220; border:1px solid #263042;
-}
-.semaforo .opt{
-  padding:.26rem .5rem; min-width:0; min-height:auto;
-  font-size:.88rem; font-weight:800; line-height:1;
-  color:#d5dee8; background:transparent; border-radius:999px;
-  transition:transform .06s ease, background-color .12s ease;
-}
-.semaforo .opt:hover{
-  transform:translateY(-1px);
-  text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:.06em;
-}
-.semaforo .opt.active{ outline:none; }
-.semaforo .opt[data-k="ok"].active{
-  background:rgba(22,163,74,.14); color:#bbf7d0; box-shadow:0 0 0 1px rgba(22,163,74,.45) inset;
-}
-.semaforo .opt[data-k="warn"].active{
-  background:rgba(245,158,11,.14); color:#fde68a; box-shadow:0 0 0 1px rgba(245,158,11,.45) inset;
-}
-.semaforo .opt[data-k="stop"].active{
-  background:rgba(220,38,38,.14); color:#fecaca; box-shadow:0 0 0 1px rgba(220,38,38,.45) inset;
-}
+/* Semáforo */
+.semaforo{ display:flex; align-items:center; gap:.32rem; padding:.24rem; border-radius:999px; background:#0b1220; border:1px solid #263042; }
+.semaforo .opt{ padding:.26rem .5rem; font-size:.88rem; font-weight:800; line-height:1; color:#d5dee8; border-radius:999px; transition:transform .06s ease, background-color .12s ease; }
+.semaforo .opt:hover{ transform:translateY(-1px); text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:.06em; }
+.semaforo .opt.active[data-k="ok"]{ background:rgba(22,163,74,.14); color:#bbf7d0; box-shadow:0 0 0 1px rgba(22,163,74,.45) inset; }
+.semaforo .opt.active[data-k="warn"]{ background:rgba(245,158,11,.14); color:#fde68a; box-shadow:0 0 0 1px rgba(245,158,11,.45) inset; }
+.semaforo .opt.active[data-k="stop"]{ background:rgba(220,38,38,.14); color:#fecaca; box-shadow:0 0 0 1px rgba(220,38,38,.45) inset; }
+.semaforo .opt:focus-visible,.btn.gloss:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:999px; }
 
-/* ---------- Focus accesible (teclado) ---------- */
-.semaforo .opt:focus-visible,.btn.gloss:focus-visible{
-  outline:2px solid var(--accent); outline-offset:2px; border-radius:999px;
-}
-
-/* ---------- Banda LÍNEA KALTENBACH (full-bleed consistente) ---------- */
-#page-equipos .brand-wrap{
-  margin-left:calc(50% - 50vw) !important;
-  margin-right:calc(50% - 50vw) !important;
-  padding:0; background:#0f141c;
-  border-top:1px solid #222; border-bottom:1px solid #222;
-}
-#page-equipos .brand-wrap img{
-  display:block; width:100vw; height:auto; max-height:72px; object-fit:contain; margin:0 auto;
-}
-#page-equipos .brand-wrap.fallback{
-  background:#0f141c; color:#e5e7eb; font-weight:800; letter-spacing:.04em;
-  display:flex; align-items:center; justify-content:center;
-}
+/* Bandas y tablas */
+#page-equipos .brand-wrap{ margin-left:calc(50% - 50vw)!important; margin-right:calc(50% - 50vw)!important; padding:0; background:#0f141c; border-top:1px solid #222; border-bottom:1px solid #222; }
+#page-equipos .brand-wrap img{ display:block; width:100vw; height:auto; max-height:72px; object-fit:contain; margin:0 auto; }
+#page-equipos .brand-wrap.fallback{ background:#0f141c; color:#e5e7eb; font-weight:800; letter-spacing:.04em; display:flex; align-items:center; justify-content:center; }
 #page-equipos .brand-wrap.fallback::before{ content:"LÍNEA KALTENBACH"; }
 
-/* ---------- Header: logo sin “pisar” el título ---------- */
-header::before{
-  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
-  background:url("logo_mantenimiento.png") no-repeat
-             center calc(6px + var(--safe-top,0px)) / clamp(200px,38vw,320px);
-  opacity:.28;
-  -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.95) 0%, rgba(0,0,0,.55) 35%, rgba(0,0,0,0) 78%);
-          mask-image:linear-gradient(to bottom, rgba(0,0,0,.95) 0%, rgba(0,0,0,.55) 35%, rgba(0,0,0,0) 78%);
-}
-.hero-title{ position:relative; z-index:1; padding-left:28px; }
-#roleChip{ color:#222; }
+table{ width:100%; border-collapse:collapse; background:#0f141c; color:#e5e7eb; border-color:#2a3442; }
+thead th{ background:#111827; color:#e5e7eb; }
+th,td{ border:1px solid #263042; padding:.45rem .55rem; text-align:left; }
 
-/* ---------- Menús: overlays full-screen y accesibilidad ---------- */
-.panel.hidden{ display:none !important; opacity:0 !important; transform:none !important; }
+/* Secciones exteriores (grafito) */
+#page-equipos,#page-gruas,#page-otros,#page-incidencias,#page-indicadores,#page-ot,#page-inventario,#page-tv{
+  background:linear-gradient(180deg,#0f141c,#0b1119 60%,#0f141c);
+  margin:0 calc(50% - 50vw); padding:10px 14px 18px; border-top:1px solid #1e2733;
+}
+
+/* Grid responsive */
+@media (min-width:760px){
+  #equiposWrap,#gruasWrap,#otrosWrap{ display:grid; gap:12px; grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (min-width:1120px){
+  #equiposWrap,#gruasWrap,#otrosWrap{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media (max-width:640px){
+  .card{ box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 4px 12px rgba(0,0,0,.25); }
+}
+@media (prefers-reduced-motion:reduce){
+  *{ animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+  .toast{ transition:none!important; }
+}
+
+/* Distintivo rojo CDL (títulos y cabecera) */
+.cdl-tag{ position:relative; display:inline-flex; align-items:center; gap:.4rem; }
+.cdl-tag::before{ content:""; display:inline-block; background:#A60000; border-radius:2px; flex-shrink:0; }
+h2.cdl-tag::before{ width:14px; height:14px; margin-right:.35rem; }
+h3.cdl-tag::before{ width:10px; height:10px; margin-right:.3rem; }
+.hero-cdl{ position:relative; padding-left:42px; }
+.hero-cdl::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:28px; height:28px; background:#E43B3B; border-radius:6px;
+  box-shadow:0 1px 0 rgba(0,0,0,.08) inset, 0 1px 6px rgba(0,0,0,.25);
+}
+/* Menús full-screen + bloqueo de scroll */
 body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
+
 #pagesPanel.menu-full, #userPanel.menu-full{
-  position:fixed !important; left:0; right:0;
+  position:fixed; left:0; right:0;
   top: calc(var(--safe-top,0px) + var(--hdr-h));
   bottom: var(--safe-bottom,0px);
+  z-index:2000;
   background: linear-gradient(180deg,#0b0f15,#121820 60%,#0b0f15);
   border-top: 2px solid #222;
   box-shadow: inset 0 20px 40px rgba(255,255,255,.08), 0 -10px 30px rgba(0,0,0,.45);
-  z-index:2000;
 }
+
 #pagesPanel.menu-full .row{ border:0; padding:0; height:100%; }
 #pagesPanel.menu-full .actions{
   display:flex; flex-direction:column; gap:0; height:100%; margin:0;
   justify-content:space-evenly;
 }
 #pagesPanel.menu-full .btn{
-  background:none !important; border:0 !important; box-shadow:none !important;
+  background:none!important; border:0!important; box-shadow:none!important;
   color:#fff; font-weight:900; text-transform:uppercase; letter-spacing:.05em;
   font-size:clamp(18px,3vh,28px); padding:1.1rem 0; position:relative;
 }
@@ -298,7 +200,6 @@ body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
   content:""; position:absolute; top:0; left:0; right:0; height:2px;
   background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 30%, rgba(255,255,255,0) 100%);
 }
-#pagesPanel.menu-full .btn:hover{ color:#E43B3B; text-shadow:0 0 6px rgba(255,0,0,.5); }
 
 #userPanel.menu-full{
   display:flex; flex-direction:column; align-items:center; gap:12px; padding:12px; overflow:auto;
@@ -310,86 +211,38 @@ body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
   border:1px solid #2a3442; border-radius:14px; padding:12px;
   box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
 }
-/* ---------- Tablas (oscuro sobre exterior claro) ---------- */
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:#0f141c;
-  color:#e5e7eb;
-  border-color:#2a3442;
+.grp-title{
+  text-transform:uppercase;
+  text-align:center;
+  letter-spacing:.06em;
+  color:#e5e7eb;              /* ↑ mejor contraste en el tema grafito */
+  margin:.6rem 0 .5rem;
+  font-weight:800;
+  opacity:.95;
 }
-thead th{ background:#111827; color:#e5e7eb; }
-th,td{
-  border:1px solid #263042;
-  padding:.45rem .55rem;
-  text-align:left;
+/* Header fijo, con fondo claro y sombra, compatible con --hdr-h */
+header{
+  position:sticky; top:0; z-index:1200;
+  background:linear-gradient(180deg,#f9fafb,#e5e7eb);
+  color:#111;
+  min-height:var(--hdr-h);
+  isolation:isolate;
+  padding-top:var(--safe-top,0px);
+  box-shadow:0 4px 10px rgba(0,0,0,.18);
 }
-
-/* ---------- Grid: 2 columnas tablets, 3 en desktop ancho ---------- */
-@media (min-width:760px){
-  #equiposWrap,#gruasWrap,#otrosWrap{
-    display:grid;
-    gap:12px;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
+/* Chip de rol y menú usuario (arriba derecha) */
+.rolechip{
+  position:absolute; right:14px; top:8px;
+  font-size:.78rem; font-weight:800;
+  color:#222; background:none; border:0;
 }
-@media (min-width:1120px){
-  #equiposWrap,#gruasWrap,#otrosWrap{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-  }
+.menu-user{ position:absolute; right:14px; top:26px; }
+.menu-user #userBtn{
+  font-size:1.3rem; padding:0; margin:0;
+  background:none; border:0; color:#222; line-height:1;
 }
-
-@media (max-width:640px){
-  /* ajustes móviles aquí */
-  .card{
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.06),
-      0 4px 12px rgba(0,0,0,.25);
-  }
-}
-/* ---------- Preferencias de movimiento ---------- */
-@media (prefers-reduced-motion:reduce){
-  *{
-    animation:none !important;
-    transition:none !important;
-    scroll-behavior:auto !important;
-  }
-  .toast{ transition:none !important; }
-}
-/* === FIX: anclar contenido de cabecera === */
-header .nav{
-  position: relative;                 /* contenedor posicionado */
-  min-height: var(--hdr-h);           /* altura real de cabecera */
-}
-
-/* Por si el alto resulta pequeño en móviles estrechos, asegúralo */
-@media (max-width:480px){
-  :root{ --hdr-h: 140px; }            /* fallback inicial; luego JS lo ajusta */
-}
-
-/* Asegura que el título queda pegado abajo del área de cabecera */
-.hero-title{
-  position: absolute;
-  left: 0; right: 0; bottom: 8px;
-  display: flex; justify-content: center;
-}
-
-/* Sube un pelín los botones de menú para que no “empujen” el título */
-.menu-pages{ left:14px; bottom:12px; }
-/* --- Ajuste logo cabecera (centrado y mayor) --- */
-header::before{
-  background-position: center 45% !important;            /* centrado, un pelín arriba */
-  background-size: clamp(280px, 45vw, 440px) !important; /* más grande */
-  opacity:.32 !important;                                 /* un poco más visible (opcional) */
-}
-
-/* --- Asegurar que los menús queden por encima y reciban el click --- */
-.menu-pages, .menu-user{ z-index: 3 !important; position: absolute; }
-
-/* El título puede cubrir el botón; evita que intercepte el click */
-.hero-title{ z-index: 1 !important; pointer-events: none !important; }
-.hero-title *{ pointer-events: auto; } /* permite seleccionar el texto si hace falta */
 </style>
+
 <style>
 /* Utilidades visuales mínimas */
 .kpi{background:#0f141c;color:#e5e7eb;border:1px solid #2a3442;border-radius:14px;padding:.7rem .9rem;margin:.5rem 0}
@@ -750,7 +603,6 @@ window.applyRoleUI = function(){
     const el = byId(id);
     if (el){ el.classList.remove("hidden"); el.style.display = ""; el.hidden = false; }
   });
-
   ["btnExportIncidCSV","btnExportIncidPDF","btnExportKPIPCSV","btnExportKPIPDF","btnExportInvCSV","btnExportOTPDF","btnExportInvQR"]
   .forEach(id=>{
     const el = byId(id);
@@ -1012,8 +864,7 @@ function cardEquipo(eq){
           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openEquipoByName('${safeName}')}">
           ${esc(eq.nombre)}
         </span>
-        <button class="btn-chip" onclick="openFicha('${safeName}')">Ficha</button>
-        <span class="qr-s" title="QR"></span>
+        <button class="btn-chip qr" onclick="openFicha('${safeName}')">Ficha</button>
       </div>
       <div class="sub">${esc(eq.grupo)}</div>
     </div>
@@ -1882,6 +1733,15 @@ openPanel = function(panelEl, btnEl){
   syncHeaderHeightVar();
   _openPanel(panelEl, btnEl);
 };
+/* === Añadir distintivo rojo CDL automáticamente a todos los títulos (h2 y h3) === */
+function addCdlTags(){
+  document.querySelectorAll("main section>h2, main section>h3").forEach(h=>{
+    if(!h.classList.contains("cdl-tag")){
+      h.classList.add("cdl-tag");
+    }
+  });
+}
+window.addEventListener("load", addCdlTags);
 
 /* ========== INIT ========== */
 window.addEventListener("load", async ()=>{
