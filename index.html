@@ -273,6 +273,122 @@ body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
 }
 .menu-pages{ display:flex; align-items:center; gap:6px; } /* botón + logo alineados */
 .logo-cdl path{ vector-effect: non-scaling-stroke; }
+.logo-cdl path{ vector-effect: non-scaling-stroke; }
+<!-- ======== CDL HOTFIX · angular único + títulos + fondo/menú ======== -->
+<style>
+/* 1) Header: quitar duplicados y watermark, y usar solo la imagen angular.png */
+header::before{ content:none !important; }         /* sin watermark en cabecera */
+.hero-cdl::before{ content:none !important; }      /* nada delante del título del header */
+
+/* 2) Angular real junto al botón hamburguesa */
+.logo-cdl{
+  width: clamp(22px, 2.4vh, 28px);
+  height: clamp(22px, 2.4vh, 28px);
+  object-fit: contain;
+  display:inline-block;
+  margin-left:8px;
+  vertical-align:middle;
+}
+
+/* 3) Angular delante de TODOS los h2 y h3, proporcional a la tipografía */
+.cdl-tag{ position:relative; display:inline-flex; align-items:baseline; gap:.4rem; }
+h2.cdl-tag::before,
+h3.cdl-tag::before{
+  content:""; display:inline-block; flex:0 0 auto;
+  background: url("/angular.png") no-repeat left top / contain;
+  width: 1em; height: 1em;               /* proporción exacta del PNG */
+  transform: translateY(2px);
+}
+h3.cdl-tag::before{ width:.85em; height:.85em; transform: translateY(1px); }
+
+/* 4) Fondo limpio: sin logo_mantenimiento.png en body ni en footer */
+body{
+  background: linear-gradient(180deg,#0c0f14,#11161e 60%,#0c0f14) fixed !important;
+  background-image: none !important;
+}
+footer{ background:transparent !important; }
+
+/* 5) Menús fullscreen con overlay correcto */
+#pagesPanel.menu-full, #userPanel.menu-full{
+  position:fixed; left:0; right:0;
+  top: calc(var(--safe-top,0px) + var(--hdr-h));
+  bottom: var(--safe-bottom,0px);
+  background: linear-gradient(180deg,#0b0f15,#121820 60%,#0b0f15) !important;
+  border-top: 2px solid #222;
+  box-shadow: inset 0 20px 40px rgba(255,255,255,.08), 0 -10px 30px rgba(0,0,0,.45);
+}
+</style>
+
+<script>
+/* ==== CDL HOTFIX JS ==== */
+(function(){
+  const ANGULAR_SRC = "/angular.png";    // <- deja este nombre al subir el PNG
+
+  // A) Sustituir el SVG del header por la imagen angular.png (si aún hay SVG)
+  window.addEventListener('DOMContentLoaded', ()=>{
+    const cont = document.querySelector('.menu.menu-pages');
+    if (!cont) return;
+    let logo = cont.querySelector('.logo-cdl');
+
+    // Si existe pero es SVG, lo reemplazamos por <img>
+    if (logo && logo.tagName.toLowerCase() !== 'img'){
+      const img = document.createElement('img');
+      img.className = 'logo-cdl';
+      img.src = ANGULAR_SRC;
+      img.alt = "";
+      img.setAttribute('aria-hidden','true');
+      logo.replaceWith(img);
+      logo = img;
+    }
+    // Si no había logo, lo insertamos tras el botón
+    if (!logo){
+      const btn = cont.querySelector('#pagesBtn') || cont.firstChild;
+      const img = document.createElement('img');
+      img.className = 'logo-cdl';
+      img.src = ANGULAR_SRC;
+      img.alt = "";
+      img.setAttribute('aria-hidden','true');
+      btn && btn.insertAdjacentElement('afterend', img);
+    }
+  });
+
+  // B) Forzar angular en TODOS los h2/h3 visibles y futuros
+  function tagAllHeadings(){
+    document.querySelectorAll("main section>h2, main section>h3").forEach(h=>{
+      h.classList.add('cdl-tag');
+    });
+  }
+
+  // C) Re-definir groupBlock para que sus h3 lleven la clase cdl-tag
+  const _oldGroupBlock = window.groupBlock;
+  window.groupBlock = function(title, items){
+    if (typeof _oldGroupBlock === 'function'){
+      const d = _oldGroupBlock(title, items);
+      // Asegura la clase
+      const h3 = d.querySelector('h3');
+      if (h3) h3.classList.add('cdl-tag');
+      return d;
+    }else{
+      // Fallback por si no existiera aún la función
+      const d = document.createElement("div");
+      const showTitle = String(title).trim().toUpperCase() !== "LÍNEA KALTENBACH";
+      d.innerHTML = showTitle ? `<h3 class="grp-title cdl-tag"></h3>` : "";
+      if (showTitle) d.querySelector("h3").textContent = title;
+      (items||[]).forEach(eq => d.appendChild(window.cardEquipo ? window.cardEquipo(eq) : document.createTextNode("")));
+      return d;
+    }
+  };
+
+  // D) Observador para headings que aparezcan dinámicamente
+  const obs = new MutationObserver(()=>tagAllHeadings());
+  window.addEventListener('load', ()=>{
+    tagAllHeadings();
+    const main = document.querySelector('main');
+    if (main) obs.observe(main, { childList:true, subtree:true });
+  });
+})();
+</script>
+<!-- ======== /CDL HOTFIX ======== -->
 </style>
 
 </head>
