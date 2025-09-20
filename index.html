@@ -17,6 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
+/* ======== BASE (utilidades + iconos) ======== */
 :root{
   --brand1:#A60000; --brand2:#E43B3B;
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
@@ -24,7 +25,12 @@
   --hdr-h:120px;
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
+  /* Angular rojo (SVG inline) para usar en backgrounds */
+  --angular-svg: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>\
+<path d='M20 100V20H100V40H40V100Z' fill='%23E43B3B'/></svg>");
 }
+
 /* Botón chip con mini-QR integrado */
 .btn-chip.qr{ display:inline-flex; align-items:center; gap:.35rem; }
 .btn-chip.qr::after{
@@ -36,12 +42,12 @@
   filter: invert(1) brightness(.95);
   border-radius:2px; box-shadow:0 0 0 1px rgba(255,255,255,.35) inset;
 }
-/* Ocultar el antiguo icono de “cuadradillos” si aún aparece */
+/* Ocultar el antiguo icono cuadradillos si aún aparece */
 .qr-s{ display:none !important; }
 </style>
 
 <style id="hotfix-cdl">
-/* ===== HOTFIX CDL (compacto y limpio) ===== */
+/* ===== HOTFIX CDL (compacto + logo angular) ===== */
 
 /* Utilidades */
 .hidden{display:none!important}
@@ -73,7 +79,54 @@ body{
   background-attachment:fixed;
 }
 
-/* Header: logo de fondo y layout */
+/* Header fijo claro, con sombra y cálculo de altura */
+header{
+  position:sticky; top:0; z-index:1200;
+  background:linear-gradient(180deg,#f9fafb,#e5e7eb);
+  color:#111;
+  min-height:var(--hdr-h);
+  isolation:isolate;
+  padding-top:var(--safe-top,0px);
+  box-shadow:0 4px 10px rgba(0,0,0,.18);
+}
+:root{ --hdr-h:104px; }
+@media (max-width:480px){ :root{ --hdr-h:112px; } }
+header .nav{ position:relative; min-height:var(--hdr-h); }
+
+/* Hero (título centrado) con angular rojo real */
+.hero-title{
+  position:absolute; left:0; right:0; bottom:8px;
+  display:flex; justify-content:center; align-items:center; gap:.45rem;
+  z-index:1; pointer-events:none;
+}
+.hero-title *{ pointer-events:auto; }
+.hero-cdl{
+  position:relative; font-weight:900; color:#111; padding-left:40px;
+}
+.hero-cdl::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:28px; height:28px;
+  background-image: var(--angular-svg);
+  background-size:100% 100%; background-repeat:no-repeat;
+}
+.hero-row.singleline{ display:flex; align-items:center; gap:.45rem; }
+.hero-panel{ font-size:1.05rem; line-height:1; align-self:center; }
+
+/* Menús */
+.menu-pages{ position:absolute; left:12px; top:50%; transform:translateY(-50%); }
+.menu-pages,.menu-user{ z-index:3!important; position:absolute; }
+
+/* Chip de rol y menú usuario (arriba derecha) */
+.rolechip{
+  position:absolute; right:14px; top:8px;
+  font-size:.78rem; font-weight:800; color:#222; background:none; border:0;
+}
+.menu-user{ position:absolute; right:14px; top:26px; }
+.menu-user #userBtn{
+  font-size:1.3rem; padding:0; margin:0; background:none; border:0; color:#222; line-height:1;
+}
+
+/* Logo de fondo en cabecera (marca agua) */
 header::before{
   content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
   background:url("logo_mantenimiento.png") no-repeat center 45%/clamp(280px,45vw,440px);
@@ -81,22 +134,6 @@ header::before{
   -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.95) 0%,rgba(0,0,0,.55) 35%,rgba(0,0,0,0) 78%);
           mask-image:linear-gradient(to bottom,rgba(0,0,0,.95) 0%,rgba(0,0,0,.55) 35%,rgba(0,0,0,0) 78%);
 }
-.hero-title{
-  position:absolute; left:0; right:0; bottom:8px;
-  display:flex; justify-content:center;
-}
-.menu-pages{ position:absolute; left:12px; top:50%; transform:translateY(-50%); }
-.menu-pages, .menu-user{ z-index:3!important; position:absolute; }
-.hero-title{ z-index:1!important; pointer-events:none!important; }
-.hero-title *{ pointer-events:auto; }
-.hero-cdl{ color:#111!important; font-weight:900; }
-.hero-row.singleline{ display:flex; align-items:center; gap:.45rem; }
-.hero-panel{ font-size:1.05rem; line-height:1; align-self:center; }
-
-/* Cabecera compacta */
-:root{ --hdr-h:104px; }
-@media (max-width:480px){ :root{ --hdr-h:112px; } }
-header .nav{ position:relative; min-height:var(--hdr-h); } /* ← llave correcta */
 
 /* Tarjetas grafito */
 .card{
@@ -113,7 +150,7 @@ header .nav{ position:relative; min-height:var(--hdr-h); } /* ← llave correcta
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 28px rgba(0,0,0,.45); }
 .card.wallet::after{ content:""; position:absolute; inset:-1px; border-radius:18px; box-shadow:0 0 0 1px rgba(255,255,255,.08); pointer-events:none; }
 
-/* Acciones */
+/* Botones */
 .right{ display:flex; justify-content:center; gap:.35rem; flex-wrap:wrap; }
 .btn.gloss{
   display:inline-flex; align-items:center; gap:.5rem; padding:.32rem .55rem; font-weight:800; border-radius:999px;
@@ -162,20 +199,19 @@ th,td{ border:1px solid #263042; padding:.45rem .55rem; text-align:left; }
   .toast{ transition:none!important; }
 }
 
-/* Distintivo rojo CDL (títulos y cabecera) */
+/* Distintivo “angular CDL” para títulos */
 .cdl-tag{ position:relative; display:inline-flex; align-items:center; gap:.4rem; }
-.cdl-tag::before{ content:""; display:inline-block; background:#A60000; border-radius:2px; flex-shrink:0; }
-h2.cdl-tag::before{ width:14px; height:14px; margin-right:.35rem; }
-h3.cdl-tag::before{ width:10px; height:10px; margin-right:.3rem; }
-.hero-cdl{ position:relative; padding-left:42px; }
-.hero-cdl::before{
-  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
-  width:28px; height:28px; background:#E43B3B; border-radius:6px;
-  box-shadow:0 1px 0 rgba(0,0,0,.08) inset, 0 1px 6px rgba(0,0,0,.25);
+h2.cdl-tag::before, h3.cdl-tag::before{
+  content:""; display:inline-block; flex-shrink:0;
+  background-image: var(--angular-svg);
+  background-size:100% 100%; background-repeat:no-repeat;
+  border-radius:2px;
 }
+h2.cdl-tag::before{ width:18px; height:18px; margin-right:.35rem; }
+h3.cdl-tag::before{ width:14px; height:14px; margin-right:.30rem; }
+
 /* Menús full-screen + bloqueo de scroll */
 body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
-
 #pagesPanel.menu-full, #userPanel.menu-full{
   position:fixed; left:0; right:0;
   top: calc(var(--safe-top,0px) + var(--hdr-h));
@@ -185,12 +221,8 @@ body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
   border-top: 2px solid #222;
   box-shadow: inset 0 20px 40px rgba(255,255,255,.08), 0 -10px 30px rgba(0,0,0,.45);
 }
-
 #pagesPanel.menu-full .row{ border:0; padding:0; height:100%; }
-#pagesPanel.menu-full .actions{
-  display:flex; flex-direction:column; gap:0; height:100%; margin:0;
-  justify-content:space-evenly;
-}
+#pagesPanel.menu-full .actions{ display:flex; flex-direction:column; gap:0; height:100%; margin:0; justify-content:space-evenly; }
 #pagesPanel.menu-full .btn{
   background:none!important; border:0!important; box-shadow:none!important;
   color:#fff; font-weight:900; text-transform:uppercase; letter-spacing:.05em;
@@ -200,7 +232,6 @@ body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
   content:""; position:absolute; top:0; left:0; right:0; height:2px;
   background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 30%, rgba(255,255,255,0) 100%);
 }
-
 #userPanel.menu-full{
   display:flex; flex-direction:column; align-items:center; gap:12px; padding:12px; overflow:auto;
   background:#000;
@@ -212,39 +243,11 @@ body.menu-open, html.menu-open{ overflow:hidden; overscroll-behavior:none; }
   box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
 }
 .grp-title{
-  text-transform:uppercase;
-  text-align:center;
-  letter-spacing:.06em;
-  color:#e5e7eb;              /* ↑ mejor contraste en el tema grafito */
-  margin:.6rem 0 .5rem;
-  font-weight:800;
-  opacity:.95;
+  text-transform:uppercase; text-align:center; letter-spacing:.06em;
+  color:#e5e7eb; margin:.6rem 0 .5rem; font-weight:800; opacity:.95;
 }
-/* Header fijo, con fondo claro y sombra, compatible con --hdr-h */
-header{
-  position:sticky; top:0; z-index:1200;
-  background:linear-gradient(180deg,#f9fafb,#e5e7eb);
-  color:#111;
-  min-height:var(--hdr-h);
-  isolation:isolate;
-  padding-top:var(--safe-top,0px);
-  box-shadow:0 4px 10px rgba(0,0,0,.18);
-}
-/* Chip de rol y menú usuario (arriba derecha) */
-.rolechip{
-  position:absolute; right:14px; top:8px;
-  font-size:.78rem; font-weight:800;
-  color:#222; background:none; border:0;
-}
-.menu-user{ position:absolute; right:14px; top:26px; }
-.menu-user #userBtn{
-  font-size:1.3rem; padding:0; margin:0;
-  background:none; border:0; color:#222; line-height:1;
-}
-</style>
 
-<style>
-/* Utilidades visuales mínimas */
+/* Utilidades visuales mínimas usadas en páginas */
 .kpi{background:#0f141c;color:#e5e7eb;border:1px solid #2a3442;border-radius:14px;padding:.7rem .9rem;margin:.5rem 0}
 .page-btn{background:transparent;border:0;color:#e5e7eb;cursor:pointer;font-weight:800}
 .page-btn[disabled]{opacity:.5;cursor:default}
@@ -260,8 +263,18 @@ header{
 .dot{display:inline-block;width:.65rem;height:.65rem;border-radius:50%}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#0f141c;color:#e5e7eb;border:1px solid #2a3442;border-radius:999px;padding:.45rem .9rem;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.45);transition:opacity .2s ease;opacity:0;z-index:3000}
 .badge-low{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.45);color:#fecaca;border-radius:999px;padding:.12rem .5rem;font-weight:900}
-
+/* Logo angular junto al botón de menú */
+.logo-cdl{
+  width:28px; height:28px;
+  display:inline-block; vertical-align:middle;
+  margin-left:8px;
+  /* evita que el trazo se deforme si el contenedor escala */
+  vector-effect: non-scaling-stroke;
+}
+.menu-pages{ display:flex; align-items:center; gap:6px; } /* botón + logo alineados */
+.logo-cdl path{ vector-effect: non-scaling-stroke; }
 </style>
+
 </head>
 <body>
 
@@ -270,6 +283,12 @@ header{
     <!-- Menú (hamburguesa) -->
     <div class="menu menu-pages">
       <button id="pagesBtn" class="mbtn" aria-label="Menú" aria-expanded="false">☰</button>
+      <svg class="logo-cdl" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+  <!-- “Angular” en L con cantos redondeados -->
+  <path d="M20 80 V20 H80"
+        fill="none" stroke="#E43B3B" stroke-width="18"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
       <div id="pagesPanel" class="panel hidden" style="min-width:260px">
         <div class="row">
           <div class="actions">
