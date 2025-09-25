@@ -200,6 +200,66 @@ table{ width:100%; table-layout:auto; }
 
 /* Header sombra al hacer scroll */
 header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.18); }
+/* ==== FIX CABECERA (v3) ==== */
+header{
+  min-height:148px;                 /* cabecera más alta */
+  overflow:hidden;                   /* corta el logo de fondo, no se “sale” */
+}
+/* logo_mantenimiento arriba, centrado, grande y difuminado */
+header::after{
+  height:148px;
+  background-position:center 6px !important;
+  background-size:clamp(220px,46vw,360px) auto !important;
+  opacity:.12;
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 40%,rgba(0,0,0,0) 75%);
+          mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 40%,rgba(0,0,0,0) 75%);
+}
+
+/* botón hamburguesa: izquierda y centrado en altura, color negro */
+.menu.menu-pages{ left:10px; top:50%; transform:translateY(-50%); position:absolute; }
+.menu .mbtn{ width:44px; height:44px; font-size:28px; color:#111; }
+
+/* título (logo CDL + “PANEL DE CONTROL”) corre a la derecha */
+.hero-title{ left:62px; right:120px; top:50%; transform:translateY(-50%); position:absolute; }
+.hero-logo-cdl{ height:22px; }
+
+/* menú usuario (tres puntos) a la derecha, centrado en altura */
+.menu.menu-user{ right:12px; top:50%; transform:translateY(-50%); position:absolute; }
+
+/* rol arriba-derecha, sin píldora y más pequeño */
+.rolechip{
+  position:absolute; right:12px; top:6px; transform:none;
+  font-size:.9rem; font-weight:700; color:#111;
+  background:none; border:0; box-shadow:none; padding:0;
+}
+
+/* icono que precede a los títulos (incluye Angular): un poco más alto */
+main section>h2.cdl-tag::before,
+main section>h3.cdl-tag::before{ transform:translateY(-0.15em); }
+
+/* (opcional) si usas angular en el título “Equipos”, ya queda proporcionado */
+/* SUBIR el icono angular respecto al texto (más alto que el centro) */
+
+/* Si el angular está en la cabecera junto a "CDL · PANEL DE CONTROL" */
+.hero-title img.logo-cdl,
+.hero-title .hero-logo-angular{
+  position: relative;
+  top: -0.42em;        /* súbelo (ajusta -0.35em / -0.5em si quieres) */
+  margin-right: .35em;
+  height: 1.15em;      /* tamaño proporcional */
+  width: auto;
+}
+
+/* Si el angular está como icono de los títulos (EQUIPOS, etc.) */
+main section>h2.cdl-tag.angular::before,
+main section>h3.cdl-tag.angular::before{
+  position: relative;
+  top: -0.42em;        /* mismo criterio: más alto que el centro */
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: .3em;
+  background-image: url("angular.png") !important;
+}
 </style>
 
 <script>
