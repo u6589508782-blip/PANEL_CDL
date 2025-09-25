@@ -222,6 +222,119 @@ header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.06); }
 
 /* Canvas fijos por CSS (no atributos) */
 #chartMttr,#chartMtbf,#chartDisp,#chartOee{ width:100% !important; height:220px !important; }
+<!-- ===== PARCHE ÚNICO (cabecera + títulos + QR en tarjetas) ===== -->
+<style>
+/* CABECERA: fondo arriba y fila única "CDL  PANEL DE CONTROL" */
+header{
+  background:#f5f6f8 !important;
+  background-image:linear-gradient(180deg,#f7f8fa,#eceff3) !important;
+  position:sticky; top:0; z-index:1200;
+}
+header::after{
+  content:"";
+  position:absolute; inset:0;
+  /* fondo SOLO en la parte superior, sin crecer ni tapar */
+  background:
+    radial-gradient(900px 420px at 50% 0%, rgba(0,0,0,.06), transparent 65%),
+    url("logo_mantenimiento.png") no-repeat center 14px / clamp(180px,42vw,260px) auto;
+  opacity:.30; pointer-events:none;
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
+          mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
+}
+.hero-title{ padding:10px 12px 14px; }
+.hero-title .hero-row.singleline{
+  display:flex; align-items:flex-end; gap:.6rem; white-space:nowrap;
+}
+.hero-logo-cdl{ height:1.5em; width:auto; display:inline-block; }
+.hero-dot{ display:none; } /* sin punto intermedio */
+.hero-panel{ font-weight:800; letter-spacing:.02em; }
+
+/* MENÚ HAMBURGUESA izquierda (ya lo tienes), usuario a la derecha sin píldora */
+.rolechip{ background:transparent; border:0; box-shadow:none; color:#111; font-weight:800; }
+
+/* Título de sección: ICONO = angular rojo (no el logo CDL) y sin líneas negras */
+main section>h2.cdl-tag::before,
+main section>h3.cdl-tag::before{
+  content:""; width:1.05em; height:1.05em;
+  background:url("angular.png") no-repeat center / contain;
+  transform:translateY(6px); /* bájalo un poco; antes estaba muy arriba */
+}
+section h2.cdl-tag, section h3.cdl-tag{ border:0 !important; }
+
+/* Tira blanca a pantalla completa para "LÍNEA KALTENBACH" */
+.brand-wrap{ margin:0; background:#fff; }
+.brand-wrap img{
+  display:block; width:100vw; max-width:none; margin-left:50%; transform:translateX(-50%);
+}
+
+/* TARJETA: columna QR a la derecha + botón "Ver ficha" negro */
+.card{ position:relative; display:flex; flex-wrap:wrap; gap:.6rem; align-items:flex-start; }
+.card .card-main{ flex:1 1 420px; min-width:260px; }
+.card .card-qr{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:.4rem; }
+.card .qrbox{
+  width:84px; height:84px; border-radius:12px;
+  background:#0f141c; border:1px solid #2a3442; overflow:hidden;
+}
+.btn.gloss.btn-ficha{
+  background:linear-gradient(180deg,#111,#222) !important;
+  color:#fff !important; border-color:#000 !important;
+}
+
+/* Nombre de máquina: más grande y en negrita */
+.card .name .linkish{ font-weight:900; font-size:1.12rem; }
+
+/* Semáforo algo más estrecho para que quepa el QR */
+.semaforo{ width:min(460px,68%); }
+
+/* Gráficas siempre visibles (sin datos) */
+#chartMttr,#chartMtbf,#chartDisp,#chartOee{ width:100% !important; height:220px !important; }
+</style>
+
+<script>
+aq
+
+  /* Interacciones del semáforo + QR real */
+  setTimeout(()=>{
+    const opts = el.querySelectorAll(".semaforo .opt");
+    opts.forEach(o=>{
+      o.tabIndex = 0;
+      o.setAttribute("role","radio");
+      o.setAttribute("aria-checked", o.classList.contains("active") ? "true" : "false");
+      o.addEventListener("click", async (e)=>{
+        const name   = el.querySelector(".semaforo").dataset.name;
+        const k      = e.currentTarget.getAttribute("data-k");
+        const estado = k === "ok" ? "En marcha" : (k === "warn" ? "Restricciones" : "Parada");
+        const ok = await setEstado(name, estado);
+        if (!ok) return;
+        opts.forEach(x=>{ x.classList.remove("active"); x.setAttribute("aria-checked","false"); });
+        e.currentTarget.classList.add("active");
+        e.currentTarget.setAttribute("aria-checked","true");
+      });
+      o.addEventListener("keydown",(e)=>{
+        if (e.key==="Enter"||e.key===" "){ e.preventDefault(); o.click(); }
+        if (["ArrowRight","ArrowDown","ArrowLeft","ArrowUp"].includes(e.key)){
+          e.preventDefault();
+          const arr = Array.from(opts); const i = arr.indexOf(o);
+          const dir = (e.key==="ArrowLeft"||e.key==="ArrowUp")? -1 : 1;
+          const next = arr[(i+dir+arr.length)%arr.length]; next.focus();
+        }
+      });
+    });
+
+    /* QR mini funcional (abre la ficha) */
+    const qrHost = el.querySelector('#'+qrId);
+    if (qrHost){
+      const url = `${baseURL()}#/equipo/${slug}`;
+      new QRCode(qrHost, { text:url, width:80, height:80, correctLevel: QRCode.CorrectLevel.M });
+      qrHost.title = "Abrir ficha";
+      qrHost.style.cursor = "pointer";
+      qrHost.addEventListener("click", ()=> openEquipoByName(safeName));
+    }
+  }, 0);
+
+  return el;
+}
+</script>
 </style>
 
 <script>
@@ -891,33 +1004,45 @@ function renderSubGroup(match, target){
 }
 function cardEquipo(eq){
   const safeName = JSON.stringify(eq.nombre).slice(1, -1);
-  const el = document.createElement("div"); 
+  const slug = slugify(eq.nombre);
+  const qrId = `qr-${slug}`;
+
+  const el = document.createElement("div");
   el.className = "card";
   el.innerHTML = `
-  <div style="display:flex;gap:.6rem;align-items:center;min-width:240px">
-    <span class="pilot ${"p-" + statusKey(eq.estado)}"></span>
-    <div>
-      <div class="name" style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-        <span class="linkish" role="button" tabindex="0"
-          onclick="openEquipoByName('${safeName}')"
-          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openEquipoByName('${safeName}')}">
-          ${esc(eq.nombre)}
-        </span>
-        <button class="btn-chip qr" onclick="openFicha('${safeName}')">Ficha</button>
+  <div class="card-main">
+    <div style="display:flex;gap:.6rem;align-items:center;min-width:240px">
+      <span class="pilot ${"p-" + statusKey(eq.estado)}"></span>
+      <div>
+        <div class="name" style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+          <span class="linkish" role="button" tabindex="0"
+            onclick="openEquipoByName('${safeName}')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openEquipoByName('${safeName}')}">
+            ${esc(eq.nombre)}
+          </span>
+        </div>
+        <div class="sub">${esc(eq.grupo)}</div>
       </div>
-      <div class="sub">${esc(eq.grupo)}</div>
+    </div>
+
+    <div class="semaforo" data-name="${safeName}" role="radiogroup" aria-label="Estado">
+      <div class="opt ${statusKey(eq.estado)==="ok"?'active':''}" data-k="ok">En marcha</div>
+      <div class="opt ${statusKey(eq.estado)==="warn"?'active':''}" data-k="warn">Restricciones</div>
+      <div class="opt ${statusKey(eq.estado)==="stop"?'active':''}" data-k="stop">Parada</div>
+    </div>
+
+    <div class="right">
+      <button class="btn gloss" onclick="estadoConIncid('${safeName}','Parada','programada')">Parada prog.</button>
+      <button class="btn gloss btn-mail" onclick="accionParadaProlongada('${safeName}')">Parada prolongada</button>
+      <button class="btn gloss" onclick="estadoConIncid('${safeName}','Nueva')">Nueva incidencia</button>
     </div>
   </div>
-  <div class="semaforo" data-name="${safeName}" role="radiogroup" aria-label="Estado">
-    <div class="opt ${statusKey(eq.estado)==="ok"?'active':''}" data-k="ok">En marcha</div>
-    <div class="opt ${statusKey(eq.estado)==="warn"?'active':''}" data-k="warn">Restricciones</div>
-    <div class="opt ${statusKey(eq.estado)==="stop"?'active':''}" data-k="stop">Parada</div>
-  </div>
-  <div class="right">
-    <button class="btn gloss" onclick="estadoConIncid('${safeName}','Parada','programada')">Parada prog.</button>
-    <button class="btn gloss btn-mail" onclick="accionParadaProlongada('${safeName}')">Parada prolongada</button>
-    <button class="btn gloss" onclick="estadoConIncid('${safeName}','Nueva')">Nueva incidencia</button>
+
+  <div class="card-qr">
+    <div class="qrbox" id="${qrId}"></div>
+    <button class="btn gloss btn-ficha" onclick="openEquipoByName('${safeName}')">Ficha</button>
   </div>`;
+
   setTimeout(()=>{
     const opts = el.querySelectorAll(".semaforo .opt");
     opts.forEach(o=>{
@@ -934,55 +1059,29 @@ function cardEquipo(eq){
         e.currentTarget.classList.add("active");
         e.currentTarget.setAttribute("aria-checked","true");
       });
-
-      // Teclado: Enter/Espacio activan, flechas navegan
-      o.addEventListener("keydown", (e)=>{
-        if (e.key === "Enter" || e.key === " "){ e.preventDefault(); o.click(); }
+      o.addEventListener("keydown",(e)=>{
+        if (e.key==="Enter"||e.key===" "){ e.preventDefault(); o.click(); }
         if (["ArrowRight","ArrowDown","ArrowLeft","ArrowUp"].includes(e.key)){
           e.preventDefault();
-          const arr = Array.from(opts);
-          const i = arr.indexOf(o);
-          const dir = (e.key==="ArrowLeft"||e.key==="ArrowUp") ? -1 : 1;
-          const next = arr[(i + dir + arr.length) % arr.length];
-          next.focus();
+          const arr = Array.from(opts); const i = arr.indexOf(o);
+          const dir = (e.key==="ArrowLeft"||e.key==="ArrowUp")? -1 : 1;
+          const next = arr[(i+dir+arr.length)%arr.length]; next.focus();
         }
       });
     });
+
+    // QR real que abre la ficha
+    const qrHost = el.querySelector('#'+qrId);
+    if (qrHost){
+      const url = `${baseURL()}#/equipo/${slug}`;
+      new QRCode(qrHost, { text:url, width:64, height:64, correctLevel: QRCode.CorrectLevel.M });
+      qrHost.title = "Abrir ficha";
+      qrHost.style.cursor = "pointer";
+      qrHost.addEventListener("click", ()=> openEquipoByName(safeName));
+    }
   }, 0);
 
   return el;
-}
-async function setEstado(name, estado){
-  if (!canEdit()){
-    alert("Inicia sesión para modificar estados.");
-    return false;
-  }
-  try{
-    const r = await apiPost({res:"state", fn:"set", name, estado, actor: currentUser.user});
-    if (!r?.ok) throw new Error("No guardado");
-    const it = STATE.find(x => x.nombre === name);
-    if (it) it.estado = estado;
-    renderState();
-    return true;
-  }catch(_){
-    alert("No se pudo cambiar el estado.");
-    return false;
-  }
-}
-function estadoConIncid(name, estado, modo){
-  if (estado !== "Nueva"){ 
-    setEstado(name, estado === "Parada" && modo === "programada" ? "Parada" : estado); 
-  }
-  nav("incidencias");
-  setTimeout(()=>{
-    byId("iEquipo").value = name;
-    byId("iTipo").value   = (modo === "programada" ? "Preventivo" : "Correctivo");
-    byId("iRes").value    = (
-      estado === "Restricciones" ? "Con restricciones" : 
-      (estado === "Nueva" ? "Solucionado" : "Parada")
-    );
-    byId("iDesc").focus();
-  }, 120);
 }
 function openFicha(name){ openEquipoByName(name); }
 
