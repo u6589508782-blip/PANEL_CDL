@@ -1,90 +1,78 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="format-detection" content="telephone=no">
-  <title>CDL · CMMS v2025</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<title>CDL · CMMS v2025</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#0c0f14">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="CDL · CMMS">
-  <link rel="icon" sizes="192x192" href="/icon-192.png">
-  <link rel="icon" sizes="512x512" href="/icon-512.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!-- PWA -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0c0f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CDL · CMMS">
+<link rel="icon" sizes="192x192" href="/icon-192.png">
+<link rel="icon" sizes="512x512" href="/icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
-  <!-- Fuente -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<!-- Fuente -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
 <style id="pwa-cdl">
 :root{
   --brand1:#A60000; --brand2:#E43B3B;
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
-  --ink:#e8eef7; --muted:#9aa7b4; --line:#232b36;
-  --hdr-h:120px;
+  --ink:#0b0f15; --muted:#6b7280; --line:#e5e7eb;
+  --hdr-h:140px;
   --safe-top: env(safe-area-inset-top,0px);
   --safe-bottom: env(safe-area-inset-bottom,0px);
 }
-
-/* Reset mínimo */
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 body{
-  margin:0;
-  font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  color:var(--ink);
-  background: linear-gradient(180deg,#0c0f14,#11161e 60%,#0c0f14) fixed;
+  margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink); background:#fff;
   -webkit-text-size-adjust:100%;
-  padding-top:var(--safe-top);
-  padding-bottom:var(--safe-bottom);
+  padding-top:var(--safe-top); padding-bottom:var(--safe-bottom);
 }
 .hidden{ display:none !important; }
-
-/* Botones / chips */
-.btn.gloss{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.32rem .55rem;border-radius:999px;border:1px solid #bbb;
-  background:linear-gradient(180deg,#fdfdfd,#dfe3eb);
-  color:#111;font-weight:800;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 12px rgba(0,0,0,.12);
-}
-.btn.gloss:focus-visible{ outline:2px solid #60a5fa; outline-offset:2px; border-radius:999px; }
+img,canvas,svg,video{ max-width:100%; height:auto; }
 
 /* ===== CABECERA ===== */
 header{
-  background:#e5e7eb !important;
-  background-image:linear-gradient(180deg,#f9fafb,#e5e7eb) !important;
   position:sticky; top:0; z-index:1200;
+  background:#fff; height:var(--hdr-h); overflow:hidden; box-shadow:0 1px 0 #eaecef;
 }
+#navBar{ height:var(--hdr-h); display:grid; grid-template-columns:56px 1fr 56px; align-items:center; gap:4px; padding:0 8px; }
 header::after{
-  content:"";
-  position:absolute; inset:0; pointer-events:none; z-index:0;
-  background: url("logo_mantenimiento.png") no-repeat center top / 200px auto;
-  opacity:.12;
-  filter:none !important;
-  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 34%,rgba(0,0,0,0) 72%);
-          mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 34%,rgba(0,0,0,0) 72%);
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(900px 420px at 50% 0%, rgba(0,0,0,.06), transparent 65%),
+    url("logo_mantenimiento.png") no-repeat center 14px / clamp(180px,42vw,260px) auto;
+  opacity:.30; pointer-events:none;
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
+          mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
 }
+.menu.menu-pages{ align-self:center; }
+#pagesBtn{ font-size:28px; line-height:1; width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; color:#111; background:transparent; border:0; }
+.menu.menu-user{ justify-self:end; }
+#userBtn{ font-size:26px; width:40px; height:40px; border:0; background:transparent; color:#111; }
+.rolechip{ position:absolute; right:12px; top:8px; font-size:.9rem; font-weight:800; color:#111; background:transparent; border:0; padding:0; box-shadow:none; }
 
-/* ===== TÍTULOS MAYÚSCULAS + LOGO CDL ===== */
-main section>h2, main section>h3{ text-transform:uppercase; }
-main section>h2.cdl-tag::before,
-main section>h3.cdl-tag::before{
-  content:""; display:inline-block; width:1em; height:1em;
-  background:url("logo-cdl.png") no-repeat center / contain;
-  flex:0 0 auto; transform:translateY(-2px);
-  filter:none !important; box-shadow:none !important;
-}
+/* Hero título 1 línea */
+.hero-title{ display:flex; align-items:center; justify-content:center; }
+.hero-title .hero-row{ display:flex; align-items:center; gap:12px; white-space:nowrap; }
+.hero-title .hero-dot{ display:none; }
+.hero-title .hero-panel{ font-weight:800; letter-spacing:.02em; }
+.hero-logo-cdl{ height:22px; width:auto; display:inline-block; margin-right:2px; }
 
-/* ===== MENÚ FULLSCREEN ===== */
-html.menu-open, body.menu-open{ overflow:hidden; }
+/* Menú fullscreen */
+html.menu-open,body.menu-open{ overflow:hidden; }
 .panel.menu-full{
-  position:fixed !important;
-  z-index:2400 !important;
-  inset: calc(env(safe-area-inset-top,0px) + var(--hdr-h)) 0 env(safe-area-inset-bottom,0px) 0 !important;
+  position:fixed !important; z-index:2400 !important;
+  inset: calc(var(--safe-top) + var(--hdr-h)) 0 var(--safe-bottom) 0 !important;
   background:#0b0f15 !important;
   background-image:linear-gradient(180deg,#0b0f15,#121820 60%,#0b0f15) !important;
 }
@@ -108,114 +96,78 @@ html.menu-open, body.menu-open{ overflow:hidden; }
   background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9) 0%, rgba(255,255,255,.4) 35%, rgba(255,255,255,0) 100%);
 }
 
-/* ===== TARJETAS ===== */
+/* Strips blancos y tags */
+.brand-wrap{ margin:0; background:#fff; }
+.brand-wrap img{ display:block; width:100vw; max-width:none; margin-left:50%; transform:translateX(-50%); }
+section h2.cdl-tag, section h3.cdl-tag{
+  margin:0; padding:.65rem 16px; color:#111; background:#fff; display:flex; align-items:center; gap:.55rem; text-transform:uppercase; border:0;
+}
+section h2.cdl-tag::before, section h3.cdl-tag::before{
+  content:""; width:18px; height:18px; flex:0 0 auto;
+  background:url("angular.png") no-repeat center/contain; transform:translateY(4px);
+}
+
+/* Tarjetas (tema oscuro + 2 grises) */
 .card{
-  position:relative; color:#e5e7eb; border-radius:16px;
-  padding:.5rem .6rem; margin:.5rem 0; border:1px solid #2a3442;
-  background: linear-gradient(180deg,#181d25,#12161b) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.38) !important;
-  overflow:hidden;
+  position:relative; color:#e5e7eb; border-radius:16px; padding:.6rem .7rem; margin:.6rem 0;
+  border:1px solid #2a3442; background:linear-gradient(180deg,#2f3339,#1c1f26)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 22px rgba(0,0,0,.28)!important;
+  display:flex; flex-wrap:wrap; gap:.6rem; align-items:flex-start; overflow:hidden;
 }
-.card::before{
-  content:""; position:absolute; top:8px; bottom:8px; left:-1px; width:3px;
-  background:linear-gradient(180deg, rgba(166,0,0,.9), rgba(228,59,59,.9));
-  border-radius:3px;
-}
+.card::before{ content:""; position:absolute; top:8px; bottom:8px; left:-1px; width:3px; background:linear-gradient(180deg,rgba(166,0,0,.9),rgba(228,59,59,.9)); border-radius:3px; }
+.card .card-main{ flex:1 1 420px; min-width:260px; }
+.card .card-qr{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:.4rem; }
+.card .qrbox{ width:84px; height:84px; border-radius:12px; background:#0f141c; border:1px solid #2a3442; overflow:hidden; }
+.card .name .linkish{ font-weight:900; font-size:1.12rem; }
 
-/* ===== SEMÁFORO METALIZADO ===== */
-.semaforo{ background:#0e1422; border:1px solid #2a3546; border-radius:999px; padding:.24rem; }
-.semaforo .opt{
-  font-weight:900; border-radius:999px; padding:.36rem .72rem;
-  background:linear-gradient(180deg,#111827,#0b1220);
-  border:1px solid #273042;
-}
-.semaforo .opt.active[data-k="ok"]{
-  color:#0b2f19;
-  background:linear-gradient(180deg,#b8ffd3,#3dd682 60%,#0b4f2a);
-  border-color:#1d9a55;
-}
-.semaforo .opt.active[data-k="warn"]{
-  color:#3a2503;
-  background:linear-gradient(180deg,#ffecc2,#f0b33a 60%,#6a3f04);
-  border-color:#d89a18;
-}
-.semaforo .opt.active[data-k="stop"]{
-  color:#3d0b0b;
-  background:linear-gradient(180deg,#ffd0d0,#ff4e4e 60%,#7a0f0f);
-  border-color:#cc2a2a;
-}
+/* Semáforo */
+.semaforo{ background:#0e1422; border:1px solid #2a3546; border-radius:999px; padding:.24rem; width:min(460px,68%); }
+.semaforo .opt{ font-weight:900; border-radius:999px; padding:.36rem .72rem; background:linear-gradient(180deg,#111827,#0b1220); border:1px solid #273042; cursor:pointer; }
+.semaforo .opt.active[data-k="ok"]{   color:#0b2f19; background:linear-gradient(180deg,#b8ffd3,#3dd682 60%,#0b4f2a); border-color:#1d9a55; }
+.semaforo .opt.active[data-k="warn"]{ color:#3a2503; background:linear-gradient(180deg,#ffecc2,#f0b33a 60%,#6a3f04); border-color:#d89a18; }
+.semaforo .opt.active[data-k="stop"]{ color:#3d0b0b; background:linear-gradient(180deg,#ffd0d0,#ff4e4e 60%,#7a0f0f); border-color:#cc2a2a; }
 
-/* ===== BOTÓN PARADA PROLONGADA ===== */
-.btn.gloss.btn-mail{
-  color:#fff !important;
-  background:linear-gradient(180deg,#ff5a5a,#c10f0f) !important;
-  border-color:#9f0c0c !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 8px 18px rgba(178,15,15,.35) !important;
-}
+/* Botones */
+.btn.gloss{ display:inline-flex; align-items:center; gap:.5rem; padding:.32rem .55rem; border-radius:999px; border:1px solid #bbb; background:linear-gradient(180deg,#fdfdfd,#dfe3eb); color:#111; font-weight:800; box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 12px rgba(0,0,0,.12); cursor:pointer;}
+.btn.gloss.btn-mail{ color:#fff!important; background:linear-gradient(180deg,#ff5a5a,#c10f0f)!important; border-color:#9f0c0c!important; box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(178,15,15,.35)!important; }
+.btn.gloss.btn-ficha{ background:linear-gradient(180deg,#111,#222)!important; color:#fff!important; border-color:#000!important; }
+.right{ display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; }
 
-/* ===== PLACEHOLDERS INCIDENCIAS ===== */
+/* Placeholders fantasma incidencias */
 .ph-wrap{ position:relative; }
-.ph-wrap .ph-label{
-  position:absolute; left:14px; top:50%; transform:translateY(-50%);
-  color:#aeb7c2; font-weight:600; pointer-events:none; opacity:.9;
-}
+.ph-wrap .ph-label{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#6b7280; font-weight:600; pointer-events:none; opacity:.9; }
 .ph-wrap.filled .ph-label{ display:none; }
-::placeholder{ color:#aeb7c2; opacity:1; }
+::placeholder{ color:#6b7280; opacity:1; }
 
-.incid-placeholder{
-  color:#aaa; font-style:italic; background:#1c1f26;
-  padding:.2rem .4rem; border-radius:6px;
-}
-header.scrolled{
-  box-shadow:0 4px 10px rgba(0,0,0,.18);
-}
+/* Tablas / Scroll */
+#incidTableWrap,#invTableWrap,#otTableWrap,.kpi table{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table{ width:100%; }
 
-/* Chip de rol (esquina superior derecha) */
-.rolechip {
-  position:absolute;
-  right:14px;
-  top:8px;
-  font-size:.78rem;
-  font-weight:800;
-  color:#222;
-  background:#f3f4f6;
-  border:1px solid #d1d5db;
-  border-radius:999px;
-  padding:.25rem .7rem;
-  box-shadow:0 2px 6px rgba(0,0,0,.12);
-}
+/* Header sombra al hacer scroll */
+header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.06); }
 
-/* --- HOTFIX iOS / tamaños de imágenes y fondo del header --- */
-img, canvas, svg, video { max-width: 100%; height: auto; }
+/* Charts obedecen CSS (regla final del primer bloque) */
+#chartMttr,#chartMtbf,#chartDisp,#chartOee{ width:100% !important; height:220px !important; }
+</style>
 
-/* Fondo decorativo del header (logo rojo) más discreto */
+<!-- ===== PATCH LIGERO (responsive + ordena cabecera) ===== -->
+<style id="pwa-cdl-patch">
+/* Evita logos gigantes en header (fallback adicional) */
 header::after{
   background-size: clamp(120px, 35vw, 200px) auto !important;
   background-position: 12px 6px !important;
   background-repeat: no-repeat !important;
+  opacity:.12;
 }
-
-/* Asegura que los <canvas> de Chart.js no fijen tamaño en CSS */
-#chartMttr, #chartMtbf, #chartDisp, #chartOee {
-  width: 100% !important;
-  height: 220px !important;
-}
-
-/* Tablas: scroll horizontal en móvil */
-#incidTableWrap, #invTableWrap, #otTableWrap, .kpi table {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-table { width: 100%; table-layout:auto; }
-
-/* Evita que los logos crezcan de más */
-.hero-logo-cdl { height: 1.6em; width: auto; display:inline-block; }
-.menu .logo-cdl { width: 24px; height: 24px; object-fit: contain; }
+.hero-logo-cdl{ height:1.6em; width:auto; display:inline-block; vertical-align:middle; }
+.menu .logo-cdl{ width:24px; height:24px; object-fit:contain; }
+.brand-wrap { display:flex; justify-content:center; padding:.4rem 0; }
+.brand-wrap img { width: min(680px, 92vw); height:auto; display:block; }
+.brand-wrap.fallback{ display:none; }
 </style>
 
-</script>
+<!-- ===== JS seguro (sin el script roto) ===== -->
 </head>
-
 <body>
 
 <header>
