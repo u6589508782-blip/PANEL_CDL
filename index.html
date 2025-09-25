@@ -25,7 +25,7 @@
   --brand1:#A60000; --brand2:#E43B3B;
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
   --ink:#e8eef7; --muted:#9aa7b4; --line:#232b36;
-  --hdr-h:120px;
+  --hdr-h:140px;                     /* ALTURA CABECERA */
   --safe-top: env(safe-area-inset-top,0px);
   --safe-bottom: env(safe-area-inset-bottom,0px);
 }
@@ -44,43 +44,55 @@ body{
 }
 .hidden{ display:none !important; }
 
-/* Botones / chips */
-.btn.gloss{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.32rem .55rem;border-radius:999px;border:1px solid #bbb;
-  background:linear-gradient(180deg,#fdfdfd,#dfe3eb);
-  color:#111;font-weight:800;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 12px rgba(0,0,0,.12);
-}
-.btn.gloss:focus-visible{ outline:2px solid #60a5fa; outline-offset:2px; border-radius:999px; }
-
 /* ===== CABECERA ===== */
 header{
-  background:#e5e7eb !important;
-  background-image:linear-gradient(180deg,#f9fafb,#e5e7eb) !important;
   position:sticky; top:0; z-index:1200;
+  background:#fff !important;                      /* franja blanca */
+  background-image:linear-gradient(180deg,#f9fafb,#e5e7eb) !important;
+  min-height:var(--hdr-h);
 }
 header::after{
+  /* fondo difuminado (logo_mantenimiento) en la parte alta */
   content:"";
-  position:absolute; inset:0; pointer-events:none; z-index:0;
-  background: url("logo_mantenimiento.png") no-repeat center top / 200px auto;
-  opacity:.12;
-  filter:none !important;
-  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 34%,rgba(0,0,0,0) 72%);
-          mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 34%,rgba(0,0,0,0) 72%);
+  position:absolute; inset:0 0 auto 0; height:calc(var(--hdr-h) + 20px);
+  background:url("logo_mantenimiento.png") no-repeat center 6px / clamp(160px,38vw,260px) auto;
+  opacity:.10;
+  pointer-events:none;
 }
 
-/* ===== TÍTULOS MAYÚSCULAS + LOGO CDL ===== */
-main section>h2, main section>h3{ text-transform:uppercase; }
-main section>h2.cdl-tag::before,
-main section>h3.cdl-tag::before{
-  content:""; display:inline-block; width:1em; height:1em;
-  background:url("logo-cdl.png") no-repeat center / contain;
-  flex:0 0 auto; transform:translateY(-2px);
-  filter:none !important; box-shadow:none !important;
+/* Contenido cabecera */
+header .nav{ position:relative; min-height:var(--hdr-h); }
+.menu.menu-pages{
+  position:absolute; left:10px; top:50%; transform:translateY(-50%);
+}
+.menu.menu-user{
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+}
+/* botón hamburguesa: grande y negro */
+.menu .mbtn{
+  appearance:none; border:0; background:none; cursor:pointer;
+  width:44px; height:44px; font-size:28px; line-height:44px;
+  color:#111; display:inline-flex; align-items:center; justify-content:center;
+}
+/* icono rojo que sobraba: oculto */
+.menu .logo-cdl{ display:none !important; }
+
+/* Título (logo CDL + texto) desplazado a la derecha */
+.hero-title{
+  display:flex; align-items:center; gap:.4rem;
+  position:absolute; left:62px; right:62px; top:50%; transform:translateY(-50%);
+}
+.hero-title .hero-row{ display:flex; align-items:center; gap:.5rem; }
+.hero-logo-cdl{ height:22px; width:auto; display:inline-block; }
+.hero-panel{ font-weight:800; letter-spacing:.06em; color:#111; }
+
+/* Chip rol solo texto, pequeño, sin píldora */
+.rolechip{
+  position:absolute; right:64px; top:50%; transform:translateY(-50%);
+  font-size:.9rem; font-weight:700; color:#111; background:none; border:0; box-shadow:none; padding:0;
 }
 
-/* ===== MENÚ FULLSCREEN ===== */
+/* ===== MENÚ FULLSCREEN (no tocar, ya te gusta) ===== */
 html.menu-open, body.menu-open{ overflow:hidden; }
 .panel.menu-full{
   position:fixed !important;
@@ -109,21 +121,18 @@ html.menu-open, body.menu-open{ overflow:hidden; }
   background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9) 0%, rgba(255,255,255,.4) 35%, rgba(255,255,255,0) 100%);
 }
 
-/* ===== TARJETAS ===== */
+/* ===== TARJETAS / SEMÁFORO / BOTONES (tal cual) ===== */
 .card{
   position:relative; color:#e5e7eb; border-radius:16px;
   padding:.5rem .6rem; margin:.5rem 0; border:1px solid #2a3442;
   background: linear-gradient(180deg,#181d25,#12161b) !important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.38) !important;
-  overflow:hidden;
 }
 .card::before{
   content:""; position:absolute; top:8px; bottom:8px; left:-1px; width:3px;
   background:linear-gradient(180deg, rgba(166,0,0,.9), rgba(228,59,59,.9));
   border-radius:3px;
 }
-
-/* ===== SEMÁFORO METALIZADO ===== */
 .semaforo{ background:#0e1422; border:1px solid #2a3546; border-radius:999px; padding:.24rem; }
 .semaforo .opt{
   font-weight:900; border-radius:999px; padding:.36rem .72rem;
@@ -131,22 +140,21 @@ html.menu-open, body.menu-open{ overflow:hidden; }
   border:1px solid #273042;
 }
 .semaforo .opt.active[data-k="ok"]{
-  color:#0b2f19;
-  background:linear-gradient(180deg,#b8ffd3,#3dd682 60%,#0b4f2a);
-  border-color:#1d9a55;
+  color:#0b2f19;background:linear-gradient(180deg,#b8ffd3,#3dd682 60%,#0b4f2a);border-color:#1d9a55;
 }
 .semaforo .opt.active[data-k="warn"]{
-  color:#3a2503;
-  background:linear-gradient(180deg,#ffecc2,#f0b33a 60%,#6a3f04);
-  border-color:#d89a18;
+  color:#3a2503;background:linear-gradient(180deg,#ffecc2,#f0b33a 60%,#6a3f04);border-color:#d89a18;
 }
 .semaforo .opt.active[data-k="stop"]{
-  color:#3d0b0b;
-  background:linear-gradient(180deg,#ffd0d0,#ff4e4e 60%,#7a0f0f);
-  border-color:#cc2a2a;
+  color:#3d0b0b;background:linear-gradient(180deg,#ffd0d0,#ff4e4e 60%,#7a0f0f);border-color:#cc2a2a;
 }
-
-/* ===== BOTÓN PARADA PROLONGADA ===== */
+.btn.gloss{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.32rem .55rem;border-radius:999px;border:1px solid #bbb;
+  background:linear-gradient(180deg,#fdfdfd,#dfe3eb);
+  color:#111;font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 12px rgba(0,0,0,.12);
+}
 .btn.gloss.btn-mail{
   color:#fff !important;
   background:linear-gradient(180deg,#ff5a5a,#c10f0f) !important;
@@ -154,7 +162,19 @@ html.menu-open, body.menu-open{ overflow:hidden; }
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 8px 18px rgba(178,15,15,.35) !important;
 }
 
-/* ===== PLACEHOLDERS INCIDENCIAS ===== */
+/* ===== TÍTULOS (icono proporcional y pegado) ===== */
+main section>h2, main section>h3{ text-transform:uppercase; }
+main section>h2.cdl-tag::before,
+main section>h3.cdl-tag::before{
+  content:""; display:inline-block; width:1.2em; height:1.2em;
+  margin-right:.35rem; transform:translateY(.05em);
+  background:url("logo-cdl.png") no-repeat center / contain;
+  filter:none !important;
+}
+/* si pones angular.png en algún título, quedará del mismo tamaño */
+.cdl-tag.angular::before{ background-image:url("angular.png"); }
+
+/* ===== PLACEHOLDERS / TABLAS / CHARTS ===== */
 .ph-wrap{ position:relative; }
 .ph-wrap .ph-label{
   position:absolute; left:14px; top:50%; transform:translateY(-50%);
@@ -162,121 +182,24 @@ html.menu-open, body.menu-open{ overflow:hidden; }
 }
 .ph-wrap.filled .ph-label{ display:none; }
 ::placeholder{ color:#aeb7c2; opacity:1; }
+.incid-placeholder{ color:#aaa; font-style:italic; background:#1c1f26; padding:.2rem .4rem; border-radius:6px; }
 
-.incid-placeholder{
-  color:#aaa; font-style:italic; background:#1c1f26;
-  padding:.2rem .4rem; border-radius:6px;
-}
-header.scrolled{
-  box-shadow:0 4px 10px rgba(0,0,0,.18);
-}
-
-/* Chip de rol (esquina superior derecha) */
-.rolechip {
-  position:absolute;
-  right:14px;
-  top:8px;
-  font-size:.78rem;
-  font-weight:800;
-  color:#222;
-  background:#f3f4f6;
-  border:1px solid #d1d5db;
-  border-radius:999px;
-  padding:.25rem .7rem;
-  box-shadow:0 2px 6px rgba(0,0,0,.12);
-}
-
-/* --- HOTFIX iOS / tamaños de imágenes y fondo del header --- */
-img, canvas, svg, video { max-width: 100%; height: auto; }
-
-/* Fondo decorativo del header (logo rojo) más discreto */
-header::after{
-  background-size: clamp(120px, 35vw, 200px) auto !important;
-  background-position: 12px 6px !important;
-  background-repeat: no-repeat !important;
-}
-
-/* Asegura que los <canvas> de Chart.js no fijen tamaño en CSS */
-#chartMttr, #chartMtbf, #chartDisp, #chartOee {
-  width: 100% !important;
-  height: 220px !important;
-}
-
-/* Tablas: scroll horizontal en móvil */
-#incidTableWrap, #invTableWrap, #otTableWrap, .kpi table {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-table { width: 100%; table-layout:auto; }
-
-/* Evita que los logos crezcan de más */
-.hero-logo-cdl { height: 1.6em; width: auto; display:inline-block; }
-.menu .logo-cdl { width: 24px; height: 24px; object-fit: contain; }
-/* ===== PATCH CABECERA Y TITULOS (iPhone) ===== */
-
-/* 1) Quitar logo rojo (angular) de la izquierda del header */
-.menu .logo-cdl{ display:none !important; }
-
-/* 2) Fondo con logo mantenimiento, suave y sin estorbar */
-header::after{
-  content:"";
-  position:absolute; inset:0; pointer-events:none; z-index:0;
-  background: url("logo_mantenimiento.png") no-repeat center 8px / clamp(120px,32vw,190px) auto;
-  opacity:.10;
-  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 34%,rgba(0,0,0,0) 72%);
-          mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 34%,rgba(0,0,0,0) 72%);
-}
-
-/* 3) Hero (logo CDL + texto PANEL DE CONTROL) alineado a la izquierda */
-.hero-title{
-  position:relative; z-index:1;
-  display:flex; align-items:center; gap:.35rem;
-  padding:8px 12px 10px;
-}
-.hero-logo-cdl{ height:22px; width:auto; display:inline-block; }
-.hero-title .hero-panel{ font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#111; }
-.hero-title .hero-dot{ display:none; } /* quitamos el punto */
-
-/* 4) Hamburguesa centrada, más grande y negra */
-.menu.menu-pages #pagesBtn{
-  position:absolute; left:50%; top:10px; transform:translateX(-50%);
-  font-size:26px; line-height:1; color:#000; background:transparent; border:0;
-  z-index:2;
-}
-
-/* 5) Panel de usuario (botón ⋮) a la derecha, centrado verticalmente */
-.menu.menu-user #userBtn{
-  position:absolute; right:12px; top:10px; color:#000; background:transparent; border:0;
-  font-size:22px; line-height:1; z-index:2;
-}
-
-/* 6) Rol sin “píldora”, solo texto y más pequeño */
-.rolechip{
-  position:absolute; right:48px; top:14px; transform:none;
-  background:transparent; border:0; box-shadow:none; color:#111;
-  font-weight:700; font-size:.82rem; padding:0; z-index:1;
-}
-
-/* 7) Títulos de secciones con icono CDL proporcionado */
-main section>h2.cdl-tag::before,
-main section>h3.cdl-tag::before{
-  width:.95em; height:.95em; transform:translateY(.02em);
-}
-
-/* 8) Cabecera: altura y sombra */
-header{ position:sticky; top:0; z-index:1200;
-  background-image:linear-gradient(180deg,#f9fafb,#e5e7eb) !important;
-}
-header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.18); }
-
-/* 9) Logos e imágenes no se agrandan raro en iOS */
-img,canvas,svg,video{ max-width:100%; height:auto; }
-
-/* 10) Tablas/tiles con scroll horizontal suave (por si acaso) */
 #incidTableWrap, #invTableWrap, #otTableWrap, .kpi table{
   overflow-x:auto; -webkit-overflow-scrolling:touch;
 }
-table{ width:100%; }
+table{ width:100%; table-layout:auto; }
+.card{ overflow:hidden; }
+
+/* LOGO de “LÍNEA KALTENBACH” */
+.brand-wrap{ display:flex; justify-content:center; padding:.4rem 0; }
+.brand-wrap img{ width:min(680px,92vw); height:auto; display:block; }
+.brand-wrap.fallback{ display:none; }
+
+/* Charts tamaño fijo por CSS (iOS) */
+#chartMttr, #chartMtbf, #chartDisp, #chartOee{ width:100% !important; height:220px !important; }
+
+/* Header sombra al hacer scroll */
+header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.18); }
 </style>
 
 <script>
@@ -467,7 +390,7 @@ body{ padding-top:var(--safe-top); }
 <main>
 
 <section id="page-equipos">
-  <h2 class="cdl-tag">Equipos</h2>
+ <h2 class="cdl-tag angular">Equipos</h2>
   <div class="brand-wrap">
   <img src="linea-kaltenbach.png" alt="LÍNEA KALTENBACH"
        loading="lazy" decoding="async" fetchpriority="low"
