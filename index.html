@@ -24,8 +24,8 @@
 :root{
   --brand1:#A60000; --brand2:#E43B3B;
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
-  --ink:#e8eef7; --muted:#9aa7b4; --line:#232b36;
-  --hdr-h:140px;                     /* ALTURA CABECERA */
+  --ink:#0b0f15; --muted:#6b7280; --line:#e5e7eb;
+  --hdr-h:140px;                           /* altura fija cabecera */
   --safe-top: env(safe-area-inset-top,0px);
   --safe-bottom: env(safe-area-inset-bottom,0px);
 }
@@ -37,67 +37,77 @@ body{
   margin:0;
   font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   color:var(--ink);
-  background: linear-gradient(180deg,#0c0f14,#11161e 60%,#0c0f14) fixed;
+  background:#ffffff;                      /* FONDO BLANCO UNIFICADO */
   -webkit-text-size-adjust:100%;
   padding-top:var(--safe-top);
   padding-bottom:var(--safe-bottom);
 }
 .hidden{ display:none !important; }
+img, canvas, svg, video { max-width:100%; height:auto; }
 
 /* ===== CABECERA ===== */
 header{
   position:sticky; top:0; z-index:1200;
-  background:#fff !important;                      /* franja blanca */
-  background-image:linear-gradient(180deg,#f9fafb,#e5e7eb) !important;
-  min-height:var(--hdr-h);
+  background:#fff;                         /* blanca */
+  height:var(--hdr-h);
+  overflow:hidden;                         /* recorta el fondo difuso */
+  box-shadow:0 1px 0 #eaecef;
 }
+#navBar{
+  height:var(--hdr-h);
+  display:grid;
+  grid-template-columns: 56px 1fr 56px;    /* hamburguesa | título | menú usuario */
+  align-items:center;
+  gap:4px;
+  padding:0 8px;
+}
+
+/* Fondo difuminado "logo_mantenimiento.png" (no crece al recargar) */
 header::after{
-  /* fondo difuminado (logo_mantenimiento) en la parte alta */
   content:"";
-  position:absolute; inset:0 0 auto 0; height:calc(var(--hdr-h) + 20px);
-  background:url("logo_mantenimiento.png") no-repeat center 6px / clamp(160px,38vw,260px) auto;
-  opacity:.10;
+  position:absolute; inset:0;
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,0,0,.04), transparent 70%),
+    url("logo_mantenimiento.png") no-repeat center 14px / clamp(180px, 42vw, 260px) auto;
+  opacity:.35;
   pointer-events:none;
 }
 
-/* Contenido cabecera */
-header .nav{ position:relative; min-height:var(--hdr-h); }
-.menu.menu-pages{
-  position:absolute; left:10px; top:50%; transform:translateY(-50%);
+/* Menú hamburguesa (izquierda, negro, más grande) */
+.menu.menu-pages{ align-self:center; }
+#pagesBtn{
+  font-size:28px; line-height:1;
+  width:40px; height:40px;
+  display:inline-flex; align-items:center; justify-content:center;
+  color:#111; background:transparent; border:0;
 }
-.menu.menu-user{
-  position:absolute; right:12px; top:50%; transform:translateY(-50%);
-}
-/* botón hamburguesa: grande y negro */
-.menu .mbtn{
-  appearance:none; border:0; background:none; cursor:pointer;
-  width:44px; height:44px; font-size:28px; line-height:44px;
-  color:#111; display:inline-flex; align-items:center; justify-content:center;
-}
-/* icono rojo que sobraba: oculto */
-.menu .logo-cdl{ display:none !important; }
 
-/* Título (logo CDL + texto) desplazado a la derecha */
-.hero-title{
-  display:flex; align-items:center; gap:.4rem;
-  position:absolute; left:62px; right:62px; top:50%; transform:translateY(-50%);
-}
-.hero-title .hero-row{ display:flex; align-items:center; gap:.5rem; }
-.hero-logo-cdl{ height:22px; width:auto; display:inline-block; }
-.hero-panel{ font-weight:800; letter-spacing:.06em; color:#111; }
+/* Título “CDL · PANEL DE CONTROL” en una sola línea */
+.hero-title{ display:flex; align-items:center; justify-content:center; }
+.hero-title .hero-row{ display:flex; align-items:center; gap:12px; white-space:nowrap; }
+.hero-title .hero-dot{ display:none; }                /* quitamos el punto intermedio */
+.hero-title .hero-panel{ font-weight:800; letter-spacing:.02em; }
 
-/* Chip rol solo texto, pequeño, sin píldora */
+/* Logo CDL (con angular rojo) */
+.hero-logo-cdl{ height:22px; width:auto; display:inline-block; margin-right:2px; }
+
+/* Menú usuario (derecha) */
+.menu.menu-user{ justify-self:end; }
+#userBtn{ font-size:26px; width:40px; height:40px; border:0; background:transparent; color:#111; }
+
+/* Rol arriba a la derecha, texto simple sin píldora y más pequeño */
 .rolechip{
-  position:absolute; right:64px; top:50%; transform:translateY(-50%);
-  font-size:.9rem; font-weight:700; color:#111; background:none; border:0; box-shadow:none; padding:0;
+  position:absolute; right:12px; top:8px;
+  font-size:.9rem; font-weight:800; color:#111;
+  background:transparent; border:0; padding:0; box-shadow:none;
 }
 
-/* ===== MENÚ FULLSCREEN (no tocar, ya te gusta) ===== */
+/* ===== MENÚ FULLSCREEN (sin cambios visuales del listado) ===== */
 html.menu-open, body.menu-open{ overflow:hidden; }
 .panel.menu-full{
   position:fixed !important;
   z-index:2400 !important;
-  inset: calc(env(safe-area-inset-top,0px) + var(--hdr-h)) 0 env(safe-area-inset-bottom,0px) 0 !important;
+  inset: calc(var(--safe-top) + var(--hdr-h)) 0 var(--safe-bottom) 0 !important;
   background:#0b0f15 !important;
   background-image:linear-gradient(180deg,#0b0f15,#121820 60%,#0b0f15) !important;
 }
@@ -121,33 +131,63 @@ html.menu-open, body.menu-open{ overflow:hidden; }
   background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9) 0%, rgba(255,255,255,.4) 35%, rgba(255,255,255,0) 100%);
 }
 
-/* ===== TARJETAS / SEMÁFORO / BOTONES (tal cual) ===== */
+/* ===== STRIPS BLANCOS A PANTALLA COMPLETA ===== */
+.brand-wrap{ margin:0; background:#fff; }
+.brand-wrap img{
+  display:block;
+  width:100vw; max-width:none;             /* de borde a borde */
+  margin-left:50%; transform:translateX(-50%);
+}
+section h2.cdl-tag{
+  margin:0; padding:.65rem 16px;
+  color:#111; background:#fff;             /* título sobre franja blanca */
+  display:flex; align-items:center; gap:.55rem;
+  border-top:10px solid #0b0f15;           /* separador oscuro opcional */
+  border-bottom:10px solid #0b0f15;        /* separador oscuro opcional */
+  text-transform:uppercase;
+}
+/* Icono rojo antes de EQUIPOS un poco más arriba y más cerca */
+section h2.cdl-tag::before{
+  content:""; width:18px; height:18px; flex:0 0 auto;
+  background:url("logo-cdl.png") no-repeat center / contain;
+  margin-right:.25rem; transform:translateY(-4px);
+}
+
+/* ===== TARJETAS (dos grises) ===== */
 .card{
   position:relative; color:#e5e7eb; border-radius:16px;
-  padding:.5rem .6rem; margin:.5rem 0; border:1px solid #2a3442;
-  background: linear-gradient(180deg,#181d25,#12161b) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.38) !important;
+  padding:.6rem .7rem; margin:.6rem 0;
+  border:1px solid #2a3442;
+  background: linear-gradient(180deg,#2f3339,#1c1f26) !important; /* dos tonos */
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 10px 22px rgba(0,0,0,.28) !important;
 }
 .card::before{
   content:""; position:absolute; top:8px; bottom:8px; left:-1px; width:3px;
   background:linear-gradient(180deg, rgba(166,0,0,.9), rgba(228,59,59,.9));
   border-radius:3px;
 }
-.semaforo{ background:#0e1422; border:1px solid #2a3546; border-radius:999px; padding:.24rem; }
+
+/* ===== SEMÁFORO MÁS ESTRECHO + BOTONES EN LÍNEA ===== */
+.semaforo{ background:#0e1422; border:1px solid #2a3546; border-radius:999px; padding:.24rem; width:min(420px,66%); }
 .semaforo .opt{
   font-weight:900; border-radius:999px; padding:.36rem .72rem;
   background:linear-gradient(180deg,#111827,#0b1220);
   border:1px solid #273042;
 }
+.right{ display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; }
+
+/* Estados activos */
 .semaforo .opt.active[data-k="ok"]{
-  color:#0b2f19;background:linear-gradient(180deg,#b8ffd3,#3dd682 60%,#0b4f2a);border-color:#1d9a55;
+  color:#0b2f19; background:linear-gradient(180deg,#b8ffd3,#3dd682 60%,#0b4f2a); border-color:#1d9a55;
 }
 .semaforo .opt.active[data-k="warn"]{
-  color:#3a2503;background:linear-gradient(180deg,#ffecc2,#f0b33a 60%,#6a3f04);border-color:#d89a18;
+  color:#3a2503; background:linear-gradient(180deg,#ffecc2,#f0b33a 60%,#6a3f04); border-color:#d89a18;
 }
 .semaforo .opt.active[data-k="stop"]{
-  color:#3d0b0b;background:linear-gradient(180deg,#ffd0d0,#ff4e4e 60%,#7a0f0f);border-color:#cc2a2a;
+  color:#3d0b0b; background:linear-gradient(180deg,#ffd0d0,#ff4e4e 60%,#7a0f0f); border-color:#cc2a2a;
 }
+
+/* Botones */
 .btn.gloss{
   display:inline-flex;align-items:center;gap:.5rem;
   padding:.32rem .55rem;border-radius:999px;border:1px solid #bbb;
@@ -162,193 +202,26 @@ html.menu-open, body.menu-open{ overflow:hidden; }
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 8px 18px rgba(178,15,15,.35) !important;
 }
 
-/* ===== TÍTULOS (icono proporcional y pegado) ===== */
-main section>h2, main section>h3{ text-transform:uppercase; }
-main section>h2.cdl-tag::before,
-main section>h3.cdl-tag::before{
-  content:""; display:inline-block; width:1.2em; height:1.2em;
-  margin-right:.35rem; transform:translateY(.05em);
-  background:url("logo-cdl.png") no-repeat center / contain;
-  filter:none !important;
-}
-/* si pones angular.png en algún título, quedará del mismo tamaño */
-.cdl-tag.angular::before{ background-image:url("angular.png"); }
-
-/* ===== PLACEHOLDERS / TABLAS / CHARTS ===== */
-.ph-wrap{ position:relative; }
-.ph-wrap .ph-label{
-  position:absolute; left:14px; top:50%; transform:translateY(-50%);
-  color:#aeb7c2; font-weight:600; pointer-events:none; opacity:.9;
-}
-.ph-wrap.filled .ph-label{ display:none; }
-::placeholder{ color:#aeb7c2; opacity:1; }
-.incid-placeholder{ color:#aaa; font-style:italic; background:#1c1f26; padding:.2rem .4rem; border-radius:6px; }
-
+/* ===== TABLAS / CONTENEDORES SCROLL ===== */
 #incidTableWrap, #invTableWrap, #otTableWrap, .kpi table{
   overflow-x:auto; -webkit-overflow-scrolling:touch;
 }
-table{ width:100%; table-layout:auto; }
-.card{ overflow:hidden; }
+table{ width:100%; }
 
-/* LOGO de “LÍNEA KALTENBACH” */
-.brand-wrap{ display:flex; justify-content:center; padding:.4rem 0; }
-.brand-wrap img{ width:min(680px,92vw); height:auto; display:block; }
-.brand-wrap.fallback{ display:none; }
-
-/* Charts tamaño fijo por CSS (iOS) */
-#chartMttr, #chartMtbf, #chartDisp, #chartOee{ width:100% !important; height:220px !important; }
-
-/* Header sombra al hacer scroll */
-header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.18); }
-/* ==== FIX CABECERA (v3) ==== */
-header{
-  min-height:148px;                 /* cabecera más alta */
-  overflow:hidden;                   /* corta el logo de fondo, no se “sale” */
+/* Placeholders incidencias */
+.ph-wrap{ position:relative; }
+.ph-wrap .ph-label{
+  position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  color:#6b7280; font-weight:600; pointer-events:none; opacity:.9;
 }
-/* logo_mantenimiento arriba, centrado, grande y difuminado */
-header::after{
-  height:148px;
-  background-position:center 6px !important;
-  background-size:clamp(220px,46vw,360px) auto !important;
-  opacity:.12;
-  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 40%,rgba(0,0,0,0) 75%);
-          mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 40%,rgba(0,0,0,0) 75%);
-}
+.ph-wrap.filled .ph-label{ display:none; }
+::placeholder{ color:#6b7280; opacity:1; }
 
-/* botón hamburguesa: izquierda y centrado en altura, color negro */
-.menu.menu-pages{ left:10px; top:50%; transform:translateY(-50%); position:absolute; }
-.menu .mbtn{ width:44px; height:44px; font-size:28px; color:#111; }
+/* Toast & header sombra */
+header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.06); }
 
-/* título (logo CDL + “PANEL DE CONTROL”) corre a la derecha */
-.hero-title{ left:62px; right:120px; top:50%; transform:translateY(-50%); position:absolute; }
-.hero-logo-cdl{ height:22px; }
-
-/* menú usuario (tres puntos) a la derecha, centrado en altura */
-.menu.menu-user{ right:12px; top:50%; transform:translateY(-50%); position:absolute; }
-
-/* rol arriba-derecha, sin píldora y más pequeño */
-.rolechip{
-  position:absolute; right:12px; top:6px; transform:none;
-  font-size:.9rem; font-weight:700; color:#111;
-  background:none; border:0; box-shadow:none; padding:0;
-}
-
-/* icono que precede a los títulos (incluye Angular): un poco más alto */
-main section>h2.cdl-tag::before,
-main section>h3.cdl-tag::before{ transform:translateY(-0.15em); }
-
-/* (opcional) si usas angular en el título “Equipos”, ya queda proporcionado */
-/* SUBIR el icono angular respecto al texto (más alto que el centro) */
-
-/* Si el angular está en la cabecera junto a "CDL · PANEL DE CONTROL" */
-.hero-title img.logo-cdl,
-.hero-title .hero-logo-angular{
-  position: relative;
-  top: -0.42em;        /* súbelo (ajusta -0.35em / -0.5em si quieres) */
-  margin-right: .35em;
-  height: 1.15em;      /* tamaño proporcional */
-  width: auto;
-}
-
-/* Si el angular está como icono de los títulos (EQUIPOS, etc.) */
-main section>h2.cdl-tag.angular::before,
-main section>h3.cdl-tag.angular::before{
-  position: relative;
-  top: -0.42em;        /* mismo criterio: más alto que el centro */
-  width: 1.2em;
-  height: 1.2em;
-  margin-right: .3em;
-  background-image: url("angular.png") !important;
-}
-/* Angular MÁS CERCA de la primera letra (lateral) y alto correcto */
-
-/* Header */
-.hero-title .hero-logo-cdl { margin-left: -0.10em; }   /* acerca CDL a lo anterior si hay hueco */
-.hero-title .hero-logo-angular{
-  position: relative;
-  top: -0.42em;          /* altura ya correcta */
-  left: -0.06em;         /* acércalo lateralmente */
-  margin-right: -0.08em; /* pega el angular a la "C" */
-  height: 1.15em; width: auto;
-}
-
-/* Títulos de sección (EQUIPOS, etc.) */
-main section>h2.cdl-tag::before,
-main section>h3.cdl-tag::before{
-  position: relative;
-  top: -0.42em;          /* ya lo sube */
-  margin-right: -0.06em; /* pega el angular a la primera letra */
-  width: 1.2em; height: 1.2em;
-}
-
-/* Si usas una clase específica para ese angular en títulos */
-main section>h2.cdl-tag.angular::before,
-main section>h3.cdl-tag.angular::before{
-  margin-right: -0.06em;
-}
-/* ===== FIX: fondo del header visible + PANEL DE CONTROL en una línea ===== */
-
-/* el header no sangra el fondo y lo recorta dentro */
-header{
-  position: sticky; top: 0; z-index: 1200;
-  overflow: hidden;                      /* evita que el fondo “se salga” */
-  min-height: 120px;                     /* asegura alto para que se vea */
-}
-
-/* fondo con logo_mantenimiento.png en la esquina sup. izquierda */
-header::after{
-  content:"";
-  position:absolute; inset:0;
-  pointer-events:none;
-  opacity:.16;                           /* intensidad del logo */
-  background:
-    url("logo_mantenimiento.png") no-repeat 14px 6px /
-    clamp(140px, 32vw, 220px) auto;      /* tamaño y posición del logo */
-  -webkit-mask-image:none; mask-image:none;  /* sin máscara que lo esconda */
-}
-
-/* fuerza el texto a una sola línea */
-.hero-title .hero-row{
-  display:flex; align-items:center; gap:.6rem;
-  white-space:nowrap;                    /* no hace salto de línea */
-  flex-wrap:nowrap;
-}
-
-/* por si el span interno forzaba saltos */
-.hero-title .hero-panel{ white-space:nowrap; }
-/* ====== TIRAS BLANCAS + “ZEBRA” EN EQUIPOS ====== */
-
-/* 1) Título EQUIPOS en franja blanca, texto negro, full-bleed */
-#page-equipos > h2.cdl-tag{
-  color:#111 !important;
-  background:#fff !important;
-  margin:0 calc(50% - 50vw) 0;        /* full-bleed (sin márgenes laterales) */
-  padding:10px 16px;                   /* alto cómodo de la franja */
-  display:flex; align-items:center; gap:.4rem;
-  border-top:10px solid #0b0f15;       /* línea negra arriba (separador) */
-  border-bottom:10px solid #0b0f15;    /* línea negra abajo (separador) */
-}
-
-/* Angular del título: ya bien de altura; solo aseguramos pegado */
-#page-equipos > h2.cdl-tag::before{
-  margin-right:-0.06em;                /* más cerca de la 1ª letra */
-}
-
-/* 2) Banda “LÍNEA KALTENBACH” a TODO ANCHO, fondo blanco, sin márgenes */
-#page-equipos .brand-wrap{
-  margin:0 calc(50% - 50vw);           /* full-bleed */
-  padding:10px 0;                      /* alto de la franja */
-  background:#fff;                     /* tira blanca */
-}
-#page-equipos .brand-wrap img{
-  display:block; width:100%; height:auto; /* ocupa de lado a lado */
-}
-
-/* 3) Quita cualquier relleno heredado previo en brand-wrap */
-.brand-wrap{ padding:0 !important; }
-
-/* 4) (opcional) separador negro fino entre la cabecera y el contenido */
-header{ border-bottom:10px solid #0b0f15; }
+/* Canvas fijos por CSS (no atributos) */
+#chartMttr,#chartMtbf,#chartDisp,#chartOee{ width:100% !important; height:220px !important; }
 </style>
 
 <script>
