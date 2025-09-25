@@ -316,6 +316,39 @@ header::after{
 
 /* por si el span interno forzaba saltos */
 .hero-title .hero-panel{ white-space:nowrap; }
+/* ====== TIRAS BLANCAS + “ZEBRA” EN EQUIPOS ====== */
+
+/* 1) Título EQUIPOS en franja blanca, texto negro, full-bleed */
+#page-equipos > h2.cdl-tag{
+  color:#111 !important;
+  background:#fff !important;
+  margin:0 calc(50% - 50vw) 0;        /* full-bleed (sin márgenes laterales) */
+  padding:10px 16px;                   /* alto cómodo de la franja */
+  display:flex; align-items:center; gap:.4rem;
+  border-top:10px solid #0b0f15;       /* línea negra arriba (separador) */
+  border-bottom:10px solid #0b0f15;    /* línea negra abajo (separador) */
+}
+
+/* Angular del título: ya bien de altura; solo aseguramos pegado */
+#page-equipos > h2.cdl-tag::before{
+  margin-right:-0.06em;                /* más cerca de la 1ª letra */
+}
+
+/* 2) Banda “LÍNEA KALTENBACH” a TODO ANCHO, fondo blanco, sin márgenes */
+#page-equipos .brand-wrap{
+  margin:0 calc(50% - 50vw);           /* full-bleed */
+  padding:10px 0;                      /* alto de la franja */
+  background:#fff;                     /* tira blanca */
+}
+#page-equipos .brand-wrap img{
+  display:block; width:100%; height:auto; /* ocupa de lado a lado */
+}
+
+/* 3) Quita cualquier relleno heredado previo en brand-wrap */
+.brand-wrap{ padding:0 !important; }
+
+/* 4) (opcional) separador negro fino entre la cabecera y el contenido */
+header{ border-bottom:10px solid #0b0f15; }
 </style>
 
 <script>
