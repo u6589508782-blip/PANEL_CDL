@@ -286,6 +286,36 @@ main section>h2.cdl-tag.angular::before,
 main section>h3.cdl-tag.angular::before{
   margin-right: -0.06em;
 }
+/* ===== FIX: fondo del header visible + PANEL DE CONTROL en una línea ===== */
+
+/* el header no sangra el fondo y lo recorta dentro */
+header{
+  position: sticky; top: 0; z-index: 1200;
+  overflow: hidden;                      /* evita que el fondo “se salga” */
+  min-height: 120px;                     /* asegura alto para que se vea */
+}
+
+/* fondo con logo_mantenimiento.png en la esquina sup. izquierda */
+header::after{
+  content:"";
+  position:absolute; inset:0;
+  pointer-events:none;
+  opacity:.16;                           /* intensidad del logo */
+  background:
+    url("logo_mantenimiento.png") no-repeat 14px 6px /
+    clamp(140px, 32vw, 220px) auto;      /* tamaño y posición del logo */
+  -webkit-mask-image:none; mask-image:none;  /* sin máscara que lo esconda */
+}
+
+/* fuerza el texto a una sola línea */
+.hero-title .hero-row{
+  display:flex; align-items:center; gap:.6rem;
+  white-space:nowrap;                    /* no hace salto de línea */
+  flex-wrap:nowrap;
+}
+
+/* por si el span interno forzaba saltos */
+.hero-title .hero-panel{ white-space:nowrap; }
 </style>
 
 <script>
