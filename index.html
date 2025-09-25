@@ -165,6 +165,24 @@ header::after{
 .brand-wrap img { width: min(680px, 92vw); height:auto; display:block; }
 .brand-wrap.fallback{ display:none; }
 </style>
+<style id="pwa-cdl-fix">
+/* Logo de fondo: centrado arriba, tamaño correcto */
+header::after{
+  background-position: center 14px !important;
+  background-size: clamp(180px,42vw,260px) auto !important;
+}
+
+/* QR en esquina superior derecha de cada tarjeta */
+.card{ position:relative; }
+.card .card-qr{
+  position:absolute; top:10px; right:10px;
+  display:flex; flex-direction:column; align-items:center; gap:.35rem;
+}
+.card .qrbox{ width:84px; height:84px; border-radius:12px; overflow:hidden; }
+
+/* Por si algún CSS posterior ensancha el semáforo */
+.semaforo{ width:min(460px,68%) !important; }
+</style>
 
 <!-- ===== JS seguro (sin el script roto) ===== -->
 </head>
@@ -175,8 +193,6 @@ header::after{
     <!-- Menú (hamburguesa) + Angular -->
 <div class="menu menu-pages">
   <button id="pagesBtn" class="mbtn" aria-label="Menú" aria-expanded="false" aria-controls="pagesPanel">☰</button>
-  <img class="logo-cdl" src="angular.png" alt="" aria-hidden="true">
-  
   <div id="pagesPanel" class="panel hidden" aria-label="Menú principal" style="min-width:260px">
     <div class="row">
       <div class="actions">
@@ -1770,6 +1786,14 @@ window.addEventListener('load', function(){
   // 2) Si algún menú quedó abierto por zoom/resize de iOS, ciérralo
   if (typeof closeAllMenus === 'function') closeAllMenus();
 });
+<script>
+/* Fallback: si QRCode no existe, muestra un recuadro con “QR” para que Rafa vea algo en el hueco */
+(function(){
+  if (window.QRCode) return;
+  document.querySelectorAll('.qrbox').forEach(b=>{
+    b.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:800;font-family:system-ui">QR</div>';
+  });
+})();
 </script>
 <!-- ====== /JS UNIFICADO ====== -->
 
