@@ -19,13 +19,12 @@
   <!-- Fuente -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
 <style id="pwa-cdl">
 :root{
   --brand1:#A60000; --brand2:#E43B3B;
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
-  --ink:#0b0f15; --muted:#6b7280; --line:#e5e7eb;
-  --hdr-h:140px;                           /* altura fija cabecera */
+  --ink:#e8eef7; --muted:#9aa7b4; --line:#232b36;
+  --hdr-h:120px;
   --safe-top: env(safe-area-inset-top,0px);
   --safe-bottom: env(safe-area-inset-bottom,0px);
 }
@@ -37,77 +36,55 @@ body{
   margin:0;
   font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   color:var(--ink);
-  background:#ffffff;                      /* FONDO BLANCO UNIFICADO */
+  background: linear-gradient(180deg,#0c0f14,#11161e 60%,#0c0f14) fixed;
   -webkit-text-size-adjust:100%;
   padding-top:var(--safe-top);
   padding-bottom:var(--safe-bottom);
 }
 .hidden{ display:none !important; }
-img, canvas, svg, video { max-width:100%; height:auto; }
+
+/* Botones / chips */
+.btn.gloss{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.32rem .55rem;border-radius:999px;border:1px solid #bbb;
+  background:linear-gradient(180deg,#fdfdfd,#dfe3eb);
+  color:#111;font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 12px rgba(0,0,0,.12);
+}
+.btn.gloss:focus-visible{ outline:2px solid #60a5fa; outline-offset:2px; border-radius:999px; }
 
 /* ===== CABECERA ===== */
 header{
+  background:#e5e7eb !important;
+  background-image:linear-gradient(180deg,#f9fafb,#e5e7eb) !important;
   position:sticky; top:0; z-index:1200;
-  background:#fff;                         /* blanca */
-  height:var(--hdr-h);
-  overflow:hidden;                         /* recorta el fondo difuso */
-  box-shadow:0 1px 0 #eaecef;
 }
-#navBar{
-  height:var(--hdr-h);
-  display:grid;
-  grid-template-columns: 56px 1fr 56px;    /* hamburguesa | título | menú usuario */
-  align-items:center;
-  gap:4px;
-  padding:0 8px;
-}
-
-/* Fondo difuminado "logo_mantenimiento.png" (no crece al recargar) */
 header::after{
   content:"";
-  position:absolute; inset:0;
-  background:
-    radial-gradient(1000px 500px at 50% 0%, rgba(0,0,0,.04), transparent 70%),
-    url("logo_mantenimiento.png") no-repeat center 14px / clamp(180px, 42vw, 260px) auto;
-  opacity:.35;
-  pointer-events:none;
+  position:absolute; inset:0; pointer-events:none; z-index:0;
+  background: url("logo_mantenimiento.png") no-repeat center top / 200px auto;
+  opacity:.12;
+  filter:none !important;
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 34%,rgba(0,0,0,0) 72%);
+          mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.6) 34%,rgba(0,0,0,0) 72%);
 }
 
-/* Menú hamburguesa (izquierda, negro, más grande) */
-.menu.menu-pages{ align-self:center; }
-#pagesBtn{
-  font-size:28px; line-height:1;
-  width:40px; height:40px;
-  display:inline-flex; align-items:center; justify-content:center;
-  color:#111; background:transparent; border:0;
+/* ===== TÍTULOS MAYÚSCULAS + LOGO CDL ===== */
+main section>h2, main section>h3{ text-transform:uppercase; }
+main section>h2.cdl-tag::before,
+main section>h3.cdl-tag::before{
+  content:""; display:inline-block; width:1em; height:1em;
+  background:url("logo-cdl.png") no-repeat center / contain;
+  flex:0 0 auto; transform:translateY(-2px);
+  filter:none !important; box-shadow:none !important;
 }
 
-/* Título “CDL · PANEL DE CONTROL” en una sola línea */
-.hero-title{ display:flex; align-items:center; justify-content:center; }
-.hero-title .hero-row{ display:flex; align-items:center; gap:12px; white-space:nowrap; }
-.hero-title .hero-dot{ display:none; }                /* quitamos el punto intermedio */
-.hero-title .hero-panel{ font-weight:800; letter-spacing:.02em; }
-
-/* Logo CDL (con angular rojo) */
-.hero-logo-cdl{ height:22px; width:auto; display:inline-block; margin-right:2px; }
-
-/* Menú usuario (derecha) */
-.menu.menu-user{ justify-self:end; }
-#userBtn{ font-size:26px; width:40px; height:40px; border:0; background:transparent; color:#111; }
-
-/* Rol arriba a la derecha, texto simple sin píldora y más pequeño */
-.rolechip{
-  position:absolute; right:12px; top:8px;
-  font-size:.9rem; font-weight:800; color:#111;
-  background:transparent; border:0; padding:0; box-shadow:none;
-}
-
-/* ===== MENÚ FULLSCREEN (sin cambios visuales del listado) ===== */
+/* ===== MENÚ FULLSCREEN ===== */
 html.menu-open, body.menu-open{ overflow:hidden; }
 .panel.menu-full{
   position:fixed !important;
   z-index:2400 !important;
-  inset: calc(var(--safe-top) + var(--hdr-h)) 0 var(--safe-bottom) 0 !important;
+  inset: calc(env(safe-area-inset-top,0px) + var(--hdr-h)) 0 env(safe-area-inset-bottom,0px) 0 !important;
   background:#0b0f15 !important;
   background-image:linear-gradient(180deg,#0b0f15,#121820 60%,#0b0f15) !important;
 }
@@ -131,35 +108,13 @@ html.menu-open, body.menu-open{ overflow:hidden; }
   background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9) 0%, rgba(255,255,255,.4) 35%, rgba(255,255,255,0) 100%);
 }
 
-/* ===== STRIPS BLANCOS A PANTALLA COMPLETA ===== */
-.brand-wrap{ margin:0; background:#fff; }
-.brand-wrap img{
-  display:block;
-  width:100vw; max-width:none;             /* de borde a borde */
-  margin-left:50%; transform:translateX(-50%);
-}
-section h2.cdl-tag{
-  margin:0; padding:.65rem 16px;
-  color:#111; background:#fff;             /* título sobre franja blanca */
-  display:flex; align-items:center; gap:.55rem;
-  border-top:10px solid #0b0f15;           /* separador oscuro opcional */
-  border-bottom:10px solid #0b0f15;        /* separador oscuro opcional */
-  text-transform:uppercase;
-}
-/* Icono rojo antes de EQUIPOS un poco más arriba y más cerca */
-section h2.cdl-tag::before{
-  content:""; width:18px; height:18px; flex:0 0 auto;
-  background:url("logo-cdl.png") no-repeat center / contain;
-  margin-right:.25rem; transform:translateY(-4px);
-}
-
-/* ===== TARJETAS (dos grises) ===== */
+/* ===== TARJETAS ===== */
 .card{
   position:relative; color:#e5e7eb; border-radius:16px;
-  padding:.6rem .7rem; margin:.6rem 0;
-  border:1px solid #2a3442;
-  background: linear-gradient(180deg,#2f3339,#1c1f26) !important; /* dos tonos */
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 10px 22px rgba(0,0,0,.28) !important;
+  padding:.5rem .6rem; margin:.5rem 0; border:1px solid #2a3442;
+  background: linear-gradient(180deg,#181d25,#12161b) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.38) !important;
+  overflow:hidden;
 }
 .card::before{
   content:""; position:absolute; top:8px; bottom:8px; left:-1px; width:3px;
@@ -167,34 +122,30 @@ section h2.cdl-tag::before{
   border-radius:3px;
 }
 
-/* ===== SEMÁFORO MÁS ESTRECHO + BOTONES EN LÍNEA ===== */
-.semaforo{ background:#0e1422; border:1px solid #2a3546; border-radius:999px; padding:.24rem; width:min(420px,66%); }
+/* ===== SEMÁFORO METALIZADO ===== */
+.semaforo{ background:#0e1422; border:1px solid #2a3546; border-radius:999px; padding:.24rem; }
 .semaforo .opt{
   font-weight:900; border-radius:999px; padding:.36rem .72rem;
   background:linear-gradient(180deg,#111827,#0b1220);
   border:1px solid #273042;
 }
-.right{ display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; }
-
-/* Estados activos */
 .semaforo .opt.active[data-k="ok"]{
-  color:#0b2f19; background:linear-gradient(180deg,#b8ffd3,#3dd682 60%,#0b4f2a); border-color:#1d9a55;
+  color:#0b2f19;
+  background:linear-gradient(180deg,#b8ffd3,#3dd682 60%,#0b4f2a);
+  border-color:#1d9a55;
 }
 .semaforo .opt.active[data-k="warn"]{
-  color:#3a2503; background:linear-gradient(180deg,#ffecc2,#f0b33a 60%,#6a3f04); border-color:#d89a18;
+  color:#3a2503;
+  background:linear-gradient(180deg,#ffecc2,#f0b33a 60%,#6a3f04);
+  border-color:#d89a18;
 }
 .semaforo .opt.active[data-k="stop"]{
-  color:#3d0b0b; background:linear-gradient(180deg,#ffd0d0,#ff4e4e 60%,#7a0f0f); border-color:#cc2a2a;
+  color:#3d0b0b;
+  background:linear-gradient(180deg,#ffd0d0,#ff4e4e 60%,#7a0f0f);
+  border-color:#cc2a2a;
 }
 
-/* Botones */
-.btn.gloss{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.32rem .55rem;border-radius:999px;border:1px solid #bbb;
-  background:linear-gradient(180deg,#fdfdfd,#dfe3eb);
-  color:#111;font-weight:800;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 12px rgba(0,0,0,.12);
-}
+/* ===== BOTÓN PARADA PROLONGADA ===== */
 .btn.gloss.btn-mail{
   color:#fff !important;
   background:linear-gradient(180deg,#ff5a5a,#c10f0f) !important;
@@ -202,412 +153,64 @@ section h2.cdl-tag::before{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 8px 18px rgba(178,15,15,.35) !important;
 }
 
-/* ===== TABLAS / CONTENEDORES SCROLL ===== */
-#incidTableWrap, #invTableWrap, #otTableWrap, .kpi table{
-  overflow-x:auto; -webkit-overflow-scrolling:touch;
-}
-table{ width:100%; }
-
-/* Placeholders incidencias */
+/* ===== PLACEHOLDERS INCIDENCIAS ===== */
 .ph-wrap{ position:relative; }
 .ph-wrap .ph-label{
   position:absolute; left:14px; top:50%; transform:translateY(-50%);
-  color:#6b7280; font-weight:600; pointer-events:none; opacity:.9;
+  color:#aeb7c2; font-weight:600; pointer-events:none; opacity:.9;
 }
 .ph-wrap.filled .ph-label{ display:none; }
-::placeholder{ color:#6b7280; opacity:1; }
+::placeholder{ color:#aeb7c2; opacity:1; }
 
-/* Toast & header sombra */
-header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.06); }
-
-/* Canvas fijos por CSS (no atributos) */
-#chartMttr,#chartMtbf,#chartDisp,#chartOee{ width:100% !important; height:220px !important; }
-<!-- 🔧 BLOQUE ÚNICO (pega en <head>, reemplazando desde <!-- ===== PARCHE ÚNICO --> hasta el </script> roto) -->
-
-/* deja esta última regla dentro del primer <style id="pwa-cdl"> */
-#chartMttr,#chartMtbf,#chartDisp,#chartOee{ width:100% !important; height:220px !important; }
-</style>
-
-<!-- ===== PARCHE ÚNICO (cabecera + títulos + QR en tarjetas) ===== -->
-<style id="pwa-cdl-unique">
-/* CABECERA: fondo arriba y fila única "CDL  PANEL DE CONTROL" */
-header{
-  background:#f5f6f8 !important;
-  background-image:linear-gradient(180deg,#f7f8fa,#eceff3) !important;
-  position:sticky; top:0; z-index:1200;
+.incid-placeholder{
+  color:#aaa; font-style:italic; background:#1c1f26;
+  padding:.2rem .4rem; border-radius:6px;
 }
-header::after{
-  content:"";
-  position:absolute; inset:0;
-  background:
-    radial-gradient(900px 420px at 50% 0%, rgba(0,0,0,.06), transparent 65%),
-    url("logo_mantenimiento.png") no-repeat center 14px / clamp(180px,42vw,260px) auto;
-  opacity:.30; pointer-events:none;
-  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
-          mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
-}
-.hero-title{ padding:10px 12px 14px; }
-.hero-title .hero-row.singleline{
-  display:flex; align-items:flex-end; gap:.6rem; white-space:nowrap;
-}
-.hero-logo-cdl{ height:1.5em; width:auto; display:inline-block; }
-.hero-dot{ display:none; }
-.hero-panel{ font-weight:800; letter-spacing:.02em; }
-
-/* Rol sin píldora */
-.rolechip{ background:transparent; border:0; box-shadow:none; color:#111; font-weight:800; }
-
-/* Títulos secciones: icono angular y sin bordes negros */
-main section>h2.cdl-tag::before,
-main section>h3.cdl-tag::before{
-  content:""; width:1.05em; height:1.05em;
-  background:url("angular.png") no-repeat center / contain;
-  transform:translateY(6px);
-}
-section h2.cdl-tag, section h3.cdl-tag{ border:0 !important; }
-
-/* Franja “LÍNEA KALTENBACH” full-bleed */
-.brand-wrap{ margin:0; background:#fff; }
-.brand-wrap img{
-  display:block; width:100vw; max-width:none; margin-left:50%; transform:translateX(-50%);
+header.scrolled{
+  box-shadow:0 4px 10px rgba(0,0,0,.18);
 }
 
-/* Tarjeta con columna QR a la derecha + botón Ficha negro */
-.card{ position:relative; display:flex; flex-wrap:wrap; gap:.6rem; align-items:flex-start; }
-.card .card-main{ flex:1 1 420px; min-width:260px; }
-.card .card-qr{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:.4rem; }
-.card .qrbox{
-  width:84px; height:84px; border-radius:12px;
-  background:#0f141c; border:1px solid #2a3442; overflow:hidden;
+/* Chip de rol (esquina superior derecha) */
+.rolechip {
+  position:absolute;
+  right:14px;
+  top:8px;
+  font-size:.78rem;
+  font-weight:800;
+  color:#222;
+  background:#f3f4f6;
+  border:1px solid #d1d5db;
+  border-radius:999px;
+  padding:.25rem .7rem;
+  box-shadow:0 2px 6px rgba(0,0,0,.12);
 }
-.btn.gloss.btn-ficha{
-  background:linear-gradient(180deg,#111,#222) !important;
-  color:#fff !important; border-color:#000 !important;
-}
 
-/* Nombre de máquina */
-.card .name .linkish{ font-weight:900; font-size:1.12rem; }
+/* --- HOTFIX iOS / tamaños de imágenes y fondo del header --- */
+img, canvas, svg, video { max-width: 100%; height: auto; }
 
-/* Semáforo un poco más estrecho */
-.semaforo{ width:min(460px,68%); }
-
-/* Gráficas siempre visibles (sin datos) */
-#chartMttr,#chartMtbf,#chartDisp,#chartOee{ width:100% !important; height:220px !important; }
-</style>
-
-<!-- ===== PATCH LIGERO (responsive + ordena cabecera) ===== -->
-<style id="pwa-cdl-patch">
-/* Evita logos gigantes en header */
+/* Fondo decorativo del header (logo rojo) más discreto */
 header::after{
   background-size: clamp(120px, 35vw, 200px) auto !important;
   background-position: 12px 6px !important;
   background-repeat: no-repeat !important;
-  opacity: .12;
 }
 
-/* Logos héroe / menú */
-.hero-logo-cdl { height: 1.6em; width: auto; display:inline-block; vertical-align:middle; }
-.menu .logo-cdl  { width: 24px; height: 24px; object-fit: contain; }
-
-/* Tablas/scroll horizontal para móviles */
-#incidTableWrap, #invTableWrap, #otTableWrap, .kpi table { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-table { width:100%; table-layout:auto; }
-
-/* Charts obedecen CSS */
-#chartMttr, #chartMtbf, #chartDisp, #chartOee { width:100% !important; height:220px !important; }
-
-/* Medios seguros */
-img, canvas, svg, video { max-width:100%; height:auto; }
-
-/* Brand wrap centrado si falla imagen */
-.brand-wrap { display:flex; justify-content:center; padding:.4rem 0; }
-.brand-wrap img { width: min(680px, 92vw); height:auto; display:block; }
-.brand-wrap.fallback { display:none; }
-
-/* Tarjetas seguras */
-.card { overflow:hidden; }
-
-/* Safe areas iOS */
-:root { --safe-top: env(safe-area-inset-top,0px); }
-body{ padding-top:var(--safe-top); }
-
-/* Header fijo, layout botones y título 1 línea */
-:root{ --hdr-h: 140px; }
-header{position:sticky;top:0;z-index:1200;background:#fff;height:var(--hdr-h);overflow:hidden;box-shadow:0 1px 0 #eaecef;}
-header::after{
-  content:"";position:absolute;inset:0;opacity:.30;pointer-events:none;
-  background:
-    radial-gradient(900px 420px at 50% 0%, rgba(0,0,0,.06), transparent 65%),
-    url("logo_mantenimiento.png") no-repeat center 14px / clamp(180px,42vw,260px) auto;
-  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
-          mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
-}
-#navBar{height:var(--hdr-h);display:grid;grid-template-columns:56px 1fr 56px;align-items:center;padding:0 8px;}
-#pagesBtn{font-size:28px;width:40px;height:40px;color:#111;background:transparent;border:0;}
-.menu.menu-user{justify-self:end;}
-#userBtn{font-size:26px;width:40px;height:40px;border:0;background:transparent;color:#111;}
-.rolechip{position:absolute;right:12px;top:8px;font-size:.9rem;font-weight:800;color:#111;background:transparent;border:0;padding:0;box-shadow:none;}
-.hero-title{display:flex;align-items:center;justify-content:center;}
-.hero-title .hero-row{display:flex;align-items:center;gap:12px;white-space:nowrap;}
-.hero-title .hero-dot{display:none;}
-.hero-panel{font-weight:800;letter-spacing:.02em;}
-.hero-logo-cdl{height:22px;width:auto;display:inline-block;margin-right:2px;}
-
-/* Títulos sección: sin bordes, con angular */
-section h2.cdl-tag, section h3.cdl-tag{margin:0;padding:.65rem 16px;color:#111;background:#fff;border:0;text-transform:uppercase;display:flex;align-items:center;gap:.55rem;}
-section h2.cdl-tag::before, section h3.cdl-tag::before{
-  content:"";width:18px;height:18px;flex:0 0 auto;background:url("angular.png") no-repeat center/contain;transform:translateY(4px);
-}
-
-/* Franja “LÍNEA KALTENBACH” full-bleed */
-.brand-wrap{margin:0;background:#fff;}
-.brand-wrap img{display:block;width:100vw;max-width:none;margin-left:50%;transform:translateX(-50%);}
-
-/* Tarjetas (tema oscuro) + QR + botón Ficha negro */
-.card{position:relative;color:#e5e7eb;border-radius:16px;padding:.6rem .7rem;margin:.6rem 0;border:1px solid #2a3442;background:linear-gradient(180deg,#2f3339,#1c1f26)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 22px rgba(0,0,0,.28)!important;display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-start;}
-.card::before{content:"";position:absolute;top:8px;bottom:8px;left:-1px;width:3px;background:linear-gradient(180deg,rgba(166,0,0,.9),rgba(228,59,59,.9));border-radius:3px;}
-.card .card-main{flex:1 1 420px;min-width:260px;}
-.card .card-qr{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:.4rem;}
-.card .qrbox{width:84px;height:84px;border-radius:12px;background:#0f141c;border:1px solid #2a3442;overflow:hidden;}
-.card .name .linkish{font-weight:900;font-size:1.12rem;}
-.btn.gloss.btn-ficha{background:linear-gradient(180deg,#111,#222)!important;color:#fff!important;border-color:#000!important;}
-.semaforo{background:#0e1422;border:1px solid #2a3546;border-radius:999px;padding:.24rem;width:min(460px,68%);}
-.right{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;}
-
-/* Tablas y charts seguros en móvil */
-#incidTableWrap,#invTableWrap,#otTableWrap,.kpi table{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{width:100%;}
-#chartMttr,#chartMtbf,#chartDisp,#chartOee{width:100%!important;height:220px!important;}
-</style>
-
-<!-- ===== JS seguro (sin el script roto) ===== -->
-<script>
-/* Logo CDL en el hero + título en mayúsculas */
-(function(){
-  const hero = document.querySelector('.hero-title .hero-row.singleline');
-  if (hero && !hero.querySelector('.hero-logo-cdl')){
-    const img = document.createElement('img');
-    img.src = 'logo-cdl.png';
-    img.alt = 'CDL';
-    img.className = 'hero-logo-cdl';
-    hero.insertBefore(img, hero.firstChild);
-  }
-  const hp = document.querySelector('.hero-panel');
-  if (hp) hp.textContent = hp.textContent.toUpperCase();
-})();
-
-/* Placeholders fantasma incidencias */
-(function(){
-  function addGhostPH(id, text){
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (el.parentElement?.classList?.contains('ph-wrap')) return;
-    const wrap = document.createElement('div');
-    wrap.className = 'ph-wrap';
-    el.parentNode.insertBefore(wrap, el);
-    wrap.appendChild(el);
-    const lab = document.createElement('span');
-    lab.className = 'ph-label';
-    lab.textContent = text;
-    wrap.appendChild(lab);
-    const sync = ()=> wrap.classList.toggle('filled', !!el.value);
-    el.addEventListener('input', sync); el.addEventListener('change', sync); sync();
-  }
-  addGhostPH('iInicio','Fecha de inicio');
-  addGhostPH('iFin','Fecha de fin');
-  addGhostPH('iHParo','Horas parada');
-  addGhostPH('iHRep','Horas reparación');
-  addGhostPH('iRep','Nº repuestos utilizados');
-  addGhostPH('iStock','Cantidad en stock');
-  ['iHParo','iHRep','iRep','iStock'].forEach(id=>{
-    const n = document.getElementById(id);
-    if (n && (n.value === '0' || n.value === 0)) n.value = '';
-  });
-})();
-</script>
-<!-- /BLOQUE ÚNICO -->
-
-  /* Interacciones del semáforo + QR real */
-  setTimeout(()=>{
-    const opts = el.querySelectorAll(".semaforo .opt");
-    opts.forEach(o=>{
-      o.tabIndex = 0;
-      o.setAttribute("role","radio");
-      o.setAttribute("aria-checked", o.classList.contains("active") ? "true" : "false");
-      o.addEventListener("click", async (e)=>{
-        const name   = el.querySelector(".semaforo").dataset.name;
-        const k      = e.currentTarget.getAttribute("data-k");
-        const estado = k === "ok" ? "En marcha" : (k === "warn" ? "Restricciones" : "Parada");
-        const ok = await setEstado(name, estado);
-        if (!ok) return;
-        opts.forEach(x=>{ x.classList.remove("active"); x.setAttribute("aria-checked","false"); });
-        e.currentTarget.classList.add("active");
-        e.currentTarget.setAttribute("aria-checked","true");
-      });
-      o.addEventListener("keydown",(e)=>{
-        if (e.key==="Enter"||e.key===" "){ e.preventDefault(); o.click(); }
-        if (["ArrowRight","ArrowDown","ArrowLeft","ArrowUp"].includes(e.key)){
-          e.preventDefault();
-          const arr = Array.from(opts); const i = arr.indexOf(o);
-          const dir = (e.key==="ArrowLeft"||e.key==="ArrowUp")? -1 : 1;
-          const next = arr[(i+dir+arr.length)%arr.length]; next.focus();
-        }
-      });
-    });
-
-    /* QR mini funcional (abre la ficha) */
-    const qrHost = el.querySelector('#'+qrId);
-    if (qrHost){
-      const url = `${baseURL()}#/equipo/${slug}`;
-      new QRCode(qrHost, { text:url, width:80, height:80, correctLevel: QRCode.CorrectLevel.M });
-      qrHost.title = "Abrir ficha";
-      qrHost.style.cursor = "pointer";
-      qrHost.addEventListener("click", ()=> openEquipoByName(safeName));
-    }
-  }, 0);
-
-  return el;
-}
-</script>
-</style>
-
-<script>
-/* ===== Inserta logo CDL en el hero ===== */
-(function(){
-  const hero = document.querySelector('.hero-title .hero-row.singleline');
-  if (hero && !hero.querySelector('.hero-logo-cdl')){
-    const img = document.createElement('img');
-    img.src = 'logo-cdl.png';
-    img.alt = 'CDL';
-    img.className = 'hero-logo-cdl';
-    hero.insertBefore(img, hero.firstChild);
-  }
-  const hp = document.querySelector('.hero-panel');
-  if (hp) hp.textContent = hp.textContent.toUpperCase();
-})();
-
-/* ===== Placeholders fantasma incidencias ===== */
-(function(){
-  function addGhostPH(id, text){
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (el.parentElement?.classList?.contains('ph-wrap')) return;
-    const wrap = document.createElement('div');
-    wrap.className = 'ph-wrap';
-    el.parentNode.insertBefore(wrap, el);
-    wrap.appendChild(el);
-    const lab = document.createElement('span');
-    lab.className = 'ph-label';
-    lab.textContent = text;
-    wrap.appendChild(lab);
-    const sync = ()=> wrap.classList.toggle('filled', !!el.value);
-    el.addEventListener('input', sync); el.addEventListener('change', sync); sync();
-  }
-
-  addGhostPH('iInicio','Fecha de inicio');
-  addGhostPH('iFin','Fecha de fin');
-  addGhostPH('iHParo','Horas parada');
-  addGhostPH('iHRep','Horas reparación');
-  addGhostPH('iRep','Nº repuestos utilizados');
-  addGhostPH('iStock','Cantidad en stock');
-
-  ['iHParo','iHRep','iRep','iStock'].forEach(id=>{
-    const n = document.getElementById(id);
-    if (n && (n.value === '0' || n.value === 0)) n.value = '';
-  });
-})();
-<style id="pwa-cdl-patch">
-/* ====== PARCHE LIGERO: ajustes visuales obligatorios y responsive ====== */
-
-/* Evita logos gigantes en header */
-header::after{
-  background-size: clamp(120px, 35vw, 200px) auto !important;
-  background-position: 12px 6px !important;
-  background-repeat: no-repeat !important;
-  opacity: .12;
-}
-
-/* Logos héroe / menú */
-.hero-logo-cdl { height: 1.6em; width: auto; display:inline-block; vertical-align:middle; }
-.menu .logo-cdl  { width: 24px; height: 24px; object-fit: contain; }
-
-/* Tablas/scroll horizontal para móviles */
-#incidTableWrap, #invTableWrap, #otTableWrap, .kpi table {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Asegura ancho de tablas */
-table { width: 100%; table-layout: auto; }
-
-/* Evita que canvas de Chart.js fijen tamaños raros */
+/* Asegura que los <canvas> de Chart.js no fijen tamaño en CSS */
 #chartMttr, #chartMtbf, #chartDisp, #chartOee {
   width: 100% !important;
   height: 220px !important;
 }
 
-/* Imágenes / canvases no desbordan y mantienen proporción */
-img, canvas, svg, video { max-width: 100%; height: auto; }
-
-/* Brand wrap: centrado y fallback por si falta la imagen */
-.brand-wrap { display:flex; justify-content:center; padding:.4rem 0; }
-.brand-wrap img { width: min(680px, 92vw); height:auto; display:block; }
-.brand-wrap.fallback { display:none; }
-
-/* Tablas y tarjetas seguras */
-.card { overflow: hidden; }
-
-/* Pequeño ajuste para evitar que header empuje contenido en algunos móviles */
-:root { --safe-top: env(safe-area-inset-top,0px); }
-body{ padding-top:var(--safe-top); }
-
-/* Header fijo, fondo arriba y título en UNA sola línea */
-:root{ --hdr-h: 140px; }
-header{position:sticky;top:0;z-index:1200;background:#fff;height:var(--hdr-h);overflow:hidden;box-shadow:0 1px 0 #eaecef;}
-header::after{
-  content:"";position:absolute;inset:0;opacity:.30;pointer-events:none;
-  background:
-    radial-gradient(900px 420px at 50% 0%, rgba(0,0,0,.06), transparent 65%),
-    url("logo_mantenimiento.png") no-repeat center 14px / clamp(180px,42vw,260px) auto;
-  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
-          mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0, rgba(0,0,0,.8) 45%, rgba(0,0,0,0) 72%);
+/* Tablas: scroll horizontal en móvil */
+#incidTableWrap, #invTableWrap, #otTableWrap, .kpi table {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
-#navBar{height:var(--hdr-h);display:grid;grid-template-columns:56px 1fr 56px;align-items:center;padding:0 8px;}
-#pagesBtn{font-size:28px;width:40px;height:40px;color:#111;background:transparent;border:0;}
-.menu.menu-user{justify-self:end;}
-#userBtn{font-size:26px;width:40px;height:40px;border:0;background:transparent;color:#111;}
-.rolechip{position:absolute;right:12px;top:8px;font-size:.9rem;font-weight:800;color:#111;background:transparent;border:0;padding:0;box-shadow:none;}
-.hero-title{display:flex;align-items:center;justify-content:center;}
-.hero-title .hero-row{display:flex;align-items:center;gap:12px;white-space:nowrap;}
-.hero-title .hero-dot{display:none;}
-.hero-panel{font-weight:800;letter-spacing:.02em;}
-.hero-logo-cdl{height:22px;width:auto;display:inline-block;margin-right:2px;}
+table { width: 100%; table-layout:auto; }
 
-/* Título secciones: SIN líneas negras; icono angular correcto */
-section h2.cdl-tag, section h3.cdl-tag{margin:0;padding:.65rem 16px;color:#111;background:#fff;border:0;text-transform:uppercase;display:flex;align-items:center;gap:.55rem;}
-section h2.cdl-tag::before, section h3.cdl-tag::before{
-  content:"";width:18px;height:18px;flex:0 0 auto;background:url("angular.png") no-repeat center/contain;transform:translateY(4px);
-}
-
-/* Franja “LÍNEA KALTENBACH” a pantalla completa sin márgenes */
-.brand-wrap{margin:0;background:#fff;}
-.brand-wrap img{display:block;width:100vw;max-width:none;margin-left:50%;transform:translateX(-50%);}
-
-/* Tarjetas: 2 grises; nombre de máquina más grande; QR a la derecha; botón Ficha negro */
-.card{position:relative;color:#e5e7eb;border-radius:16px;padding:.6rem .7rem;margin:.6rem 0;border:1px solid #2a3442;background:linear-gradient(180deg,#2f3339,#1c1f26)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 22px rgba(0,0,0,.28)!important;display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-start;}
-.card::before{content:"";position:absolute;top:8px;bottom:8px;left:-1px;width:3px;background:linear-gradient(180deg,rgba(166,0,0,.9),rgba(228,59,59,.9));border-radius:3px;}
-.card .card-main{flex:1 1 420px;min-width:260px;}
-.card .card-qr{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:.4rem;}
-.card .qrbox{width:84px;height:84px;border-radius:12px;background:#0f141c;border:1px solid #2a3442;overflow:hidden;}
-.card .name .linkish{font-weight:900;font-size:1.12rem;}
-.btn.gloss.btn-ficha{background:linear-gradient(180deg,#111,#222)!important;color:#fff!important;border-color:#000!important;}
-.semaforo{background:#0e1422;border:1px solid #2a3546;border-radius:999px;padding:.24rem;width:min(460px,68%);}
-.right{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;}
-
-/* Tablas y charts seguros en móvil */
-#incidTableWrap,#invTableWrap,#otTableWrap,.kpi table{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{width:100%;}
-#chartMttr,#chartMtbf,#chartDisp,#chartOee{width:100%!important;height:220px!important;}
+/* Evita que los logos crezcan de más */
+.hero-logo-cdl { height: 1.6em; width: auto; display:inline-block; }
+.menu .logo-cdl { width: 24px; height: 24px; object-fit: contain; }
 </style>
 
 </script>
