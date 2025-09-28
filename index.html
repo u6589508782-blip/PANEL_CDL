@@ -22,25 +22,59 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
+/* ===== Base visual corporativa (oscuro) ===== */
 :root{
   --brand1:#A60000; --brand2:#E43B3B;
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
-  --ink:#0b0f15; --muted:#6b7280; --line:#e5e7eb;
-  --bg:#ffffff; --bg-dark:#0b0f15; --panel:#111827;
+  --ink:#e8eef7; --muted:#9aa7b4; --line:#232b36;
+  --bg:#0c0f14; --panel:#0b0f15;
   --safe-top: env(safe-area-inset-top,0px);
   --safe-bottom: env(safe-area-inset-bottom,0px);
-  --hdr-h: 140px;
+  --hdr-h: 64px;
 }
-*{ box-sizing: border-box; }
+*{ box-sizing:border-box; }
 html,body{ height:100%; }
 body{
   margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  color:var(--ink); background:var(--bg);
-  -webkit-text-size-adjust:100%;
+  color:var(--ink); background:var(--bg); -webkit-text-size-adjust:100%;
   padding-top:var(--safe-top); padding-bottom:var(--safe-bottom);
 }
 .hidden{ display:none !important; }
 img,canvas,svg,video{ max-width:100%; height:auto; }
+
+/* Cabecera oscura */
+header{ background:var(--panel); border-bottom:1px solid #1f2937; position:sticky; top:0; z-index:2000; }
+header .nav{ min-height:64px; display:flex; align-items:center; justify-content:center; position:relative; padding:.35rem .6rem; }
+.hero-title .hero-panel{ color:#f3f4f6; font-weight:900; letter-spacing:.04em; }
+.hero-logo-cdl{ height:22px; width:auto; display:inline-block; }
+.rolechip{ position:absolute; right:12px; top:8px; font-size:.92rem; font-weight:800; color:#f3f4f6; }
+.menu button#pagesBtn,
+.menu button#userBtn{
+  position:absolute; top:10px; width:36px; height:36px; border-radius:8px;
+  border:1px solid #2a3342; color:#e5e7eb; background:#111826; cursor:pointer; display:grid; place-items:center;
+}
+.menu button#pagesBtn{ left:10px; }
+.menu button#userBtn{ right:10px; }
+
+/* Panel de menú (cuadro oscuro flotante) */
+.panel{
+  position:absolute; top:56px; left:10px; background:#0b0f15; color:#e5e7eb;
+  border:1px solid #1f2937; border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.45);
+  padding:.6rem; z-index:2100; max-height:calc(100vh - 80px); overflow:auto;
+}
+.menu-user .panel{ right:10px; left:auto; width:280px; }
+.menu-pages .panel{ width:280px; }
+.panel .row{ display:flex; flex-direction:column; gap:.5rem; }
+.panel .actions{ display:flex; flex-direction:column; gap:.35rem; }
+
+/* Contenido */
+main{ max-width:1200px; margin:0 auto; padding:.8rem .8rem 1.2rem; }
+.card{ background:#141a22; border:1px solid var(--line); border-radius:12px; padding:.75rem .9rem; margin:.5rem 0; }
+.in-txt, input[type="date"], select{ height:36px; padding:.35rem .55rem; border-radius:10px; border:1px solid #2b3443; background:#0f141b; color:var(--ink); }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:.4rem; padding:.42rem .72rem; border-radius:999px; border:1px solid #2b3443; background:#0f141b; color:var(--ink); font-weight:800; }
+table{ width:100%; border-collapse:collapse; background:#0f141b; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+thead th{ background:#121925; color:#e5e7eb; font-weight:800; text-align:left; border-bottom:1px solid var(--line); padding:.55rem .6rem; }
+tbody td{ border-top:1px solid var(--line); padding:.5rem .6rem; }
 </style>
 </head>
 <body>
@@ -1722,8 +1756,46 @@ if (!window.__CDL_MIN_BOOT__){
   }
 })();
  /* ========== BLOQUE 7.4 (FIN) ========== */
- /* ========== BLOQUE 7.5 (INICIO) — Cierres finales ========== */
+ <!-- ========== BLOQUE 7.6 (INICIO) — Menús funcionales ========== -->
+<script>
+(function(){
+  if (window.__CDL_MENUS__) return; window.__CDL_MENUS__=true;
+
+  const $ = (id)=>document.getElementById(id);
+  const pagesBtn=$("pagesBtn"), pagesPanel=$("pagesPanel");
+  const userBtn =$("userBtn"),  userPanel =$("userPanel");
+
+  function open(btn,panel,fullscreen){
+    closeAll();
+    panel.classList.remove("hidden");
+    if (fullscreen && matchMedia("(max-width: 720px)").matches){
+      panel.classList.add("menu-full");
+      document.documentElement.classList.add("menu-open");
+      document.body.classList.add("menu-open");
+    }
+    btn.setAttribute("aria-expanded","true");
+  }
+  function close(btn,panel){
+    if(!panel) return;
+    panel.classList.add("hidden"); panel.classList.remove("menu-full");
+    btn?.setAttribute("aria-expanded","false");
+    document.documentElement.classList.remove("menu-open");
+    document.body.classList.remove("menu-open");
+  }
+  function closeAll(){ close(pagesBtn,pagesPanel); close(userBtn,userPanel); }
+
+  pagesBtn?.addEventListener("click",()=> pagesPanel.classList.contains("hidden") ? open(pagesBtn,pagesPanel,true) : close(pagesBtn,pagesPanel));
+  userBtn ?.addEventListener("click",()=> userPanel .classList.contains("hidden") ? open(userBtn ,userPanel ,false) : close(userBtn ,userPanel ));
+
+  document.addEventListener("click",(e)=>{
+    if (e.target.closest("#pagesPanel, #pagesBtn, #userPanel, #userBtn")) return;
+    closeAll();
+  }, {passive:true});
+
+  document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeAll(); }, {passive:true});
+})();
 </script>
+<!-- ========== BLOQUE 7.6 (FIN) ========== -->
 
 </body>
 </html>
