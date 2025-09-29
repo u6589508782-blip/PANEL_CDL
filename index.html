@@ -10,25 +10,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-<!-- PWA -->
-<link rel="manifest" href="manifest.webmanifest?v=2">
-<meta name="theme-color" content="#ffffff">
+<!-- iOS: abrir como app y usar icono -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CDL · CMMS">
 
-<!-- Icons -->
-<link rel="icon" href="favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-
 <style>
+/* ===== Base visual corporativa (CLARO) ===== */
+/* Rojos/negros/grises/blancos según referencia CDL */
 :root{
-  --brand1:#A60000; --brand2:#E43B3B;
+  --brand1:#A60000; --brand2:#E43B3B;         /* rojos corporativos */
   --ink:#111827; --muted:#475569; --line:#e5e7eb;
   --bg:#ffffff; --panel:#ffffff;
+
   --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
+
   --safe-top: env(safe-area-inset-top,0px);
   --safe-bottom: env(safe-area-inset-bottom,0px);
   --hdr-h: 64px;
@@ -43,11 +39,12 @@ body{
 .hidden{ display:none !important; }
 img,canvas,svg,video{ max-width:100%; height:auto; }
 
-/* Header */
+/* Cabecera clara con “MANTENIMIENTO” degradado */
 header{
   background: var(--panel);
   border-bottom:1px solid var(--line);
   position:sticky; top:0; z-index:2000;
+
   background-image:url('logo_mantenimiento.png');
   background-repeat:no-repeat;
   background-position:center top;
@@ -58,13 +55,14 @@ header .nav{
   min-height:64px; display:flex; align-items:center; justify-content:center;
   position:relative; padding:.35rem .6rem;
 }
-.hero-title{ display:flex; justify-content:center; }
-.hero-title .hero-row{ display:flex; align-items:center; gap:10px; white-space:nowrap; }
 .hero-title .hero-panel{ color:#111827; font-weight:900; letter-spacing:.04em; }
 .hero-logo-cdl{ height:22px; width:auto; display:inline-block; }
-.rolechip{ position:absolute; right:56px; top:6px; font-size:.92rem; font-weight:800; color:#111827; }
+.rolechip{
+  position:absolute; right:56px; top:6px;
+  font-size:.92rem; font-weight:800; color:#111827;
+}
 
-/* Menús */
+/* Botones menú */
 .menu button#pagesBtn,
 .menu button#userBtn{
   position:absolute; top:10px; width:36px; height:36px; border-radius:8px;
@@ -72,6 +70,8 @@ header .nav{
 }
 .menu button#pagesBtn{ left:10px; }
 .menu button#userBtn{ right:10px; }
+
+/* Panel de menú */
 .panel{
   position:absolute; top:56px; left:10px; background:#ffffff; color:#111827;
   border:1px solid var(--line); border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.10);
@@ -82,17 +82,7 @@ header .nav{
 .panel .row{ display:flex; flex-direction:column; gap:.5rem; }
 .panel .actions{ display:flex; flex-direction:column; gap:.35rem; }
 
-/* Fullscreen panel on mobile */
-html.menu-open,body.menu-open{ overflow:hidden; }
-.panel.menu-full{
-  position:fixed !important; z-index:2400 !important;
-  inset: calc(var(--safe-top) + var(--hdr-h)) 0 var(--safe-bottom) 0 !important;
-  background:#ffffff !important;
-  background-image:linear-gradient(180deg,#ffffff,#f8fafc 60%,#ffffff) !important;
-}
-.panel.menu-full::before{ content:""; position:absolute; inset:0; background: radial-gradient(1200px 600px at 50% -10%, rgba(0,0,0,.06), transparent 60%); pointer-events:none; }
-
-/* Content */
+/* Contenido (base claro) */
 main{ max-width:1200px; margin:0 auto; padding:.8rem .8rem 1.2rem; }
 .card{ background:#ffffff; border:1px solid var(--line); border-radius:12px; padding:.75rem .9rem; margin:.5rem 0; }
 .in-txt, input[type="date"], select{
@@ -102,43 +92,26 @@ main{ max-width:1200px; margin:0 auto; padding:.8rem .8rem 1.2rem; }
 table{ width:100%; border-collapse:collapse; background:#ffffff; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
 thead th{ background:#f8fafc; color:#0f172a; font-weight:800; text-align:left; border-bottom:1px solid var(--line); padding:.55rem .6rem; }
 tbody td{ border-top:1px solid var(--line); padding:.5rem .6rem; }
-
-/* TV Dashboard */
-.tv-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
-.tv-card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:.8rem; }
-.tv-card h3{ margin:.1rem 0 .5rem; font-size:1rem; font-weight:900; letter-spacing:.04em; color:var(--ink); text-transform:uppercase; }
-.tv-list{ display:flex; flex-direction:column; gap:.4rem; }
-.tv-item{ padding:.45rem .6rem; border-radius:10px; border:1px solid #e5e7eb; background:#fff; font-weight:700; }
-.tv-empty{ opacity:.55; font-style:italic; }
-
-.badge{ display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; border-radius:999px; border:1px solid #cbd5e1; font-weight:800; }
-.dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
-.dot-ok{ background:#16a34a; } .dot-warn{ background:#f59e0b; } .dot-stop{ background:#dc2626; }
-
-/* Header shadow on scroll */
-header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
-
-/* Password eye */
-.pw-toggle{
-  width:32px; height:32px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; cursor:pointer;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>');
-  background-repeat:no-repeat; background-position:center;
-}
-.pw-toggle.on{
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.77 19.77 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a19.8 19.8 0 0 1-4.22 5.02M1 1l22 22"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/></svg>');
-}
-.small{ font-size:.85rem; color:#64748b; }
-.nowrap{ white-space:nowrap; }
-.right{ text-align:right; }
 </style>
+
+<!-- ====== BLOQUE ICONOS (HEAD) ====== -->
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3">
+<link rel="manifest" href="/manifest.webmanifest?v=2">
+<meta name="theme-color" content="#ffffff">
+<!-- ====== FIN BLOQUE 1.1 ICONOS (HEAD) ====== -->
 </head>
 <body>
 
+<!-- ====== BLOQUE 1.2 (CABECERA: LOGO, ROL, MENÚ USUARIO) ====== -->
 <header>
   <div class="nav" id="navBar">
+    <!-- Menú (hamburguesa) -->
     <div class="menu menu-pages">
       <button id="pagesBtn" aria-label="Menú" aria-expanded="false" aria-controls="pagesPanel">☰</button>
-      <div id="pagesPanel" class="panel hidden" aria-label="Menú principal">
+      <div id="pagesPanel" class="panel hidden" aria-label="Menú principal" style="min-width:260px">
         <div class="row">
           <div class="actions">
             <button class="btn" onclick="nav('equipos')">Equipos</button>
@@ -156,6 +129,7 @@ header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
       </div>
     </div>
 
+    <!-- Título centrado (logo + texto en UNA línea) -->
     <div class="hero-title">
       <div class="hero-row">
         <img src="logo-cdl.png" alt="CDL" class="hero-logo-cdl">
@@ -163,6 +137,7 @@ header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
       </div>
     </div>
 
+    <!-- Chip de rol y menú usuario -->
     <span id="roleChip" class="rolechip" aria-label="Rol actual">Invitado</span>
     <div class="menu menu-user">
       <button id="userBtn" aria-label="Usuario" aria-expanded="false" aria-controls="userPanel">⋮</button>
@@ -192,8 +167,8 @@ header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
           </div>
 
           <div class="actions" style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">
-            <button class="btn" onclick="login()">Entrar</button>
-            <button class="btn" onclick="logout()">Salir</button>
+            <button class="btn gloss" onclick="login()">Entrar</button>
+            <button class="btn gloss" onclick="logout()">Salir</button>
           </div>
         </div>
 
@@ -208,7 +183,7 @@ header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
             <button type="button" class="pw-toggle" data-target="newPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
           </div>
           <div class="actions" style="margin-top:.6rem">
-            <button class="btn" onclick="changePwd()">Cambiar</button>
+            <button class="btn gloss" onclick="changePwd()">Cambiar</button>
           </div>
           <div id="pwdMsg" class="small" style="margin-top:.4rem;color:#374151"></div>
         </div>
@@ -216,17 +191,30 @@ header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
     </div>
   </div>
 </header>
+<!-- ====== FIN BLOQUE 1.2 ====== -->
 
+<!-- ====== BLOQUE 1.3 (SECCIONES · TV COMO CENTRO VISUAL) ====== -->
 <main>
   <!-- Resumen -->
   <section id="status-strip">
     <div style="max-width:1200px;margin:0 auto;padding:.55rem .8rem;display:flex;gap:.8rem;align-items:center;flex-wrap:wrap">
       <div style="font-weight:900;letter-spacing:.02em">RESUMEN</div>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
-        <span id="sumStop" class="badge"><span class="dot dot-stop"></span><span>Paradas:</span><b id="kStop">0</b></span>
-        <span id="sumWarn" class="badge"><span class="dot dot-warn"></span><span>Restricciones:</span><b id="kWarn">0</b></span>
-        <span id="sumOk"   class="badge"><span class="dot dot-ok"></span><span>En marcha:</span><b id="kOk">0</b></span>
-        <span id="sumAll"  class="badge"><span>Total:</span><b id="kAll">0</b></span>
+        <span id="sumStop" style="display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .5rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff;font-weight:800">
+          <span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block"></span>
+          <span>Paradas:</span><b id="kStop">0</b>
+        </span>
+        <span id="sumWarn" style="display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .5rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff;font-weight:800">
+          <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span>
+          <span>Restricciones:</span><b id="kWarn">0</b>
+        </span>
+        <span id="sumOk" style="display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .5rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff;font-weight:800">
+          <span style="width:10px;height:10px;border-radius:50%;background:#16a34a;display:inline-block"></span>
+          <span>En marcha:</span><b id="kOk">0</b>
+        </span>
+        <span id="sumAll" style="display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .5rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff;font-weight:800">
+          <span>Total:</span><b id="kAll">0</b>
+        </span>
       </div>
       <div style="margin-left:auto;font-weight:700;color:#64748b">Última actualización: <span id="kUpdated">—</span></div>
     </div>
@@ -236,19 +224,19 @@ header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
   <section id="page-equipos" class="">
     <h2 class="cdl-tag">Equipos</h2>
     <div class="brand-wrap">
-      <img src="linea-kaltenbach.png" alt="LÍNEA KALTENBACH"
+      <img src="/linea-kaltenbach.png" alt="LÍNEA KALTENBACH"
            loading="lazy" decoding="async" fetchpriority="low"
            onerror="this.closest('.brand-wrap').classList.add('fallback'); this.remove();">
     </div>
     <div id="legend-equipos" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:.5rem 0">
-      <span style="display:inline-flex;align-items:center;gap:.4rem"><span class="dot dot-stop"></span>Parada</span>
-      <span style="display:inline-flex;align-items:center;gap:.4rem"><span class="dot dot-warn"></span>Restricciones</span>
-      <span style="display:inline-flex;align-items:center;gap:.4rem"><span class="dot dot-ok"></span>En marcha</span>
+      <span style="display:inline-flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block"></span>Parada</span>
+      <span style="display:inline-flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span>Restricciones</span>
+      <span style="display:inline-flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:#16a34a;display:inline-block"></span>En marcha</span>
     </div>
     <div id="equiposWrap"></div>
   </section>
 
-  <!-- Otras páginas -->
+  <!-- Otras páginas (se mantienen) -->
   <section id="page-gruas" class="hidden"><h2 class="cdl-tag">Puentes Grúa</h2><div id="gruasWrap"></div></section>
   <section id="page-otros" class="hidden"><h2 class="cdl-tag">Otros (auxiliares)</h2><div id="otrosWrap"></div></section>
   <section id="page-equipo" class="hidden"><div id="equipoDetail"></div></section>
@@ -261,107 +249,532 @@ header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
   <section id="page-logs" class="hidden"><h2 class="cdl-tag">Histórico de logs</h2><div id="logsWrap"></div></section>
   <section id="page-incidencias" class="hidden"><h2 class="cdl-tag">Incidencias</h2><div id="incidTableWrap"></div></section>
 
-  <!-- TV Dashboard -->
+  <!-- ===== Dashboard TV (HOME) ===== -->
   <section id="page-tv" class="">
     <h2 class="cdl-tag">Dashboard TV</h2>
-    <div class="tv-grid" id="tvGrid">
-      <article class="tv-card"><h3><span class="badge"><span class="dot dot-stop"></span> PARADAS</span></h3><div id="tvParadas" class="tv-list"></div></article>
-      <article class="tv-card"><h3><span class="badge"><span class="dot dot-warn"></span> RESTRICCIONES</span></h3><div id="tvRestr" class="tv-list"></div></article>
-      <article class="tv-card"><h3><span class="badge">REPUESTOS · URGENCIA</span></h3><div id="tvRep" class="tv-list"></div></article>
-      <article class="tv-card"><h3><span class="badge">PARADAS PREVISTAS (OT)</span></h3><div id="tvPrev" class="tv-list"></div></article>
+    <div style="display:grid;grid-template-columns:1fr;gap:1rem;max-width:1100px;margin:0 auto">
+      <div class="card">
+        <h3>Paradas (recientes)</h3>
+        <div id="tvParados" class="tv-list"></div>
+      </div>
+      <div class="card">
+        <h3>Restricciones (recientes)</h3>
+        <div id="tvRestr" class="tv-list"></div>
+      </div>
+      <div class="card">
+        <h3>Repuestos críticos/urgentes</h3>
+        <div id="tvRepuestos" class="tv-list"></div>
+      </div>
+      <div class="card">
+        <h3>Paradas previstas por preventivos</h3>
+        <div id="tvPrev" class="tv-list"></div>
+      </div>
     </div>
   </section>
 </main>
+<!-- ====== FIN BLOQUE 1.3 ====== -->
 
-<!-- Toast -->
-<div id="toast" class="hidden" aria-live="polite"></div>
+<!-- ========== BLOQUE 1.4 (ESTILOS DE CABECERA/STATUS + MENÚ FULLSCREEN) ========== -->
+<style>
+/* Chip de rol limpio (no tapa el botón usuario) */
+.rolechip{ position:absolute; right:56px; top:6px; font-size:.92rem; font-weight:800; color:#111827; background:transparent; border:0; padding:0; }
 
+/* Título centrado y alineado a logo CDL */
+.hero-title{ display:flex; align-items:center; justify-content:center; }
+.hero-title .hero-row{ display:flex; align-items:center; gap:10px; white-space:nowrap; }
+.hero-title .hero-panel{ font-weight:800; letter-spacing:.02em; color:#111827; }
+.hero-logo-cdl{ height:22px; width:auto; display:inline-block; }
+
+/* Panel menús a pantalla completa en móvil */
+html.menu-open,body.menu-open{ overflow:hidden; }
+.panel.menu-full{
+  position:fixed !important; z-index:2400 !important;
+  inset: calc(var(--safe-top) + var(--hdr-h)) 0 var(--safe-bottom) 0 !important;
+  background:#ffffff !important;
+  background-image:linear-gradient(180deg,#ffffff,#f8fafc 60%,#ffffff) !important;
+}
+.panel.menu-full::before{ content:""; position:absolute; inset:0; background: radial-gradient(1200px 600px at 50% -10%, rgba(0,0,0,.06), transparent 60%); pointer-events:none; }
+#pagesPanel.menu-full .actions{
+  width:min(560px,92vw); margin:0 auto !important;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:0; height:100%;
+}
+#pagesPanel.menu-full .btn{
+  background:none!important; border:0!important; box-shadow:none!important;
+  color:#111!important; font-weight:900; text-transform:uppercase; letter-spacing:.06em;
+  font-size:clamp(18px,3vh,28px); padding:1.05rem 0; text-align:center; position:relative; cursor:pointer;
+}
+#pagesPanel.menu-full .btn + .btn::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:1px; opacity:.85;
+  background:linear-gradient(90deg, rgba(0,0,0,.12), rgba(0,0,0,.04), rgba(0,0,0,0));
+}
+
+/* Status strip claro forzado */
+#status-strip{ background:#ffffff !important; color:#111827 !important; border-bottom:1px solid #e5e7eb !important; }
+
+/* Sombra cabecera al hacer scroll */
+header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
+
+/* Ajuste responsive del logo cabecera */
+@media (max-width: 420px){ .hero-logo-cdl{ height:18px; } }
+</style>
+<!-- ========== FIN BLOQUE 1.4 ========== -->
+
+<!-- ========== BLOQUE 1.5 (ESTILOS BOTONES + OJO PASSWORD) ========== -->
+<style>
+.btn.gloss{
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.34rem .62rem; border-radius:999px; border:1px solid #cbd5e1;
+  background:linear-gradient(180deg,#ffffff,#eef2f7); color:#111; font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 12px rgba(0,0,0,.08); cursor:pointer;
+}
+.btn.gloss.btn-mail{
+  color:#fff!important; background:linear-gradient(180deg,#ff5a5a,#c10f0f)!important; border-color:#9f0c0c!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(178,15,15,.25)!important;
+}
+.btn.gloss.btn-ficha{
+  background:linear-gradient(180deg,#111,#222)!important; color:#fff!important; border-color:#000!important;
+}
+.pw-toggle{
+  width:32px; height:32px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; cursor:pointer;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>');
+  background-repeat:no-repeat; background-position:center;
+}
+.pw-toggle.on{
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.77 19.77 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a19.8 19.8 0 0 1-4.22 5.02M1 1l22 22"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/></svg>');
+}
+</style>
+<!-- ========== FIN BLOQUE 1.5 ========== -->
+
+<!-- ========== BLOQUE 1.6 (ESTILOS EXTRA: TV 4 PANELES + MENÚ FULLSCREEN) ========== -->
+<style>
+/* Menú fullscreen en móvil */
+html.menu-open,body.menu-open{ overflow:hidden; }
+.panel.menu-full{
+  position:fixed !important; z-index:2400 !important;
+  inset: calc(var(--safe-top) + var(--hdr-h)) 0 var(--safe-bottom) 0 !important;
+  background:#ffffff !important;
+  background-image:linear-gradient(180deg,#ffffff,#f8fafc 60%,#ffffff) !important;
+}
+.panel.menu-full::before{ content:""; position:absolute; inset:0; background: radial-gradient(1200px 600px at 50% -10%, rgba(0,0,0,.06), transparent 60%); pointer-events:none; }
+
+/* Dashboard TV (4 paneles) */
+.tv-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+.tv-card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:.8rem; }
+.tv-card h3{ margin:.1rem 0 .5rem; font-size:1rem; font-weight:900; letter-spacing:.04em; color:var(--ink); text-transform:uppercase; }
+.tv-list{ display:flex; flex-direction:column; gap:.4rem; }
+.tv-item{ padding:.45rem .6rem; border-radius:10px; border:1px solid #e5e7eb; background:#fff; font-weight:700; }
+.tv-empty{ opacity:.55; font-style:italic; }
+
+/* Chips y severidades */
+.badge{ display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; border-radius:999px; border:1px solid #cbd5e1; font-weight:800; }
+.dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+.dot-ok{ background:#16a34a; } .dot-warn{ background:#f59e0b; } .dot-stop{ background:#dc2626; }
+.urg{ font-weight:900; }
+.urg-alta{ color:var(--brand1); }
+.urg-media{ color:#b45309; }
+.urg-baja{ color:#475569; }
+
+/* Ajuste de cabecera (una sola línea y centrado ya) */
+.hero-title{ display:flex; justify-content:center; }
+.hero-title .hero-row{ display:flex; align-items:center; gap:10px; white-space:nowrap; }
+</style>
+<!-- ========== FIN BLOQUE 1.6 ========== -->
 <script>
-/* ===== Helpers básicos ===== */
-const $id = (id)=>document.getElementById(id);
-const $$ = (s)=>Array.from(document.querySelectorAll(s));
-const esc = (str)=>String(str??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
-const API_BASE = "https://script.google.com/macros/s/AKfycbzPxPJztSCo7dX-xmzYW_pBwkQne3aACe1EzzlNDsjr0nuRXZaOSOrRGzVrYZsN5cgF/exec";
+/* =========================
+   Helpers básicos y estado
+   ========================= */
+const byId = (id)=> document.getElementById(id);
+const qs   = (sel)=> document.querySelector(sel);
+const qsa  = (sel)=> [...document.querySelectorAll(sel)];
+const show = (id)=> byId(id)?.classList.remove("hidden");
+const hide = (id)=> byId(id)?.classList.add("hidden");
+const toggle = (id)=> byId(id)?.classList.toggle("hidden");
+const esc = (str)=> String(str).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 
-async function apiGet(q){ const u=new URL(API_BASE); Object.entries(q).forEach(([k,v])=>u.searchParams.set(k,v)); const r=await fetch(u); return r.json(); }
-async function apiPost(q){ const r=await fetch(API_BASE,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(q)}); return r.json(); }
-function fmtDate(d){ if(!d) return ""; const dt=new Date(d); return isNaN(dt)? String(d) : dt.toLocaleString("es-ES",{hour12:false}); }
-function toast(msg){ const t=$id("toast"); if(!t) return alert(msg); t.classList.remove("hidden"); t.textContent=msg; t.style.position="fixed"; t.style.left="50%"; t.style.bottom="16px"; t.style.transform="translateX(-50%)"; t.style.background="#0b0f15"; t.style.color="#e5e7eb"; t.style.border="1px solid #1f2937"; t.style.padding=".5rem .8rem"; t.style.borderRadius="12px"; t.style.boxShadow="0 10px 26px rgba(0,0,0,.35)"; clearTimeout(window.__TOAST_T); window.__TOAST_T=setTimeout(()=>t.classList.add("hidden"),1800); }
-
-/* ===== Estado usuario ===== */
-let USER = JSON.parse(localStorage.getItem("CDL_USER")||"{}");
-if(!USER.user){ USER = { user:"invitado", rol:"Invitado", group:"guest" }; }
+/* Estado de usuario persistido */
+let USER = { user:"invitado", rol:"Invitado", group:"guest" };
 function setUser(u){ USER=u; localStorage.setItem("CDL_USER",JSON.stringify(u)); applyRoleUI(); }
-function applyRoleUI(){ $id("roleChip").textContent = USER.rol; }
+function getUser(){ try{return JSON.parse(localStorage.getItem("CDL_USER")||"{}");}catch(_){return USER;} }
+USER = getUser() || USER;
 
-/* ===== Router / Nav ===== */
-const PAGES = {equipos:"page-equipos",gruas:"page-gruas",otros:"page-otros",incidencias:"page-incidencias",indicadores:"page-indicadores",ot:"page-ot",inventario:"page-inv",repuestos:"page-rep",consumibles:"page-cons",tv:"page-tv",personal:"page-personal",logs:"page-logs",equipo:"page-equipo",repuesto:"page-repuesto"};
-function ensureHidden(){ $$('[id^="page-"]').forEach(el=>el.classList.add("hidden")); }
-function nav(page){ const id=PAGES[page]||PAGES.equipos; ensureHidden(); $id(id)?.classList.remove("hidden"); location.hash="#/"+page; }
+function applyRoleUI(){
+  // Mostrar/ocultar elementos por rol (si usan data-role="Rol1,Rol2")
+  qsa("[data-role]").forEach(el=>{
+    const roles=(el.getAttribute("data-role")||"").split(",").map(s=>s.trim());
+    if(roles.includes(USER.rol) || USER.rol==="Administrador"){ el.style.display=""; }
+    else{ el.style.display="none"; }
+  });
+  // Chip con el rol
+  const chip = byId("roleChip");
+  if (chip) chip.textContent = USER.rol || "Invitado";
+}
 
-/* Menús + fullscreen móvil */
+/* =========================
+   Router simple de páginas
+   ========================= */
+const PAGE_ID = {
+  equipos:"page-equipos", gruas:"page-gruas", otros:"page-otros",
+  incidencias:"page-incidencias", indicadores:"page-indicadores",
+  ot:"page-ot", inventario:"page-inv", repuestos:"page-rep",
+  consumibles:"page-cons", tv:"page-tv", personal:"page-personal",
+  logs:"page-logs", equipo:"page-equipo", repuesto:"page-repuesto"
+};
+function ensureSectionsHidden(){ qsa('[id^="page-"]').forEach(el=>el.classList.add("hidden")); }
+function nav(page){
+  const id = PAGE_ID[page] || PAGE_ID.equipos;
+  ensureSectionsHidden();
+  byId(id)?.classList.remove("hidden");
+  try{ const h = "#/"+page; if(location.hash!==h) location.hash=h; }catch(_){}
+}
+
+/* =========================
+   Menús + modo fullscreen
+   ========================= */
 (function(){
-  const pagesBtn=$id("pagesBtn"), pagesPanel=$id("pagesPanel");
-  const userBtn=$id("userBtn"), userPanel=$id("userPanel");
-  const open=(btn,panel,fs)=>{ closeAll(); panel.classList.remove("hidden"); if(fs && matchMedia("(max-width: 720px)").matches){ panel.classList.add("menu-full"); document.documentElement.classList.add("menu-open"); document.body.classList.add("menu-open"); } btn.setAttribute("aria-expanded","true"); };
-  const close=(btn,panel)=>{ if(!panel) return; panel.classList.add("hidden"); panel.classList.remove("menu-full"); btn?.setAttribute("aria-expanded","false"); document.documentElement.classList.remove("menu-open"); document.body.classList.remove("menu-open"); };
-  const closeAll=()=>{ close(pagesBtn,pagesPanel); close(userBtn,userPanel); };
+  const pagesBtn = byId("pagesBtn"), pagesPanel = byId("pagesPanel");
+  const userBtn  = byId("userBtn") , userPanel  = byId("userPanel");
+
+  const open=(btn,panel,fullscreen)=>{
+    closeAll();
+    panel.classList.remove("hidden");
+    if(fullscreen && matchMedia("(max-width: 720px)").matches){
+      panel.classList.add("menu-full");
+      document.documentElement.classList.add("menu-open");
+      document.body.classList.add("menu-open");
+    }
+    btn?.setAttribute("aria-expanded","true");
+  };
+  const close=(btn,panel)=>{
+    if(!panel) return;
+    panel.classList.add("hidden");
+    panel.classList.remove("menu-full");
+    btn?.setAttribute("aria-expanded","false");
+    document.documentElement.classList.remove("menu-open");
+    document.body.classList.remove("menu-open");
+  };
+  function closeAll(){ close(pagesBtn,pagesPanel); close(userBtn,userPanel); }
+
   pagesBtn?.addEventListener("click",()=> pagesPanel.classList.contains("hidden") ? open(pagesBtn,pagesPanel,true) : close(pagesBtn,pagesPanel));
   userBtn ?.addEventListener("click",()=> userPanel .classList.contains("hidden") ? open(userBtn ,userPanel ,false) : close(userBtn ,userPanel ));
+
+  // Cerrar al clicar fuera o con ESC
   document.addEventListener("click",(e)=>{ if(e.target.closest("#pagesPanel,#pagesBtn,#userPanel,#userBtn")) return; closeAll(); }, {passive:true});
   document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeAll(); }, {passive:true});
+
+  // Exponer para otros bloques si hace falta
+  window.closeAllMenus = closeAll;
 })();
 
-/* Header shadow + timestamp */
+/* =========================
+   Sello de tiempo (Resumen)
+   ========================= */
+function updateSummaryTimestamp(){
+  const d=new Date();
+  const el=byId("kUpdated");
+  if(el) el.textContent = d.toLocaleString("es-ES",{hour12:false});
+}
+setInterval(updateSummaryTimestamp, 30*1000);
+
+/* =========================
+   Sombra cabecera + --hdr-h
+   ========================= */
 (function(){
-  const hdr=document.querySelector("header");
-  const onScroll=()=>{ if(window.scrollY>2) hdr.classList.add("scrolled"); else hdr.classList.remove("scrolled"); };
-  onScroll(); window.addEventListener("scroll",onScroll,{passive:true});
-  function updateTS(){ const d=new Date(); const el=$id("kUpdated"); if(el) el.textContent=d.toLocaleString("es-ES",{hour12:false}); }
-  setInterval(updateTS,30e3); updateTS();
+  const hdr = document.querySelector("header");
+  const onScroll = ()=>{ if(window.scrollY>2) hdr?.classList.add("scrolled"); else hdr?.classList.remove("scrolled"); };
+  const sync = ()=>{
+    const h = Math.max(72, hdr?.offsetHeight||0);
+    document.documentElement.style.setProperty('--hdr-h', h+'px');
+  };
+  onScroll();
+  window.addEventListener("scroll", onScroll, {passive:true});
+  window.addEventListener("load", sync, {once:true});
+  window.addEventListener("resize", sync, {passive:true});
+  window.addEventListener("orientationchange", sync, {passive:true});
+  (document.fonts?.ready || Promise.resolve()).then(sync);
 })();
 
-/* Password eye (delegado) */
+/* =========================
+   Toggle ojo contraseña
+   ========================= */
 document.addEventListener("click",(e)=>{
-  const btn=e.target.closest(".pw-toggle"); if(!btn) return;
-  const id=btn.getAttribute("data-target"); const inp=$id(id); if(!inp) return;
-  const to = inp.type==="password" ? "text" : "password"; inp.type=to;
-  btn.classList.toggle("on", to==="text"); btn.setAttribute("aria-pressed", to==="text"?"true":"false");
+  const btn = e.target.closest(".pw-toggle"); if(!btn) return;
+  const id  = btn.getAttribute("data-target"); const inp = byId(id); if(!inp) return;
+  const to = (inp.type==="password") ? "text" : "password";
+  inp.type = to;
+  btn.classList.toggle("on", to==="text");
+  btn.setAttribute("aria-pressed", to==="text" ? "true" : "false");
 });
 
-/* ===== Datos globales ===== */
-window.STATE=[]; window.INCID=[]; window.INV=[]; window.REP=[]; window.CONS=[]; window.OTS=[];
+/* =========================
+   Arranque mínimo
+   ========================= */
+document.addEventListener("DOMContentLoaded", ()=>{
+  applyRoleUI();
+  updateSummaryTimestamp();
+  if(!location.hash){ nav('equipos'); } else {
+    const p=(location.hash.replace(/^#\/?/,'')||'equipos');
+    nav(p);
+  }
+});
+</script>
+<script>
+/* =========================
+   Configuración de API
+   ========================= */
+(function(){
+  if (!window.API_BASE){
+    window.API_BASE = "https://script.google.com/macros/s/AKfycbzPxPJztSCo7dX-xmzYW_pBwkQne3aACe1EzzlNDsjr0nuRXZaOSOrRGzVrYZsN5cgF/exec";
+  }
+})();
 
-/* ===== Cargas ===== */
+/* =========================
+   Fetch helpers (GET/POST)
+   ========================= */
+(async function(){
+  if (!window.apiGet){
+    window.apiGet = async function(q){
+      const u = new URL(window.API_BASE);
+      Object.entries(q||{}).forEach(([k,v])=> u.searchParams.set(k, v));
+      const r = await fetch(u.toString(), { credentials:"omit", cache:"no-cache" });
+      return await r.json();
+    };
+  }
+  if (!window.apiPost){
+    window.apiPost = async function(body){
+      const r = await fetch(window.API_BASE, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(body||{})
+      });
+      return await r.json();
+    };
+  }
+})();
+
+/* =========================
+   Formateos y utilidades
+   ========================= */
+(function(){
+  if (!window.fmtDate){
+    window.fmtDate = function(d){
+      if(!d) return "";
+      const dt = new Date(d);
+      return isNaN(dt) ? String(d) : dt.toLocaleString("es-ES",{hour12:false});
+    };
+  }
+  if (!window.baseURL){
+    window.baseURL = ()=> (location.origin + location.pathname);
+  }
+  if (!window.slugify){
+    window.slugify = (s)=> String(s||"")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  }
+  if (!window.copyText){
+    window.copyText = (txt)=>
+      navigator.clipboard.writeText(String(txt||""))
+        .then(()=> toast("Copiado"))
+        .catch(()=> alert("No se pudo copiar"));
+  }
+})();
+
+/* =========================
+   Descarga / CSV / Print
+   ========================= */
+(function(){
+  if (!window.csvEscape){
+    window.csvEscape = function(v){
+      v = (v==null?'':String(v));
+      if (/[",\n;]/.test(v)) return `"${v.replace(/"/g,'""')}"`;
+      return v;
+    };
+  }
+  if (!window.toCSV){
+    window.toCSV = function(rows){
+      return (rows||[]).map(r => (r||[]).map(window.csvEscape).join(";")).join("\n");
+    };
+  }
+  if (!window.download){
+    window.download = function(name, content, type="text/plain;charset=utf-8"){
+      const blob = new Blob([content], {type});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    };
+  }
+  if (!window.exportCSVFromTable){
+    window.exportCSVFromTable = function(tableSel, fileName){
+      const table = document.querySelector(tableSel); if(!table) return;
+      const rows = [...table.querySelectorAll("tr")]
+        .map(tr => [...tr.children].map(td => td.innerText.trim()));
+      window.download(fileName, window.toCSV(rows), "text/csv;charset=utf-8");
+    };
+  }
+  if (!window.exportSimpleCSV){
+    window.exportSimpleCSV = function(name, headers, items, pick){
+      const rows = [headers].concat((items||[]).map(pick));
+      window.download(name, window.toCSV(rows), "text/csv;charset=utf-8");
+    };
+  }
+  if (!window.printHTML){
+    window.printHTML = function(title, html){
+      const w = window.open("", "_blank");
+      w.document.write(`<!doctype html><html><head><meta charset="utf-8">
+        <title>${String(title||"Documento")}</title>
+        <style>
+          body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:16px}
+          table{width:100%;border-collapse:collapse}
+          th,td{border:1px solid #ddd;padding:6px 8px}
+          th{background:#f3f4f6}
+        </style></head><body>${html||""}</body></html>`);
+      w.document.close(); w.focus(); w.print();
+    };
+  }
+})();
+
+/* =========================
+   Toast unificado (ligero)
+   ========================= */
+(function(){
+  if (!window.toast){
+    window.toast = function(msg){
+      let t = document.getElementById("toast");
+      if(!t){
+        t = document.createElement("div");
+        t.id = "toast";
+        Object.assign(t.style, {
+          position:"fixed", left:"50%", bottom:"16px", transform:"translateX(-50%)",
+          background:"#0b0f15", color:"#e5e7eb", border:"1px solid #1f2937",
+          padding:".5rem .8rem", borderRadius:"12px", boxShadow:"0 10px 26px rgba(0,0,0,.35)",
+          opacity:"0", transition:"opacity .25s ease", zIndex:"3000"
+        });
+        document.body.appendChild(t);
+      }
+      t.textContent = String(msg||"");
+      requestAnimationFrame(()=>{ t.style.opacity = "1"; });
+      clearTimeout(window.__TOAST_T);
+      window.__TOAST_T = setTimeout(()=> t.style.opacity = "0", 1800);
+    };
+  }
+  if (!window.showToast){ window.showToast = (m)=> window.toast(m); }
+})();
+
+/* =========================
+   Permisos (roles que editan)
+   ========================= */
+(function(){
+  if (!window.canEdit){
+    const EDIT_ROLES = new Set(["Administrador","Gerente","Encargado","Producción"]);
+    window.canEdit = ()=> EDIT_ROLES.has((window.USER?.rol)||"Invitado");
+  }
+})();
+
+/* =========================
+   SW auto-actualiza (opcional)
+   ========================= */
+(function(){
+  if ('serviceWorker' in navigator && !window.__CDL_SW_BOUND__){
+    window.__CDL_SW_BOUND__ = true;
+    window.addEventListener('load', async () => {
+      try {
+        const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          nw && nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              reg.waiting && reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        });
+        navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+      } catch (e) { console.error('SW register error', e); }
+    });
+  }
+})();
+
+/* =========================
+   QRCode lazy loader
+   ========================= */
+(function(){
+  if (window.QRCode || document.querySelector('script[data-qrcode-lib]')) return;
+  const s = document.createElement("script");
+  s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+  s.setAttribute("data-qrcode-lib","1");
+  s.onload = ()=> console.log("QRCode.js cargado");
+  document.head.appendChild(s);
+})();
+</script>
+<script>
+/* ==========================================================
+   Datos globales (idempotente)
+   ========================================================== */
+window.STATE = window.STATE || [];  // Estado equipos
+window.INCID = window.INCID || [];  // Incidencias
+window.INV   = window.INV   || [];  // Inventario
+window.REP   = window.REP   || [];  // Repuestos solicitados
+window.CONS  = window.CONS  || [];  // Consumibles
+window.OTS   = window.OTS   || [];  // Órdenes de trabajo
+
+/* Helpers locales */
+(function(){
+  if (!window.esc){
+    window.esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+    }[m]));
+  }
+  if (!window.byId){ window.byId = (id)=> document.getElementById(id); }
+})();
+
+/* ==========================================================
+   Carga de ESTADO + render de Equipos
+   ========================================================== */
 async function loadState(){
   try{
     const r = await apiGet({res:"state", fn:"list"});
-    STATE = Array.isArray(r?.items) ? r.items : [];
+    window.STATE = Array.isArray(r?.items) ? r.items : [];
+    renderEquiposList();
+    // KPIs del strip resumen
     const nStop = STATE.filter(x=>x.estado==="Parada").length;
     const nWarn = STATE.filter(x=>x.estado==="Restricciones").length;
     const nOk   = STATE.filter(x=>x.estado==="En marcha").length;
-    $id("kStop").textContent=nStop; $id("kWarn").textContent=nWarn; $id("kOk").textContent=nOk; $id("kAll").textContent=STATE.length;
-    renderEquiposList();
-    renderTV();
-  }catch(e){ console.error(e); }
+    byId("kStop") && (byId("kStop").textContent = nStop);
+    byId("kWarn") && (byId("kWarn").textContent = nWarn);
+    byId("kOk")   && (byId("kOk").textContent   = nOk);
+    byId("kAll")  && (byId("kAll").textContent  = STATE.length);
+  }catch(e){ console.error("loadState", e); }
 }
-function badge(color, txt){ return `<span class="badge"><i style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block"></i><b>${txt}</b></span>`; }
-function slugify(s){ return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
+
+function badge(color, txt){
+  return `<span style="display:inline-flex;align-items:center;gap:.35rem;padding:.18rem .48rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff">
+    <i style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block"></i><b>${esc(txt)}</b>
+  </span>`;
+}
+
 function renderEquiposList(){
-  const wrap=$id("equiposWrap"); if(!wrap) return;
-  const items=STATE||[];
-  if(!items.length){ wrap.innerHTML=`<div class="card">Sin datos</div>`; return; }
+  const wrap = byId("equiposWrap"); if(!wrap) return;
+  const items = (window.STATE||[]);
+  if(!items.length){ wrap.innerHTML = `<div class="card">Sin datos</div>`; return; }
+
   const colores = { "Parada":"#dc2626", "Restricciones":"#f59e0b", "En marcha":"#16a34a" };
-  const grupos = {}; items.forEach(it=>{ (grupos[it.grupo]=grupos[it.grupo]||[]).push(it); });
+  // Agrupar por línea / grupo
+  const grupos = {};
+  items.forEach(it=>{ (grupos[it.grupo]=grupos[it.grupo]||[]).push(it); });
+
   wrap.innerHTML = Object.entries(grupos).map(([g,arr])=>{
     const filas = arr.map(it=>{
       const c = colores[it.estado]||"#64748b";
+      const slug = (window.slugify ? slugify(it.nombre) : String(it.nombre).toLowerCase().replace(/\s+/g,'-'));
       return `<div class="card" style="display:flex;align-items:center;gap:.6rem;justify-content:space-between">
         <div><b>${esc(it.nombre)}</b><div class="small" style="color:#64748b">${esc(g)}</div></div>
-        <div>${badge(c, esc(it.estado))}</div>
+        <div>${badge(c, it.estado)}</div>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap">
-          <button class="btn" onclick="location.hash='#/equipo/${encodeURIComponent(slugify(it.nombre))}'">Ficha</button>
-          <button class="btn" onclick="accionParadaProlongada(${JSON.stringify(it.nombre)})">Parada prolongada</button>
+          <button class="btn gloss btn-ficha" onclick="location.hash='#/equipo/${encodeURIComponent(slug)}'">Ficha</button>
+          <button class="btn gloss btn-mail" onclick="accionParadaProlongada(${JSON.stringify(it.nombre)})">Parada prolongada</button>
         </div>
       </div>`;
     }).join("");
@@ -369,129 +782,833 @@ function renderEquiposList(){
   }).join("");
 }
 
-/* ===== TV ===== */
-function renderTV(){
-  const STATE_ = STATE||[]; const REP_ = REP||[]; const OTS_ = OTS||[];
-  const par = STATE_.filter(x=>x.estado==="Parada").map(x=>x.nombre).sort();
-  const res = STATE_.filter(x=>x.estado==="Restricciones").map(x=>x.nombre).sort();
-  const rank = { "Alta":3, "Media":2, "Baja":1 };
-  const repRows = REP_.map(r=>({ txt:`${r.ref} — ${r.nombre||""} · <span class="urg urg-${(r.urgencia||'baja').toLowerCase()}">${r.urgencia||'Baja'}</span> · Entrega: ${r.entrega?fmtDate(r.entrega):"—"}`, urg:rank[(r.urgencia||"Baja")]||1, eta:new Date(r.entrega||r.fecha||r.fechaPrevista||"2100-01-01").getTime() })).sort((a,b)=> (b.urg-a.urg)||(a.eta-b.eta)).map(x=>`<div class="tv-item">${x.txt}</div>`).join("");
-  const prev = OTS_.filter(o=> /prevent/i.test(o.titulo||o.tipo||"") || /prevent/i.test(o.prioridad||"")).map(o=>({ t:`${o.id||""} — ${o.titulo||""} · Vence: ${fmtDate(o.vencimiento)}`, v:new Date(o.vencimiento||"2100-01-01").getTime() })).sort((a,b)=>a.v-b.v).map(x=>`<div class="tv-item">${x.t}</div>`).join("");
-  const fill = (id,arr)=>{ const el=$id(id); if(!el) return; el.innerHTML = (Array.isArray(arr) ? arr : []).length ? arr.map(t=>`<div class="tv-item">${t}</div>`).join("") : `<div class="tv-item tv-empty">—</div>`; };
-  fill("tvParadas", par);
-  fill("tvRestr", res);
-  $id("tvRep").innerHTML = repRows || `<div class="tv-item tv-empty">—</div>`;
-  $id("tvPrev").innerHTML = prev || `<div class="tv-item tv-empty">—</div>`;
-}
-let TV_T=null; function initTV(){ renderTV(); if(TV_T) clearInterval(TV_T); TV_T=setInterval(renderTV, 10000); }
-
-/* ===== Otras cargas ===== */
-async function loadIncid(){ try{ const r=await apiGet({res:"incid", fn:"list"}); if(r?.ok) { INCID=r.items||[]; } }catch(e){ console.error(e); } }
-async function loadInv(){ try{ const r=await apiGet({res:"inv", fn:"list"}); if(r?.ok) { INV=r.items||[]; } }catch(e){ console.error(e); } }
-async function loadRepSol(){ try{ const r=await apiGet({res:"rep", fn:"list"}); if(r?.ok) { REP=r.items||[]; renderTV(); } }catch(e){ console.error(e); } }
-async function loadConsumibles(){ try{ const r=await apiGet({res:"cons", fn:"list"}); if(r?.ok) { CONS=r.items||[]; } }catch(e){ console.error(e); } }
-async function loadOT(){ try{ const r=await apiGet({res:"ot", fn:"list"}); if(r?.ok) { OTS=r.items||[]; renderTV(); } }catch(e){ console.error(e); } }
-
-/* ===== Acciones ===== */
-async function invDelta(ref, delta){ try{ const r = await apiPost({res:"inv", fn:"delta", ref, delta, actor:USER.user}); if (r?.ok){ toast("Stock actualizado: "+ref); loadInv(); } }catch(e){ console.error(e); } }
-async function accionParadaProlongada(equipo){
+/* ==========================================================
+   Incidencias: carga + tabla + export
+   ========================================================== */
+async function loadIncid(){
   try{
-    const r = await apiPost({res:"mail", fn:"parada_prolongada", equipo, actor:(USER?.user||"anon")});
-    if (r?.ok){ toast("Aviso enviado"); return; }
-    throw new Error("mail api not ok");
-  }catch(_){
-    const subj = encodeURIComponent(`[CDL] Parada prolongada — ${equipo}`);
-    const body = encodeURIComponent(`Equipo: ${equipo}\nFecha: ${new Date().toLocaleString("es-ES",{hour12:false})}\n\nDetalle: ...`);
-    location.href = `mailto:?subject=${subj}&body=${body}`;
+    const r = await apiGet({res:"incid", fn:"list"});
+    if (r?.ok && Array.isArray(r.items)){
+      window.INCID = r.items;
+      renderIncidenciasTable(r.items);
+    }
+  }catch(e){ console.error("loadIncid", e); }
+}
+
+function renderIncidenciasTable(items){
+  const wrap = byId("incidTableWrap"); if(!wrap) return;
+  if (!items || !items.length){ wrap.innerHTML = `<div class="card">Sin incidencias</div>`; return; }
+  wrap.innerHTML = `
+    <div class="card" style="overflow:auto">
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem">
+        <button id="btnExportIncidCSVTop" class="btn gloss">Exportar CSV</button>
+        <button id="btnExportIncidPDFTop" class="btn gloss">Exportar PDF</button>
+      </div>
+      <table id="tblIncid">
+        <thead><tr>
+          <th>Equipo</th><th>Tipo</th><th>Descripción</th>
+          <th>Inicio</th><th>Fin</th><th>Reportante</th>
+        </tr></thead>
+        <tbody>
+          ${items.map(it=>`
+            <tr>
+              <td>${esc(it.equipo)}</td>
+              <td>${esc(it.tipo||"")}</td>
+              <td>${esc(it.desc||"")}</td>
+              <td>${fmtDate(it.inicio)}</td>
+              <td>${fmtDate(it.fin)}</td>
+              <td>${esc(it.reportante||"")}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+        <button id="btnExportIncidCSV" class="btn gloss">Exportar CSV</button>
+        <button id="btnExportIncidPDF" class="btn gloss">Exportar PDF</button>
+      </div>
+    </div>`;
+
+  // Bind export (idempotente)
+  const csv = ()=> exportCSVFromTable?.("#tblIncid","incidencias.csv");
+  const pdf = ()=>{
+    const t = byId("tblIncid"); if(!t) return;
+    printHTML?.("Incidencias", `<h2>Incidencias</h2><table>${t.innerHTML}</table>`);
+  };
+  ["btnExportIncidCSVTop","btnExportIncidCSV"].forEach(id=>{
+    const b = byId(id); if(b && !b.__b){ b.__b = true; b.addEventListener("click", csv); }
+  });
+  ["btnExportIncidPDFTop","btnExportIncidPDF"].forEach(id=>{
+    const b = byId(id); if(b && !b.__b){ b.__b = true; b.addEventListener("click", pdf); }
+  });
+}
+
+/* ==========================================================
+   Inventario: carga + listado con ±1/±10/±100
+   ========================================================== */
+async function loadInv(){
+  try{
+    const r = await apiGet({res:"inv", fn:"list"});
+    if (r?.ok && Array.isArray(r.items)){
+      window.INV = r.items;
+      renderInv(r.items);
+    }
+  }catch(e){ console.error("loadInv", e); }
+}
+
+function renderInv(items){
+  const wrap = byId("invWrap"); if (!wrap) return;
+  if (!items || !items.length){ wrap.innerHTML = `<div class="card">Inventario vacío</div>`; return; }
+  wrap.innerHTML = items.map(it=>`
+    <div class="card">
+      <div><b>${esc(it.nombre)}</b> <span style="opacity:.7">[${esc(it.ref)}]</span></div>
+      <div>Stock: <b>${it.stock}</b> · Mínimo: <b>${it.minimo}</b></div>
+      <div style="display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.35rem">
+        ${["+1","-1","+10","-10","+100","-100"].map(lbl=>{
+          const d = parseInt(lbl.replace("+","")) || -parseInt(lbl.replace("-",""));
+          return `<button class="btn" data-ref="${esc(it.ref)}" data-delta="${d}" onclick="invDelta('${esc(it.ref)}',${d})">${lbl}</button>`
+        }).join("")}
+        <button class="btn gloss btn-ficha" onclick="openRepuestoByRef('${esc(it.ref)}')">Ficha</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function invDelta(ref, delta){
+  try{
+    const r = await apiPost({res:"inv", fn:"delta", ref, delta, actor:(window.USER?.user||"anon")});
+    if (r?.ok){ toast(`Stock ${ref}: ${r.stock}`); loadInv(); }
+  }catch(e){ console.error("invDelta", e); }
+}
+
+/* ==========================================================
+   Repuestos solicitados: carga + tabla + acciones + export
+   ========================================================== */
+async function loadRepSol(){
+  try{
+    const d = await apiGet({res:"rep", fn:"list"});
+    window.REP = d?.ok && Array.isArray(d.items) ? d.items : [];
+    renderRepTable();
+  }catch(e){ console.error("loadRepSol", e); }
+}
+
+function renderRepTable(){
+  const host = byId("repWrap"); if (!host) return;
+
+  if (!window.REP || !window.REP.length){
+    host.innerHTML = `<div class="card">Sin solicitudes</div>`;
+    return;
+  }
+
+  const rows = window.REP.map(r=>`
+    <tr data-id="${esc(r.id)}">
+      <td class="nowrap">${esc(fmtDate(r.created||""))}</td>
+      <td>${esc(r.id)}</td>
+      <td>${esc(r.ref)}</td>
+      <td>
+        <button class="btn gloss btn-ficha" title="Abrir ficha de inventario" onclick="openRepuestoByRef('${esc(r.ref)}')">${esc(r.nombre)}</button>
+      </td>
+      <td>${esc(r.solicitante||"-")}</td>
+      <td>
+        <select class="repestado" data-id="${esc(r.id)}">
+          ${["Pendiente","Aprobado","Denegado","Recibido"].map(s=>`<option ${s===(r.estado||"Pendiente")?'selected':''}>${s}</option>`).join("")}
+        </select>
+      </td>
+      <td><input class="repcoment in-txt" data-id="${esc(r.id)}" value="${esc(r.comentario||"")}" placeholder="Comentario"></td>
+      <td class="nowrap">
+        <div class="qty" data-ref="${esc(r.ref)}" style="margin-bottom:.35rem;display:flex;gap:.25rem;flex-wrap:wrap">
+          ${["+1","-1","+10","-10","+100","-100"].map(lbl=>{
+            const d = parseInt(lbl.replace("+","")) || -parseInt(lbl.replace("-",""));
+            return `<button class="btn rep-delta" data-delta="${d}" data-ref="${esc(r.ref)}">${lbl}</button>`;
+          }).join("")}
+        </div>
+        <button class="btn gloss rep-guardar" data-id="${esc(r.id)}">Guardar</button>
+      </td>
+    </tr>
+  `).join("");
+
+  host.innerHTML = `
+    <div id="repTableWrap" class="card" style="overflow:auto">
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem">
+        <button id="btnExportRepCSV" class="btn gloss">Exportar CSV</button>
+        <button id="btnExportRepPDF" class="btn gloss">Exportar PDF</button>
+      </div>
+      <table id="tblRep">
+        <thead>
+          <tr>
+            <th>Fecha</th><th>ID</th><th>Ref</th><th>Nombre</th><th>Solicitante</th>
+            <th>Estado</th><th>Comentario</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  const tb = host.querySelector("tbody"); if (!tb) return;
+
+  // Guardar fila (estado/comentario)
+  tb.querySelectorAll(".rep-guardar").forEach(b=>{
+    if (b.__b) return; b.__b = true;
+    b.addEventListener("click", async (e)=>{
+      if (!canEdit()) return alert("Sin permiso.");
+      const id = e.currentTarget.getAttribute("data-id");
+      const estado = tb.querySelector(`.repestado[data-id="${CSS.escape(id)}"]`)?.value || "Pendiente";
+      const comentario = tb.querySelector(`.repcoment[data-id="${CSS.escape(id)}"]`)?.value || "";
+      try{
+        const r = await apiPost({res:"rep", fn:"set", id, estado, comentario, actor:(window.USER?.user||"anon")});
+        if (r?.ok){ toast("Guardado"); loadRepSol(); }
+        else alert(r?.error||"No se pudo guardar");
+      }catch(err){ console.error(err); alert("Error de red"); }
+    });
+  });
+
+  // Ajustes rápidos al inventario desde la solicitud
+  tb.querySelectorAll(".rep-delta").forEach(b=>{
+    if (b.__b) return; b.__b = true;
+    b.addEventListener("click", async (e)=>{
+      if (!canEdit()) return alert("Sin permiso.");
+      const ref   = e.currentTarget.getAttribute("data-ref");
+      const delta = Number(e.currentTarget.getAttribute("data-delta"));
+      try{
+        const r = await apiPost({res:"inv", fn:"delta", ref, delta, actor:(window.USER?.user||"anon")});
+        if (r?.ok){ toast(`Inventario ${ref}: ${r.stock}`); loadInv(); }
+      }catch(err){ console.error(err); }
+    });
+  });
+
+  // Export
+  const doCSV = ()=> {
+    exportSimpleCSV?.("repuestos_solicitados.csv",
+      ["Fecha","ID","Ref","Nombre","Solicitante","Estado","Comentario"],
+      (window.REP||[]),
+      r=>[fmtDate(r.created||""), r.id, r.ref, r.nombre, r.solicitante||"", r.estado||"", r.comentario||""]
+    );
+  };
+  const doPDF = ()=> {
+    const rows = (window.REP||[]).map(r=>`
+      <tr><td>${esc(fmtDate(r.created||""))}</td><td>${esc(r.id)}</td><td>${esc(r.ref)}</td><td>${esc(r.nombre)}</td><td>${esc(r.solicitante||"")}</td><td>${esc(r.estado||"")}</td><td>${esc(r.comentario||"")}</td></tr>
+    `).join("");
+    printHTML?.("Repuestos solicitados", `<h2>Repuestos solicitados</h2>
+      <table><thead><tr><th>Fecha</th><th>ID</th><th>Ref</th><th>Nombre</th><th>Solicitante</th><th>Estado</th><th>Comentario</th></tr></thead><tbody>${rows}</tbody></table>`);
+  };
+  const bCSV = byId("btnExportRepCSV"); if (bCSV && !bCSV.__b){ bCSV.__b = true; bCSV.addEventListener("click", doCSV); }
+  const bPDF = byId("btnExportRepPDF"); if (bPDF && !bPDF.__b){ bPDF.__b = true; bPDF.addEventListener("click", doPDF); }
+}
+
+/* ==========================================================
+   Consumibles: carga + tabla + alertas
+   ========================================================== */
+async function loadConsumibles(){
+  try{
+    const d = await apiGet({res:"cons", fn:"list"});
+    window.CONS = d?.ok ? (d.items||[]) : [];
+    renderConsTable();
+    renderConsAlerts();
+  }catch(e){ console.error("loadConsumibles", e); }
+}
+
+function renderConsTable(){
+  const host = byId("consWrap"); if (!host) return;
+  const CONS = window.CONS || [];
+  if (!CONS.length){ host.innerHTML = `<div class="card">Sin consumibles</div>`; return; }
+  const rows = CONS.map(c=>`
+    <tr>
+      <td>${esc(c.ref)}</td>
+      <td>${esc(c.nombre)}</td>
+      <td class="num">${c.stock}</td>
+      <td class="num">${c.minimo}</td>
+      <td>${c.updated ? esc(fmtDate(c.updated)) : ""}</td>
+      <td class="nowrap">
+        ${["+1","-1","+10","-10","+100","-100"].map(lbl=>{
+          const d = parseInt(lbl.replace("+","")) || -parseInt(lbl.replace("-",""));
+          return `<button class="btn cons-delta" data-delta="${d}" data-ref="${esc(c.ref)}">${lbl}</button>`;
+        }).join("")}
+      </td>
+    </tr>
+  `).join("");
+  host.innerHTML = `
+    <div id="consTableWrap" class="card" style="overflow:auto">
+      <table id="tblCons">
+        <thead>
+          <tr><th>Ref</th><th>Nombre</th><th>Stock</th><th>Mínimo</th><th>Actualizado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  host.querySelectorAll("button.cons-delta").forEach(b=>{
+    if (b.__b) return; b.__b = true;
+    b.addEventListener("click", async (e)=>{
+      if (!canEdit()) return alert("Sin permiso.");
+      const ref   = e.currentTarget.getAttribute("data-ref");
+      const delta = Number(e.currentTarget.getAttribute("data-delta"));
+      try{
+        const r = await apiPost({res:"cons", fn:"delta", ref, delta, actor:(window.USER?.user||"anon")});
+        if (r?.ok){ toast(`Stock ${ref}: ${r.stock}`); loadConsumibles(); }
+      }catch(err){ console.error(err); }
+    });
+  });
+}
+
+function renderConsAlerts(){
+  const low = (window.CONS||[]).filter(x => (x.stock||0) <= (x.minimo||0));
+  const box = byId("consAlerts"); if (!box) return; // opcional
+  if (!low.length){ box.classList.add("hidden"); box.innerHTML=""; return; }
+  box.classList.remove("hidden");
+  box.innerHTML = `<b>Consumibles bajos:</b> ` + low.map(x=>`<span class="badge-low">${esc(x.ref)} (${x.stock}/${x.minimo})</span>`).join(" ");
+}
+
+/* ==========================================================
+   Órdenes de trabajo: carga + tabla + export
+   ========================================================== */
+async function loadOT(){
+  try{
+    const d = await apiGet({res:"ot", fn:"list"});
+    window.OTS = d?.ok ? (d.items||[]) : [];
+    renderOTTable();
+  }catch(e){ console.error("loadOT", e); }
+}
+
+function renderOTTable(){
+  const host = byId("otWrap"); if (!host) return;
+  const OTS = window.OTS||[];
+  if (!OTS.length){ host.innerHTML = `<div class="card">Sin OT</div>`; return; }
+  const rows = OTS.map(o=>`
+    <tr>
+      <td>${esc(fmtDate(o.created||""))}</td>
+      <td>${esc(o.id)}</td>
+      <td>${esc(o.prioridad||"")}</td>
+      <td>${esc(o.asignado||"")}</td>
+      <td>${esc(o.vencimiento||"")}</td>
+      <td>${esc(o.estado||"")}</td>
+    </tr>
+  `).join("");
+  host.innerHTML = `
+    <div id="otTableWrap" class="card" style="overflow:auto">
+      <table id="tblOT">
+        <thead>
+          <tr><th>Fecha</th><th>OT</th><th>Prioridad</th><th>Asignado</th><th>Vence</th><th>Estado</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="right" style="margin-top:.5rem;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end">
+        <button id="btnExportOTPDF" class="btn gloss">Exportar PDF</button>
+      </div>
+    </div>`;
+
+  const b = byId("btnExportOTPDF");
+  if (b && !b.__b){
+    b.__b = true;
+    b.addEventListener("click", ()=>{
+      const rows = (window.OTS||[]).map(o=>`
+        <tr><td>${esc(fmtDate(o.created||""))}</td><td>${esc(o.id)}</td><td>${esc(o.prioridad||"")}</td><td>${esc(o.asignado||"")}</td><td>${esc(o.vencimiento||"")}</td><td>${esc(o.estado||"")}</td></tr>
+      `).join("");
+      printHTML?.("Órdenes de trabajo", `<h2>Órdenes de trabajo</h2>
+        <table><thead><tr><th>Fecha</th><th>OT</th><th>Prioridad</th><th>Asignado</th><th>Vence</th><th>Estado</th></tr></thead><tbody>${rows}</tbody></table>`);
+    });
   }
 }
 
-/* ===== Login / logout / cambio pass ===== */
-async function login(){
-  const uSel=$id("userSelect"); const pInp=$id("userPass");
-  const u=uSel?.value||"invitado"; const p=pInp?.value||"";
-  try{
-    const r = await apiPost({res:"auth", fn:"login", user:u, pass:p, cid:(localStorage.getItem("CDL_CID")||"")});
-    if (r?.ok){ setUser({user:u, rol:r.rol||u, group:r.group||"guest"}); toast("Bienvenido "+u); closeMenus(); }
-    else alert("Usuario o contraseña incorrectos");
-  }catch(e){ console.error(e); alert("Error en la conexión al servidor"); }
-}
-function logout(){ localStorage.removeItem("CDL_USER"); setUser({ user:"invitado", rol:"Invitado", group:"guest" }); toast("Sesión cerrada"); closeMenus(); }
-async function changePwd(){
-  const oldP=$id("oldPass")?.value||""; const newP=$id("newPass")?.value||""; const msg=$id("pwdMsg");
-  if(!oldP||!newP){ alert("Introduce la contraseña actual y la nueva"); return; }
-  try{
-    const r = await apiPost({res:"auth", fn:"chpwd", old:oldP, nuevo:newP, cid:(localStorage.getItem("CDL_CID")||"")});
-    if(r?.ok){ if(msg){ msg.textContent="Contraseña cambiada correctamente"; msg.style.color="green"; } $id("oldPass").value=""; $id("newPass").value=""; }
-    else { if(msg){ msg.textContent="Error al cambiar la contraseña"; msg.style.color="red"; } }
-  }catch(e){ console.error(e); if(msg){ msg.textContent="Error de red"; msg.style.color="red"; } }
-}
-function closeMenus(){ ["pagesPanel","userPanel"].forEach(id=>{ const p=$id(id); if(p) p.classList.add("hidden"); }); document.documentElement.classList.remove("menu-open"); document.body.classList.remove("menu-open"); }
-
-/* ===== Router ===== */
-function handleHash(){
-  const h=location.hash||"";
-  if (!h){ nav("tv"); return; }
-  const mEq=h.match(/^#\/equipo\/(.+)$/);
-  const mRp=h.match(/^#\/repuesto\/(.+)$/);
-  if (mEq){ renderEquipoBySlug(mEq[1]); return; }
-  if (mRp){ const ref=decodeURIComponent(mRp[1]||""); renderRepuestoByRef(ref); return; }
-  const p=h.replace(/^#\/?/,"");
-  const pages=Object.keys(PAGES);
-  if (pages.includes(p)){ nav(p); return; }
-  nav("tv");
-}
-window.addEventListener("hashchange", handleHash);
-
-/* ===== QR lib (lazy) ===== */
-(function loadQR(){ if (window.QRCode || document.querySelector('script[data-qrcode-lib]')) return; const s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"; s.setAttribute("data-qrcode-lib","1"); document.head.appendChild(s); })();
-
-/* ===== Fichas ===== */
-function baseURL(){ return (location.origin + location.pathname); }
+/* ==========================================================
+   Fichas: equipo / repuesto (rutas #/equipo/:slug y #/repuesto/:ref)
+   ========================================================== */
 function renderEquipoBySlug(slug){
-  ensureHidden(); $id("page-equipo").classList.remove("hidden"); const host=$id("equipoDetail");
-  const eq=(STATE||[]).find(x => slugify(x.nombre)===slug);
-  if(!host || !eq){ host.innerHTML="<div class='card'>No encontrado</div>"; return; }
+  const pageId="page-equipo", hostId="equipoDetail";
+  document.querySelectorAll('[id^="page-"]').forEach(el=> el.classList.add("hidden"));
+  byId(pageId)?.classList.remove("hidden");
+
+  const eq = (window.STATE||[]).find(x=>{
+    const s = window.slugify ? slugify(x.nombre) : String(x.nombre).toLowerCase().replace(/\s+/g,'-');
+    return s === slug;
+  });
+  const host = byId(hostId);
+  if (!host || !eq){ if (host) host.innerHTML = "<div class='card'>No encontrado</div>"; return; }
+
   host.innerHTML = `
     <div class="card">
       <h3 style="margin:.1rem 0">${esc(eq.nombre)}</h3>
       <div class="sub">${esc(eq.grupo)}</div>
       <div style="margin:.5rem 0">Estado actual: <b>${esc(eq.estado)}</b></div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn" onclick="accionParadaProlongada(${JSON.stringify(eq.nombre)})">Parada prolongada (email)</button>
-        <button class="btn" onclick="window.print()">Imprimir ficha</button>
-        <button class="btn" onclick="history.back()">Volver</button>
+        <button class="btn gloss btn-mail" onclick="accionParadaProlongada(${JSON.stringify(eq.nombre)})">Parada prolongada (email)</button>
+        <button class="btn gloss btn-ficha" onclick="window.print()">Imprimir ficha</button>
+        <button class="btn gloss" onclick="history.back()">Volver</button>
       </div>
       <div style="margin-top:.6rem"><div id="qrficha"></div></div>
     </div>
   `;
-  const qr=$id("qrficha"); if(qr && window.QRCode){ new QRCode(qr,{ text: `${baseURL()}#/equipo/${slug}`, width:96, height:96 }); }
+  const qr = byId("qrficha");
+  if (qr && window.QRCode){
+    new QRCode(qr, { text: `${baseURL()}#/equipo/${slug}`, width:96, height:96 });
+  }
 }
-function openRepuestoByRef(ref){ location.hash = `#/repuesto/${encodeURIComponent(ref)}`; renderRepuestoByRef(ref); }
+
+function openRepuestoByRef(ref){
+  const slug = encodeURIComponent(ref);
+  location.hash = `#/repuesto/${slug}`;
+  renderRepuestoByRef(ref);
+}
+
 function renderRepuestoByRef(ref){
-  ensureHidden(); $id("page-repuesto").classList.remove("hidden"); const host=$id("repuestoDetail");
-  const it=(INV||[]).find(x=>String(x.ref).toUpperCase()===String(ref).toUpperCase());
-  if(!host || !it){ host.innerHTML="<div class='card'>No encontrado</div>"; return; }
+  const pageId="page-repuesto", hostId="repuestoDetail";
+  document.querySelectorAll('[id^="page-"]').forEach(el=> el.classList.add("hidden"));
+  byId(pageId)?.classList.remove("hidden");
+
+  const it = (window.INV||[]).find(x => String(x.ref).toUpperCase() === String(ref).toUpperCase());
+  const host = byId(hostId);
+  if (!host || !it){ if (host) host.innerHTML = "<div class='card'>No encontrado</div>"; return; }
+
   host.innerHTML = `
     <div class="card">
       <h3 style="margin:.1rem 0">${esc(it.nombre)}</h3>
       <div class="sub">Ref: <b>${esc(it.ref)}</b></div>
       <div style="margin:.5rem 0">Stock: <b>${it.stock}</b> · Mínimo: <b>${it.minimo}</b></div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn" onclick="window.print()">Imprimir etiqueta</button>
-        <button class="btn" onclick="history.back()">Volver</button>
+        <button class="btn gloss" onclick="window.print()">Imprimir etiqueta</button>
+        <button class="btn gloss" onclick="history.back()">Volver</button>
       </div>
       <div style="margin-top:.6rem"><div id="qrrep"></div></div>
     </div>
   `;
-  const qr=$id("qrrep"); if(qr && window.QRCode){ new QRCode(qr,{ text: `${baseURL()}#/repuesto/${encodeURIComponent(it.ref)}`, width:96, height:96 }); }
+  const qr = byId("qrrep");
+  if (qr && window.QRCode){
+    new QRCode(qr, { text: `${baseURL()}#/repuesto/${encodeURIComponent(it.ref)}`, width:96, height:96 });
+  }
 }
 
-/* ===== SW register ===== */
-if ('serviceWorker' in navigator){
+/* ==========================================================
+   Dashboard TV (4 paneles) + refresco
+   ========================================================== */
+(function(){
+  if (window.__TV_BOUND__) return; window.__TV_BOUND__ = true;
+
+  function fmtShort(d){ try{ return d ? new Date(d).toLocaleDateString("es-ES",{hour12:false}) : "—"; }catch(_){ return d||"—"; } }
+  function ensureTVHost(){
+    const sec = byId("page-tv"); if(!sec) return null;
+    if (!sec.__tv4__){
+      sec.innerHTML = `
+        <h2 class="cdl-tag">Dashboard TV</h2>
+        <div class="tv-grid" id="tvGrid">
+          <article class="tv-card"><h3><span class="badge"><span class="dot dot-stop"></span> PARADAS</span></h3><div id="tvParadas" class="tv-list"></div></article>
+          <article class="tv-card"><h3><span class="badge"><span class="dot dot-warn"></span> RESTRICCIONES</span></h3><div id="tvRestr" class="tv-list"></div></article>
+          <article class="tv-card"><h3><span class="badge">REPUESTOS · URGENCIA</span></h3><div id="tvRep" class="tv-list"></div></article>
+          <article class="tv-card"><h3><span class="badge">PARADAS PREVISTAS (OT)</span></h3><div id="tvPrev" class="tv-list"></div></article>
+        </div>`;
+      sec.__tv4__ = true;
+    }
+    return sec;
+  }
+
+  function renderTV(){
+    if (!ensureTVHost()) return;
+    const STATE = (window.STATE||[]);
+    const REP   = (window.REP||[]);
+    const OTS   = (window.OTS||[]);
+
+    // Paradas / Restricciones (desde STATE)
+    const par = STATE.filter(x=>x.estado==="Parada").map(x=>x.nombre).sort();
+    const res = STATE.filter(x=>x.estado==="Restricciones").map(x=>x.nombre).sort();
+
+    const fill = (id, arr)=> {
+      const host = byId(id); if(!host) return;
+      host.innerHTML = arr.length
+        ? arr.map(t=>`<div class="tv-item">${esc(t)}</div>`).join("")
+        : `<div class="tv-item tv-empty">—</div>`;
+    };
+    fill("tvParadas", par);
+    fill("tvRestr", res);
+
+    // Repuestos por urgencia + fecha
+    const rank = { "Alta":3, "Media":2, "Baja":1 };
+    const repRows = (REP||[]).map(r=>({
+      txt: `${esc(r.ref)} — ${esc(r.nombre||"")} · <span class="urg urg-${(r.urgencia||'baja').toLowerCase()}">${esc(r.urgencia||'Baja')}</span> · Entrega: ${esc(fmtShort(r.entrega||r.fecha||r.fechaPrevista))}`,
+      urg: rank[(r.urgencia||"Baja")]||1,
+      eta: new Date(r.entrega||r.fecha||r.fechaPrevista||"2100-01-01").getTime()
+    }))
+    .sort((a,b)=> (b.urg-a.urg) || (a.eta-b.eta))
+    .map(x=>`<div class="tv-item">${x.txt}</div>`)
+    .join("");
+    byId("tvRep").innerHTML = repRows || `<div class="tv-item tv-empty">—</div>`;
+
+    // Preventivos (OT)
+    const prev = (OTS||[])
+      .filter(o=> /prevent/i.test(o.titulo||o.tipo||"") || /prevent/i.test(o.prioridad||""))
+      .map(o=>({ t: `${esc(o.id)} — ${esc(o.titulo||"")} · Vence: ${esc(fmtShort(o.vencimiento))}`, v: new Date(o.vencimiento||"2100-01-01").getTime() }))
+      .sort((a,b)=> a.v-b.v)
+      .map(x=>`<div class="tv-item">${x.t}</div>`)
+      .join("");
+    byId("tvPrev").innerHTML = prev || `<div class="tv-item tv-empty">—</div>`;
+  }
+
+  // Exponer para re-render desde fuera
+  window.renderTV = renderTV;
+
+  // Boot + refresco periódico
+  let _T=null;
+  function bootTV(){ renderTV(); if(_T) clearInterval(_T); _T=setInterval(renderTV, 10000); }
+  if (document.readyState !== "loading") bootTV();
+  else document.addEventListener("DOMContentLoaded", bootTV);
+
+  // Re-render tras cargas de datos
+  ["loadState","loadRepSol","loadConsumibles","loadInv","loadOT","loadIncid"].forEach(name=>{
+    const orig = window[name];
+    if (typeof orig === "function"){
+      window[name] = async function(){
+        const r = await orig.apply(this, arguments);
+        try{ renderTV(); }catch(_){}
+        return r;
+      };
+    }
+  });
+})();
+
+/* ==========================================================
+   Arranque recomendado: carga inicial en paralelo
+   ========================================================== */
+(async function initialLoad(){
+  if (window.__CDL_INITIAL_LOAD__) return; window.__CDL_INITIAL_LOAD__ = true;
+  try{
+    await Promise.all([
+      loadState(), loadIncid(), loadInv(), loadRepSol(), loadConsumibles(), loadOT()
+    ]);
+  }catch(e){ console.error("initialLoad", e); }
+})();
+</script>
+<script>
+/* ==========================================================
+   Router por hash (#/equipos, #/tv, #/equipo/:slug, #/repuesto/:ref)
+   (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_ROUTER_BOUND__) return; window.__CDL_ROUTER_BOUND__ = true;
+
+  const PAGES = new Set(["equipos","gruas","otros","incidencias","indicadores","ot","inventario","repuestos","consumibles","tv","personal","logs","equipo","repuesto"]);
+  function go(page){
+    if (!window.nav) return;
+    window.nav(page);
+  }
+
+  window.handleHash = function(){
+    const h = location.hash || "";
+    if (!h){ go("tv"); return; }
+
+    const mEq = h.match(/^#\/equipo\/(.+)$/);
+    const mRp = h.match(/^#\/repuesto\/(.+)$/);
+
+    if (mEq && typeof window.renderEquipoBySlug==="function"){ window.renderEquipoBySlug(mEq[1]); return; }
+    if (mRp && typeof window.renderRepuestoByRef==="function"){ const ref = decodeURIComponent(mRp[1]||""); window.renderRepuestoByRef(ref); return; }
+
+    const p = h.replace(/^#\/?/,"");
+    if (PAGES.has(p)){ go(p); return; }
+    go("tv");
+  };
+
+  window.addEventListener("hashchange", window.handleHash, { passive:true });
+  if (document.readyState !== "loading") handleHash();
+  else document.addEventListener("DOMContentLoaded", handleHash);
+})();
+
+/* ==========================================================
+   Menús (hamburguesa y usuario) con modo fullscreen en móvil
+   y cierre accesible con ESC/click-fuera (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_MENUS_BOUND__) return; window.__CDL_MENUS_BOUND__ = true;
+
+  const $ = (id)=>document.getElementById(id);
+  const pagesBtn=$("pagesBtn"), pagesPanel=$("pagesPanel");
+  const userBtn =$("userBtn"),  userPanel =$("userPanel");
+
+  function open(btn,panel,fullscreen){
+    closeAll();
+    if (!panel) return;
+    panel.classList.remove("hidden");
+    if (fullscreen && matchMedia("(max-width: 720px)").matches){
+      panel.classList.add("menu-full");
+      document.documentElement.classList.add("menu-open");
+      document.body.classList.add("menu-open");
+    }
+    btn?.setAttribute("aria-expanded","true");
+  }
+  function close(btn,panel){
+    if(!panel) return;
+    panel.classList.add("hidden"); panel.classList.remove("menu-full");
+    btn?.setAttribute("aria-expanded","false");
+    document.documentElement.classList.remove("menu-open");
+    document.body.classList.remove("menu-open");
+  }
+  function closeAll(){ close(pagesBtn,pagesPanel); close(userBtn,userPanel); }
+
+  pagesBtn?.addEventListener("click",()=> pagesPanel.classList.contains("hidden") ? open(pagesBtn,pagesPanel,true) : close(pagesBtn,pagesPanel));
+  userBtn ?.addEventListener("click",()=> userPanel .classList.contains("hidden") ? open(userBtn ,userPanel ,false) : close(userBtn ,userPanel ));
+
+  document.addEventListener("click",(e)=>{
+    if (e.target.closest("#pagesPanel, #pagesBtn, #userPanel, #userBtn")) return;
+    closeAll();
+  }, {passive:true});
+
+  document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeAll(); }, {passive:true});
+
+  // Exponer utilidad global para otros bloques
+  window.closeAllMenus = closeAll;
+})();
+
+/* ==========================================================
+   Cabecera sticky: sombra on-scroll + sincroniza --hdr-h
+   (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_HDR_EFFECTS__) return; window.__CDL_HDR_EFFECTS__ = true;
+
+  const hdr=document.querySelector("header");
+  const onScroll=()=>{ if(window.scrollY>2) hdr?.classList.add("scrolled"); else hdr?.classList.remove("scrolled"); };
+  const sync=()=>{ const h=Math.max(64, hdr?.offsetHeight||0); document.documentElement.style.setProperty('--hdr-h', h+'px'); };
+
+  onScroll(); window.addEventListener("scroll",onScroll,{passive:true});
+  if (document.readyState!=="loading") sync(); else window.addEventListener("load",sync,{once:true});
+  window.addEventListener('resize',sync,{passive:true});
+  window.addEventListener('orientationchange',sync,{passive:true});
+  (document.fonts?.ready||Promise.resolve()).then(sync);
+})();
+
+/* ==========================================================
+   Sello de tiempo del resumen (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_TS_TIMER__) return; window.__CDL_TS_TIMER__ = true;
+  window.updateSummaryTimestamp = window.updateSummaryTimestamp || function(){
+    const d=new Date(); const el=document.getElementById("kUpdated");
+    if (el) el.textContent=d.toLocaleString("es-ES",{hour12:false});
+  };
+  setInterval(window.updateSummaryTimestamp,30*1000);
+  if (document.readyState!=="loading") window.updateSummaryTimestamp();
+  else document.addEventListener("DOMContentLoaded", window.updateSummaryTimestamp);
+})();
+
+/* ==========================================================
+   Atajos de teclado + accesibilidad (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_KBD_BOUND__) return; window.__CDL_KBD_BOUND__ = true;
+
+  const hasInputFocus = ()=> {
+    const a = document.activeElement; if (!a) return false;
+    const tag = (a.tagName||"").toLowerCase();
+    return ["input","textarea","select","button"].includes(tag) || a.isContentEditable;
+  };
+
+  // "/" busca (primer input de búsqueda visible)
+  document.addEventListener("keydown",(e)=>{
+    if (hasInputFocus()) return;
+    if (e.key === "/"){
+      const cand = document.querySelector('input[type="search"]')
+              || document.getElementById("invSearch")
+              || document.querySelector('input[placeholder*="Buscar" i]');
+      if (cand){ e.preventDefault(); cand.focus(); cand.select?.(); }
+    }
+  }, { passive:false });
+
+  // "g" + tecla → navegación rápida
+  document.addEventListener("keydown",(e)=>{
+    if (hasInputFocus()) return;
+    if ((e.key||"").toLowerCase() !== "g") return;
+    const onNext = (ev)=>{
+      document.removeEventListener("keydown", onNext, true);
+      const k = (ev.key||"").toLowerCase();
+      if (!window.nav) return;
+      if (k==="e") nav("equipos");
+      if (k==="i") nav("inventario");
+      if (k==="r") nav("repuestos");
+      if (k==="c") nav("consumibles");
+      if (k==="t") nav("tv");
+    };
+    document.addEventListener("keydown", onNext, true);
+  }, { passive:true });
+
+  // Mejorar focus/teclado en botones pseudo (role/button)
+  const boostBtn = (btn)=>{
+    if (!btn || btn.__kbd__) return; btn.__kbd__ = true;
+    if (!btn.hasAttribute("tabindex")) btn.setAttribute("tabindex","0");
+    btn.addEventListener("keydown",(e)=>{
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); btn.click(); }
+    });
+  };
+  const tryBoost = ()=>{
+    ["pagesBtn","userBtn"].forEach(id => boostBtn(document.getElementById(id)));
+    document.querySelectorAll('[role="button"]').forEach(boostBtn);
+    document.querySelectorAll('button').forEach(b=>boostBtn(b));
+  };
+  tryBoost();
+  const mo = new MutationObserver(tryBoost);
+  mo.observe(document.documentElement, { subtree:true, childList:true });
+})();
+
+/* ==========================================================
+   Toggle mostrar/ocultar contraseña (delegado, idempotente)
+   ========================================================== */
+(function(){
+  if (window.__PW_TOGGLE_BOUND__) return; window.__PW_TOGGLE_BOUND__ = true;
+  document.addEventListener("click",(e)=>{
+    const btn = e.target.closest(".pw-toggle"); if(!btn) return;
+    const id = btn.getAttribute("data-target"); const inp = document.getElementById(id); if(!inp) return;
+    const to = inp.type==="password" ? "text" : "password"; inp.type = to;
+    btn.classList.toggle("on", to==="text"); btn.setAttribute("aria-pressed", to==="text"?"true":"false");
+  });
+})();
+
+/* ==========================================================
+   Auth: login / logout / changePwd + UI por rol (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_AUTH_BOUND__) return; window.__CDL_AUTH_BOUND__ = true;
+
+  // Asegurar USER y applyRoleUI
+  window.USER = window.USER || { user:"invitado", rol:"Invitado", group:"guest" };
+  window.applyRoleUI = window.applyRoleUI || function(){
+    document.querySelectorAll("[data-role]").forEach(el=>{
+      const roles = (el.getAttribute("data-role")||"").split(",");
+      if (roles.includes(USER.rol)||USER.rol==="Administrador"){ el.style.display=""; }
+      else{ el.style.display="none"; }
+    });
+    const chip = document.getElementById("roleChip");
+    if (chip) chip.textContent = USER.rol;
+  };
+  function setUser(u){ window.USER = u; localStorage.setItem("CDL_USER", JSON.stringify(u)); applyRoleUI(); }
+  function getCID(){ try{ return localStorage.getItem("CDL_CID") || ""; }catch(_){ return ""; } }
+
+  window.login = async function(){
+    try{
+      const uSel = document.getElementById("userSelect");
+      const pInp = document.getElementById("userPass");
+      const u = uSel?.value || "invitado";
+      const p = pInp?.value || "";
+      const r = await apiPost({res:"auth", fn:"login", user:u, pass:p, cid:getCID()});
+      if (r?.ok){
+        setUser({ user:u, rol:r.rol||u, group:r.group||"guest" });
+        (window.toast||console.log)(`Bienvenido ${u}`);
+        window.closeAllMenus?.();
+      }else{
+        alert("Usuario o contraseña incorrectos");
+      }
+    }catch(err){
+      console.error(err);
+      alert("Error en la conexión al servidor");
+    }
+  };
+
+  window.logout = function(){
+    try{
+      localStorage.removeItem("CDL_USER");
+      setUser({ user:"invitado", rol:"Invitado", group:"guest" });
+      (window.toast||console.log)("Sesión cerrada");
+      window.closeAllMenus?.();
+    }catch(e){ console.error(e); }
+  };
+
+  window.changePwd = async function(){
+    const oldP = document.getElementById("oldPass")?.value || "";
+    const newP = document.getElementById("newPass")?.value || "";
+    const msg  = document.getElementById("pwdMsg");
+    if (!oldP || !newP){ alert("Introduce la contraseña actual y la nueva"); return; }
+    try{
+      const r = await apiPost({res:"auth", fn:"chpwd", old:oldP, nuevo:newP, cid:getCID()});
+      if (r?.ok){
+        if (msg){ msg.textContent = "Contraseña cambiada correctamente"; msg.style.color = "green"; }
+        const o = document.getElementById("oldPass"); const n = document.getElementById("newPass");
+        if (o) o.value=""; if (n) n.value="";
+      }else{
+        if (msg){ msg.textContent = "Error al cambiar la contraseña"; msg.style.color = "red"; }
+      }
+    }catch(err){
+      console.error(err);
+      if (msg){ msg.textContent = "Error de red"; msg.style.color = "red"; }
+    }
+  };
+
+  // Aplicar rol guardado al cargar
+  try{
+    const saved = JSON.parse(localStorage.getItem("CDL_USER")||"null");
+    if (saved && saved.user){ window.USER = saved; }
+  }catch(_){}
+  if (document.readyState !== "loading") applyRoleUI(); else document.addEventListener("DOMContentLoaded", applyRoleUI);
+})();
+</script>
+<script>
+/* ==========================================================
+   Utilidades: CSV/PDF/descarga (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_EXPORT_UTILS__) return; window.__CDL_EXPORT_UTILS__ = true;
+
+  window.csvEscape = window.csvEscape || function(v){
+    v = (v==null?'':String(v));
+    if (/[",\n;]/.test(v)) return `"${v.replace(/"/g,'""')}"`;
+    return v;
+  };
+  window.toCSV = window.toCSV || function(rows){
+    return rows.map(r => r.map(window.csvEscape).join(";")).join("\n");
+  };
+  window.download = window.download || function(name, content, type="text/plain"){
+    const blob = new Blob([content], {type});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  };
+  window.exportCSVFromTable = window.exportCSVFromTable || function(tableSel, fileName){
+    const table = document.querySelector(tableSel); if(!table) return;
+    const rows = [...table.querySelectorAll("tr")].map(tr => [...tr.children].map(td => (td.innerText||"").trim()));
+    window.download(fileName, window.toCSV(rows), "text/csv;charset=utf-8");
+  };
+  window.printHTML = window.printHTML || function(title, html){
+    const w = window.open("", "_blank");
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>
+      body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:16px}
+      table{width:100%;border-collapse:collapse}
+      th,td{border:1px solid #ddd;padding:6px 8px}
+      th{background:#f3f4f6}
+    </style></head><body>${html}</body></html>`);
+    w.document.close(); w.focus(); w.print();
+  };
+})();
+
+/* ==========================================================
+   Toast unificado (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_TOAST__) return; window.__CDL_TOAST__ = true;
+  window.toast = window.toast || function(msg){
+    let t = document.getElementById("toast");
+    if(!t){
+      t = document.createElement("div");
+      t.id = "toast";
+      Object.assign(t.style, {
+        position:"fixed", left:"50%", bottom:"16px", transform:"translateX(-50%)",
+        background:"#0b0f15", color:"#e5e7eb", border:"1px solid #1f2937",
+        padding:".5rem .8rem", borderRadius:"12px", boxShadow:"0 10px 26px rgba(0,0,0,.35)",
+        opacity:"0", transition:"opacity .25s ease", zIndex:"3000"
+      });
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = "1";
+    clearTimeout(window.__TOAST_T);
+    window.__TOAST_T = setTimeout(()=> t.style.opacity = "0", 1800);
+  };
+  window.showToast = window.showToast || ((m)=> window.toast(m));
+})();
+
+/* ==========================================================
+   Service Worker: auto-actualización (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_SW_BOUND__) return; window.__CDL_SW_BOUND__=true;
+  if (!('serviceWorker' in navigator)) return;
+
   window.addEventListener('load', async () => {
     try {
-      const reg = await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+      const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
       if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
       reg.addEventListener('updatefound', () => {
         const nw = reg.installing;
@@ -503,16 +1620,633 @@ if ('serviceWorker' in navigator){
       });
       navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
     } catch (e) { console.error('SW register error', e); }
+  }, { once:true });
+})();
+
+/* ==========================================================
+   QRCode.js lazy loader (idempotente)
+   ========================================================== */
+(function(){
+  if (window.__CDL_QR_LOADED__) return; window.__CDL_QR_LOADED__=true;
+  if (window.QRCode || document.querySelector('script[data-qrcode-lib]')) return;
+  const s = document.createElement("script");
+  s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+  s.setAttribute("data-qrcode-lib","1");
+  s.onload = ()=> console.log("QRCode.js cargado");
+  document.head.appendChild(s);
+})();
+
+/* ==========================================================
+   Helpers comunes (idempotente): canEdit, val, baseURL, slugify
+   ========================================================== */
+(function(){
+  if (window.__CDL_HELPERS_COMMON__) return; window.__CDL_HELPERS_COMMON__ = true;
+
+  // USER puede venir de otros bloques; respétalo
+  window.USER = window.USER || { user:"invitado", rol:"Invitado", group:"guest" };
+
+  const EDIT_ROLES = new Set(["Administrador","Gerente","Encargado","Producción"]);
+  window.canEdit = window.canEdit || function(){
+    return EDIT_ROLES.has((window.USER?.rol)||"Invitado");
+  };
+  window.val = window.val || function(id){
+    return (document.getElementById(id)?.value||"").trim();
+  };
+  window.baseURL = window.baseURL || function(){
+    return (location.origin + location.pathname);
+  };
+  window.slugify = window.slugify || function(s){
+    return String(s||"")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  };
+})();
+
+/* ==========================================================
+   Acción “Parada prolongada” (API → fallback mailto)
+   ========================================================== */
+(function(){
+  if (window.__CDL_ACCIONES__) return; window.__CDL_ACCIONES__ = true;
+
+  window.accionParadaProlongada = window.accionParadaProlongada || async function(equipo){
+    try{
+      const actor = (window.USER?.user)||"anon";
+      const r = await apiPost({res:"mail", fn:"parada_prolongada", equipo, actor});
+      if (r?.ok){ (window.toast||console.log)("Aviso enviado"); return; }
+      throw new Error("mail api not ok");
+    }catch(_){
+      const subj = encodeURIComponent(`[CDL] Parada prolongada — ${equipo}`);
+      const body = encodeURIComponent(
+        `Equipo: ${equipo}\nFecha: ${new Date().toLocaleString("es-ES",{hour12:false})}\n\nDetalle: ...`
+      );
+      location.href = `mailto:?subject=${subj}&body=${body}`;
+    }
+  };
+})();
+</script>
+<script>
+/* ==========================================================
+   Estado global (idempotente)
+   ========================================================== */
+window.STATE = window.STATE || [];
+window.INCID = window.INCID || [];
+window.INV   = window.INV   || [];
+window.REP   = window.REP   || [];
+window.CONS  = window.CONS  || [];
+window.OTS   = window.OTS   || [];
+
+/* ==========================================================
+   Helpers locales
+   ========================================================== */
+(function(){
+  if (window.__CDL_LOCAL_FMT__) return; window.__CDL_LOCAL_FMT__=true;
+
+  window.esc = window.esc || function(str){
+    return String(str??"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+  };
+  window.fmtDate = window.fmtDate || function(d){
+    if(!d) return "";
+    const dt = new Date(d); if (isNaN(dt)) return d;
+    return dt.toLocaleString("es-ES",{hour12:false});
+  };
+})();
+
+/* ==========================================================
+   Carga de datos (API) — usa API_BASE/apiGet/apiPost definidos en Bloque 2
+   ========================================================== */
+async function loadState(){
+  try{
+    const r = await apiGet({res:"state", fn:"list"});
+    window.STATE = Array.isArray(r?.items) ? r.items : [];
+    renderEquiposList();
+
+    // Totales para el status-strip
+    const nStop = STATE.filter(x=>x.estado==="Parada").length;
+    const nWarn = STATE.filter(x=>x.estado==="Restricciones").length;
+    const nOk   = STATE.filter(x=>x.estado==="En marcha").length;
+    const byId = (id)=>document.getElementById(id);
+    byId("kStop")&&(byId("kStop").textContent=nStop);
+    byId("kWarn")&&(byId("kWarn").textContent=nWarn);
+    byId("kOk")&&(byId("kOk").textContent=nOk);
+    byId("kAll")&&(byId("kAll").textContent=STATE.length);
+
+    // Re-pintar TV
+    renderTV && renderTV();
+  }catch(e){ console.error(e); }
+}
+
+async function loadIncid(){
+  try{
+    const r = await apiGet({res:"incid", fn:"list"});
+    if (r?.ok && Array.isArray(r.items)){
+      window.INCID = r.items;
+      renderIncidenciasTable(r.items);
+      renderTV && renderTV();
+      calcKPIs && calcKPIs();
+    }
+  }catch(e){ console.error(e); }
+}
+
+async function loadInv(){
+  try{
+    const r = await apiGet({res:"inv", fn:"list"});
+    if (r?.ok && Array.isArray(r.items)){
+      window.INV = r.items;
+      renderInv(r.items);
+    }
+  }catch(e){ console.error(e); }
+}
+
+async function loadRepSol(){
+  try{
+    const d = await apiGet({res:"rep", fn:"list"});
+    window.REP = d?.ok && Array.isArray(d.items) ? d.items : [];
+    renderRepTable();
+    renderTV && renderTV();
+  }catch(e){ console.error(e); }
+}
+
+async function loadConsumibles(){
+  try{
+    const d = await apiGet({res:"cons", fn:"list"});
+    window.CONS = d.ok ? d.items : [];
+    renderConsTable();
+    renderConsAlerts && renderConsAlerts();
+  }catch(e){ console.error(e); }
+}
+
+async function loadOT(){
+  try{
+    const d = await apiGet({res:"ot", fn:"list"});
+    window.OTS = d.ok ? d.items : [];
+    renderOTTable();
+    renderTV && renderTV();
+  }catch(e){ console.error(e); }
+}
+
+/* ==========================================================
+   Renders principales: Equipos / Incidencias / Inventario / Repuestos / Consumibles / OT
+   ========================================================== */
+function badge(color, txt){
+  return `<span style="display:inline-flex;align-items:center;gap:.35rem;padding:.18rem .48rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff">
+    <i style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block"></i><b>${esc(txt)}</b>
+  </span>`;
+}
+
+function renderEquiposList(){
+  const wrap = document.getElementById("equiposWrap"); if(!wrap) return;
+  const items = (window.STATE||[]);
+  if(!items.length){ wrap.innerHTML = `<div class="card">Sin datos</div>`; return; }
+
+  const colores = { "Parada":"#dc2626", "Restricciones":"#f59e0b", "En marcha":"#16a34a" };
+  const grupos = {};
+  items.forEach(it=>{ (grupos[it.grupo]=grupos[it.grupo]||[]).push(it); });
+
+  wrap.innerHTML = Object.entries(grupos).map(([g,arr])=>{
+    const filas = arr.map(it=>{
+      const c = colores[it.estado]||"#64748b";
+      return `<div class="card" style="display:flex;align-items:center;gap:.6rem;justify-content:space-between">
+        <div><b>${esc(it.nombre)}</b><div class="small" style="color:#64748b">${esc(g)}</div></div>
+        <div>${badge(c, it.estado)}</div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <button class="btn gloss btn-ficha" onclick="location.hash='#/equipo/${encodeURIComponent(slugify(it.nombre))}'">Ficha</button>
+          <button class="btn gloss btn-mail" onclick="accionParadaProlongada(${JSON.stringify(it.nombre)})">Parada prolongada</button>
+        </div>
+      </div>`;
+    }).join("");
+    return `<div><h3 style="margin:.6rem 0 .2rem">${esc(g)}</h3>${filas}</div>`;
+  }).join("");
+}
+
+function renderIncidenciasTable(items){
+  const wrap = document.getElementById("incidTableWrap") || document.createElement("div");
+  wrap.id = "incidTableWrap";
+  wrap.innerHTML = "";
+  if (!items || !items.length){
+    wrap.textContent = "Sin incidencias";
+    return;
+  }
+  const table = document.createElement("table");
+  table.innerHTML = `
+    <thead><tr>
+      <th>Equipo</th><th>Tipo</th><th>Descripción</th>
+      <th>Inicio</th><th>Fin</th><th>Reportante</th>
+    </tr></thead>
+    <tbody>
+      ${items.map(it=>`
+        <tr>
+          <td>${esc(it.equipo)}</td>
+          <td>${esc(it.tipo||"")}</td>
+          <td>${esc(it.desc||"")}</td>
+          <td>${fmtDate(it.inicio)}</td>
+          <td>${fmtDate(it.fin)}</td>
+          <td>${esc(it.reportante||"")}</td>
+        </tr>
+      `).join("")}
+    </tbody>`;
+  wrap.appendChild(table);
+  const sec = document.getElementById("page-incidencias");
+  if (sec && !sec.querySelector("#incidTableWrap")) sec.appendChild(wrap);
+}
+
+function renderInv(items){
+  const wrap = document.getElementById("invWrap");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  if (!items || !items.length){
+    wrap.textContent = "Inventario vacío";
+    return;
+  }
+  items.forEach(it=>{
+    const d = document.createElement("div");
+    d.className = "card";
+    d.innerHTML = `
+      <div><b>${esc(it.nombre)}</b> [${esc(it.ref)}]</div>
+      <div>Stock: ${it.stock} · Mínimo: ${it.minimo}</div>
+      <div>
+        <button onclick="invDelta('${esc(it.ref)}',1)">+1</button>
+        <button onclick="invDelta('${esc(it.ref)}',-1)">-1</button>
+        <button onclick="invDelta('${esc(it.ref)}',10)">+10</button>
+        <button onclick="invDelta('${esc(it.ref)}',-10)">-10</button>
+        <button onclick="invDelta('${esc(it.ref)}',100)">+100</button>
+        <button onclick="invDelta('${esc(it.ref)}',-100)">-100</button>
+      </div>
+    `;
+    wrap.appendChild(d);
   });
 }
 
-/* ===== Boot ===== */
-document.addEventListener("DOMContentLoaded", async ()=>{
-  applyRoleUI();
-  await Promise.all([ loadState(), loadIncid(), loadInv(), loadRepSol(), loadConsumibles(), loadOT() ]);
-  initTV();
-  if(!location.hash) nav('tv'); else handleHash();
-});
+async function invDelta(ref, delta){
+  try{
+    const r = await apiPost({res:"inv", fn:"delta", ref, delta, actor: (USER?.user||"anon")});
+    if (r?.ok){
+      (window.toast||console.log)("Stock actualizado: "+ref);
+      loadInv();
+    }
+  }catch(e){ console.error(e); }
+}
+
+/* ---- Repuestos solicitados ---- */
+function renderRepTable(){
+  const host = document.getElementById("repWrap");
+  if (!host) return;
+
+  if (!window.REP || !window.REP.length){
+    host.innerHTML = `<div class="card">Sin solicitudes</div>`;
+    return;
+  }
+
+  const rows = window.REP.map(r=>`
+    <tr data-id="${esc(r.id)}">
+      <td class="nowrap">${esc(fmtDate(r.created||""))}</td>
+      <td>${esc(r.id)}</td>
+      <td>${esc(r.ref)}</td>
+      <td>
+        <button class="btn gloss btn-ficha" title="Abrir ficha de inventario" onclick="openRepuestoByRef('${esc(r.ref)}')">${esc(r.nombre)}</button>
+      </td>
+      <td>${esc(r.solicitante||"-")}</td>
+      <td>
+        <select class="repestado" data-id="${esc(r.id)}">
+          ${["Pendiente","Aprobado","Denegado","Recibido"].map(s=>`<option ${s===(r.estado||"Pendiente")?'selected':''}>${s}</option>`).join("")}
+        </select>
+      </td>
+      <td><input class="repcoment in-txt" data-id="${esc(r.id)}" value="${esc(r.comentario||"")}" placeholder="Comentario"></td>
+      <td class="nowrap">
+        <div class="qty" data-ref="${esc(r.ref)}" style="margin-bottom:.35rem;display:flex;gap:.25rem;flex-wrap:wrap">
+          <button class="page-btn rep-delta" data-delta="+1"   data-ref="${esc(r.ref)}">+1</button>
+          <button class="page-btn rep-delta" data-delta="-1"   data-ref="${esc(r.ref)}">-1</button>
+          <button class="page-btn rep-delta" data-delta="+10"  data-ref="${esc(r.ref)}">+10</button>
+          <button class="page-btn rep-delta" data-delta="-10"  data-ref="${esc(r.ref)}">-10</button>
+          <button class="page-btn rep-delta" data-delta="+100" data-ref="${esc(r.ref)}">+100</button>
+          <button class="page-btn rep-delta" data-delta="-100" data-ref="${esc(r.ref)}">-100</button>
+        </div>
+        <button class="btn gloss rep-guardar" data-id="${esc(r.id)}">Guardar</button>
+      </td>
+    </tr>
+  `).join("");
+
+  host.innerHTML = `
+    <div id="repTableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th><th>ID</th><th>Ref</th><th>Nombre</th><th>Solicitante</th>
+            <th>Estado</th><th>Comentario</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  const tb = host.querySelector("tbody");
+  if (!tb) return;
+
+  // Guardar fila (estado/comentario)
+  tb.querySelectorAll(".rep-guardar").forEach(b=>{
+    b.addEventListener("click", async (e)=>{
+      if (!canEdit()) return alert("Sin permiso.");
+      const id = e.currentTarget.getAttribute("data-id");
+      const estado = tb.querySelector(`.repestado[data-id="${CSS.escape(id)}"]`)?.value || "Pendiente";
+      const comentario = tb.querySelector(`.repcoment[data-id="${CSS.escape(id)}"]`)?.value || "";
+      try{
+        const r = await apiPost({res:"rep", fn:"set", id, estado, comentario, actor:(USER?.user||"anon")});
+        if (r?.ok){ (window.toast||console.log)("Guardado"); loadRepSol(); }
+        else alert(r?.error||"No se pudo guardar");
+      }catch(err){ console.error(err); alert("Error de red"); }
+    });
+  });
+
+  // Ajustes rápidos al inventario desde la solicitud
+  tb.querySelectorAll(".rep-delta").forEach(b=>{
+    b.addEventListener("click", async (e)=>{
+      if (!canEdit()) return alert("Sin permiso.");
+      const ref   = e.currentTarget.getAttribute("data-ref");
+      const delta = Number(e.currentTarget.getAttribute("data-delta"));
+      try{
+        const r = await apiPost({res:"inv", fn:"delta", ref, delta, actor:(USER?.user||"anon")});
+        if (r?.ok){ (window.toast||console.log)(`Inventario ${ref}: ${r.stock}`); loadInv(); }
+      }catch(err){ console.error(err); }
+    });
+  });
+}
+
+/* ---- Consumibles ---- */
+function renderConsTable(){
+  const host = document.getElementById("consWrap"); if (!host) return;
+  if (!Array.isArray(CONS) || !CONS.length){
+    host.innerHTML = `<div class="card">Sin consumibles</div>`;
+    return;
+  }
+  const rows = CONS.map(c=>`
+    <tr>
+      <td>${esc(c.ref)}</td>
+      <td>${esc(c.nombre)}</td>
+      <td class="num">${c.stock}</td>
+      <td class="num">${c.minimo}</td>
+      <td>${c.updated ? esc(fmtDate(c.updated)) : ""}</td>
+      <td class="nowrap">
+        <div class="qty" data-ref="${esc(c.ref)}">
+          <button class="page-btn cons-delta" data-delta="+1"   data-ref="${esc(c.ref)}">+1</button>
+          <button class="page-btn cons-delta" data-delta="-1"   data-ref="${esc(c.ref)}">-1</button>
+          <button class="page-btn cons-delta" data-delta="+10"  data-ref="${esc(c.ref)}">+10</button>
+          <button class="page-btn cons-delta" data-delta="-10"  data-ref="${esc(c.ref)}">-10</button>
+          <button class="page-btn cons-delta" data-delta="+100" data-ref="${esc(c.ref)}">+100</button>
+          <button class="page-btn cons-delta" data-delta="-100" data-ref="${esc(c.ref)}">-100</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+  host.innerHTML = `
+    <div id="consTableWrap">
+      <table>
+        <thead>
+          <tr><th>Ref</th><th>Nombre</th><th>Stock</th><th>Mínimo</th><th>Actualizado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  host.querySelectorAll("button.cons-delta").forEach(b=>{
+    b.addEventListener("click", async (e)=>{
+      if (!canEdit()) return alert("Sin permiso.");
+      const ref   = e.currentTarget.getAttribute("data-ref");
+      const delta = Number(e.currentTarget.getAttribute("data-delta"));
+      try{
+        const r = await apiPost({res:"cons", fn:"delta", ref, delta, actor: USER?.user||"anon"});
+        if (r?.ok){ (window.toast||console.log)(`Stock ${ref}: ${r.stock}`); loadConsumibles(); }
+      }catch(err){ console.error(err); }
+    });
+  });
+}
+
+/* ---- Órdenes de trabajo ---- */
+function renderOTTable(){
+  const host = document.getElementById("otWrap"); if (!host) return;
+  if (!Array.isArray(OTS) || !OTS.length){
+    host.innerHTML = `<div class="card">Sin OT</div>`;
+    return;
+  }
+  const rows = OTS.map(o=>`
+    <tr>
+      <td>${esc(fmtDate(o.created||""))}</td>
+      <td>${esc(o.id)}</td>
+      <td>${esc(o.prioridad||"")}</td>
+      <td>${esc(o.asignado||"")}</td>
+      <td>${esc(o.vencimiento||"")}</td>
+      <td>${esc(o.estado||"")}</td>
+    </tr>
+  `).join("");
+  host.innerHTML = `
+    <div id="otTableWrap">
+      <table>
+        <thead>
+          <tr><th>Fecha</th><th>OT</th><th>Prioridad</th><th>Asignado</th><th>Vence</th><th>Estado</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+/* ==========================================================
+   Dashboard TV — 4 paneles
+   ========================================================== */
+(function(){
+  if (window.__CDL_TV4__) return; window.__CDL_TV4__=true;
+
+  function ensureTVHost(){
+    const sec = document.getElementById("page-tv"); if(!sec) return null;
+    if (!sec.__tv4__){
+      sec.innerHTML = `
+        <h2 class="cdl-tag">Dashboard TV</h2>
+        <div class="tv-grid" id="tvGrid">
+          <article class="tv-card"><h3><span class="badge"><span class="dot dot-stop"></span> PARADAS</span></h3><div id="tvParadas" class="tv-list"></div></article>
+          <article class="tv-card"><h3><span class="badge"><span class="dot dot-warn"></span> RESTRICCIONES</span></h3><div id="tvRestr" class="tv-list"></div></article>
+          <article class="tv-card"><h3><span class="badge">REPUESTOS · URGENCIA</span></h3><div id="tvRep" class="tv-list"></div></article>
+          <article class="tv-card"><h3><span class="badge">PARADAS PREVISTAS (OT)</span></h3><div id="tvPrev" class="tv-list"></div></article>
+        </div>`;
+      sec.__tv4__ = true;
+    }
+    return sec;
+  }
+
+  function fmtDia(d){ try{ return d ? new Date(d).toLocaleDateString("es-ES",{hour12:false}) : "—"; }catch(_){ return d||"—"; } }
+  function fillList(id, arr){
+    const host = document.getElementById(id); if(!host) return;
+    host.innerHTML = (arr.length
+      ? arr.map(t=>`<div class="tv-item">${t}</div>`).join("")
+      : `<div class="tv-item tv-empty">—</div>`);
+  }
+
+  window.renderTV = window.renderTV || function(){
+    if (!ensureTVHost()) return;
+    const STATE = (window.STATE||[]);
+    const REP   = (window.REP||[]);
+    const OTS   = (window.OTS||[]);
+    const INC   = (window.INCID||[]);
+
+    // A) PARADAS (por estado actual + incidencias recientes tipo "parada")
+    const parNow = STATE.filter(x=>x.estado==="Parada").map(x=>x.nombre);
+    const parInc = INC.filter(x=> String(x.tipo).toLowerCase()==="parada")
+                      .sort((a,b)=> new Date(b.inicio)-new Date(a.inicio))
+                      .slice(0,12)
+                      .map(x=>`${esc(x.equipo)} — <b>${fmtDia(x.inicio)}</b>${x.desc?(" · "+esc(x.desc)):""}`);
+    const par = [...new Set(parNow.concat(parInc))].slice(0,12);
+    fillList("tvParadas", par);
+
+    // B) RESTRICCIONES (estado + incidencias tipo "restricciones")
+    const resNow = STATE.filter(x=>x.estado==="Restricciones").map(x=>x.nombre);
+    const resInc = INC.filter(x=> String(x.tipo).toLowerCase()==="restricciones")
+                      .sort((a,b)=> new Date(b.inicio)-new Date(a.inicio))
+                      .slice(0,12)
+                      .map(x=>`${esc(x.equipo)} — <b>${fmtDia(x.inicio)}</b>${x.desc?(" · "+esc(x.desc)):""}`);
+    const res = [...new Set(resNow.concat(resInc))].slice(0,12);
+    fillList("tvRestr", res);
+
+    // C) REPUESTOS (orden por urgencia y fecha prevista)
+    const rank = { "Alta":3, "Media":2, "Baja":1 };
+    const repRows = (REP||[]).map(r=>({
+      txt: `${esc(r.ref)} — ${esc(r.nombre||"")} · <span class="urg urg-${(r.urgencia||'baja').toLowerCase()}">${esc(r.urgencia||'Baja')}</span> · Entrega: ${fmtDia(r.entrega||r.fecha||r.fechaPrevista)}`,
+      urg: rank[(r.urgencia||"Baja")]||1,
+      eta: new Date(r.entrega||r.fecha||r.fechaPrevista||"2100-01-01").getTime()
+    }))
+    .sort((a,b)=> (b.urg-a.urg) || (a.eta-b.eta))
+    .slice(0,12)
+    .map(x=>x.txt);
+    fillList("tvRep", repRows);
+
+    // D) PREVENTIVOS/OT
+    const prev = (OTS||[])
+      .filter(o=> /prevent/i.test(o.titulo||o.tipo||"") || /prevent/i.test(o.prioridad||""))
+      .map(o=>({ t: `${esc(o.id)} — ${esc(o.titulo||"")} · Vence: ${fmtDia(o.vencimiento)}`, v: new Date(o.vencimiento||"2100-01-01").getTime() }))
+      .sort((a,b)=> a.v-b.v)
+      .slice(0,12)
+      .map(x=>x.t);
+    fillList("tvPrev", prev);
+  };
+
+  // Timer de refresco suave
+  let _TV_T=null;
+  window.initTV = window.initTV || function(){
+    renderTV();
+    if(_TV_T) clearInterval(_TV_T);
+    _TV_T=setInterval(renderTV, 10000);
+  };
+})();
+
+/* ==========================================================
+   Fichas de equipo y repuesto (rutado por hash)
+   ========================================================== */
+function renderEquipoBySlug(slug){
+  document.querySelectorAll('[id^="page-"]').forEach(el=> el.classList.add("hidden"));
+  document.getElementById("page-equipo")?.classList.remove("hidden");
+  const host = document.getElementById("equipoDetail");
+
+  const eq = (window.STATE||[]).find(x => slugify(x.nombre) === slug);
+  if (!host || !eq){ if (host) host.innerHTML = "<div class='card'>No encontrado</div>"; return; }
+
+  const base = baseURL();
+  host.innerHTML = `
+    <div class="card">
+      <h3 style="margin:.1rem 0">${esc(eq.nombre)}</h3>
+      <div class="sub">${esc(eq.grupo)}</div>
+      <div style="margin:.5rem 0">Estado actual: <b>${esc(eq.estado)}</b></div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn gloss btn-mail" onclick="accionParadaProlongada(${JSON.stringify(eq.nombre)})">Parada prolongada (email)</button>
+        <button class="btn gloss btn-ficha" onclick="window.print()">Imprimir ficha</button>
+        <button class="btn gloss" onclick="history.back()">Volver</button>
+      </div>
+      <div style="margin-top:.6rem"><div id="qrficha"></div></div>
+    </div>
+  `;
+  const qr = document.getElementById("qrficha");
+  if (qr && window.QRCode){
+    new QRCode(qr, { text: `${base}#/equipo/${slug}`, width:96, height:96 });
+  }
+}
+
+function openRepuestoByRef(ref){
+  const slug = encodeURIComponent(ref);
+  location.hash = `#/repuesto/${slug}`;
+  renderRepuestoByRef(ref);
+}
+
+function renderRepuestoByRef(ref){
+  document.querySelectorAll('[id^="page-"]').forEach(el=> el.classList.add("hidden"));
+  document.getElementById("page-repuesto")?.classList.remove("hidden");
+  const host = document.getElementById("repuestoDetail");
+
+  const it = (window.INV||[]).find(x => String(x.ref).toUpperCase() === String(ref).toUpperCase());
+  if (!host || !it){ if (host) host.innerHTML = "<div class='card'>No encontrado</div>"; return; }
+
+  const base = baseURL();
+  host.innerHTML = `
+    <div class="card">
+      <h3 style="margin:.1rem 0">${esc(it.nombre)}</h3>
+      <div class="sub">Ref: <b>${esc(it.ref)}</b></div>
+      <div style="margin:.5rem 0">Stock: <b>${it.stock}</b> · Mínimo: <b>${it.minimo}</b></div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn gloss" onclick="window.print()">Imprimir etiqueta</button>
+        <button class="btn gloss" onclick="history.back()">Volver</button>
+      </div>
+      <div style="margin-top:.6rem"><div id="qrrep"></div></div>
+    </div>
+  `;
+  const qr = document.getElementById("qrrep");
+  if (qr && window.QRCode){
+    new QRCode(qr, { text: `${base}#/repuesto/${encodeURIComponent(it.ref)}`, width:96, height:96 });
+  }
+}
+
+/* ==========================================================
+   Router + Boot + Timers
+   ========================================================== */
+(function(){
+  if (window.__CDL_ROUTER_BOOT__) return; window.__CDL_ROUTER_BOOT__=true;
+
+  // Router por hash
+  function handleHash(){
+    const h = location.hash || "";
+    if (!h){ nav && nav("tv"); return; }
+
+    const mEq = h.match(/^#\/equipo\/(.+)$/);
+    const mRp = h.match(/^#\/repuesto\/(.+)$/);
+
+    if (mEq){ renderEquipoBySlug(mEq[1]); return; }
+    if (mRp){ const ref = decodeURIComponent(mRp[1]||""); renderRepuestoByRef(ref); return; }
+
+    const p = h.replace(/^#\/?/,"");
+    const pages = ["equipos","gruas","otros","incidencias","indicadores","ot","inventario","repuestos","consumibles","tv","personal","logs"];
+    if (pages.includes(p) && typeof nav==="function"){ nav(p); return; }
+
+    nav && nav("tv");
+  }
+  window.addEventListener("hashchange", handleHash);
+
+  // Sello de tiempo del resumen
+  function updateSummaryTimestamp(){
+    const d = new Date();
+    const el = document.getElementById("kUpdated");
+    if (el) el.textContent = d.toLocaleString("es-ES",{hour12:false});
+  }
+  setInterval(updateSummaryTimestamp, 30*1000);
+
+  // Boot
+  document.addEventListener("DOMContentLoaded", async ()=>{
+    try{
+      // Carga inicial paralela
+      await Promise.all([loadState(), loadIncid(), loadInv(), loadRepSol(), loadConsumibles(), loadOT()]);
+      // KPIs + TV
+      calcKPIs && calcKPIs();
+      renderTV && renderTV();
+      initTV && initTV();
+      // Router inicial
+      handleHash();
+      // Sello de tiempo
+      updateSummaryTimestamp();
+    }catch(e){ console.error(e); }
+  });
+  
 </script>
+
 </body>
 </html>
+
