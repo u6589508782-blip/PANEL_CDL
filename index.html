@@ -1,1729 +1,944 @@
-<!-- ====== BLOQUE 1.1 (HEAD + APERTURA BODY + CABECERA) ====== -->
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="format-detection" content="telephone=no">
-<title>CDL · CMMS</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CDL · Mantenimiento</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#E43B3B">
 
-<!-- PWA -->
-<link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0c0f14">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CDL · CMMS">
-<link rel="icon" sizes="192x192" href="/icon-192.png">
-<link rel="icon" sizes="512x512" href="/icon-512.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <!-- BLOQUE 001: TOKENS + TEMA BLANCO CDL -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" />
+  <style>
+    :root{
+      /* Marca CDL */
+      --cdl-red:#E43B3B;        /* rojo corporativo */
+      --cdl-black:#1F2937;      /* texto titulares */
+      --cdl-ink:#111827;        /* texto intenso */
+      --cdl-muted:#6B7280;      /* texto secundario */
+      --cdl-line:#E5E7EB;       /* líneas suaves */
+      --hdr-h: 76px;            /* alto cabecera móvil */
+      --container: 1080px;      /* ancho máx. contenido */
+    }
+    html,body{ background:#fff; color:#111; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+    /* Contenedor global tipo web corporativa */
+    .cdl-container{ width:min(100%, var(--container)); margin-inline:auto; padding-inline:16px; }
+    /* Botones rojos corporativos */
+    .btn-cdl{
+      border:0; border-radius:999px; font-weight:800; letter-spacing:.02em; cursor:pointer;
+      padding:.7rem 1.2rem; background:var(--cdl-red); color:#fff;
+      box-shadow:0 8px 18px rgba(228,59,59,.22);
+    }
+    .btn-cdl:active{ transform:translateY(1px); }
+    /* Separadores suaves */
+    .cdl-divider{ height:1px; background:var(--cdl-line); margin:16px 0; }
+  </style>
 
-<!-- Fuente -->
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- BLOQUE 002: TITULARES CON MARCO ROJO CDL -->
+  <style>
+    :where(h1,h2,h3){
+      position:relative; margin:1.1rem 0 .8rem; padding-left:.65rem;
+      font-weight:900; letter-spacing:.02em; color:var(--cdl-black);
+      line-height:1.15;
+    }
+    :where(h1)::before, :where(h2)::before, :where(h3)::before{
+      content:""; position:absolute; left:0; top:0.1rem;
+      width:18px; height:18px; display:block;
+      background:
+        linear-gradient(90deg,var(--cdl-red) 0 100%) 0 0/100% 6px no-repeat,
+        linear-gradient(180deg,var(--cdl-red) 0 100%) 0 0/6px 100% no-repeat;
+      border-radius:1px;
+    }
+    h1{ font-size:clamp(1.6rem, 2.8vw, 2.25rem); }
+    h2{ font-size:clamp(1.25rem, 2.2vw, 1.6rem); }
+    h3{ font-size:clamp(1.05rem, 1.8vw, 1.25rem); color:#1b1f24; }
+    .cdl-underline{ box-shadow: inset 0 -10px rgba(228,59,59,.18); display:inline; }
+  </style>
 
-<style>
-:root{
-  --brand1:#A60000; --brand2:#E43B3B;
-  --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
-  --ink:#0b0f15; --muted:#6b7280; --line:#e5e7eb;
-  --bg:#ffffff; --bg-dark:#0b0f15; --panel:#111827;
-  --safe-top: env(safe-area-inset-top,0px);
-  --safe-bottom: env(safe-area-inset-bottom,0px);
-  --hdr-h: 140px;
-}
-*{ box-sizing: border-box; }
-html,body{ height:100%; }
-body{
-  margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  color:var(--ink); background:var(--bg);
-  -webkit-text-size-adjust:100%;
-  padding-top:var(--safe-top); padding-bottom:var(--safe-bottom);
-}
-.hidden{ display:none !important; }
-img,canvas,svg,video{ max-width:100%; height:auto; }
-</style>
+  <!-- BLOQUE 003: ESTILOS CABECERA + WATERMARK -->
+  <style>
+    .cdl-header{ position:sticky; top:0; z-index:1000; height:var(--hdr-h); background:#fff; border-bottom:1px solid var(--cdl-line); }
+    .cdl-header__inner{ height:var(--hdr-h); display:flex; align-items:center; justify-content:space-between; position:relative; }
+    /* Hamburger */
+    .cdl-hamb{ width:42px; height:42px; display:grid; place-items:center; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
+    .cdl-hamb span{ width:18px; height:2px; background:#111; display:block; }
+    .cdl-hamb span+span{ margin-top:4px; }
+    /* User area */
+    .cdl-user{ display:flex; align-items:center; gap:.5rem; }
+    .cdl-user__role{ font-weight:800; color:#111; }
+    .cdl-user__btn{ width:42px; height:42px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; color:#111; }
+
+    /* Watermark en parte alta con logo_mantenimiento */
+    #cdlHeader::after{
+      content:""; position:absolute; inset:-40% -10% 40% -10%;
+      pointer-events:none; z-index:0;
+      background:
+        radial-gradient(60% 60% at 0% 0%, rgba(228,59,59,.08), transparent 70%) no-repeat,
+        url('./logo_mantenimiento.png') left 24px top 8px / 260px auto no-repeat;
+      opacity:.9;
+    }
+    .cdl-header__inner{ position:relative; z-index:1; }
+  </style>
+
+  <!-- BLOQUE 004: ESTILOS PANEL LATERAL + LISTAS -->
+  <style>
+    .cdl-panel{ position:fixed; inset:0 auto 0 0; width:min(86vw, 360px); background:#fff; z-index:1100;
+      border-right:1px solid var(--cdl-line); transform:translateX(-102%); transition:transform .28s ease; display:flex; flex-direction:column; }
+    .cdl-panel[aria-hidden="false"]{ transform:translateX(0); }
+    .cdl-panel__backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.28); z-index:1090; }
+    .cdl-panel__head{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--cdl-line); }
+    .cdl-x{ width:36px; height:36px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; font-weight:900; }
+    .cdl-panel__search{ display:flex; gap:.5rem; padding:12px 16px; border-bottom:1px solid var(--cdl-line); }
+    .cdl-panel__search input{ flex:1; height:40px; border:1px solid #e5e7eb; border-radius:10px; padding:0 .7rem; }
+    .cdl-panel__nav{ display:grid; gap:.2rem; padding:10px 8px; }
+    .cdl-panel__nav a{ display:block; padding:.7rem .8rem; border-radius:12px; font-weight:800; color:#111; }
+    .cdl-panel__nav a:hover{ background:#f3f4f6; }
+    .cdl-panel__foot{ margin-top:auto; padding:10px 16px; border-top:1px solid var(--cdl-line); color:#6b7280; }
+
+    /* Lista/ tarjetas equipos */
+    .equipos-grid{ display:grid; grid-template-columns:1fr; gap:12px; padding-bottom:22px; }
+    @media(min-width:720px){ .equipos-grid{ grid-template-columns: repeat(2, 1fr); } }
+    @media(min-width:1024px){ .equipos-grid{ grid-template-columns: repeat(3, 1fr); } }
+    .eq-card{ border:1px solid #e5e7eb; border-radius:14px; background:#fff; overflow:hidden; display:flex; flex-direction:column; }
+    .eq-card__media{ aspect-ratio: 16/9; background:#f3f4f6 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="290" height="162"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%239ca3af" font-family="Arial" font-size="14">Foto equipo</text></svg>') center/contain no-repeat; }
+    .eq-card__body{ padding:12px; display:grid; gap:10px; }
+    .eq-title{ font-weight:900; color:#111; display:flex; align-items:center; justify-content:space-between; }
+    .eq-meta{ color:#6b7280; font-size:.9rem; }
+    .eq-actions{ display:flex; gap:8px; justify-content:space-between; align-items:center; }
+    .eq-actions .btn-cdl{ padding:.55rem .8rem; }
+    .eq-qr{ width:60px; height:60px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; display:grid; place-items:center; }
+  </style>
+
+  <!-- BLOQUE 005: ESTILOS SEMÁFORO + FICHA + PRINT -->
+  <style>
+    .cdl-sem{ display:flex; align-items:center; gap:.65rem; }
+    .cdl-sem .chip{
+      display:inline-flex; align-items:center; gap:.45rem; padding:.28rem .6rem;
+      border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#111; font-weight:900;
+    }
+    .cdl-sem .dot{ width:12px; height:12px; border-radius:50%; box-shadow:0 0 0 2px #fff inset, 0 0 0 1px rgba(0,0,0,.08); }
+    .dot-ok{ background:#16a34a; } .dot-warn{ background:#f59e0b; } .dot-stop{ background:#dc2626; }
+
+    .cdl-sem .btn{
+      border:1px solid #e5e7eb; background:#fff; color:#111; border-radius:10px; height:36px; padding:0 .7rem; font-weight:800;
+    }
+    .cdl-sem .btn[data-state="En marcha"]{ border-color:#16a34a33; }
+    .cdl-sem .btn[data-state="Restricciones"]{ border-color:#f59e0b33; }
+    .cdl-sem .btn[data-state="Parada"]{ border-color:#dc262633; }
+    .cdl-sem.compact .btn{ height:30px; padding:0 .55rem; font-size:.85rem; }
+
+    .eq-detail{ display:grid; grid-template-columns:1fr; gap:16px; }
+    .eq-detail__right{ border:1px solid #e5e7eb; border-radius:14px; padding:12px; }
+    .eq-qr-big{ width:180px; height:180px; border:1px solid #e5e7eb; border-radius:12px; background:#fff; display:grid; place-items:center; margin-bottom:10px; }
+    .kpi{ border:1px solid #e5e7eb; border-radius:12px; padding:8px; background:#fff; display:grid; gap:4px; }
+    .kpi b{ font-size:1.15rem; }
+    .eq-table{ border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; }
+    .eq-table table{ width:100%; border-collapse:collapse; font-size:.95rem; }
+    .eq-table th,.eq-table td{ padding:8px 10px; border-bottom:1px solid #f1f5f9; text-align:left; }
+    .eq-table th{ background:#f8fafc; color:#111; }
+    .evt-form{ display:grid; gap:8px; }
+    .evt-form input,.evt-form select,.evt-form textarea{
+      width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:.55rem .6rem; background:#fff;
+    }
+    @media(min-width:1024px){
+      .eq-detail{ grid-template-columns: 1.35fr .8fr; }
+    }
+
+    /* Print */
+    @media print{
+      header, #cdlHeader, #pagesPanel, #panelBackdrop, .btn-cdl, .cdl-divider, #equiposView { display:none !important; }
+      #equipoView{ display:block !important; }
+      .eq-detail{ grid-template-columns: 1.2fr .8fr !important; gap:10px; }
+      body{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    }
+  </style>
 </head>
 <body>
+  <!-- BLOQUE 006: CABECERA CDL -->
+  <header id="cdlHeader" class="cdl-header" role="banner" aria-label="Cabecera CDL">
+    <div class="cdl-container cdl-header__inner">
+      <!-- Menú hamburguesa (izquierda) -->
+      <button id="btnMenu" class="cdl-hamb" aria-label="Abrir menú" aria-controls="pagesPanel" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <!-- Logotipo CDL -->
+      <div class="cdl-logo">
+        <img src="./logo-cdl.png" alt="CDL" height="28" />
+      </div>
+      <!-- Área usuario (derecha) -->
+      <div class="cdl-user">
+        <div class="cdl-user__role" id="userRole">Mantenimiento</div>
+        <button id="userBtn" class="cdl-user__btn" aria-label="Abrir panel de usuario">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
 
-<header>
-  <div class="nav" id="navBar">
-    <!-- Menú (hamburguesa) -->
-    <div class="menu menu-pages">
-      <button id="pagesBtn" aria-label="Menú" aria-expanded="false" aria-controls="pagesPanel">☰</button>
-      <div id="pagesPanel" class="panel hidden" aria-label="Menú principal" style="min-width:260px">
-        <div class="row">
-          <div class="actions">
-            <button class="btn" onclick="nav('equipos')">Equipos</button>
-            <button class="btn" onclick="nav('gruas')">Puentes Grúa</button>
-            <button class="btn" onclick="nav('otros')">Otros</button>
-            <button class="btn" onclick="nav('incidencias')">Incidencias</button>
-            <button class="btn" onclick="nav('indicadores')">Indicadores</button>
-            <button class="btn" onclick="nav('ot')">OT</button>
-            <button class="btn" onclick="nav('inventario')">Inventario</button>
-            <button class="btn" onclick="nav('repuestos')">Repuestos solicitados</button>
-            <button class="btn" onclick="nav('consumibles')">Consumibles</button>
-            <button class="btn" onclick="nav('tv')">Dashboard TV</button>
-          </div>
+  <!-- BLOQUE 007: PANEL LATERAL -->
+  <aside id="pagesPanel" class="cdl-panel" aria-hidden="true" aria-label="Menú principal">
+    <div class="cdl-panel__head">
+      <img src="./logo-cdl.png" alt="CDL" height="24">
+      <button id="btnClosePanel" class="cdl-x" aria-label="Cerrar menú">✕</button>
+    </div>
+    <div class="cdl-panel__search">
+      <input id="searchBox" type="search" placeholder="Buscar equipo…">
+      <button id="searchBtn" class="btn-cdl" style="padding:.55rem .9rem;">Buscar</button>
+    </div>
+    <nav class="cdl-panel__nav">
+      <a href="#/equipos">Equipos</a>
+      <a href="#/incidencias">Incidencias</a>
+      <a href="#/repuestos">Repuestos</a>
+      <a href="#/kpi">KPIs</a>
+      <a href="#/ajustes">Ajustes</a>
+    </nav>
+    <div class="cdl-panel__foot">
+      <small>© CDL · Mantenimiento</small>
+    </div>
+  </aside>
+  <div id="panelBackdrop" class="cdl-panel__backdrop" hidden></div>
+
+  <!-- BLOQUE 008: HERO / LANDING -->
+  <main id="main" class="cdl-container" role="main" tabindex="-1" style="padding-top:18px;">
+    <section class="cdl-hero" aria-label="Resumen de mantenimiento">
+      <h1><span class="cdl-underline">Gestión de Mantenimiento</span></h1>
+      <p style="color:#4b5563; max-width:70ch; margin:.4rem 0 1rem">
+        Control integral de equipos CDL: estados, incidencias, repuestos y KPIs, con la misma línea visual que <strong>www.cdl.es</strong>.
+      </p>
+      <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+        <button class="btn-cdl" onclick="location.hash='#/equipos'">Ver equipos</button>
+        <button class="btn-cdl" style="background:#111" onclick="location.hash='#/tv'">Dashboard TV</button>
+      </div>
+    </section>
+    <div class="cdl-divider"></div>
+  </main>
+
+  <!-- BLOQUE 009: SEMÁFORO TEMPLATE -->
+  <template id="tplSemaforo">
+    <div class="cdl-sem" role="group" aria-label="Estado del equipo">
+      <span class="chip" id="chipState"><i class="dot"></i><b class="txt">—</b></span>
+      <button class="btn" data-state="En marcha"       aria-pressed="false">Marcha</button>
+      <button class="btn" data-state="Restricciones"   aria-pressed="false">Restr.</button>
+      <button class="btn" data-state="Parada"          aria-pressed="false">Paro</button>
+    </div>
+  </template>
+
+  <!-- BLOQUE 010: VISTA LISTA DE EQUIPOS -->
+  <section id="equiposView" class="cdl-container" hidden>
+    <h2>Equipos</h2>
+    <div id="equiposGrid" class="equipos-grid"></div>
+  </section>
+
+  <!-- BLOQUE 011: VISTA FICHA DE EQUIPO -->
+  <section id="equipoView" class="cdl-container" hidden>
+    <a href="#/equipos" class="btn-cdl" style="background:#111; margin-top:8px;">← Volver</a>
+    <header style="margin-top:10px;">
+      <h2 id="eqName">Equipo</h2>
+      <p id="eqMeta" class="eq-meta"></p>
+    </header>
+
+    <div class="cdl-divider"></div>
+
+    <div class="eq-detail">
+      <div class="eq-detail__left">
+        <div id="eqSem" class="cdl-sem"></div>
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:10px;">
+          <div class="kpi"><b id="kpi-hm">0h</b><span>Horas marcha</span></div>
+          <div class="kpi"><b id="kpi-hr">0h</b><span>Horas restricciones</span></div>
+          <div class="kpi"><b id="kpi-hp">0h</b><span>Horas paro</span></div>
+          <div class="kpi"><b id="kpi-rp">0</b><span>Reparaciones</span></div>
+          <div class="kpi"><b id="kpi-mtbf">—</b><span>MTBF</span></div>
+          <div class="kpi"><b id="kpi-dispo">—</b><span>Disponibilidad</span></div>
         </div>
+
+        <h3 style="margin-top:14px;">Histórico</h3>
+        <div id="eqTable" class="eq-table"></div>
       </div>
-    </div>
-<!-- ====== FIN BLOQUE 1.1 ====== -->
 
-<!-- ====== BLOQUE 1.2 (CABECERA: LOGO, ROL, MENÚ USUARIO) ====== -->
+      <aside class="eq-detail__right">
+        <h3>QR del equipo</h3>
+        <div id="eqQR" class="eq-qr-big"></div>
+        <button class="btn-cdl" onclick="window.print()">Imprimir ficha</button>
 
-    <!-- Título centrado -->
-    <div class="hero-title">
-      <div class="hero-row">
-        <img src="/logo-cdl.png" alt="CDL" class="hero-logo-cdl">
-        <span class="hero-panel">PANEL DE CONTROL</span>
-      </div>
-    </div>
-
-    <!-- Chip de rol y menú usuario -->
-    <span id="roleChip" class="rolechip" aria-label="Rol actual">Invitado</span>
-    <div class="menu menu-user">
-      <button id="userBtn" aria-label="Usuario" aria-expanded="false" aria-controls="userPanel">⋮</button>
-      <div id="userPanel" class="panel hidden" aria-label="Panel de usuario">
-        <div class="row">
-          <label class="small">Usuario</label>
-          <select id="userSelect">
-            <option value="invitado">Invitado</option>
-            <option value="admin">Administrador</option>
-            <option value="gerente">Gerente</option>
-            <option value="encargado">Encargado</option>
-            <option value="produccion">Producción</option>
-            <option value="rt11">RT1.1</option>
-            <option value="rt12">RT1.2</option>
-            <option value="rt21">RT2.1</option>
-            <option value="rt22">RT2.2</option>
-            <option value="rt31">RT3.1</option>
-            <option value="rt32">RT3.2</option>
-            <option value="tcoint">Tco.INT</option>
-            <option value="subc">Subcontrata</option>
-          </select>
-
-          <label class="small" style="margin-top:.4rem">Contraseña</label>
-          <div class="pw" style="display:flex;gap:.4rem;align-items:center">
-            <input id="userPass" type="password" placeholder="••••••••" style="flex:1">
-            <button type="button" class="pw-toggle" data-target="userPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
-          </div>
-
-          <div class="actions" style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">
-            <button class="btn gloss" onclick="login()">Entrar</button>
-            <button class="btn gloss" onclick="logout()">Salir</button>
-          </div>
-        </div>
-
-        <div class="row" style="margin-top:.8rem">
-          <label class="small">Cambiar contraseña</label>
-          <div class="pw" style="display:flex;gap:.4rem;align-items:center">
-            <input id="oldPass" type="password" placeholder="Actual" style="flex:1">
-            <button type="button" class="pw-toggle" data-target="oldPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
-          </div>
-          <div class="pw" style="margin-top:.4rem;display:flex;gap:.4rem;align-items:center">
-            <input id="newPass" type="password" placeholder="Nueva" style="flex:1">
-            <button type="button" class="pw-toggle" data-target="newPass" aria-label="Mostrar contraseña" aria-pressed="false"></button>
-          </div>
-          <div class="actions" style="margin-top:.6rem">
-            <button class="btn gloss" onclick="changePwd()">Cambiar</button>
-          </div>
-          <div id="pwdMsg" class="small" style="margin-top:.4rem;color:#374151"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</header>
-<!-- ====== FIN BLOQUE 1.2 ====== --> <!-- ====== BLOQUE 1.3 (STATUS STRIP + SECCIONES PRINCIPALES) ====== -->
-
-<main>
-
-  <!-- Resumen alto impacto (totales y última actualización) -->
-  <section id="status-strip" style="background:#0b0f15;color:#e5e7eb;border-bottom:1px solid #1f2937">
-    <div style="max-width:1200px;margin:0 auto;padding:.55rem .8rem;display:flex;gap:.8rem;align-items:center;flex-wrap:wrap">
-      <div style="font-weight:900;letter-spacing:.02em">RESUMEN</div>
-      <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
-        <span id="sumStop" style="display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .5rem;border-radius:999px;border:1px solid #7f1d1d;background:#1b0b0b;font-weight:800">
-          <span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block"></span>
-          <span>Paradas:</span><b id="kStop">0</b>
-        </span>
-        <span id="sumWarn" style="display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .5rem;border-radius:999px;border:1px solid #854d0e;background:#1b1404;font-weight:800">
-          <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span>
-          <span>Restricciones:</span><b id="kWarn">0</b>
-        </span>
-        <span id="sumOk" style="display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .5rem;border-radius:999px;border:1px solid #14532d;background:#0a1b12;font-weight:800">
-          <span style="width:10px;height:10px;border-radius:50%;background:#16a34a;display:inline-block"></span>
-          <span>En marcha:</span><b id="kOk">0</b>
-        </span>
-        <span id="sumAll" style="display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .5rem;border-radius:999px;border:1px solid #334155;background:#0b1220;font-weight:800">
-          <span>Total:</span><b id="kAll">0</b>
-        </span>
-      </div>
-      <div style="margin-left:auto;font-weight:700;color:#94a3b8">Última actualización: <span id="kUpdated">—</span></div>
+        <h3 style="margin-top:14px;">Nuevo evento</h3>
+        <form id="evtForm" class="evt-form">
+          <label>Tipo
+            <select name="tipo" required>
+              <option value="Avería">Avería</option>
+              <option value="Restricción">Restricción</option>
+              <option value="Paro">Paro</option>
+              <option value="Reparación">Reparación</option>
+              <option value="Marcha">Marcha</option>
+            </select>
+          </label>
+          <label>Horas (si aplica) <input type="number" step="0.1" min="0" name="horas" placeholder="0"></label>
+          <label>Coste repuesto (€) <input type="number" step="0.01" min="0" name="coste" placeholder="0"></label>
+          <label>Detalle <textarea name="detalle" rows="3" placeholder="Descripción…"></textarea></label>
+          <button class="btn-cdl" type="submit">Guardar evento</button>
+        </form>
+      </aside>
     </div>
   </section>
-
-  <!-- ====== SECCIONES ====== -->
-
-  <section id="page-equipos">
-    <h2 class="cdl-tag">Equipos</h2>
-    <div class="brand-wrap">
-      <img src="/linea-kaltenbach.png" alt="LÍNEA KALTENBACH"
-           loading="lazy" decoding="async" fetchpriority="low"
-           onerror="this.closest('.brand-wrap').classList.add('fallback'); this.remove();">
-    </div>
-
-    <!-- Leyenda local para esta vista -->
-    <div id="legend-equipos" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:.5rem 0">
-      <span style="display:inline-flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:#dc2626;display:inline-block"></span>Parada</span>
-      <span style="display:inline-flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span>Restricciones</span>
-      <span style="display:inline-flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:#16a34a;display:inline-block"></span>En marcha</span>
-      <span style="margin-left:auto;display:flex;gap:.4rem;flex-wrap:wrap">
-        <button id="btnShowCritical" class="btn gloss">Ver solo críticas</button>
-        <button id="btnResetFilters" class="btn gloss">Ver todo</button>
-      </span>
-    </div>
-
-    <div id="equiposWrap"></div>
-
-    <div class="right" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem">
-      <button id="btnExportIncidCSVTop" class="btn gloss">Incidencias CSV</button>
-      <button id="btnExportIncidPDFTop" class="btn gloss">Incidencias PDF</button>
-    </div>
-  </section>
-
-  <section id="page-gruas" class="hidden">
-    <h2 class="cdl-tag">Puentes Grúa</h2>
-    <div id="gruasWrap"></div>
-  </section>
-
-  <section id="page-otros" class="hidden">
-    <h2 class="cdl-tag">Otros (auxiliares)</h2>
-    <div id="otrosWrap"></div>
-  </section>
-
-  <!-- 🔹 NUEVAS SECCIONES DE DETALLE (usadas por el router #/equipo/:slug y #/repuesto/:ref) -->
-  <section id="page-equipo" class="hidden">
-    <div id="equipoDetail"></div>
-  </section>
-
-  <section id="page-repuesto" class="hidden">
-    <div id="repuestoDetail"></div>
-  </section>
-
-  <!-- Inventario -->
-  <section id="page-inv" class="hidden">
-    <h2 class="cdl-tag">Inventario</h2>
-
-    <div style="margin:.5rem 0;display:flex;flex-wrap:wrap;gap:.5rem">
-      <input id="invRef" placeholder="Referencia" class="in-txt">
-      <input id="invNombre" placeholder="Nombre" class="in-txt">
-      <input id="invStock" type="number" placeholder="Stock" class="in-txt" style="width:90px">
-      <input id="invMin" type="number" placeholder="Mínimo" class="in-txt" style="width:90px">
-      <button id="btnAddInv" class="btn gloss">Añadir</button>
-    </div>
-
-    <div id="invWrap"></div>
-
-    <!-- 🔸 Botón de exportación que ya usan los scripts -->
-    <div class="right" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem">
-      <button id="btnExportInvCSV" class="btn gloss">Exportar CSV</button>
-    </div>
-  </section>
-
-  <!-- Repuestos solicitados -->
-  <section id="page-rep" class="hidden">
-    <h2 class="cdl-tag">Repuestos solicitados</h2>
-
-    <div style="margin:.5rem 0;display:flex;flex-wrap:wrap;gap:.5rem">
-      <input id="repRef" placeholder="Referencia" class="in-txt">
-      <input id="repNombre" placeholder="Nombre repuesto" class="in-txt">
-      <button id="btnAddRep" class="btn gloss">Solicitar</button>
-    </div>
-
-    <div id="repWrap"></div>
-
-    <div class="right" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem">
-      <button id="btnExportRepCSV" class="btn gloss">Exportar CSV</button>
-      <button id="btnExportRepPDF" class="btn gloss">Exportar PDF</button>
-    </div>
-  </section>
-
-  <!-- Consumibles -->
-  <section id="page-cons" class="hidden">
-    <h2 class="cdl-tag">Consumibles recurrentes</h2>
-
-    <div style="margin:.5rem 0;display:flex;flex-wrap:wrap;gap:.5rem">
-      <input id="consRef" placeholder="Referencia" class="in-txt">
-      <input id="consNombre" placeholder="Nombre consumible" class="in-txt">
-      <input id="consStock" type="number" placeholder="Stock" class="in-txt" style="width:90px">
-      <input id="consMin" type="number" placeholder="Mínimo" class="in-txt" style="width:90px">
-      <button id="btnAddCons" class="btn gloss">Añadir</button>
-    </div>
-
-    <div id="consWrap"></div>
-
-    <!-- 🔸 Botón de exportación que ya usan los scripts -->
-    <div class="right" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem">
-      <button id="btnExportConsCSV" class="btn gloss">Exportar CSV</button>
-    </div>
-  </section>
-
-  <!-- Órdenes de trabajo -->
-  <section id="page-ot" class="hidden">
-    <h2 class="cdl-tag">Órdenes de trabajo</h2>
-
-    <div style="margin:.5rem 0;display:flex;flex-wrap:wrap;gap:.5rem">
-      <input id="otEquipo" placeholder="Equipo" class="in-txt">
-      <input id="otTitulo" placeholder="Título" class="in-txt">
-      <input id="otVencimiento" type="date" class="in-txt">
-      <select id="otPrioridad" class="in-txt">
-        <option value="A">Alta</option>
-        <option value="M">Media</option>
-        <option value="B">Baja</option>
-      </select>
-      <button id="btnAddOT" class="btn gloss">Crear OT</button>
-    </div>
-
-    <div id="otWrap"></div>
-    <!-- Nota: el botón Exportar PDF de OT lo inserta dinámicamente renderOTTable() -->
-  </section>
-
-  <!-- Personal -->
-  <section id="page-personal" class="hidden">
-    <h2 class="cdl-tag">Personal</h2>
-    <div id="personalWrap"></div>
-  </section>
-
-  <!-- Logs -->
-  <section id="page-logs" class="hidden">
-    <h2 class="cdl-tag">Histórico de logs</h2>
-    <div id="logsWrap"></div>
-  </section>
-
-  <!-- Incidencias -->
-  <section id="page-incidencias" class="hidden">
-    <h2 class="cdl-tag">Incidencias</h2>
-
-    <div style="margin:.5rem 0;display:flex;flex-wrap:wrap;gap:.5rem">
-      <input id="incidEquipo" placeholder="Equipo" class="in-txt">
-      <input id="incidTipo" placeholder="Tipo" class="in-txt">
-      <input id="incidDesc" placeholder="Descripción" class="in-txt" style="flex:1">
-      <button id="btnAddIncid" class="btn gloss">Añadir</button>
-    </div>
-
-    <div id="incidTableWrap"></div>
-
-    <div class="right" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem">
-      <button id="btnExportIncidCSV" class="btn gloss">Exportar CSV</button>
-      <button id="btnExportIncidPDF" class="btn gloss">Exportar PDF</button>
-    </div>
-  </section>
-
-  <!-- Indicadores -->
-  <section id="page-indicadores" class="hidden">
-    <h2 class="cdl-tag">Indicadores</h2>
-
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <h3>MTTR</h3>
-        <canvas id="chartMttr" aria-label="MTTR (Tiempo medio de reparación)" width="320" height="180"></canvas>
-        <div><b id="kpiMttrG">0.00</b> h</div>
-      </div>
-      <div class="kpi-card">
-        <h3>MTBF</h3>
-        <canvas id="chartMtbf" aria-label="MTBF (Tiempo medio entre fallos)" width="320" height="180"></canvas>
-        <div><b id="kpiMbfG">0.00</b> h</div>
-      </div>
-      <div class="kpi-card">
-        <h3>Disponibilidad</h3>
-        <canvas id="chartDisp" aria-label="Disponibilidad de equipos" width="320" height="180"></canvas>
-        <div><b id="kpiDispG">0.00</b> %</div>
-      </div>
-      <div class="kpi-card">
-        <h3>OEE</h3>
-        <canvas id="chartOee" aria-label="Eficiencia global de equipos (OEE)" width="320" height="180"></canvas>
-        <div><b id="kpiOeeG">0.00</b> %</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Dashboard TV -->
-  <section id="page-tv" class="hidden">
-    <h2 class="cdl-tag">Dashboard TV</h2>
-
-    <div style="display:flex;flex-direction:column;gap:1rem;max-width:800px;margin:0 auto">
-      <div>
-        <h3>Equipos Parados</h3>
-        <div id="tvParados" class="tv-list"></div>
-      </div>
-      <div>
-        <h3>Equipos con Restricciones</h3>
-        <div id="tvRestr" class="tv-list"></div>
-      </div>
-      <div>
-        <h3>Stock Crítico</h3>
-        <div id="tvStock" class="tv-list"></div>
-      </div>
-    </div>
-  </section>
-
-</main>
-<!-- ====== FIN BLOQUE 1.3 ====== -->
-<!-- ========== BLOQUE 1.4 (INICIO) ========== -->
-<style>
-/* Chip de rol visible y limpio */
-.rolechip{
-  position:absolute; right:12px; top:8px;
-  font-size:.92rem; font-weight:800; color:#f3f4f6; background:transparent; border:0; padding:0;
-}
-
-/* Título centrado y alineado a logo CDL */
-.hero-title{ display:flex; align-items:center; justify-content:center; }
-.hero-title .hero-row{ display:flex; align-items:center; gap:10px; white-space:nowrap; }
-.hero-title .hero-panel{ font-weight:800; letter-spacing:.02em; color:#f3f4f6; }
-.hero-logo-cdl{ height:22px; width:auto; display:inline-block; }
-
-/* Panel menús en pantalla completa */
-html.menu-open,body.menu-open{ overflow:hidden; }
-.panel.menu-full{
-  position:fixed !important; z-index:2400 !important;
-  inset: calc(var(--safe-top) + var(--hdr-h)) 0 var(--safe-bottom) 0 !important;
-  background:#0b0f15 !important;
-  background-image:linear-gradient(180deg,#0b0f15,#121820 60%,#0b0f15) !important;
-}
-.panel.menu-full::before{
-  content:""; position:absolute; inset:0;
-  background: radial-gradient(1200px 600px at 50% -10%, rgba(255,255,255,.06), transparent 60%);
-  pointer-events:none;
-}
-#pagesPanel.menu-full .actions{
-  width:min(560px,92vw); margin:0 auto !important;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:0; height:100%;
-}
-#pagesPanel.menu-full .btn{
-  background:none!important; border:0!important; box-shadow:none!important;
-  color:#fff!important; font-weight:900; text-transform:uppercase; letter-spacing:.06em;
-  font-size:clamp(18px,3vh,28px); padding:1.05rem 0; text-align:center; position:relative; cursor:pointer;
-}
-#pagesPanel.menu-full .btn + .btn::before{
-  content:""; position:absolute; top:0; left:0; right:0; height:1px; opacity:.85;
-  background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9) 0%, rgba(255,255,255,.4) 35%, rgba(255,255,255,0) 100%);
-}
-</style>
-<!-- ========== BLOQUE 1.4 (FIN) ========== -->
-
-
-<!-- ========== BLOQUE 1.5 (INICIO) ========== -->
-<style>
-/* Botones genéricos */
-.btn.gloss{
-  display:inline-flex; align-items:center; gap:.5rem;
-  padding:.34rem .62rem; border-radius:999px; border:1px solid #cbd5e1;
-  background:linear-gradient(180deg,#fdfdfd,#dfe3eb); color:#111; font-weight:800;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 12px rgba(0,0,0,.12); cursor:pointer;
-}
-.btn.gloss.btn-mail{
-  color:#fff!important; background:linear-gradient(180deg,#ff5a5a,#c10f0f)!important; border-color:#9f0c0c!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(178,15,15,.35)!important;
-}
-.btn.gloss.btn-ficha{
-  background:linear-gradient(180deg,#111,#222)!important; color:#fff!important; border-color:#000!important;
-}
-
-/* Sombra cabecera al hacer scroll */
-header.scrolled{ box-shadow:0 4px 10px rgba(0,0,0,.18); }
-
-/* Ojo (mostrar/ocultar contraseña) bien visible */
-.pw-toggle{
-  width:32px; height:32px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; cursor:pointer;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>');
-  background-repeat:no-repeat; background-position:center;
-}
-.pw-toggle.on{
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.77 19.77 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a19.8 19.8 0 0 1-4.22 5.02M1 1l22 22"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/></svg>');
-}
-
-/* Ajuste responsive del logo cabecera */
-@media (max-width: 420px){
-  .hero-logo-cdl{ height:18px; }
-}
-</style>
-<!-- ========== BLOQUE 1.5 (FIN) ========== -->
+<!-- BLOQUE 012: JS SEMÁFORO -->
 <script>
-/* ========== BLOQUE 4.1 (INICIO) ========== */
-/* ====== BOOT ====== */
-const API_BASE = "https://script.google.com/macros/s/AKfycbzPxPJztSCo7dX-xmzYW_pBwkQne3aACe1EzzlNDsjr0nuRXZaOSOrRGzVrYZsN5cgF/exec";
-
-function byId(id){ return document.getElementById(id); }
-function show(id){ byId(id)?.classList.remove("hidden"); }
-function hide(id){ byId(id)?.classList.add("hidden"); }
-function toggle(id){ byId(id)?.classList.toggle("hidden"); }
-
-function qs(sel){ return document.querySelector(sel); }
-function qsa(sel){ return [...document.querySelectorAll(sel)]; }
-function esc(str){ return String(str).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
-
-function getCID(){ return localStorage.getItem("CDL_CID") || ""; }
-function setCID(v){ localStorage.setItem("CDL_CID",v); }
-
-let USER = { user:"invitado", rol:"Invitado", group:"guest" };
-function setUser(u){ USER=u; localStorage.setItem("CDL_USER",JSON.stringify(u)); applyRoleUI(); }
-function getUser(){ try{return JSON.parse(localStorage.getItem("CDL_USER")||"{}");}catch(_){return USER;} }
-USER=getUser()||USER;
-/* ========== BLOQUE 4.1 (FIN) ========== */
-/* ========== BLOQUE 4.2 (INICIO) ========== */
-async function apiGet(q){
-  const u=new URL(API_BASE);
-  Object.entries(q).forEach(([k,v])=>u.searchParams.set(k,v));
-  const r=await fetch(u);
-  return await r.json();
-}
-
-async function apiPost(q){
-  const r=await fetch(API_BASE,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(q)
-  });
-  return await r.json();
-}
-
-function fmtDate(d){
-  if(!d)return"";
-  const dt=new Date(d);
-  if(isNaN(dt))return d;
-  return dt.toLocaleString("es-ES",{hour12:false});
-}
-
-function copyText(txt){
-  navigator.clipboard.writeText(txt)
-    .then(()=>toast("Copiado"))
-    .catch(()=>alert("No se pudo copiar"));
-}
-
-function applyRoleUI(){
-  qsa("[data-role]").forEach(el=>{
-    const roles=(el.getAttribute("data-role")||"").split(",");
-    if(roles.includes(USER.rol)||USER.rol==="Administrador"){
-      el.style.display="";
-    }else{
-      el.style.display="none";
-    }
-  });
-  byId("roleChip").textContent = USER.rol;  // 🔹 corregido
-}
-/* ========== BLOQUE 4.2 (FIN) ========== */
-/* ========== BLOQUE 4.3 (INICIO) ========== */
-function renderState(items){
-  const wrap=byId("stateWrap");
-  if(!wrap)return;
-  wrap.innerHTML="";
-  if(!items||!items.length){ wrap.textContent="Sin datos"; return; }
-
-  const groups={};
-  items.forEach(it=>{
-    if(!groups[it.grupo])groups[it.grupo]=[];
-    groups[it.grupo].push(it);
-  });
-
-  Object.keys(groups).forEach(g=>{
-    const sec=document.createElement("section");
-    const h=document.createElement("h3");
-    h.textContent=g;
-    sec.appendChild(h);
-
-    groups[g].forEach(it=>{
-      const d=document.createElement("div");
-      d.className="card";
-      d.innerHTML=`<div><b>${esc(it.nombre)}</b><br>
-      Estado: <span class="${it.estado.toLowerCase()}">${esc(it.estado)}</span><br>
-      Actualizado: ${fmtDate(it.updated)}</div>`;
-      sec.appendChild(d);
-    });
-    wrap.appendChild(sec);
-  });
-}
-/* ========== BLOQUE 4.3 (FIN) ========== */
-/* ========== BLOQUE 5.1 (INICIO) ========== */
-/* KPIs y minigráficas (placeholder sin libs externas) */
 (function(){
-  const notify = (window.toast || window.showToast || (m=>console.log(m)));
-
-  if (typeof calcKPIs === "undefined"){
-    window.calcKPIs = function(){
-      try{
-        const data = (window.INCID || []);
-        const totalRep = data.reduce((a,x)=>a + (+x.hRep||0), 0);
-        const nRep = data.length || 1;
-        const mttr = totalRep / nRep;
-
-        const setTxt = (id,v)=>{ const n=document.getElementById(id); if(n) n.textContent=String(v); };
-        const fmt = (n)=> (Math.round((+n||0)*100)/100).toFixed(2);
-
-        setTxt("kpiMttrG", fmt(mttr));
-        setTxt("kpiMbfG", "0.00");
-        setTxt("kpiDispG","0.00");
-        setTxt("kpiOeeG", "0.00");
-      }catch(e){ console.error(e); }
-    };
+  if (window.__CDL_SEM__) return; window.__CDL_SEM__ = true;
+  const COLORS = { "En marcha":"ok", "Restricciones":"warn", "Parada":"stop" };
+  function setChip(chip, estado){
+    const dot = chip.querySelector('.dot'), txt = chip.querySelector('.txt');
+    dot.className = 'dot dot-' + (COLORS[estado]||'warn');
+    txt.textContent = estado || '—';
+    chip.setAttribute('data-state', estado);
+    chip.parentElement?.querySelectorAll('.btn').forEach(b=>{
+      const on = b.dataset.state === estado;
+      b.setAttribute('aria-pressed', on?'true':'false');
+      b.style.outline = on ? '2px solid rgba(0,0,0,.12)' : 'none';
+      b.style.background = on ? '#f9fafb' : '#fff';
+    });
   }
-
-  if (typeof drawAllCharts === "undefined"){
-    window.drawAllCharts = function(){
-      ["chartMttr","chartMtbf","chartDisp","chartOee"].forEach(id=>{
-        const c = document.getElementById(id); if(!c) return;
-        const ctx = c.getContext("2d");
-        ctx.clearRect(0,0,c.width,c.height);
-        ctx.fillStyle = "#0f141c";
-        ctx.fillRect(0,0,c.width,c.height);
-        ctx.fillStyle = "#e5e7eb";
-        ctx.font = "16px Inter, Arial, sans-serif";
-        ctx.fillText(c.getAttribute("aria-label")||"", 12, 22);
+  window.mountSemaforo = function(host, {equipo, estado}){
+    const tpl = document.getElementById('tplSemaforo');
+    if (!tpl || !host) return;
+    const node = tpl.content.firstElementChild.cloneNode(true);
+    const chip = node.querySelector('#chipState');
+    setChip(chip, estado||'Restricciones');
+    node.querySelectorAll('.btn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const newState = btn.dataset.state;
+        try{
+          if (typeof window.setEquipoEstado === 'function'){
+            await window.setEquipoEstado(equipo, newState);
+          }
+          setChip(chip, newState);
+        }catch(e){ console.error(e); alert('No se pudo actualizar el estado'); }
       });
-      notify("KPIs dibujados");
-    };
-  }
-})();
-/* ========== BLOQUE 5.1 (FIN) ========== */
-
-/* ========== BLOQUE 5.2 (INICIO) ========== */
-/* Router por hash + utilidades de navegación */
-(function(){
-  if (typeof window.handleHash === "undefined"){
-    window.handleHash = function(){
-      const h = location.hash || "";
-      if (!h){ window.nav && nav("equipos"); return; }
-
-      const mEq = h.match(/^#\/equipo\/(.+)$/);
-      const mRp = h.match(/^#\/repuesto\/(.+)$/);
-
-      if (mEq && window.renderEquipoBySlug){ renderEquipoBySlug(mEq[1]); return; }
-      if (mRp && window.renderRepuestoByRef){ const ref = decodeURIComponent(mRp[1]||""); renderRepuestoByRef(ref); return; }
-
-      const p = h.replace(/^#\/?/,"");
-      const pages = ["equipos","gruas","otros","incidencias","indicadores","ot","inventario","repuestos","consumibles","tv"];
-      if (pages.includes(p) && window.nav){ nav(p); return; }
-
-      window.nav && nav("equipos");
-    };
-    window.addEventListener("hashchange", window.handleHash);
-  }
-
-  // Actualización del sello de tiempo del resumen
-  if (typeof window.updateSummaryTimestamp === "undefined"){
-    window.updateSummaryTimestamp = function(){
-      const d = new Date();
-      const el = document.getElementById("kUpdated");
-      if (el) el.textContent = d.toLocaleString("es-ES",{hour12:false});
-    };
-    setInterval(window.updateSummaryTimestamp, 30*1000);
-    window.updateSummaryTimestamp();
-  }
-})();
-/* ========== BLOQUE 5.2 (FIN) ========== */
-
-/* ========== BLOQUE 5.3 (INICIO) ========== */
-/* Utilidades de exportación y ventana de impresión (con guardas) */
-(function(){
-  if (typeof window.csvEscape === "undefined"){
-    window.csvEscape = function(v){
-      v = (v==null?'':String(v));
-      if (/[",\n;]/.test(v)) return `"${v.replace(/"/g,'""')}"`;
-      return v;
-    };
-  }
-
-  if (typeof window.toCSV === "undefined"){
-    window.toCSV = function(rows){ return rows.map(r => r.map(window.csvEscape).join(";")).join("\n"); };
-  }
-
-  if (typeof window.download === "undefined"){
-    window.download = function(name, content, type="text/plain"){
-      const blob = new Blob([content], {type});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
-    };
-  }
-
-  if (typeof window.exportCSVFromTable === "undefined"){
-    window.exportCSVFromTable = function(tableSel, fileName){
-      const table = document.querySelector(tableSel); if(!table) return;
-      const rows = [...table.querySelectorAll("tr")]
-        .map(tr => [...tr.children].map(td => td.innerText.trim()));
-      window.download(fileName, window.toCSV(rows), "text/csv;charset=utf-8");
-    };
-  }
-
-  if (typeof window.exportSimpleCSV === "undefined"){
-    window.exportSimpleCSV = function(name, headers, items, pick){
-      const rows = [headers].concat(items.map(pick));
-      window.download(name, window.toCSV(rows), "text/csv;charset=utf-8");
-    };
-  }
-
-  if (typeof window.printHTML === "undefined"){
-    window.printHTML = function(title, html){
-      const w = window.open("", "_blank");
-      w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>
-        body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:16px}
-        table{width:100%;border-collapse:collapse}
-        th,td{border:1px solid #ddd;padding:6px 8px}
-        th{background:#f3f4f6}
-      </style></head><body>${html}</body></html>`);
-      w.document.close(); w.focus(); w.print();
-    };
-  }
-})();
-
-/* ========== BLOQUE 5.3 (FIN) ========== */
-/* ========== BLOQUE 5.4 (INICIO) ========== */
-/* TV Dashboard (renderizado periódico) */
-(function(){
-  if (typeof window.renderTV === "undefined"){
-    window.renderTV = function(){
-      try{
-        const esc = (s)=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-        const STATE = (window.STATE||[]);
-        const INV   = (window.INV||[]);
-        const par = STATE.filter(x=>x.estado==="Parada").map(x=>x.nombre);
-        const wrn = STATE.filter(x=>x.estado==="Restricciones").map(x=>x.nombre);
-        const low = INV.filter(x=>(x.stock||0)<=(x.minimo||0)).map(x=>`${x.ref} (${x.stock}/${x.minimo})`);
-        const fill = (id,arr)=>{
-          const el = document.getElementById(id); if(!el) return;
-          el.innerHTML = arr.length ? arr.map(n=>`<div class="tv-item">${esc(n)}</div>`).join("") : `<div class="tv-item" style="opacity:.6">—</div>`;
-        };
-        fill("tvParados", par);
-        fill("tvRestr",  wrn);
-        fill("tvStock",  low);
-      }catch(e){ console.error(e); }
-    };
-  }
-  if (typeof window.initTV === "undefined"){
-    let TV_TIMER = null;
-    window.initTV = function(){
-      if (TV_TIMER) clearInterval(TV_TIMER);
-      window.renderTV && renderTV();
-      TV_TIMER = setInterval(()=>{ window.renderTV && renderTV(); }, 10000);
-    };
-  }
-})();
-/* ========== BLOQUE 5.4 (FIN) ========== */
-
-/* ========== BLOQUE 5.5 (INICIO) ========== */
-/* Bind de UI principal + arranque (DOMContentLoaded) */
-(function(){
-  if (typeof window.bindUI === "undefined"){
-    window.bindUI = function(){
-      // Sello de tiempo (con guarda para no duplicar timers)
-      if (typeof window.updateSummaryTimestamp === "function"){
-        if (!window.__TS_TIMER__){
-          window.__TS_TIMER__ = setInterval(window.updateSummaryTimestamp, 30*1000);
-        }
-        window.updateSummaryTimestamp();
-      }
-
-      const byId=(id)=>document.getElementById(id);
-
-      // (INCIDENCIAS) 👉 Eliminado aquí, lo gestiona el BLOQUE 5.5.x compartido
-
-      // Export Inventario
-      byId("btnExportInvCSV")?.addEventListener("click",()=>{
-        if(!exportSimpleCSV)return;
-        const INV=(window.INV||[]);
-        exportSimpleCSV("inventario.csv",
-          ["Ref","Nombre","Stock","Mínimo"],
-          INV,
-          x=>[x.ref,x.nombre,x.stock,x.minimo]);
-      });
-
-      // Export Consumibles
-      byId("btnExportConsCSV")?.addEventListener("click",()=>{
-        if(!exportSimpleCSV)return;
-        const CONS=(window.CONS||[]);
-        const fmtDate=(d)=> new Date(d).toLocaleString("es-ES",{hour12:false});
-        exportSimpleCSV("consumibles.csv",
-          ["Ref","Nombre","Stock","Mínimo","Actualizado"],
-          CONS,
-          x=>[x.ref,x.nombre,x.stock,x.minimo,x.updated?fmtDate(x.updated):""]);
-      });
-
-      // Export Repuestos solicitados
-      byId("btnExportRepCSV")?.addEventListener("click",()=>{
-        if(!exportSimpleCSV)return;
-        const REP=(window.REP||[]);
-        exportSimpleCSV("repuestos.csv",
-          ["ID","Ref","Nombre","Solicitante","Estado"],
-          REP,
-          x=>[x.id,x.ref,x.nombre,x.solicitante||"",x.estado||""]);
-      });
-      byId("btnExportRepPDF")?.addEventListener("click",()=>{
-        const REP=(window.REP||[]);
-        if(!window.printHTML)return;
-        const rows=REP.map(r=>
-          `<tr><td>${r.id}</td><td>${r.ref}</td><td>${r.nombre}</td><td>${r.solicitante||""}</td><td>${r.estado||""}</td></tr>`).join("");
-        printHTML("Repuestos solicitados",
-          `<h2>Repuestos solicitados</h2><table>
-            <thead><tr><th>ID</th><th>Ref</th><th>Nombre</th><th>Solicitante</th><th>Estado</th></tr></thead>
-            <tbody>${rows}</tbody></table>`);
-      });
-
-      // Export OT
-      byId("btnExportOTPDF")?.addEventListener("click",()=>{
-        const OTS=(window.OTS||[]);
-        if(!window.printHTML)return;
-        const fmtDate=(d)=> new Date(d).toLocaleString("es-ES",{hour12:false});
-        const rows=OTS.map(o=>
-          `<tr><td>${fmtDate(o.created||"")}</td><td>${o.id}</td><td>${o.prioridad||""}</td><td>${o.asignado||""}</td><td>${o.vencimiento||""}</td><td>${o.estado||""}</td></tr>`).join("");
-        printHTML("Órdenes de trabajo",
-          `<h2>Órdenes de trabajo</h2><table>
-            <thead><tr><th>Fecha</th><th>OT</th><th>Prioridad</th><th>Asignado</th><th>Vence</th><th>Estado</th></tr></thead>
-            <tbody>${rows}</tbody></table>`);
-      });
-    };
-  }
-
-  // Boot (idempotente)
-  if (!window.__CDL_BOOT_ATTACHED__){
-    window.__CDL_BOOT_ATTACHED__=true;
-    document.addEventListener("DOMContentLoaded", async ()=>{
-      try{
-        bindUI && bindUI();
-        loadState && await loadState();
-        if(loadIncid && loadInv && loadRepSol && loadConsumibles && loadOT){
-          await Promise.all([loadIncid(),loadInv(),loadRepSol(),loadConsumibles(),loadOT()]);
-        }
-        calcKPIs && calcKPIs();
-        drawAllCharts && drawAllCharts();
-        handleHash && handleHash();
-      }catch(e){ console.error(e); }
     });
-  }
-})();
-/* ========== BLOQUE 5.5 (FIN) ========== */
-/* ========== BLOQUE 5.5.x (INICIO) — Listeners export Incidencias (IDs únicos) ========== */
-(function(){
-  if (window.__INCID_EXPORT_BOUND__) return;
-  window.__INCID_EXPORT_BOUND__ = true;
-
-  const tableSel = "#incidTableWrap table";
-
-  const handleCSV = ()=>{
-    const t = document.querySelector(tableSel);
-    if (!t) { alert("No hay tabla de incidencias"); return; }
-    if (typeof exportCSVFromTable === "function"){
-      exportCSVFromTable(tableSel, "incidencias.csv");
-    }
+    host.innerHTML = ''; host.appendChild(node);
   };
-
-  const handlePDF = ()=>{
-    const t = document.querySelector(tableSel);
-    if (!t) { alert("No hay tabla de incidencias"); return; }
-    if (typeof printHTML === "function"){
-      printHTML("Incidencias", `<h2>Incidencias</h2><table>${t.innerHTML}</table>`);
-    }
-  };
-
-  ["btnExportIncidCSV","btnExportIncidCSVTop"].forEach(id=>{
-    document.getElementById(id)?.addEventListener("click", handleCSV);
-  });
-  ["btnExportIncidPDF","btnExportIncidPDFTop"].forEach(id=>{
-    document.getElementById(id)?.addEventListener("click", handlePDF);
+  document.querySelectorAll('[data-sem]').forEach(el=>{
+    const equipo = el.getAttribute('data-equipo') || 'Equipo';
+    const estado = el.getAttribute('data-state') || 'Restricciones';
+    mountSemaforo(el, {equipo, estado});
   });
 })();
-/* ========== BLOQUE 5.5.x (FIN) ========== */
-/* ========== BLOQUE 5.6 (INICIO) ========== */
-/* SW auto-actualiza + loader QR + utilidades Toast */
-(function(){
-  // Toast unificado (mantiene compatibilidad con showToast y toast)
-  if (typeof window.toast === "undefined"){
-    window.toast = function(msg){
-      let t = document.getElementById("toast");
-      if(!t){
-        t = document.createElement("div");
-        t.id = "toast";
-        t.style.position="fixed";
-        t.style.left="50%";
-        t.style.bottom="16px";
-        t.style.transform="translateX(-50%)";
-        t.style.background="#0b0f15";
-        t.style.color="#e5e7eb";
-        t.style.border="1px solid #1f2937";
-        t.style.padding=".5rem .8rem";
-        t.style.borderRadius="12px";
-        t.style.boxShadow="0 10px 26px rgba(0,0,0,.35)";
-        t.style.opacity="0";
-        t.style.transition="opacity .25s ease";
-        t.style.zIndex="3000";
-        document.body.appendChild(t);
-      }
-      t.textContent = msg;
-      t.style.opacity = "1";
-      clearTimeout(window.__TOAST_T);
-      window.__TOAST_T = setTimeout(()=> t.style.opacity = "0", 1800);
-    };
-  }
-  if (typeof window.showToast === "undefined"){
-    window.showToast = (m)=> window.toast(m);
-  }
-
-  // Service Worker auto-actualiza
-  if ('serviceWorker' in navigator && !window.__CDL_SW_BOUND__){
-    window.__CDL_SW_BOUND__ = true;
-    window.addEventListener('load', async () => {
-      try {
-        const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
-        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        reg.addEventListener('updatefound', () => {
-          const nw = reg.installing;
-          nw && nw.addEventListener('statechange', () => {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              reg.waiting && reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-            }
-          });
-        });
-        navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
-      } catch (e) { console.error('SW register error', e); }
-    });
-  }
-
-  // QRCode lazy loader (si no está cargado)
-  (function loadQRLib(){
-    if (window.QRCode || document.querySelector('script[data-qrcode-lib]')) return;
-    const s = document.createElement("script");
-    s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
-    s.setAttribute("data-qrcode-lib","1");
-    s.onload = ()=> console.log("QRCode.js cargado");
-    document.head.appendChild(s);
-  })();
-})();
-/* ========== BLOQUE 5.6 (FIN) ========== */
-/* ========== BLOQUE 5.7 (INICIO) — Helpers y navegación (producción) ========== */
-(function(){
-  if (window.__CDL_HELPERS_READY__) return;
-  window.__CDL_HELPERS_READY__ = true;
-
-  // Espejo del usuario actual (compatibilidad con código previo)
-  window.currentUser = window.currentUser || USER;
-
-  // Roles con permiso de edición (ajusta si Producción no debe editar)
-  const EDIT_ROLES = new Set(["Administrador","Gerente","Encargado","Producción"]);
-  if (typeof window.canEdit !== "function"){
-    window.canEdit = ()=> EDIT_ROLES.has((USER?.rol)||"Invitado");
-  }
-
-  // Helpers básicos
-  if (typeof window.val !== "function"){
-    window.val = (id)=> (document.getElementById(id)?.value||"").trim();
-  }
-  if (typeof window.baseURL !== "function"){
-    window.baseURL = ()=> (location.origin + location.pathname);
-  }
-  if (typeof window.slugify !== "function"){
-    window.slugify = (s)=> String(s||"")
-      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-      .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
-  }
-  if (typeof window.ensureSectionsHidden !== "function"){
-    window.ensureSectionsHidden = ()=>{
-      document.querySelectorAll('[id^="page-"]').forEach(el=> el.classList.add("hidden"));
-    };
-  }
-
-  // Mapa nav -> id de sección real en tu HTML
-  const PAGE_ID = {
-    equipos:      "page-equipos",
-    gruas:        "page-gruas",
-    otros:        "page-otros",
-    incidencias:  "page-incidencias",
-    indicadores:  "page-indicadores",
-    ot:           "page-ot",
-    inventario:   "page-inv",
-    repuestos:    "page-rep",
-    consumibles:  "page-cons",
-    tv:           "page-tv",
-    personal:     "page-personal",
-    logs:         "page-logs",
-
-    // Detalles (por si existieran en tu layout)
-    equipo:       "page-equipo",
-    repuesto:     "page-repuesto",
-  };
-
-  // Navegación principal (idempotente)
-  if (typeof window.nav !== "function"){
-    window.nav = (page)=>{
-      const id = PAGE_ID[page] || PAGE_ID["equipos"];
-      window.ensureSectionsHidden && ensureSectionsHidden();
-
-      const tgt = document.getElementById(id);
-      if (tgt) tgt.classList.remove("hidden");
-
-      // hash navegable (no romper el back)
-      try{
-        const desired = "#/"+page;
-        if (location.hash !== desired) location.hash = desired;
-      }catch(_){}
-    };
-  }
-
-  // Cerrar menús (páginas / usuario) y desbloquear scroll
-  if (typeof window.closeAllMenus !== "function"){
-    window.closeAllMenus = ()=>{
-      const p = document.getElementById("pagesPanel");
-      const u = document.getElementById("userPanel");
-      if (p){ p.classList.add("hidden"); document.getElementById("pagesBtn")?.setAttribute("aria-expanded","false"); }
-      if (u){ u.classList.add("hidden"); document.getElementById("userBtn")?.setAttribute("aria-expanded","false"); }
-      document.documentElement.classList.remove("menu-open");
-      document.body.classList.remove("menu-open");
-    };
-  }
-
-  // Bindings a botones de alta/acciones (idempotentes, sólo si existen)
-  const on = (id,fn)=>{
-    const n = document.getElementById(id);
-    if (!n || n.__bound__) return;
-    n.__bound__ = true; n.addEventListener("click", fn);
-  };
-  on("btnAddInv",   ()=> window.invAdd && invAdd());
-  on("btnAddRep",   ()=> window.addRep && addRep());
-  on("btnAddCons",  ()=> window.consAdd && consAdd());
-  on("btnAddOT",    ()=> window.addOT && addOT());
-  on("btnAddIncid", ()=> window.addIncid && addIncid());
-
-  // Acción “Parada prolongada”: primero API; si falla, mailto
-  if (typeof window.accionParadaProlongada !== "function"){
-    window.accionParadaProlongada = async (equipo)=>{
-      try{
-        const r = await apiPost({res:"mail", fn:"parada_prolongada", equipo, actor:(window.currentUser?.user||USER?.user||"anon")});
-        if (r?.ok){ (window.toast||window.showToast||console.log)("Aviso enviado"); return; }
-        throw new Error("mail api not ok");
-      }catch(_){
-        const subj = encodeURIComponent(`[CDL] Parada prolongada — ${equipo}`);
-        const body = encodeURIComponent(`Equipo: ${equipo}\nFecha: ${new Date().toLocaleString("es-ES",{hour12:false})}\n\nDetalle: ...`);
-        location.href = `mailto:?subject=${subj}&body=${body}`;
-      }
-    };
-  }
-})();
-/* ========== BLOQUE 5.7 (FIN) ========== */
-/* ========== BLOQUE 6.1 (INICIO) — Estados globales + helpers export ========== */
-window.INCID = window.INCID || [];
-window.INV   = window.INV   || [];
-window.REP   = window.REP   || [];
-window.CONS  = window.CONS  || [];
-window.OTS   = window.OTS   || [];
-
-if (typeof window.csvEscape === "undefined"){
-  window.csvEscape = function(v){
-    v = (v==null?'':String(v));
-    if (/[",\n;]/.test(v)) return `"${v.replace(/"/g,'""')}"`;
-    return v;
-  };
-}
-if (typeof window.toCSV === "undefined"){
-  window.toCSV = function(rows){ return rows.map(r => r.map(window.csvEscape).join(";")).join("\n"); };
-}
-if (typeof window.download === "undefined"){
-  window.download = function(name, content, type="text/plain"){
-    const blob = new Blob([content], {type});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
-  };
-}
-/* ========== BLOQUE 6.1 (FIN) ========== */
-
-/* ========== BLOQUE 6.2 (INICIO) — Incidencias: carga, filtros, render tabla ========== */
-async function loadIncid(){
-  try{
-    const r = await apiGet({res:"incid", fn:"list"});
-    if (r?.ok && Array.isArray(r.items)){
-      window.INCID = r.items;
-      renderIncidenciasTable(r.items);
-    }
-  }catch(e){ console.error(e); }
-}
-
-function renderIncidenciasTable(items){
-  const wrap = document.getElementById("incidTableWrap") || document.createElement("div");
-  wrap.id = "incidTableWrap";
-  wrap.innerHTML = "";
-  if (!items || !items.length){
-    wrap.textContent = "Sin incidencias";
-    return;
-  }
-  const table = document.createElement("table");
-  table.innerHTML = `
-    <thead><tr>
-      <th>Equipo</th><th>Tipo</th><th>Descripción</th>
-      <th>Inicio</th><th>Fin</th><th>Reportante</th>
-    </tr></thead>
-    <tbody>
-      ${items.map(it=>`
-        <tr>
-          <td>${esc(it.equipo)}</td>
-          <td>${esc(it.tipo||"")}</td>
-          <td>${esc(it.desc||"")}</td>
-          <td>${fmtDate(it.inicio)}</td>
-          <td>${fmtDate(it.fin)}</td>
-          <td>${esc(it.reportante||"")}</td>
-        </tr>
-      `).join("")}
-    </tbody>`;
-  wrap.appendChild(table);
-  const sec = document.getElementById("page-incidencias");
-  if (sec && !sec.querySelector("#incidTableWrap")) sec.appendChild(wrap);
-}
-/* ========== BLOQUE 6.2 (FIN) ========== */
-
-
-/* ========== BLOQUE 6.3 (INICIO) — Inventario con ±1/±10/±100 ========== */
-async function loadInv(){
-  try{
-    const r = await apiGet({res:"inv", fn:"list"});
-    if (r?.ok && Array.isArray(r.items)){
-      window.INV = r.items;
-      renderInv(r.items);
-    }
-  }catch(e){ console.error(e); }
-}
-
-function renderInv(items){
-  const wrap = document.getElementById("invWrap");
-  if (!wrap) return;
-  wrap.innerHTML = "";
-  if (!items || !items.length){
-    wrap.textContent = "Inventario vacío";
-    return;
-  }
-  items.forEach(it=>{
-    const d = document.createElement("div");
-    d.className = "card";
-    d.innerHTML = `
-      <div><b>${esc(it.nombre)}</b> [${esc(it.ref)}]</div>
-      <div>Stock: ${it.stock} · Mínimo: ${it.minimo}</div>
-      <div>
-        <button onclick="invDelta('${it.ref}',1)">+1</button>
-        <button onclick="invDelta('${it.ref}',-1)">-1</button>
-        <button onclick="invDelta('${it.ref}',10)">+10</button>
-        <button onclick="invDelta('${it.ref}',-10)">-10</button>
-        <button onclick="invDelta('${it.ref}',100)">+100</button>
-        <button onclick="invDelta('${it.ref}',-100)">-100</button>
-      </div>
-    `;
-    wrap.appendChild(d);
-  });
-}
-
-async function invDelta(ref, delta){
-  try{
-    const r = await apiPost({res:"inv", fn:"delta", ref, delta, actor:USER.user});
-    if (r?.ok){
-      (window.toast||window.showToast||console.log)("Stock actualizado: "+ref);
-      loadInv();
-    }
-  }catch(e){ console.error(e); }
-}
-
-async function invAdd(){
-  const ref = document.getElementById("invRef")?.value || "";
-  const nombre = document.getElementById("invNombre")?.value || "";
-  const stock = +(document.getElementById("invStock")?.value || 0);
-  const minimo = +(document.getElementById("invMin")?.value || 0);
-  try{
-    const r = await apiPost({res:"inv", fn:"add", ref, nombre, stock, minimo, actor:USER.user});
-    if (r?.ok){
-      (window.toast||window.showToast||console.log)("Añadido al inventario");
-      loadInv();
-    }
-  }catch(e){ console.error(e); }
-}
-/* ========== BLOQUE 6.3 (FIN) ========== */
-/* ========== BLOQUE 6.4 (INICIO) — Repuestos solicitados (HTML-safe con #repWrap) ========== */
-async function loadRepSol(){
-  try{
-    const d = await apiGet({res:"rep", fn:"list"});
-    window.REP = d?.ok && Array.isArray(d.items) ? d.items : [];
-    renderRepTable();
-  }catch(e){ console.error(e); }
-}
-
-function renderRepTable(){
-  const host = document.getElementById("repWrap");
-  if (!host) return;
-
-  if (!window.REP || !window.REP.length){
-    host.innerHTML = `<div class="card">Sin solicitudes</div>`;
-    return;
-  }
-
-  const rows = window.REP.map(r=>`
-    <tr data-id="${esc(r.id)}">
-      <td class="nowrap">${esc(fmtDate(r.created||""))}</td>
-      <td>${esc(r.id)}</td>
-      <td>${esc(r.ref)}</td>
-      <td>
-        <button class="btn gloss btn-ficha" title="Abrir ficha de inventario" onclick="openRepuestoByRef('${esc(r.ref)}')">${esc(r.nombre)}</button>
-      </td>
-      <td>${esc(r.solicitante||"-")}</td>
-      <td>
-        <select class="repestado" data-id="${esc(r.id)}">
-          ${["Pendiente","Aprobado","Denegado","Recibido"].map(s=>`<option ${s===(r.estado||"Pendiente")?'selected':''}>${s}</option>`).join("")}
-        </select>
-      </td>
-      <td><input class="repcoment in-txt" data-id="${esc(r.id)}" value="${esc(r.comentario||"")}" placeholder="Comentario"></td>
-      <td class="nowrap">
-        <div class="qty" data-ref="${esc(r.ref)}" style="margin-bottom:.35rem;display:flex;gap:.25rem;flex-wrap:wrap">
-          <button class="page-btn rep-delta" data-delta="+1"   data-ref="${esc(r.ref)}">+1</button>
-          <button class="page-btn rep-delta" data-delta="-1"   data-ref="${esc(r.ref)}">-1</button>
-          <button class="page-btn rep-delta" data-delta="+10"  data-ref="${esc(r.ref)}">+10</button>
-          <button class="page-btn rep-delta" data-delta="-10"  data-ref="${esc(r.ref)}">-10</button>
-          <button class="page-btn rep-delta" data-delta="+100" data-ref="${esc(r.ref)}">+100</button>
-          <button class="page-btn rep-delta" data-delta="-100" data-ref="${esc(r.ref)}">-100</button>
-        </div>
-        <button class="btn gloss rep-guardar" data-id="${esc(r.id)}">Guardar</button>
-      </td>
-    </tr>
-  `).join("");
-
-  host.innerHTML = `
-    <div id="repTableWrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Fecha</th><th>ID</th><th>Ref</th><th>Nombre</th><th>Solicitante</th>
-            <th>Estado</th><th>Comentario</th><th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-
-  const tb = host.querySelector("tbody");
-  if (!tb) return;
-
-  // Guardar fila (estado/comentario)
-  tb.querySelectorAll(".rep-guardar").forEach(b=>{
-    b.addEventListener("click", async (e)=>{
-      if (!canEdit()) return alert("Sin permiso.");
-      const id = e.currentTarget.getAttribute("data-id");
-      const estado = tb.querySelector(`.repestado[data-id="${CSS.escape(id)}"]`)?.value || "Pendiente";
-      const comentario = tb.querySelector(`.repcoment[data-id="${CSS.escape(id)}"]`)?.value || "";
-      try{
-        const r = await apiPost({res:"rep", fn:"set", id, estado, comentario, actor:(window.currentUser?.user||USER?.user||"anon")});
-        if (r?.ok){ (window.toast||window.showToast||console.log)("Guardado"); loadRepSol(); }
-        else alert(r?.error||"No se pudo guardar");
-      }catch(err){ console.error(err); alert("Error de red"); }
-    });
-  });
-
-  // Ajustes rápidos al inventario desde la solicitud
-  tb.querySelectorAll(".rep-delta").forEach(b=>{
-    b.addEventListener("click", async (e)=>{
-      if (!canEdit()) return alert("Sin permiso.");
-      const ref   = e.currentTarget.getAttribute("data-ref");
-      const delta = Number(e.currentTarget.getAttribute("data-delta"));
-      try{
-        const r = await apiPost({res:"inv", fn:"delta", ref, delta, actor:(window.currentUser?.user||USER?.user||"anon")});
-        if (r?.ok){ (window.toast||window.showToast||console.log)(`Inventario ${ref}: ${r.stock}`); loadInv(); }
-      }catch(err){ console.error(err); }
-    });
-  });
-}
-
-async function addRep(){
-  if (!canEdit()) return alert("Sin permiso.");
-  const item = { ref: val("repRef"), nombre: val("repNombre") };
-  if (!item.ref || !item.nombre){ alert("Rellena referencia y nombre"); return; }
-  try{
-    const r = await apiPost({res:"rep", fn:"add", item, actor:(window.currentUser?.user||USER?.user||"anon")});
-    if (r?.ok){
-      (window.toast||window.showToast||console.log)("Solicitud enviada");
-      ["repRef","repNombre","repComent"].forEach(id=>{ const n=byId(id); if(n) n.value=""; });
-      loadRepSol();
-    }else alert(r?.error||"No se pudo crear");
-  }catch(err){ console.error(err); alert("Error de red"); }
-}
-
-function exportRepCSV(){
-  if (!window.exportSimpleCSV) return;
-  exportSimpleCSV("repuestos_solicitados.csv",
-    ["Fecha","ID","Ref","Nombre","Solicitante","Estado","Comentario"],
-    (window.REP||[]),
-    r=>[fmtDate(r.created||""), r.id, r.ref, r.nombre, r.solicitante||"", r.estado||"", r.comentario||""]
-  );
-}
-
-function exportRepPDF(){
-  if (!window.printHTML) return;
-  const rows = (window.REP||[]).map(r=>`
-    <tr><td>${esc(fmtDate(r.created||""))}</td><td>${esc(r.id)}</td><td>${esc(r.ref)}</td><td>${esc(r.nombre)}</td><td>${esc(r.solicitante||"")}</td><td>${esc(r.estado||"")}</td><td>${esc(r.comentario||"")}</td></tr>
-  `).join("");
-  printHTML("Repuestos solicitados", `<h2>Repuestos solicitados</h2>
-  <table><thead><tr><th>Fecha</th><th>ID</th><th>Ref</th><th>Nombre</th><th>Solicitante</th><th>Estado</th><th>Comentario</th></tr></thead><tbody>${rows}</tbody></table>`);
-}
-/* ========== BLOQUE 6.4 (FIN) ========== */
-
-/* ========== BLOQUE 6.5 (INICIO) — Consumibles (render en #consWrap) ========== */
-async function loadConsumibles(){
-  try{
-    const d = await apiGet({res:"cons", fn:"list"});
-    CONS = d.ok ? d.items : [];
-    renderConsTable();
-    renderConsAlerts();
-  }catch(e){ console.error(e); }
-}
-
-function renderConsTable(){
-  const host = document.getElementById("consWrap"); if (!host) return;
-  if (!Array.isArray(CONS) || !CONS.length){
-    host.innerHTML = `<div class="card">Sin consumibles</div>`;
-    return;
-  }
-  const rows = CONS.map(c=>`
-    <tr>
-      <td>${esc(c.ref)}</td>
-      <td>${esc(c.nombre)}</td>
-      <td class="num">${c.stock}</td>
-      <td class="num">${c.minimo}</td>
-      <td>${c.updated ? esc(fmtDate(c.updated)) : ""}</td>
-      <td class="nowrap">
-        <div class="qty" data-ref="${esc(c.ref)}">
-          <button class="page-btn cons-delta" data-delta="+1"   data-ref="${esc(c.ref)}">+1</button>
-          <button class="page-btn cons-delta" data-delta="-1"   data-ref="${esc(c.ref)}">-1</button>
-          <button class="page-btn cons-delta" data-delta="+10"  data-ref="${esc(c.ref)}">+10</button>
-          <button class="page-btn cons-delta" data-delta="-10"  data-ref="${esc(c.ref)}">-10</button>
-          <button class="page-btn cons-delta" data-delta="+100" data-ref="${esc(c.ref)}">+100</button>
-          <button class="page-btn cons-delta" data-delta="-100" data-ref="${esc(c.ref)}">-100</button>
-        </div>
-      </td>
-    </tr>
-  `).join("");
-  host.innerHTML = `
-    <div id="consTableWrap">
-      <table>
-        <thead>
-          <tr><th>Ref</th><th>Nombre</th><th>Stock</th><th>Mínimo</th><th>Actualizado</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-  host.querySelectorAll("button.cons-delta").forEach(b=>{
-    b.addEventListener("click", async (e)=>{
-      if (!canEdit()) return alert("Sin permiso.");
-      const ref   = e.currentTarget.getAttribute("data-ref");
-      const delta = Number(e.currentTarget.getAttribute("data-delta"));
-      try{
-        const r = await apiPost({res:"cons", fn:"delta", ref, delta, actor: currentUser?.user||"anon"});
-        if (r?.ok){ toast(`Stock ${ref}: ${r.stock}`); loadConsumibles(); }
-      }catch(err){ console.error(err); }
-    });
-  });
-}
-
-function renderConsAlerts(){
-  const low = (CONS||[]).filter(x => (x.stock||0) <= (x.minimo||0));
-  const box = byId("consAlerts"); if (!box) return; // opcional
-  if (!low.length){ box.classList.add("hidden"); box.innerHTML=""; return; }
-  box.classList.remove("hidden");
-  box.innerHTML = `<b>Consumibles bajos:</b> ` + low.map(x=>`<span class="badge-low">${esc(x.ref)} (${x.stock}/${x.minimo})</span>`).join(" ");
-}
-
-async function consAdd(){
-  if (!canEdit()) return alert("Sin permiso.");
-  const item = { ref: val("consRef"), nombre: val("consNombre"), stock: Number(val("consStock")||0), minimo: Number(val("consMin")||0) };
-  try{
-    const r = await apiPost({res:"cons", fn:"add", item, actor: currentUser?.user||"anon"});
-    if (r?.ok){
-      toast("Consumible añadido");
-      ["consRef","consNombre","consStock","consMin"].forEach(id=>{ const n=byId(id); if(n) n.value=""; });
-      loadConsumibles();
-    }else alert(r?.error||"No se pudo añadir");
-  }catch(err){ console.error(err); alert("Error de red"); }
-}
-/* ========== BLOQUE 6.5 (FIN) ========== */
-
-/* ========== BLOQUE 6.6 (INICIO) — Órdenes de trabajo (render en #otWrap) ========== */
-async function loadOT(){
-  try{
-    const d = await apiGet({res:"ot", fn:"list"});
-    OTS = d.ok ? d.items : [];
-    renderOTTable();
-  }catch(e){ console.error(e); }
-}
-
-function renderOTTable(){
-  const host = document.getElementById("otWrap"); if (!host) return;
-  if (!Array.isArray(OTS) || !OTS.length){
-    host.innerHTML = `<div class="card">Sin OT</div>`;
-    return;
-  }
-  const rows = OTS.map(o=>`
-    <tr>
-      <td>${esc(fmtDate(o.created||""))}</td>
-      <td>${esc(o.id)}</td>
-      <td>${esc(o.prioridad||"")}</td>
-      <td>${esc(o.asignado||"")}</td>
-      <td>${esc(o.vencimiento||"")}</td>
-      <td>${esc(o.estado||"")}</td>
-    </tr>
-  `).join("");
-  host.innerHTML = `
-    <div id="otTableWrap">
-      <table>
-        <thead>
-          <tr><th>Fecha</th><th>OT</th><th>Prioridad</th><th>Asignado</th><th>Vence</th><th>Estado</th></tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-      <div class="right" style="margin-top:.5rem;display:flex;gap:.5rem;flex-wrap:wrap">
-        <button id="btnExportOTPDF" class="btn gloss">Exportar PDF</button>
-      </div>
-    </div>`;
-}
-
-async function addOT(){
-  if (!canEdit()) return alert("Sin permiso.");
-  const item = {
-    equipo: val("otEquipo"),
-    prioridad: val("otPrioridad"),
-    titulo: val("otTitulo"),
-    vencimiento: val("otVencimiento"),
-    asignado: "", adj: "", desc: ""
-  };
-  try{
-    const r = await apiPost({res:"ot", fn:"add", item, actor: currentUser?.user||"anon"});
-    if (r?.ok){
-      toast("OT creada");
-      ["otEquipo","otTitulo","otVencimiento","otPrioridad"].forEach(id=>{ const n=byId(id); if(n) n.value=""; });
-      loadOT();
-    }else alert(r?.error||"No se pudo crear");
-  }catch(err){ console.error(err); alert("Error de red"); }
-}
-
-function exportOTPDF(){
-  if (!window.printHTML) return;
-  const fmt = (d)=> new Date(d).toLocaleString("es-ES",{hour12:false});
-  const rows = (OTS||[]).map(o=>`
-    <tr><td>${esc(fmt(o.created||""))}</td><td>${esc(o.id)}</td><td>${esc(o.prioridad||"")}</td><td>${esc(o.asignado||"")}</td><td>${esc(o.vencimiento||"")}</td><td>${esc(o.estado||"")}</td></tr>
-  `).join("");
-  printHTML("Órdenes de trabajo", `<h2>Órdenes de trabajo</h2>
-  <table><thead><tr><th>Fecha</th><th>OT</th><th>Prioridad</th><th>Asignado</th><th>Vence</th><th>Estado</th></tr></thead><tbody>${rows}</tbody></table>`);
-}
-/* ========== BLOQUE 6.6 (FIN) ========== */
-/* ========== BLOQUE 6.7 (INICIO) — Fichas (equipo / repuesto) ========== */
-function renderEquipoBySlug(slug){
-  // Oculta secciones y muestra ficha de equipo
-  if (typeof ensureSectionsHidden === "function") ensureSectionsHidden();
-  const hostId = "equipoDetail";
-  const pageId = "page-equipo";
-  const show = (id)=>document.getElementById(id)?.classList.remove("hidden");
-  show(pageId);
-  const host = document.getElementById(hostId);
-
-  const eq = (window.STATE||[]).find(x => (typeof slugify==="function" ? slugify(x.nombre) : String(x.nombre).toLowerCase().replace(/\s+/g,'-')) === slug);
-  if (!host || !eq){
-    if (host) host.innerHTML = "<div class='card'>No encontrado</div>";
-    return;
-  }
-
-  const baseURL = (typeof window.baseURL==="function") ? window.baseURL() : (location.origin + location.pathname);
-  host.innerHTML = `
-    <div class="card">
-      <h3 style="margin:.1rem 0">${esc(eq.nombre)}</h3>
-      <div class="sub">${esc(eq.grupo)}</div>
-      <div style="margin:.5rem 0">Estado actual: <b>${esc(eq.estado)}</b></div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn gloss btn-mail" onclick="accionParadaProlongada(${JSON.stringify(eq.nombre)})">Parada prolongada (email)</button>
-        <button class="btn gloss btn-ficha" onclick="window.print()">Imprimir ficha</button>
-        <button class="btn gloss" onclick="history.back()">Volver</button>
-      </div>
-      <div style="margin-top:.6rem"><div id="qrficha"></div></div>
-    </div>
-  `;
-  const qr = document.getElementById("qrficha");
-  if (qr && window.QRCode){
-    new QRCode(qr, { text: `${baseURL}#/equipo/${slug}`, width:96, height:96 });
-  }
-}
-
-function openRepuestoByRef(ref){
-  const slug = encodeURIComponent(ref);
-  location.hash = `#/repuesto/${slug}`;
-  renderRepuestoByRef(ref);
-}
-
-function renderRepuestoByRef(ref){
-  if (typeof ensureSectionsHidden === "function") ensureSectionsHidden();
-  const pageId = "page-repuesto";
-  const hostId = "repuestoDetail";
-  const show = (id)=>document.getElementById(id)?.classList.remove("hidden");
-  show(pageId);
-  const host = document.getElementById(hostId);
-
-  const it = (window.INV||[]).find(x => String(x.ref).toUpperCase() === String(ref).toUpperCase());
-  if (!host || !it){
-    if (host) host.innerHTML = "<div class='card'>No encontrado</div>";
-    return;
-  }
-
-  const baseURL = (typeof window.baseURL==="function") ? window.baseURL() : (location.origin + location.pathname);
-  host.innerHTML = `
-    <div class="card">
-      <h3 style="margin:.1rem 0">${esc(it.nombre)}</h3>
-      <div class="sub">Ref: <b>${esc(it.ref)}</b></div>
-      <div style="margin:.5rem 0">Stock: <b>${it.stock}</b> · Mínimo: <b>${it.minimo}</b></div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn gloss" onclick="window.print()">Imprimir etiqueta</button>
-        <button class="btn gloss" onclick="history.back()">Volver</button>
-      </div>
-      <div style="margin-top:.6rem"><div id="qrrep"></div></div>
-    </div>
-  `;
-  const qr = document.getElementById("qrrep");
-  if (qr && window.QRCode){
-    new QRCode(qr, { text: `${baseURL}#/repuesto/${encodeURIComponent(it.ref)}`, width:96, height:96 });
-  }
-}
-/* ========== BLOQUE 6.7 (FIN) ========== */
-
-
-/* ========== BLOQUE 6.8 (INICIO) — Router (guard) + sello de tiempo ========== */
-// Si otro bloque ya definió handleHash, respetarlo.
-if (typeof window.handleHash !== "function"){
-  window.handleHash = function(){
-    const h = location.hash || "";
-    if (!h){ window.nav && nav("equipos"); return; }
-
-    const mEq = h.match(/^#\/equipo\/(.+)$/);
-    const mRp = h.match(/^#\/repuesto\/(.+)$/);
-
-    if (mEq && typeof renderEquipoBySlug==="function"){ renderEquipoBySlug(mEq[1]); return; }
-    if (mRp && typeof renderRepuestoByRef==="function"){ const ref = decodeURIComponent(mRp[1]||""); renderRepuestoByRef(ref); return; }
-
-    const p = h.replace(/^#\/?/,"");
-    const pages = ["equipos","gruas","otros","incidencias","indicadores","ot","inventario","repuestos","consumibles","tv"];
-    if (pages.includes(p) && typeof nav==="function"){ nav(p); return; }
-
-    typeof nav==="function" && nav("equipos");
-  };
-  window.addEventListener("hashchange", window.handleHash);
-}
-
-// Sello de tiempo del resumen (guard)
-if (typeof window.updateSummaryTimestamp !== "function"){
-  window.updateSummaryTimestamp = function(){
-    const d = new Date();
-    const el = document.getElementById("kUpdated");
-    if (el) el.textContent = d.toLocaleString("es-ES",{hour12:false});
-  };
-  setInterval(window.updateSummaryTimestamp, 30*1000);
-  window.updateSummaryTimestamp();
-}
-/* ========== BLOQUE 6.8 (FIN) ========== */
-
-
-/* ========== BLOQUE 7.1 (INICIO) — PW toggle + arranque mínimo (guard) ========== */
-// Toggle de mostrar/ocultar contraseñas (click delegado)
-if (!window.__PW_TOGGLE_BOUND__){
-  window.__PW_TOGGLE_BOUND__ = true;
-  document.addEventListener("click",(e)=>{
-    const btn = e.target.closest(".pw-toggle");
-    if (!btn) return;
-    const targetId = btn.getAttribute("data-target");
-    const inp = document.getElementById(targetId);
-    if (!inp) return;
-    const to = inp.type === "password" ? "text" : "password";
-    inp.type = to;
-    btn.classList.toggle("on", to === "text");
-    btn.setAttribute("aria-pressed", to === "text" ? "true" : "false");
-  });
-}
-
-// Arranque mínimo si no está ya
-if (!window.__CDL_MIN_BOOT__){
-  window.__CDL_MIN_BOOT__ = true;
-  document.addEventListener("DOMContentLoaded", ()=>{
-    // Si existen, lánzalas (idempotente)
-    typeof updateSummaryTimestamp === "function" && updateSummaryTimestamp();
-    typeof handleHash === "function" && handleHash();
-  });
-}
-/* ========== BLOQUE 7.1 (FIN) ========== */
-/* ========== BLOQUE 7.2 (INICIO) — Atajos de UI y accesibilidad (guards) ========== */
-(function(){
-  if (window.__CDL_UI_SHORTCUTS__) return;
-  window.__CDL_UI_SHORTCUTS__ = true;
-
-  const hasInputFocus = ()=> {
-    const a = document.activeElement;
-    if (!a) return false;
-    const tag = (a.tagName||"").toLowerCase();
-    return ["input","textarea","select"].includes(tag) || a.isContentEditable;
-  };
-
-  // Atajos:
-  //  - "/" enfoca el primer buscador visible (invSearch si existe)
-  //  - "g e" → equipos, "g i" → inventario, "g r" → repuestos, "g c" → consumibles, "g t" → TV
-  //  - "Esc" cierra menús si están abiertos
-  document.addEventListener("keydown",(e)=>{
-    // ESC → cerrar paneles si la app define closeAllMenus
-    if (e.key === "Escape" && typeof window.closeAllMenus === "function"){
-      window.closeAllMenus();
-      return;
-    }
-
-    // Evitar atajos cuando se escribe en inputs
-    if (hasInputFocus()) return;
-
-    // "/" → buscador
-    if (e.key === "/"){
-      const cand = document.getElementById("invSearch")
-               || document.querySelector('input[type="search"]')
-               || document.querySelector('input[placeholder*="Buscar" i]');
-      if (cand){ e.preventDefault(); cand.focus(); cand.select?.(); }
-      return;
-    }
-
-    // Prefijo "g" (go) + letra
-    if (e.key.toLowerCase() === "g"){
-      // Esperar a la siguiente tecla
-      const onNext = (ev)=>{
-        document.removeEventListener("keydown", onNext, true);
-        const k = (ev.key||"").toLowerCase();
-        if (typeof window.nav !== "function") return;
-        if (k === "e") nav("equipos");
-        if (k === "i") nav("inventario");
-        if (k === "r") nav("repuestos");
-        if (k === "c") nav("consumibles");
-        if (k === "t") nav("tv");
-      };
-      document.addEventListener("keydown", onNext, true);
-    }
-  }, { passive:true });
-
-  // Asegurar activación con teclado en botones con role/button
-  const boostBtn = (btn)=>{
-    if (!btn || btn.__kbd__) return;
-    btn.__kbd__ = true;
-    btn.setAttribute("tabindex","0");
-    btn.addEventListener("keydown",(e)=>{
-      if (e.key === "Enter" || e.key === " "){
-        e.preventDefault();
-        btn.click();
-      }
-    });
-  };
-  const tryBoost = ()=>{
-    ["pagesBtn","userBtn"].forEach(id => boostBtn(document.getElementById(id)));
-    document.querySelectorAll('[role="button"]').forEach(boostBtn);
-  };
-  tryBoost();
-  const mo = new MutationObserver(tryBoost);
-  mo.observe(document.documentElement, { subtree:true, childList:true });
-})();
-/* ========== BLOQUE 7.2 (FIN) ========== */
-
-
-/* ========== BLOQUE 7.3 (INICIO) — Mejoras de cabecera y viewport (guards) ========== */
-(function(){
-  if (window.__CDL_HDR_BOUND__) return;
-  window.__CDL_HDR_BOUND__ = true;
-
-  // Sombra al hacer scroll (si no lo hizo otro bloque)
-  const hdr = document.querySelector("header");
-  if (hdr){
-    const onScroll = ()=>{ if (window.scrollY > 2) hdr.classList.add("scrolled"); else hdr.classList.remove("scrolled"); };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive:true });
-  }
-
-  // Sincroniza variable --hdr-h para layouts con panel fullscreen
-  const syncHeaderHeightVar = ()=>{
-    const h = Math.max(72, document.querySelector('header')?.offsetHeight || 0);
-    document.documentElement.style.setProperty('--hdr-h', h + 'px');
-  };
-  window.addEventListener('load', syncHeaderHeightVar);
-  window.addEventListener('resize', syncHeaderHeightVar);
-  window.addEventListener('orientationchange', syncHeaderHeightVar);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderHeightVar);
-  syncHeaderHeightVar();
-})();
-/* ========== BLOQUE 7.3 (FIN) ========== */
-
-
-/* ========== BLOQUE 7.4 (INICIO) — Login / Logout / Cambio de contraseña (guards) ========== */
-(function(){
-  const apiPost = window.apiPost || (async()=>({ ok:false }));
-
-  if (typeof window.login !== "function"){
-    window.login = async function(){
-      const uSel = document.getElementById("userSelect");
-      const pInp = document.getElementById("userPass");
-      const u = uSel?.value || "invitado";
-      const p = pInp?.value || "";
-      try{
-        const cid = (typeof getCID==="function" ? getCID() : (localStorage.getItem("CDL_CID")||""));
-        const r = await apiPost({res:"auth", fn:"login", user:u, pass:p, cid});
-        if (r?.ok){
-          (typeof setUser==="function" ? setUser({ user:u, rol:r.rol||u, group:r.group||"guest" }) : (window.currentUser={ user:u, rol:r.rol||u, group:r.group||"guest"}));
-          (window.toast||window.showToast||console.log)(`Bienvenido ${u}`);
-          if (typeof window.closeAllMenus==="function") closeAllMenus();
-        }else{
-          alert("Usuario o contraseña incorrectos");
-        }
-      }catch(err){
-        console.error(err);
-        alert("Error en la conexión al servidor");
-      }
-    };
-  }
-
-  if (typeof window.logout !== "function"){
-    window.logout = function(){
-      try{
-        localStorage.removeItem("CDL_USER");
-        (typeof setUser==="function" ? setUser({ user:"invitado", rol:"Invitado", group:"guest" }) : (window.currentUser={ user:"invitado", rol:"Invitado", group:"guest"}));
-        (window.toast||window.showToast||console.log)("Sesión cerrada");
-        if (typeof window.closeAllMenus==="function") closeAllMenus();
-      }catch(e){ console.error(e); }
-    };
-  }
-
-  if (typeof window.changePwd !== "function"){
-    window.changePwd = async function(){
-      const oldP = document.getElementById("oldPass")?.value || "";
-      const newP = document.getElementById("newPass")?.value || "";
-      const msg  = document.getElementById("pwdMsg");
-      if (!oldP || !newP){ alert("Introduce la contraseña actual y la nueva"); return; }
-      try{
-        const cid = (typeof getCID==="function" ? getCID() : (localStorage.getItem("CDL_CID")||""));
-        const r = await apiPost({res:"auth", fn:"chpwd", old:oldP, nuevo:newP, cid});
-        if (r?.ok){
-          if (msg){ msg.textContent = "Contraseña cambiada correctamente"; msg.style.color = "green"; }
-          const o = document.getElementById("oldPass"); const n = document.getElementById("newPass");
-          if (o) o.value=""; if (n) n.value="";
-        }else{
-          if (msg){ msg.textContent = "Error al cambiar la contraseña"; msg.style.color = "red"; }
-        }
-      }catch(err){
-        console.error(err);
-        if (msg){ msg.textContent = "Error de red"; msg.style.color = "red"; }
-      }
-    };
-  }
-})();
- /* ========== BLOQUE 7.4 (FIN) ========== */
- /* ========== BLOQUE 7.5 (INICIO) — Cierres finales ========== */
 </script>
 
+<!-- BLOQUE 013: JS PANEL LATERAL -->
+<script>
+(function(){
+  const panel = document.getElementById('pagesPanel');
+  const openBtn = document.getElementById('btnMenu');
+  const closeBtn = document.getElementById('btnClosePanel');
+  const backdrop = document.getElementById('panelBackdrop');
+  function open(){ panel.setAttribute('aria-hidden','false'); backdrop.hidden=false; openBtn?.setAttribute('aria-expanded','true'); }
+  function close(){ panel.setAttribute('aria-hidden','true'); backdrop.hidden=true; openBtn?.setAttribute('aria-expanded','false'); }
+  openBtn?.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  backdrop?.addEventListener('click', close);
+  window.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+  document.getElementById('searchBtn')?.addEventListener('click', ()=>{
+    const q = (document.getElementById('searchBox')?.value||'').trim();
+    location.hash = '#/equipos?q='+encodeURIComponent(q); close();
+  });
+})();
+</script>
+
+<!-- BLOQUE 014: QR GENERATOR (ligero) -->
+<script>
+(function(global){function t(a,b){this.mode=h.MODE_8BIT_BYTE;this.data=a;this.parsedData=[];for(var c=0,d=a.length;c<d;c++){var e=a.charCodeAt(c);e>65535?(this.parsedData.push(240|e>>18&7),this.parsedData.push(128|e>>12&63),this.parsedData.push(128|e>>6&63),this.parsedData.push(128|e&63)):e>2047?(this.parsedData.push(224|e>>12&15),this.parsedData.push(128|e>>6&63),this.parsedData.push(128|e&63)):e>127?(this.parsedData.push(192|e>>6&31),this.parsedData.push(128|e&63)):this.parsedData.push(e)}this.parsedData.length!=a.length&&(this.parsedData.unshift(191,187,239));this.getLength=function(){return this.parsedData.length};this.write=function(a){for(var b=0,c=this.parsedData.length;b<c;b++)a.put(this.parsedData[b],8)}}function u(a,b){if(void 0==a.length)throw Error(a.length+"/"+b);for(var c=0;c<a.length&&0==a[c];)c++;this.num=Array(a.length-c+b);for(var d=0;d<a.length-c;d++)this.num[d]=a[d+c]}function v(a,b){this.totalCount=a;this.dataCount=b}function w(){this.buffer=[];this.length=0}w.prototype={get:function(a){return 1==(this.buffer[a>>>3]>>>7-(a%8)&1)},put:function(a,b){for(var c=0;c<b;c++)this.putBit(1==(a>>>b-c-1&1))},putBit:function(a){var b=this.length>>>3;this.buffer.length<=b&&this.buffer.push(0);a&&(this.buffer[b]|=128>>>this.length%8);this.length++}};var h={PAD0:236,PAD1:17,MODE_8BIT_BYTE:4,ErrorCorrectLevel:{L:1,M:0,Q:3,H:2}},x=[[1,26,19],[1,44,34],[1,70,55],[1,100,80],[1,134,108],[2,86,62],[2,98,76],[2,121,93],[2,146,111],[2,86,68],[2,98,78],[2,123,97],[2,146,116],[3,86,62],[3,98,74],[3,123,96],[4,86,62]];function y(a){for(var b=1;b<=40;b++){var c=z(b,h.ErrorCorrectLevel.M);if(a<=A(c))return b}return 40}function z(a,b){var c=[];c.typeNumber=a;c.ecLevel=b;c.rsBlocks=B(a,b);return c}function B(a,b){var c=[];var d=x[Math.min(a-1,x.length-1)];for(var e=0;e<d[0];e++)c.push(new v(d[1],d[2]));return c}function A(a){for(var b=0,c=0;c<a.rsBlocks.length;c++)b+=a.rsBlocks[c].dataCount;return b}function C(a,b){for(var c=new w,d=0;d<b.rsBlocks.length;d++){var e=b.rsBlocks[d];c.put(4,4);c.put(a.getLength(),8);a.write(c);}for(;c.length+4<=8*A(b);)c.put(0,4);for(;c.length%8!=0;)c.put(0,1);for(var f=[],g=0;g<b.rsBlocks.length;g++){e=b.rsBlocks[g];var k=e.dataCount,m=Array(k);for(d=0;d<k;d++)m[d]=255&c.buffer[d+(f.length?f[f.length-1].length:0)];f.push(m)}return D(f)}function D(a){var b=[];for(var c=0;c<a.length;c++)b=b.concat(a[c]);return b}
+function E(size,bytes){
+  const n=Math.ceil(Math.sqrt(bytes.length*8/3))+8;const dim=Math.max(21, n%2? n:n+1);
+  const canvas=document.createElement('canvas'); canvas.width=canvas.height=size;
+  const ctx=canvas.getContext('2d'); const mtx=Array.from({length:dim},()=>Array(dim).fill(0));
+  function finder(x,y){for(let i=-3;i<=3;i++)for(let j=-3;j<=3;j++){const X=x+i,Y=y+j;if(X<0||Y<0||X>=dim||Y>=dim)continue;const d=Math.max(Math.abs(i),Math.abs(j))<=3&&(Math.max(Math.abs(i),Math.abs(j))%2==0||Math.max(Math.abs(i),Math.abs(j))==3);mtx[Y][X]=d?1:mtx[Y][X];}}
+  finder(3,3); finder(dim-4,3); finder(3,dim-4);
+  let xi=8, yi=8, bi=0;
+  for(let y=yi;y<dim;y++)for(let x=xi;x<dim;x++){ if(mtx[y][x])continue; if(bi>=bytes.length) break; mtx[y][x]= (bytes[bi++]>> (bi%2) ) &1 ?1:0; }
+  const s=size/dim; ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size); ctx.fillStyle='#000';
+  for(let y=0;y<dim;y++)for(let x=0;x<dim;x++){ if(mtx[y][x]) ctx.fillRect(Math.floor(x*s),Math.floor(y*s),Math.ceil(s),Math.ceil(s)); }
+  return canvas;
+}
+function qrMake(el, text, size){ size=size||120; if(!el) return;
+  var q=new t(text); var cfg=z(y(q.getLength()),h.ErrorCorrectLevel.M); var bytes=C(q,cfg);
+  const node=E(size,bytes); el.innerHTML=''; el.appendChild(node);
+  el.title='Click para descargar'; el.style.cursor='pointer';
+  el.onclick=()=>{ const a=document.createElement('a'); a.download='qr-'+(text.split('/').pop()||'cdl')+'.png'; a.href=node.toDataURL(); a.click(); };
+}
+global.qrMake = qrMake;
+})(window);
+</script>
+
+<!-- BLOQUE 015: ROUTER + DATOS + VISTAS -->
+<script>
+(function(){
+  const $ = sel => document.querySelector(sel);
+  const LSKEY = 'cdl-equipos';
+  function loadEquipos(){
+    const demo = [
+      {codigo:'EQ-001', nombre:'Sierra KBS 620', estado:'En marcha', horas:{m:120,r:6,p:2}, reparaciones:1, repuestos:230},
+      {codigo:'EQ-002', nombre:'Prensa 200T',    estado:'Restricciones', horas:{m:80,r:22,p:5}, reparaciones:3, repuestos:540},
+      {codigo:'EQ-003', nombre:'Plasma Hyper',   estado:'Parada', horas:{m:40,r:10,p:30}, reparaciones:5, repuestos:910}
+    ];
+    try{ const raw = localStorage.getItem(LSKEY); return raw ? JSON.parse(raw) : demo; }catch{ return demo; }
+  }
+  function saveEquipos(arr){ try{ localStorage.setItem(LSKEY, JSON.stringify(arr)); }catch{} }
+  window.setEquipoEstado = async function(codigo, estado){
+    const list = loadEquipos(); const item = list.find(e=>e.codigo==codigo); if(!item) return;
+    item.estado = estado; saveEquipos(list);
+  };
+  const EVTKEY = c => 'cdl-evt-'+c;
+  function loadEvt(codigo){ try{ return JSON.parse(localStorage.getItem(EVTKEY(codigo))) || []; }catch{return [];} }
+  function pushEvt(codigo, evt){
+    const arr = loadEvt(codigo); arr.unshift({...evt, ts:Date.now()});
+    localStorage.setItem(EVTKEY(codigo), JSON.stringify(arr));
+  }
+  function calcKPIs(eq){
+    const ev = loadEvt(eq.codigo);
+    const horas = {...(eq.horas||{m:0,r:0,p:0})};
+    let repar = eq.reparaciones||0, repuestos = eq.repuestos||0;
+    ev.forEach(e=>{
+      if(e.tipo==='Marcha') horas.m += Number(e.horas||0);
+      if(e.tipo==='Restricción') horas.r += Number(e.horas||0);
+      if(e.tipo==='Paro') horas.p += Number(e.horas||0);
+      if(e.tipo==='Reparación') repar += 1;
+      if(Number(e.coste)) repuestos += Number(e.coste);
+    });
+    const total = horas.m + horas.r + horas.p || 1;
+    const dispo = (horas.m/total)*100;
+    const mtbf = horas.m / Math.max(1, repar);
+    return {horas, dispo, mtbf, reparaciones:repar, repuestos};
+  }
+  function renderEquipos(list, query){
+    const grid = document.getElementById('equiposGrid');
+    const view = document.getElementById('equiposView');
+    if(!grid || !view) return;
+    view.hidden = false;
+    const q = (query||'').toLowerCase();
+    const items = list.filter(e => !q || e.nombre.toLowerCase().includes(q) || String(e.codigo).includes(q));
+    grid.innerHTML = '';
+    if(items.length === 0){ grid.innerHTML = `<p style="color:#6b7280">No hay resultados para “${q}”.</p>`; return; }
+    items.forEach(eq=>{
+      const card = document.createElement('article');
+      card.className = 'eq-card';
+      card.innerHTML = `
+        <div class="eq-card__media"></div>
+        <div class="eq-card__body">
+          <div class="eq-title">
+            <span>${eq.nombre}</span>
+            <small class="eq-meta">#${eq.codigo}</small>
+          </div>
+          <div class="eq-actions">
+            <div class="eq-sem compact" data-sem data-equipo="${eq.codigo}" data-state="${eq.estado||'Restricciones'}"></div>
+            <div class="eq-qr" id="qr-${eq.codigo}" aria-label="QR ${eq.nombre}"></div>
+          </div>
+          <div style="display:flex; gap:.5rem;">
+            <button class="btn-cdl" onclick="gotoEquipo('${eq.codigo}')">Abrir ficha</button>
+            <button class="btn-cdl" style="background:#111" onclick="registrarEvento('${eq.codigo}')">Añadir evento</button>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+      mountSemaforo(card.querySelector('[data-sem]'), {equipo:eq.codigo, estado:eq.estado});
+      qrMake(document.getElementById(`qr-${eq.codigo}`), location.origin+location.pathname+'#/equipo/'+eq.codigo);
+    });
+  }
+  window.gotoEquipo = code => location.hash = '#/equipo/'+code;
+  window.registrarEvento = code => location.hash = '#/equipo/'+code+'?add=1';
+
+  function showEquipos(q){
+    document.getElementById('equipoView').hidden = true;
+    renderEquipos(loadEquipos(), q);
+  }
+  function showEquipo(code){
+    const list = loadEquipos(); const eq = list.find(e=>e.codigo===code);
+    if(!eq){ location.hash = '#/equipos'; return; }
+    document.getElementById('equiposView').hidden = true;
+    const v = document.getElementById('equipoView'); v.hidden=false;
+    document.getElementById('eqName').textContent = eq.nombre;
+    document.getElementById('eqMeta').textContent = `Código ${eq.codigo} · Estado actual: ${eq.estado}`;
+    mountSemaforo(document.getElementById('eqSem'), {equipo:eq.codigo, estado:eq.estado});
+    const k = calcKPIs(eq);
+    document.getElementById('kpi-hm').textContent = (k.horas.m||0)+'h';
+    document.getElementById('kpi-hr').textContent = (k.horas.r||0)+'h';
+    document.getElementById('kpi-hp').textContent = (k.horas.p||0)+'h';
+    document.getElementById('kpi-rp').textContent = k.reparaciones;
+    document.getElementById('kpi-mtbf').textContent = (k.mtbf||0).toFixed(1)+'h';
+    document.getElementById('kpi-dispo').textContent = k.dispo.toFixed(1)+'%';
+    const url = location.origin+location.pathname+'#/equipo/'+eq.codigo;
+    qrMake(document.getElementById('eqQR'), url, 180);
+    const ev = loadEvt(eq.codigo);
+    const tbl = document.createElement('table');
+    tbl.innerHTML = `<thead><tr>
+      <th>Fecha</th><th>Tipo</th><th>Horas</th><th>Coste €</th><th>Detalle</th>
+    </tr></thead><tbody>${
+      ev.map(e=>`<tr><td>${new Date(e.ts).toLocaleString()}</td><td>${e.tipo}</td><td>${e.horas||''}</td><td>${e.coste||''}</td><td>${(e.detalle||'').replace(/</g,'&lt;')}</td></tr>`).join('')
+    }</tbody>`;
+    const wrap = document.getElementById('eqTable'); wrap.innerHTML=''; wrap.appendChild(tbl);
+    const form = document.getElementById('evtForm');
+    form.onsubmit = (evn)=>{
+      evn.preventDefault();
+      const fd = new FormData(form);
+      pushEvt(eq.codigo, {
+        tipo: fd.get('tipo'),
+        horas:Number(fd.get('horas')||0),
+        coste:Number(fd.get('coste')||0),
+        detalle:String(fd.get('detalle')||'')
+      });
+      form.reset();
+      showEquipo(eq.codigo);
+    };
+    if(location.hash.includes('?add=1')) form.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+  function router(){
+    const h = location.hash || '#/equipos';
+    const [path, queryStr] = h.split('?');
+    if(path.startsWith('#/equipo/')){
+      const code = decodeURIComponent(path.split('/')[2]||'');
+      showEquipo(code);
+    }else{
+      const q = new URLSearchParams(queryStr||'').get('q')||'';
+      showEquipos(q);
+    }
+  }
+  window.addEventListener('hashchange', router);
+  window.addEventListener('load', router);
+})();
+</script>
+
+<!-- BLOQUE 016: REGISTRO SW (opcional si existe sw.js) -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    });
+  }
+</script>
+  <!-- BLOQUE 017: Placeholder -->
+  <!-- BLOQUE 018: Placeholder -->
+  <!-- BLOQUE 019: Placeholder -->
+  <!-- BLOQUE 020: Placeholder -->
+  <!-- BLOQUE 021: Placeholder -->
+  <!-- BLOQUE 022: Placeholder -->
+  <!-- BLOQUE 023: Placeholder -->
+  <!-- BLOQUE 024: Placeholder -->
+  <!-- BLOQUE 025: Placeholder -->
+  <!-- BLOQUE 026: Placeholder -->
+  <!-- BLOQUE 027: Placeholder -->
+  <!-- BLOQUE 028: Placeholder -->
+  <!-- BLOQUE 029: Placeholder -->
+  <!-- BLOQUE 030: Placeholder -->
+  <!-- BLOQUE 031: Placeholder -->
+  <!-- BLOQUE 032: Placeholder -->
+  <!-- BLOQUE 033: Placeholder -->
+  <!-- BLOQUE 034: Placeholder -->
+  <!-- BLOQUE 035: Placeholder -->
+  <!-- BLOQUE 036: Placeholder -->
+  <!-- BLOQUE 037: Placeholder -->
+  <!-- BLOQUE 038: Placeholder -->
+  <!-- BLOQUE 039: Placeholder -->
+  <!-- BLOQUE 040: Placeholder -->
+  <!-- BLOQUE 041: Placeholder -->
+  <!-- BLOQUE 042: Placeholder -->
+  <!-- BLOQUE 043: Placeholder -->
+  <!-- BLOQUE 044: Placeholder -->
+  <!-- BLOQUE 045: Placeholder -->
+  <!-- BLOQUE 046: Placeholder -->
+  <!-- BLOQUE 047: Placeholder -->
+  <!-- BLOQUE 048: Placeholder -->
+  <!-- BLOQUE 049: Placeholder -->
+  <!-- BLOQUE 050: Placeholder -->
+  <!-- BLOQUE 051: Placeholder -->
+  <!-- BLOQUE 052: Placeholder -->
+  <!-- BLOQUE 053: Placeholder -->
+  <!-- BLOQUE 054: Placeholder -->
+  <!-- BLOQUE 055: Placeholder -->
+  <!-- BLOQUE 056: Placeholder -->
+  <!-- BLOQUE 057: Placeholder -->
+  <!-- BLOQUE 058: Placeholder -->
+  <!-- BLOQUE 059: Placeholder -->
+  <!-- BLOQUE 060: Placeholder -->
+  <!-- BLOQUE 061: Placeholder -->
+  <!-- BLOQUE 062: Placeholder -->
+  <!-- BLOQUE 063: Placeholder -->
+  <!-- BLOQUE 064: Placeholder -->
+  <!-- BLOQUE 065: Placeholder -->
+  <!-- BLOQUE 066: Placeholder -->
+  <!-- BLOQUE 067: Placeholder -->
+  <!-- BLOQUE 068: Placeholder -->
+  <!-- BLOQUE 069: Placeholder -->
+  <!-- BLOQUE 070: Placeholder -->
+  <!-- BLOQUE 071: Placeholder -->
+  <!-- BLOQUE 072: Placeholder -->
+  <!-- BLOQUE 073: Placeholder -->
+  <!-- BLOQUE 074: Placeholder -->
+  <!-- BLOQUE 075: Placeholder -->
+  <!-- BLOQUE 076: Placeholder -->
+  <!-- BLOQUE 077: Placeholder -->
+  <!-- BLOQUE 078: Placeholder -->
+  <!-- BLOQUE 079: Placeholder -->
+  <!-- BLOQUE 080: Placeholder -->
+  <!-- BLOQUE 081: Placeholder -->
+  <!-- BLOQUE 082: Placeholder -->
+  <!-- BLOQUE 083: Placeholder -->
+  <!-- BLOQUE 084: Placeholder -->
+  <!-- BLOQUE 085: Placeholder -->
+  <!-- BLOQUE 086: Placeholder -->
+  <!-- BLOQUE 087: Placeholder -->
+  <!-- BLOQUE 088: Placeholder -->
+  <!-- BLOQUE 089: Placeholder -->
+  <!-- BLOQUE 090: Placeholder -->
+  <!-- BLOQUE 091: Placeholder -->
+  <!-- BLOQUE 092: Placeholder -->
+  <!-- BLOQUE 093: Placeholder -->
+  <!-- BLOQUE 094: Placeholder -->
+  <!-- BLOQUE 095: Placeholder -->
+  <!-- BLOQUE 096: Placeholder -->
+  <!-- BLOQUE 097: Placeholder -->
+  <!-- BLOQUE 098: Placeholder -->
+  <!-- BLOQUE 099: Placeholder -->
+  <!-- BLOQUE 100: Placeholder -->
+  <!-- BLOQUE 101: Placeholder -->
+  <!-- BLOQUE 102: Placeholder -->
+  <!-- BLOQUE 103: Placeholder -->
+  <!-- BLOQUE 104: Placeholder -->
+  <!-- BLOQUE 105: Placeholder -->
+  <!-- BLOQUE 106: Placeholder -->
+  <!-- BLOQUE 107: Placeholder -->
+  <!-- BLOQUE 108: Placeholder -->
+  <!-- BLOQUE 109: Placeholder -->
+  <!-- BLOQUE 110: Placeholder -->
+  <!-- BLOQUE 111: Placeholder -->
+  <!-- BLOQUE 112: Placeholder -->
+  <!-- BLOQUE 113: Placeholder -->
+  <!-- BLOQUE 114: Placeholder -->
+  <!-- BLOQUE 115: Placeholder -->
+  <!-- BLOQUE 116: Placeholder -->
+  <!-- BLOQUE 117: Placeholder -->
+  <!-- BLOQUE 118: Placeholder -->
+  <!-- BLOQUE 119: Placeholder -->
+  <!-- BLOQUE 120: Placeholder -->
+  <!-- BLOQUE 121: Placeholder -->
+  <!-- BLOQUE 122: Placeholder -->
+  <!-- BLOQUE 123: Placeholder -->
+  <!-- BLOQUE 124: Placeholder -->
+  <!-- BLOQUE 125: Placeholder -->
+  <!-- BLOQUE 126: Placeholder -->
+  <!-- BLOQUE 127: Placeholder -->
+  <!-- BLOQUE 128: Placeholder -->
+  <!-- BLOQUE 129: Placeholder -->
+  <!-- BLOQUE 130: Placeholder -->
+  <!-- BLOQUE 131: Placeholder -->
+  <!-- BLOQUE 132: Placeholder -->
+  <!-- BLOQUE 133: Placeholder -->
+  <!-- BLOQUE 134: Placeholder -->
+  <!-- BLOQUE 135: Placeholder -->
+  <!-- BLOQUE 136: Placeholder -->
+  <!-- BLOQUE 137: Placeholder -->
+  <!-- BLOQUE 138: Placeholder -->
+  <!-- BLOQUE 139: Placeholder -->
+  <!-- BLOQUE 140: Placeholder -->
+  <!-- BLOQUE 141: Placeholder -->
+  <!-- BLOQUE 142: Placeholder -->
+  <!-- BLOQUE 143: Placeholder -->
+  <!-- BLOQUE 144: Placeholder -->
+  <!-- BLOQUE 145: Placeholder -->
+  <!-- BLOQUE 146: Placeholder -->
+  <!-- BLOQUE 147: Placeholder -->
+  <!-- BLOQUE 148: Placeholder -->
+  <!-- BLOQUE 149: Placeholder -->
+  <!-- BLOQUE 150: Placeholder -->
+  <!-- BLOQUE 151: Placeholder -->
+  <!-- BLOQUE 152: Placeholder -->
+  <!-- BLOQUE 153: Placeholder -->
+  <!-- BLOQUE 154: Placeholder -->
+  <!-- BLOQUE 155: Placeholder -->
+  <!-- BLOQUE 156: Placeholder -->
+  <!-- BLOQUE 157: Placeholder -->
+  <!-- BLOQUE 158: Placeholder -->
+  <!-- BLOQUE 159: Placeholder -->
+  <!-- BLOQUE 160: Placeholder -->
+  <!-- BLOQUE 161: Placeholder -->
+  <!-- BLOQUE 162: Placeholder -->
+  <!-- BLOQUE 163: Placeholder -->
+  <!-- BLOQUE 164: Placeholder -->
+  <!-- BLOQUE 165: Placeholder -->
+  <!-- BLOQUE 166: Placeholder -->
+  <!-- BLOQUE 167: Placeholder -->
+  <!-- BLOQUE 168: Placeholder -->
+  <!-- BLOQUE 169: Placeholder -->
+  <!-- BLOQUE 170: Placeholder -->
+  <!-- BLOQUE 171: Placeholder -->
+  <!-- BLOQUE 172: Placeholder -->
+  <!-- BLOQUE 173: Placeholder -->
+  <!-- BLOQUE 174: Placeholder -->
+  <!-- BLOQUE 175: Placeholder -->
+  <!-- BLOQUE 176: Placeholder -->
+  <!-- BLOQUE 177: Placeholder -->
+  <!-- BLOQUE 178: Placeholder -->
+  <!-- BLOQUE 179: Placeholder -->
+  <!-- BLOQUE 180: Placeholder -->
+  <!-- BLOQUE 181: Placeholder -->
+  <!-- BLOQUE 182: Placeholder -->
+  <!-- BLOQUE 183: Placeholder -->
+  <!-- BLOQUE 184: Placeholder -->
+  <!-- BLOQUE 185: Placeholder -->
+  <!-- BLOQUE 186: Placeholder -->
+  <!-- BLOQUE 187: Placeholder -->
+  <!-- BLOQUE 188: Placeholder -->
+  <!-- BLOQUE 189: Placeholder -->
+  <!-- BLOQUE 190: Placeholder -->
+  <!-- BLOQUE 191: Placeholder -->
+  <!-- BLOQUE 192: Placeholder -->
+  <!-- BLOQUE 193: Placeholder -->
+  <!-- BLOQUE 194: Placeholder -->
+  <!-- BLOQUE 195: Placeholder -->
+  <!-- BLOQUE 196: Placeholder -->
+  <!-- BLOQUE 197: Placeholder -->
+  <!-- BLOQUE 198: Placeholder -->
+  <!-- BLOQUE 199: Placeholder -->
+  <!-- BLOQUE 200: Placeholder -->
+  <!-- BLOQUE 201: Placeholder -->
+  <!-- BLOQUE 202: Placeholder -->
+  <!-- BLOQUE 203: Placeholder -->
+  <!-- BLOQUE 204: Placeholder -->
+  <!-- BLOQUE 205: Placeholder -->
+  <!-- BLOQUE 206: Placeholder -->
+  <!-- BLOQUE 207: Placeholder -->
+  <!-- BLOQUE 208: Placeholder -->
+  <!-- BLOQUE 209: Placeholder -->
+  <!-- BLOQUE 210: Placeholder -->
+  <!-- BLOQUE 211: Placeholder -->
+  <!-- BLOQUE 212: Placeholder -->
+  <!-- BLOQUE 213: Placeholder -->
+  <!-- BLOQUE 214: Placeholder -->
+  <!-- BLOQUE 215: Placeholder -->
+  <!-- BLOQUE 216: Placeholder -->
+  <!-- BLOQUE 217: Placeholder -->
+  <!-- BLOQUE 218: Placeholder -->
+  <!-- BLOQUE 219: Placeholder -->
+  <!-- BLOQUE 220: Placeholder -->
+  <!-- BLOQUE 221: Placeholder -->
+  <!-- BLOQUE 222: Placeholder -->
+  <!-- BLOQUE 223: Placeholder -->
+  <!-- BLOQUE 224: Placeholder -->
+  <!-- BLOQUE 225: Placeholder -->
+  <!-- BLOQUE 226: Placeholder -->
+  <!-- BLOQUE 227: Placeholder -->
+  <!-- BLOQUE 228: Placeholder -->
+  <!-- BLOQUE 229: Placeholder -->
+  <!-- BLOQUE 230: Placeholder -->
+  <!-- BLOQUE 231: Placeholder -->
+  <!-- BLOQUE 232: Placeholder -->
+  <!-- BLOQUE 233: Placeholder -->
+  <!-- BLOQUE 234: Placeholder -->
+  <!-- BLOQUE 235: Placeholder -->
+  <!-- BLOQUE 236: Placeholder -->
+  <!-- BLOQUE 237: Placeholder -->
+  <!-- BLOQUE 238: Placeholder -->
+  <!-- BLOQUE 239: Placeholder -->
+  <!-- BLOQUE 240: Placeholder -->
+  <!-- BLOQUE 241: Placeholder -->
+  <!-- BLOQUE 242: Placeholder -->
+  <!-- BLOQUE 243: Placeholder -->
+  <!-- BLOQUE 244: Placeholder -->
+  <!-- BLOQUE 245: Placeholder -->
+  <!-- BLOQUE 246: Placeholder -->
+  <!-- BLOQUE 247: Placeholder -->
+  <!-- BLOQUE 248: Placeholder -->
+  <!-- BLOQUE 249: Placeholder -->
+  <!-- BLOQUE 250: Placeholder -->
+  <!-- BLOQUE 251: Placeholder -->
+  <!-- BLOQUE 252: Placeholder -->
+  <!-- BLOQUE 253: Placeholder -->
+  <!-- BLOQUE 254: Placeholder -->
+  <!-- BLOQUE 255: Placeholder -->
+  <!-- BLOQUE 256: Placeholder -->
+  <!-- BLOQUE 257: Placeholder -->
+  <!-- BLOQUE 258: Placeholder -->
+  <!-- BLOQUE 259: Placeholder -->
+  <!-- BLOQUE 260: Placeholder -->
+  <!-- BLOQUE 261: Placeholder -->
+  <!-- BLOQUE 262: Placeholder -->
+  <!-- BLOQUE 263: Placeholder -->
+  <!-- BLOQUE 264: Placeholder -->
+  <!-- BLOQUE 265: Placeholder -->
+  <!-- BLOQUE 266: Placeholder -->
+  <!-- BLOQUE 267: Placeholder -->
+  <!-- BLOQUE 268: Placeholder -->
+  <!-- BLOQUE 269: Placeholder -->
+  <!-- BLOQUE 270: Placeholder -->
+  <!-- BLOQUE 271: Placeholder -->
+  <!-- BLOQUE 272: Placeholder -->
+  <!-- BLOQUE 273: Placeholder -->
+  <!-- BLOQUE 274: Placeholder -->
+  <!-- BLOQUE 275: Placeholder -->
+  <!-- BLOQUE 276: Placeholder -->
+  <!-- BLOQUE 277: Placeholder -->
+  <!-- BLOQUE 278: Placeholder -->
+  <!-- BLOQUE 279: Placeholder -->
+  <!-- BLOQUE 280: Placeholder -->
+  <!-- BLOQUE 281: Placeholder -->
+  <!-- BLOQUE 282: Placeholder -->
+  <!-- BLOQUE 283: Placeholder -->
+  <!-- BLOQUE 284: Placeholder -->
+  <!-- BLOQUE 285: Placeholder -->
+  <!-- BLOQUE 286: Placeholder -->
+  <!-- BLOQUE 287: Placeholder -->
+  <!-- BLOQUE 288: Placeholder -->
+  <!-- BLOQUE 289: Placeholder -->
+  <!-- BLOQUE 290: Placeholder -->
+  <!-- BLOQUE 291: Placeholder -->
+  <!-- BLOQUE 292: Placeholder -->
+  <!-- BLOQUE 293: Placeholder -->
+  <!-- BLOQUE 294: Placeholder -->
+  <!-- BLOQUE 295: Placeholder -->
+  <!-- BLOQUE 296: Placeholder -->
+  <!-- BLOQUE 297: Placeholder -->
+  <!-- BLOQUE 298: Placeholder -->
+  <!-- BLOQUE 299: Placeholder -->
+  <!-- BLOQUE 300: Placeholder -->
+  <!-- BLOQUE 301: Placeholder -->
+  <!-- BLOQUE 302: Placeholder -->
+  <!-- BLOQUE 303: Placeholder -->
+  <!-- BLOQUE 304: Placeholder -->
+  <!-- BLOQUE 305: Placeholder -->
+  <!-- BLOQUE 306: Placeholder -->
+  <!-- BLOQUE 307: Placeholder -->
+  <!-- BLOQUE 308: Placeholder -->
+  <!-- BLOQUE 309: Placeholder -->
+  <!-- BLOQUE 310: Placeholder -->
+  <!-- BLOQUE 311: Placeholder -->
+  <!-- BLOQUE 312: Placeholder -->
+  <!-- BLOQUE 313: Placeholder -->
+  <!-- BLOQUE 314: Placeholder -->
+  <!-- BLOQUE 315: Placeholder -->
+  <!-- BLOQUE 316: Placeholder -->
+  <!-- BLOQUE 317: Placeholder -->
+  <!-- BLOQUE 318: Placeholder -->
+  <!-- BLOQUE 319: Placeholder -->
+  <!-- BLOQUE 320: Placeholder -->
+  <!-- BLOQUE 321: Placeholder -->
+  <!-- BLOQUE 322: Placeholder -->
+  <!-- BLOQUE 323: Placeholder -->
+  <!-- BLOQUE 324: Placeholder -->
+  <!-- BLOQUE 325: Placeholder -->
+  <!-- BLOQUE 326: Placeholder -->
+  <!-- BLOQUE 327: Placeholder -->
+  <!-- BLOQUE 328: Placeholder -->
+  <!-- BLOQUE 329: Placeholder -->
+  <!-- BLOQUE 330: Placeholder -->
+  <!-- BLOQUE 331: Placeholder -->
+  <!-- BLOQUE 332: Placeholder -->
+  <!-- BLOQUE 333: Placeholder -->
+  <!-- BLOQUE 334: Placeholder -->
+  <!-- BLOQUE 335: Placeholder -->
+  <!-- BLOQUE 336: Placeholder -->
+  <!-- BLOQUE 337: Placeholder -->
+  <!-- BLOQUE 338: Placeholder -->
+  <!-- BLOQUE 339: Placeholder -->
+  <!-- BLOQUE 340: Placeholder -->
+  <!-- BLOQUE 341: Placeholder -->
+  <!-- BLOQUE 342: Placeholder -->
+  <!-- BLOQUE 343: Placeholder -->
+  <!-- BLOQUE 344: Placeholder -->
+  <!-- BLOQUE 345: Placeholder -->
+  <!-- BLOQUE 346: Placeholder -->
+  <!-- BLOQUE 347: Placeholder -->
+  <!-- BLOQUE 348: Placeholder -->
+  <!-- BLOQUE 349: Placeholder -->
+  <!-- BLOQUE 350: Placeholder -->
+  <!-- BLOQUE 351: Placeholder -->
+  <!-- BLOQUE 352: Placeholder -->
+  <!-- BLOQUE 353: Placeholder -->
+  <!-- BLOQUE 354: Placeholder -->
+  <!-- BLOQUE 355: Placeholder -->
+  <!-- BLOQUE 356: Placeholder -->
+  <!-- BLOQUE 357: Placeholder -->
+  <!-- BLOQUE 358: Placeholder -->
+  <!-- BLOQUE 359: Placeholder -->
+  <!-- BLOQUE 360: Placeholder -->
+  <!-- BLOQUE 361: Placeholder -->
+  <!-- BLOQUE 362: Placeholder -->
+  <!-- BLOQUE 363: Placeholder -->
+  <!-- BLOQUE 364: Placeholder -->
+  <!-- BLOQUE 365: Placeholder -->
+  <!-- BLOQUE 366: Placeholder -->
+  <!-- BLOQUE 367: Placeholder -->
+  <!-- BLOQUE 368: Placeholder -->
+  <!-- BLOQUE 369: Placeholder -->
+  <!-- BLOQUE 370: Placeholder -->
+  <!-- BLOQUE 371: Placeholder -->
+  <!-- BLOQUE 372: Placeholder -->
+  <!-- BLOQUE 373: Placeholder -->
+  <!-- BLOQUE 374: Placeholder -->
+  <!-- BLOQUE 375: Placeholder -->
+  <!-- BLOQUE 376: Placeholder -->
+  <!-- BLOQUE 377: Placeholder -->
+  <!-- BLOQUE 378: Placeholder -->
+  <!-- BLOQUE 379: Placeholder -->
+  <!-- BLOQUE 380: Placeholder -->
+  <!-- BLOQUE 381: Placeholder -->
+  <!-- BLOQUE 382: Placeholder -->
+  <!-- BLOQUE 383: Placeholder -->
+  <!-- BLOQUE 384: Placeholder -->
+  <!-- BLOQUE 385: Placeholder -->
+  <!-- BLOQUE 386: Placeholder -->
+  <!-- BLOQUE 387: Placeholder -->
+  <!-- BLOQUE 388: Placeholder -->
+  <!-- BLOQUE 389: Placeholder -->
+  <!-- BLOQUE 390: Placeholder -->
+  <!-- BLOQUE 391: Placeholder -->
+  <!-- BLOQUE 392: Placeholder -->
+  <!-- BLOQUE 393: Placeholder -->
+  <!-- BLOQUE 394: Placeholder -->
+  <!-- BLOQUE 395: Placeholder -->
+  <!-- BLOQUE 396: Placeholder -->
+  <!-- BLOQUE 397: Placeholder -->
+  <!-- BLOQUE 398: Placeholder -->
+  <!-- BLOQUE 399: Placeholder -->
+  <!-- BLOQUE 400: Placeholder -->
+  <!-- BLOQUE 401: Placeholder -->
+  <!-- BLOQUE 402: Placeholder -->
+  <!-- BLOQUE 403: Placeholder -->
+  <!-- BLOQUE 404: Placeholder -->
+  <!-- BLOQUE 405: Placeholder -->
+  <!-- BLOQUE 406: Placeholder -->
+  <!-- BLOQUE 407: Placeholder -->
+  <!-- BLOQUE 408: Placeholder -->
+  <!-- BLOQUE 409: Placeholder -->
+  <!-- BLOQUE 410: Placeholder -->
+  <!-- BLOQUE 411: Placeholder -->
+  <!-- BLOQUE 412: Placeholder -->
+  <!-- BLOQUE 413: Placeholder -->
+  <!-- BLOQUE 414: Placeholder -->
+  <!-- BLOQUE 415: Placeholder -->
+  <!-- BLOQUE 416: Placeholder -->
+  <!-- BLOQUE 417: Placeholder -->
+  <!-- BLOQUE 418: Placeholder -->
+  <!-- BLOQUE 419: Placeholder -->
+  <!-- BLOQUE 420: Placeholder -->
+  <!-- BLOQUE 421: Placeholder -->
+  <!-- BLOQUE 422: Placeholder -->
+  <!-- BLOQUE 423: Placeholder -->
+  <!-- BLOQUE 424: Placeholder -->
+  <!-- BLOQUE 425: Placeholder -->
+  <!-- BLOQUE 426: Placeholder -->
+  <!-- BLOQUE 427: Placeholder -->
+  <!-- BLOQUE 428: Placeholder -->
+  <!-- BLOQUE 429: Placeholder -->
+  <!-- BLOQUE 430: Placeholder -->
+  <!-- BLOQUE 431: Placeholder -->
+  <!-- BLOQUE 432: Placeholder -->
+  <!-- BLOQUE 433: Placeholder -->
+  <!-- BLOQUE 434: Placeholder -->
+  <!-- BLOQUE 435: Placeholder -->
+  <!-- BLOQUE 436: Placeholder -->
+  <!-- BLOQUE 437: Placeholder -->
+  <!-- BLOQUE 438: Placeholder -->
+  <!-- BLOQUE 439: Placeholder -->
+  <!-- BLOQUE 440: CIERRE -->
 </body>
 </html>
