@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CDL · Mantenimiento</title>
+
+  <!-- BLOQUE 01: TOKENS + TEMA BLANCO CDL -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" />
+  <style>
+    :root{
+      --cdl-red:#E43B3B; --cdl-black:#1F2937; --cdl-ink:#111827;
+      --cdl-muted:#6B7280; --cdl-line:#E5E7EB;
+      --hdr-h: 76px; --container: 1080px;
+    }
+    html,body{ background:#fff; color:#111; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+    .cdl-container{ width:min(100%, var(--container)); margin-inline:auto; padding-inline:16px; }
+    .btn-cdl{ border:0; border-radius:999px; font-weight:800; letter-spacing:.02em; cursor:pointer;
+      padding:.7rem 1.2rem; background:var(--cdl-red); color:#fff; box-shadow:0 8px 18px rgba(228,59,59,.22); }
+    .btn-cdl:active{ transform:translateY(1px); }
+    .cdl-divider{ height:1px; background:var(--cdl-line); margin:16px 0; }
+  </style>
+</head>
+<body>
+
+<!-- BLOQUE 02: CABECERA CDL -->
+<header id="cdlHeader" class="cdl-header">
+  <div class="cdl-container cdl-header__inner">
+    <button id="btnMenu" class="cdl-hamb"><span></span><span></span><span></span></button>
+    <div class="cdl-logo"><img src="./logo-cdl.png" alt="CDL" height="28" /></div>
+    <div class="cdl-user">
+      <div class="cdl-user__role" id="userRole">Mantenimiento</div>
+      <button id="userBtn" class="cdl-user__btn"><svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path></svg></button>
+    </div>
+  </div>
+</header>
+
+<!-- BLOQUE 03: TITULARES -->
+<style>
+  :where(h1,h2,h3){position:relative; margin:1.1rem 0 .8rem; padding-left:.65rem;
+    font-weight:900; letter-spacing:.02em; color:var(--cdl-black); line-height:1.15;}
+  :where(h1)::before,:where(h2)::before,:where(h3)::before{content:""; position:absolute; left:0; top:0.1rem;
+    width:18px; height:18px; background:linear-gradient(90deg,var(--cdl-red) 0 100%) 0 0/100% 6px no-repeat,
+    linear-gradient(180deg,var(--cdl-red) 0 100%) 0 0/6px 100% no-repeat; border-radius:1px;}
+  h1{font-size:clamp(1.6rem, 2.8vw, 2.25rem);} h2{font-size:clamp(1.25rem, 2.2vw, 1.6rem);} h3{font-size:clamp(1.05rem, 1.8vw, 1.25rem); color:#1b1f24;}
+  .cdl-underline{ box-shadow: inset 0 -10px rgba(228,59,59,.18); display:inline; }
+</style>
+
+<!-- BLOQUE 04: HERO -->
+<main id="main" class="cdl-container">
+  <section class="cdl-hero">
+    <h1><span class="cdl-underline">Gestión de Mantenimiento</span></h1>
+    <p style="color:#4b5563; max-width:70ch;">Control integral de equipos CDL con estilo www.cdl.es</p>
+    <div style="display:flex; gap:.6rem;"><button class="btn-cdl" onclick="location.hash='#/equipos'">Ver equipos</button>
+    <button class="btn-cdl" style="background:#111" onclick="location.hash='#/tv'">Dashboard TV</button></div>
+  </section>
+  <div class="cdl-divider"></div>
+</main>
+
+<!-- BLOQUE 05: SEMÁFORO -->
+<template id="tplSemaforo">
+  <div class="cdl-sem"><span class="chip" id="chipState"><i class="dot"></i><b class="txt">—</b></span>
+    <button class="btn" data-state="En marcha">Marcha</button>
+    <button class="btn" data-state="Restricciones">Restr.</button>
+    <button class="btn" data-state="Parada">Paro</button>
+  </div>
+</template>
+<script>window.setEquipoEstado=function(){};function mountSemaforo(){};</script>
+
+<!-- BLOQUE 06... hasta BLOQUE 11 OMITIDO en esta muestra (ya definido arriba en tu proyecto) -->
+
+<!-- BLOQUE 440: CIERRE -->
+</body>
+</html>
