@@ -3315,8 +3315,8 @@ BLOQUE 78 — Panel de usuario (rol, cerrar sesión ficticia, tema)
         <option>Dirección</option>
       </select>
     </label>
-    <button class="btn-cdl" id="btnSaveRole">Guardar rol</button>
-    <button class="btn-cdl" style="background:#111" id="btnLogout">Cerrar sesión</button>
+    <m
+    <button class="btn-cdl" style="background:#111" id="btnLogout">Cerrarsesión</button>
   </div>
 </aside>
 <script>
@@ -11170,6 +11170,182 @@ BLOQUE 440 — Backdrop del panel lateral (CSS + JS)
 
   // Asegura que al cargar, el backdrop quede oculto
   window.addEventListener('load', ()=>{ if(backdrop) backdrop.hidden = true; });
+})();
+</script>
+<!-- =========================================================
+BLOQUE 70 — CABECERA + MENÚ + TÍTULOS + “PLANTAS”
+(FIX responsive cabecera, logo, menú fullscreen, títulos con angular,
+ocultar "Todas las plantas", autocierre panel, migas alineadas)
+========================================================= -->
+<style>
+  /* ---------- Cabecera fija y limpia (siempre blanca) ---------- */
+  #cdlHeader.cdl-header{
+    position:sticky; top:0; z-index:1000;
+    height:var(--hdr-h,76px);
+    background:#fff !important;
+    border-bottom:1px solid var(--cdl-line,#e5e7eb);
+  }
+  #cdlHeader .cdl-header__inner{
+    height:inherit; display:flex; align-items:center; justify-content:space-between;
+    gap:.75rem; overflow:hidden; /* evita desbordes en móvil */
+  }
+
+  /* Logo sin recorte (alto fijo, quepa completo) */
+  .cdl-logo img{
+    display:block; height:28px; width:auto;
+    object-fit:contain; object-position:left center;
+  }
+
+  /* Hamburguesa sin píldora; líneas juntas */
+  .cdl-hamb{
+    all:unset; display:grid; place-items:center; width:42px; height:42px; cursor:pointer;
+  }
+  .cdl-hamb span{ width:18px; height:2px; background:#111; display:block; }
+  .cdl-hamb span+span{ margin-top:3px; } /* más juntas */
+
+  /* ---------- Menú lateral a pantalla completa ---------- */
+  .cdl-panel{
+    position:fixed; inset:0; max-width:none; width:100vw; height:100vh;
+    background:#0b0f14; color:#fff; border:none; box-shadow:none;
+    transform:translateX(-100%); transition:transform .28s cubic-bezier(.2,.8,.2,1);
+    z-index:1100;
+  }
+  .cdl-panel[aria-hidden="false"]{ transform:translateX(0); }
+
+  /* Franja superior blanca con logo + botón cerrar */
+  .cdl-panel__top{
+    background:#fff; color:#111; height:60px; display:flex; align-items:center;
+    justify-content:space-between; padding:0 16px; border-bottom:1px solid #e5e7eb;
+  }
+  .cdl-panel__top img{ height:26px; width:auto; display:block; }
+  .cdl-panel__close{
+    all:unset; width:40px; height:40px; display:grid; place-items:center;
+    font-size:20px; line-height:1; color:#111; cursor:pointer;
+  }
+
+  /* Zona de búsqueda oscura bajo la franja blanca */
+  .cdl-panel__search{ padding:12px 16px; border-bottom:1px solid rgba(255,255,255,.06); }
+  .cdl-panel__search input{
+    width:100%; border-radius:12px; border:1px solid rgba(255,255,255,.18);
+    background:transparent; color:#fff; padding:.7rem .9rem; outline:none;
+  }
+  .cdl-panel__search input::placeholder{ color:rgba(255,255,255,.6); }
+
+  /* Navegación del panel: mayúsculas, blanco, sin subrayado */
+  .cdl-panel__nav{ display:grid; gap:.25rem; padding:12px 10px 24px; }
+  .cdl-panel__nav a{
+    text-decoration:none; text-transform:uppercase; color:#fff;
+    font-weight:700; letter-spacing:.02em; padding:.5rem .75rem; border-radius:8px;
+    display:block;
+  }
+  .cdl-panel__nav a:hover{ background:rgba(255,255,255,.06); }
+
+  /* Backdrop controlado por JS (se añade si no existe) */
+  .cdl-panel__backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.28); z-index:1090;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .cdl-panel__backdrop:not([hidden]){ opacity:1; pointer-events:auto; }
+
+  /* ---------- Títulos H1/H2/H3 en mayúsculas + angular rojo ---------- */
+  h1, h2, h3{ text-transform:uppercase; position:relative; }
+  /* Angular: dos trazos formando “L” que ARRANCAN en el 2º tercio del alto del título */
+  h1::before, h2::before, h3::before,
+  h1::after,  h2::after,  h3::after{ content:""; position:absolute; left:-14px; background:#E43B3B; }
+  h1::before, h2::before, h3::before{  /* trazo vertical */
+    top:33%; width:3px; height:16px; border-radius:2px;
+  }
+  h1::after, h2::after, h3::after{   /* trazo horizontal */
+    top:33%; width:14px; height:3px; border-radius:2px; transform:translateX(-14px);
+  }
+
+  /* ---------- Migas / breadcrumb alineadas ---------- */
+  .cdl-breadcrumbs, nav[aria-label="breadcrumb"]{
+    display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+  }
+  .cdl-breadcrumbs *{ vertical-align:middle; }
+
+  /* Utilidad genérica */
+  [hidden]{ display:none !important; }
+</style>
+
+<script>
+(function(){
+  /* ---------- 1) Eliminar “Todas las plantas” en cabecera ---------- */
+  window.addEventListener('load', ()=>{
+    const candidates = Array.from(document.querySelectorAll('button, a, [role="button"], .pill, .chip'))
+      .filter(el => /todas\s+las\s+plantas/i.test(el.textContent||''));
+    candidates.forEach(el => el.remove());
+  });
+
+  /* ---------- 2) Construir franja blanca + buscador dentro del panel si falta ---------- */
+  const panel    = document.getElementById('pagesPanel');
+  const openBtn  = document.getElementById('btnMenu');
+  const closeBtn = document.getElementById('btnClosePanel'); // si existe el tuyo
+  let   backdrop = document.getElementById('panelBackdrop');
+
+  function ensurePanelChrome(){
+    if(!panel) return;
+    // A) Top bar blanca con logo + X
+    if(!panel.querySelector('.cdl-panel__top')){
+      const top = document.createElement('div');
+      top.className = 'cdl-panel__top';
+      top.innerHTML = `
+        <img src="./logo-cdl.png" alt="CDL">
+        <button class="cdl-panel__close" aria-label="Cerrar">×</button>`;
+      panel.prepend(top);
+      top.querySelector('.cdl-panel__close').addEventListener('click', close);
+    }
+    // B) Bloque de búsqueda oscuro
+    if(!panel.querySelector('.cdl-panel__search')){
+      const box = document.createElement('div');
+      box.className='cdl-panel__search';
+      box.innerHTML = `<input type="search" placeholder="Buscar equipo..." id="sideSearch">`;
+      const afterTop = panel.querySelector('.cdl-panel__top');
+      (afterTop?.nextSibling) ? panel.insertBefore(box, afterTop.nextSibling) : panel.appendChild(box);
+    }
+    // C) Backdrop si no existe
+    if(!backdrop){
+      backdrop = document.createElement('div');
+      backdrop.id='panelBackdrop'; backdrop.className='cdl-panel__backdrop'; backdrop.hidden=true;
+      document.body.appendChild(backdrop);
+    }
+  }
+
+  /* ---------- 3) Abrir / cerrar + autocierre ---------- */
+  function open(){
+    ensurePanelChrome();
+    panel?.setAttribute('aria-hidden','false');
+    if(backdrop) backdrop.hidden = false;
+    openBtn?.setAttribute('aria-expanded','true');
+  }
+  function close(){
+    panel?.setAttribute('aria-hidden','true');
+    if(backdrop) backdrop.hidden = true;
+    openBtn?.setAttribute('aria-expanded','false');
+  }
+
+  openBtn?.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  document.addEventListener('click', (e)=>{
+    if(!panel) return;
+    // Cierra al pulsar un enlace del menú
+    if(e.target.closest && e.target.closest('.cdl-panel__nav a')) close();
+  });
+  backdrop?.addEventListener('click', close);
+  window.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+  window.addEventListener('load', ()=>{ if(backdrop) backdrop.hidden = true; });
+
+  /* ---------- 4) Asegurar cabecera no desborde en iOS ---------- */
+  // Forzamos repaint si la altura cambia (teclado, zoom)
+  let lastW = innerWidth;
+  window.addEventListener('resize', ()=>{
+    if(Math.abs(innerWidth - lastW) > 1){
+      document.getElementById('cdlHeader')?.style.setProperty('will-change','transform');
+      requestAnimationFrame(()=>document.getElementById('cdlHeader')?.style.removeProperty('will-change'));
+      lastW = innerWidth;
+    }
+  });
 })();
 </script>
 
