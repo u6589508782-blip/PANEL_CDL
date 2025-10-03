@@ -11519,5 +11519,119 @@ BLOQUE 500 — Ajustes cabecera + menú full-screen + títulos + dark
   }
 })();
 </script>
+<!-- =========================================================
+BLOQUE 500 — Overrides UI (cabecera blanca, logo sin corte,
+hamburguesa full-screen, H1–H3 angular/upper, breadcrumbs alineados,
+ocultar Plantas/Áreas, y fixes de overflow)
+========================================================= -->
+<style>
+  /* 1) Cabecera SIEMPRE blanca y sin watermark */
+  #cdlHeader{ background:#fff !important; }
+  #cdlHeader::after{ content:none !important; } /* adiós logo_mantenimiento + degradado */
+
+  /* 2) Logo cabecera: que no se recorte y mantenga proporción */
+  .cdl-logo img{
+    display:block;
+    max-height: calc(var(--hdr-h, 76px) - 22px);
+    height:auto !important; width:auto; /* por si el PNG es más alto */
+    object-fit:contain;
+    margin:0; padding:4px 0;
+  }
+
+  /* 3) Contención de cabecera (evitar “desbordes” visuales) */
+  .cdl-header{
+    position:sticky; top:0; z-index:1000;
+    overflow:clip;              /* recorta cualquier pseudo-elemento/imagen suelta */
+    contain:layout paint;       /* aisla la pintura del header */
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+
+  /* 4) Menú hamburguesa: pantalla completa con tope blanco arriba */
+  .cdl-panel{
+    inset:0 auto 0 0; width:100vw !important; max-width:none !important;
+    transform:translateX(-102%); transition:transform .28s ease;
+    background:#000; color:#fff; /* cuerpo del panel en negro */
+  }
+  .cdl-panel[aria-hidden="false"]{ transform:translateX(0); }
+  .cdl-panel__head{
+    background:#fff; color:#111;
+    border-bottom:1px solid var(--cdl-line);
+  }
+  .cdl-panel__head img{ filter:none; }
+  .cdl-x{ background:#fff; color:#111; border-color:#e5e7eb; }
+
+  /* Franja buscador y navegación en negro con textos blancos */
+  .cdl-panel__search{
+    background:#000; border-bottom:1px solid #222;
+  }
+  .cdl-panel__search input{
+    background:#111; color:#fff; border:1px solid #333;
+  }
+  .cdl-panel__nav a{
+    color:#fff; border-radius:12px;
+  }
+  .cdl-panel__nav a:hover{ background:#111; }
+
+  /* Backdrop más opaco para tapar completamente el fondo */
+  #panelBackdrop{
+    background:rgba(0,0,0,.85) !important;
+  }
+
+  /* 5) Titulares: mayúscula + acento “angular” rojo
+        - marca diagonal arrancando ~segundo tercio
+        - mantiene padding lateral para que no tape el texto */
+  :where(h1,h2,h3){
+    position:relative; text-transform:uppercase;
+    padding-left:2.4rem; margin:1.1rem 0 .8rem;
+    line-height:1.125; font-weight:900; letter-spacing:.02em;
+  }
+  :where(h1,h2,h3)::before{
+    content:"";
+    position:absolute; left:.35rem; top:66%; /* ~2º tercio */
+    width:14px; height:14px; background:var(--cdl-red);
+    transform:translateY(-50%) rotate(-45deg);
+    border-radius:2px;
+    box-shadow:0 0 0 2px #fff inset; /* halo para que “muerda” el papel blanco */
+  }
+
+  /* 6) Breadcrumbs siempre alineados */
+  .cdl-breadcrumbs{ display:flex; align-items:center; gap:.4rem; }
+  .cdl-breadcrumbs > *{ display:inline-flex; align-items:center; }
+  .cdl-breadcrumbs span[aria-hidden="true"]{ line-height:1; }
+
+  /* 7) Ocultar UI de multi-PLANTAS/ÁREAS sin tocar datos */
+  .ctx-wrap{ display:none !important; }
+
+  /* 8) Tema oscuro: respetar contraste en header y buscador del panel */
+  :root[data-theme="dark"] .cdl-header{ background:#0B0F14 !important; }
+  :root[data-theme="dark"] .cdl-panel{
+    background:#000; color:#fff;
+  }
+  :root[data-theme="dark"] .cdl-panel__search input{
+    background:#0F141B; border-color:#253040; color:#E5E7EB;
+  }
+</style>
+
+<script>
+/* Asegura que el backdrop se muestre/oculte en sync y cubra todo */
+(function(){
+  const panel = document.getElementById('pagesPanel');
+  const openBtn = document.getElementById('btnMenu');
+  const closeBtn = document.getElementById('btnClosePanel');
+  const backdrop = document.getElementById('panelBackdrop');
+
+  function open(){ panel?.setAttribute('aria-hidden','false'); if(backdrop) backdrop.hidden=false; openBtn?.setAttribute('aria-expanded','true'); }
+  function close(){ panel?.setAttribute('aria-hidden','true');  if(backdrop) backdrop.hidden=true;  openBtn?.setAttribute('aria-expanded','false'); }
+
+  openBtn?.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  backdrop?.addEventListener('click', close);
+  window.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+
+  /* Al cargar, deja backdrop oculto para evitar parpadeos */
+  window.addEventListener('load', ()=>{ if(backdrop) backdrop.hidden=true; });
+})();
+</script>
 </body>
 </html>
