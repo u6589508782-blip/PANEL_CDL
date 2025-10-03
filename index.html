@@ -11633,5 +11633,116 @@ ocultar Plantas/Áreas, y fixes de overflow)
   window.addEventListener('load', ()=>{ if(backdrop) backdrop.hidden=true; });
 })();
 </script>
+<!-- =========================================================
+BLOQUE 500 — FIX CABECERA + MENÚ FULLSCREEN + TITULARES + BREADCRUMBS
+(override seguro: no borres nada; este bloque gana por cascada)
+========================================================= -->
+<style>
+  /* 1) CABECERA: quita el watermark que está rompiendo el layout */
+  #cdlHeader{ overflow:hidden; }
+  #cdlHeader::after{ content:none !important; background:none !important; }
+
+  /* 2) HAMBURGUER: sin píldora, barras más juntas */
+  .cdl-hamb{
+    width:40px;height:40px;border:none !important;background:transparent !important;border-radius:0 !important;
+    display:grid;place-items:center;
+  }
+  .cdl-hamb span{ width:20px;height:2px;background:#111;display:block; }
+  .cdl-hamb span+span{ margin-top:3px; }
+
+  /* 3) MENÚ FULLSCREEN: cubre toda la pantalla, con franja blanca arriba y cuerpo negro */
+  .cdl-panel{
+    inset:0 !important; left:0; right:auto;
+    width:100vw !important; max-width:100vw !important;
+    height:100dvh !important; transform:translateX(-102%); transition:transform .28s ease;
+    background:#000 !important; color:#fff;
+    border-right: none !important;
+  }
+  .cdl-panel[aria-hidden="false"]{ transform:translateX(0); }
+
+  /* Head (franja blanca con logo CDL a la izq. y X negra a la dcha.) */
+  .cdl-panel__head{
+    position:sticky; top:env(safe-area-inset-top,0); z-index:1;
+    padding:12px 16px; background:#fff !important; border-bottom:1px solid #e5e7eb;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .cdl-panel__head img{ height:22px; }
+  .cdl-x{ background:#fff !important; color:#111 !important; border:1px solid #e5e7eb; }
+
+  /* Cuerpo negro: buscador y navegación en blanco */
+  .cdl-panel__search{ background:#000 !important; border-bottom:1px solid rgba(255,255,255,.08); }
+  .cdl-panel__search input{
+    flex:1; height:42px; border-radius:10px; border:1px solid rgba(255,255,255,.18);
+    background:#111; color:#fff; padding:0 .7rem;
+  }
+  .cdl-panel__nav{ background:#000; }
+  .cdl-panel__nav a{
+    color:#fff !important; border-radius:12px; font-weight:800; padding:.8rem .9rem;
+  }
+  .cdl-panel__nav a:hover{ background:rgba(255,255,255,.06); }
+
+  /* 4) Backdrop único y bloqueo de scroll al abrir */
+  .cdl-panel__backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.38); z-index:1090;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .cdl-panel[aria-hidden="false"] + .cdl-panel__backdrop{ opacity:1; pointer-events:auto; }
+  body.cdl-lock{ overflow:hidden; touch-action:none; }
+
+  /* 5) Quitar la “x” nativa de los inputs de tipo search en iOS */
+  input[type="search"]::-webkit-search-cancel-button{ -webkit-appearance: none; appearance:none; }
+
+  /* 6) TITULARES: mayúsculas + “ángulo rojo” arrancando en el segundo tercio */
+  :where(h1,h2,h3){
+    text-transform:uppercase;
+    letter-spacing:.02em; font-weight:900; position:relative; padding-left:0.9rem;
+  }
+  :where(h1,h2,h3)::before{
+    content:""; position:absolute; left:0; top:.12rem; width:18px; height:18px; border-radius:2px;
+    /* ángulo rojo (L) que empieza visualmente avanzado */
+    background:
+      linear-gradient(90deg, var(--cdl-red) 0 100%) 0 0/100% 6px no-repeat,
+      linear-gradient(180deg, var(--cdl-red) 0 100%) 0 0/6px 100% no-repeat;
+    transform-origin:left top; transform:skew(-10deg) translateX(6px);
+  }
+
+  /* 7) Breadcrumbs: alineación y espaciado uniforme */
+  .cdl-breadcrumbs{ align-items:center !important; gap:.45rem !important; line-height:1 !important; }
+  .cdl-breadcrumbs a{ display:inline-flex; align-items:center; }
+
+  /* 8) Header todavía más seguro en móviles (no se desborda) */
+  .cdl-header{ height:var(--hdr-h); background:#fff; border-bottom:1px solid var(--cdl-line); }
+  .cdl-header__inner{ max-width:var(--container); margin-inline:auto; padding-inline:16px; }
+</style>
+
+<script>
+  // Unificar open/close del panel y bloqueo del scroll (evita duplicados previos)
+  (function(){
+    const panel   = document.getElementById('pagesPanel');
+    const openBtn = document.getElementById('btnMenu');
+    const closeBtn= document.getElementById('btnClosePanel');
+    const backdrop= document.getElementById('panelBackdrop');
+
+    function open(){
+      panel?.setAttribute('aria-hidden','false');
+      backdrop && (backdrop.hidden = false);
+      document.body.classList.add('cdl-lock');
+      openBtn?.setAttribute('aria-expanded','true');
+    }
+    function close(){
+      panel?.setAttribute('aria-hidden','true');
+      backdrop && (backdrop.hidden = true);
+      document.body.classList.remove('cdl-lock');
+      openBtn?.setAttribute('aria-expanded','false');
+    }
+    openBtn?.addEventListener('click', open);
+    closeBtn?.addEventListener('click', close);
+    backdrop?.addEventListener('click', close);
+    window.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+
+    // Asegurar estado inicial
+    window.addEventListener('load', ()=>{ backdrop && (backdrop.hidden = true); panel?.setAttribute('aria-hidden','true'); });
+  })();
+</script>
 </body>
 </html>
