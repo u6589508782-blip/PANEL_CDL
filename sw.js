@@ -1,7 +1,7 @@
 /* =========================================================
 BLOQUE 20 — NUEVO sw.js (guardar como /sw.js en la raíz)
 ========================================================= */
-const CACHE_VERSION = 'cdl-v3';
+const CACHE_VERSION = 'cdl-v500';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 const CORE_ASSETS = [
