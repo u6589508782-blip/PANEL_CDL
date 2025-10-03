@@ -1,0 +1,1310 @@
+<!-- =========================================================
+     PARTE 1/6 · ESTRUCTURA BASE + HEAD + ESTILOS FUNDACION
+     Contiene BLOQUES 01–06
+========================================================= -->
+<!doctype html>
+<html lang="es">
+<head>
+  <!-- =======================
+       BLOQUE 01 · META + PWA
+       - Viewport con safe-area
+       - PWA y favicons
+  ======================== -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <title>CDL · CMMS</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0c0f14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" sizes="192x192" href="/icon-192.png">
+  <link rel="icon" sizes="512x512" href="/icon-512.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- =========================================================
+       BLOQUE 02 · CSS : VARIABLES + RESET + UTILIDADES
+       - Variables de marca y estados
+       - Reset consistente
+       - Utilidades frecuentes
+  ========================================================== -->
+  <style>
+    :root{
+      /* Marca CDL (look cdl.es) */
+      --brand1:#A60000;     /* rojo oscuro */
+      --brand2:#E43B3B;     /* rojo vivo */
+      --ink:#0c0f14;        /* tinta principal en modo claro */
+      --paper:#ffffff;      /* fondo principal */
+      --line:#e5e7eb;       /* bordes suaves */
+
+      /* Estados */
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --stop:#dc2626;
+
+      /* Layout */
+      --radius-sm:10px;
+      --radius-md:12px;
+      --gap-1:.25rem;
+      --gap-2:.5rem;
+      --gap-3:.75rem;
+      --gap-4:1rem;
+
+      /* Cabecera */
+      --hdr-h:56px; /* alto base cabecera sin safe-area */
+    }
+
+    /* Reset mínimo y accesible */
+    *,*::before,*::after{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:var(--paper);
+      color:var(--ink);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    img,svg,video,canvas{ display:block; max-width:100%; height:auto }
+    a{ color:inherit; text-decoration:none }
+    button,input,select,textarea{ font:inherit; color:inherit }
+    :focus-visible{ outline:3px solid rgba(228,59,59,.35); outline-offset:2px }
+
+    /* Utilidades */
+    .hide{ display:none !important }
+    .sr-only{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+      clip:rect(0,0,0,0);white-space:nowrap;border:0
+    }
+    .card{ border:1px solid var(--line); border-radius:var(--radius-md); background:#fff }
+
+    /* Antidesbordes horizontales globales (cabeceras, grids, etc.) */
+    html,body{ overflow-x:hidden }
+
+    /* Forzar aspecto claro también cuando el SO está en dark
+       (look cdl.es; si en el futuro se quiere dark real, se activará con toggle) */
+    @media (prefers-color-scheme: dark){
+      html,body{ background:#fff; color:#111 }
+    }
+  </style>
+
+  <!-- =========================================================
+       BLOQUE 03 · CSS COMPONENTE: CABECERA + HAMBURGUESA
+       - Cabecera sin desbordes + safe-area iOS
+       - Hamburguesa SIN “píldora” y líneas más juntas
+       - Sin subrayados en navegación superior
+  ========================================================== -->
+  <style>
+    /* Contenedor cabecera */
+    .cdl-header{
+      position:sticky; top:0; z-index:1000;
+      background:#fff; color:#111;
+      border-bottom:1px solid var(--line);
+      height:calc(var(--hdr-h) + env(safe-area-inset-top,0px));
+      padding-top:env(safe-area-inset-top,0px);
+      overflow:hidden; /* evita sangrados */
+    }
+    .cdl-header__inner{
+      height:var(--hdr-h);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:var(--gap-2);
+      padding:0 var(--gap-4);
+    }
+    .cdl-logo{ display:flex; align-items:center; gap:.5rem; font-weight:800 }
+
+    /* Botón usuario / acciones header (estilo plano) */
+    .cdl-user__btn{
+      width:42px; height:42px;
+      display:grid; place-items:center;
+      border:1px solid var(--line);
+      border-radius:var(--radius-sm);
+      background:#fff; color:#111;
+    }
+
+    /* Hamburguesa (sin píldora) */
+    .cdl-hamb{
+      width:42px; height:42px;
+      display:grid; place-items:center;
+      background:transparent; border:none; border-radius:0; box-shadow:none;
+      position:relative; overflow:hidden; /* que no asome nada */
+    }
+    .cdl-hamb span{
+      width:18px; height:2px; background:#111; display:block;
+    }
+    .cdl-hamb span + span{ margin-top:2px } /* líneas más juntas (antes 4px) */
+
+    /* Nav superior: sin subrayados y hover suave */
+    .cdl-header a{ text-decoration:none }
+    .cdl-header a:hover{ opacity:.9 }
+  </style>
+
+  <!-- =========================================================
+       BLOQUE 04 · CSS PANEL LATERAL (NAV) · BASE
+       - Estructura base; detalles en PARTE 2/6
+       - Sección sin duplicidades, look claro
+  ========================================================== -->
+  <style>
+    .cdl-panel{
+      position:fixed; inset:0 0 0 auto; width:min(86vw,360px);
+      background:#fff; border-left:1px solid var(--line);
+      transform:translateX(100%); transition:transform .25s ease;
+      display:flex; flex-direction:column; gap:var(--gap-2);
+    }
+    .cdl-panel.is-open{ transform:none }
+    .cdl-panel__hdr{ display:flex; align-items:center; justify-content:space-between; padding:var(--gap-4) }
+    .cdl-panel__nav{ display:flex; flex-direction:column; padding:0 var(--gap-4) var(--gap-4) }
+    .cdl-panel__nav a{
+      padding:.6rem .7rem; border-radius:8px; text-decoration:none;
+      display:flex; align-items:center; gap:.5rem;
+    }
+    .cdl-panel__nav a:hover{ background:#f3f4f6 }
+    .cdl-panel__nav a[aria-current="page"]{ background:#ef4444; color:#fff }
+  </style>
+
+  <!-- =========================================================
+       BLOQUE 05 · CSS LAYOUT PRINCIPAL
+       - Contenedor de página y secciones base
+  ========================================================== -->
+  <style>
+    .page{
+      min-height:100dvh;
+      display:grid; grid-template-rows:auto 1fr;
+      background:#fff; color:#111;
+    }
+    .page__content{ padding:var(--gap-4) }
+    .grid{ display:grid; gap:var(--gap-4) }
+  </style>
+
+  <!-- =========================================================
+       BLOQUE 06 · PLACEHOLDERS DE COMPATIBILIDAD
+       - Selector #cdlHeader (si era usado puntualmente)
+       - Evita que un “#cdlHeader.” roto corte CSS (ya corregido)
+  ========================================================== -->
+  <style>
+    /* Si en alguna parte del código histórico se esperaba #cdlHeader,
+       este bloque asegura compatibilidad sin romper nada. */
+    #cdlHeader{ /* ajustes opcionales si los necesitas */ }
+  </style>
+</head>
+
+<body class="theme-light">
+  <!-- =======================
+       BLOQUE 01b · CABECERA DOM
+       (estructura; JS para abrir panel llega en PARTE 3/6)
+  ======================== -->
+  <header class="cdl-header" id="cdlHeader">
+    <div class="cdl-header__inner">
+      <button class="cdl-hamb" id="hambBtn" aria-controls="sidePanel" aria-expanded="false" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="cdl-logo">CDL · CMMS</div>
+      <button class="cdl-user__btn" id="userBtn" aria-label="Usuario">⋯</button>
+    </div>
+  </header>
+
+  <!-- Panel lateral (contenido completo llega en PARTE 2/6) -->
+  <aside class="cdl-panel" id="sidePanel" hidden>
+    <div class="cdl-panel__hdr">
+      <strong>Menú</strong>
+      <button class="cdl-user__btn" id="closePanelBtn" aria-label="Cerrar">✕</button>
+    </div>
+    <nav class="cdl-panel__nav" id="panelNav">
+      <!-- Items de navegación se inyectarán/ordenarán más adelante -->
+    </nav>
+  </aside>
+
+  <!-- Contenido principal (continúa en PARTE 2/6) -->
+  <main class="page__content" id="appRoot">
+  <!-- =========================================================
+     PARTE 2/6 · UI · COMPONENTES VISUALES + LAYOUT DE PÁGINA
+     Contiene BLOQUES 07–12
+     (Sin JS todavía; la lógica llega en PARTE 3/6 y 5/6)
+========================================================= -->
+
+<!-- =========================================================
+     BLOQUE 07 · CSS · BOTONES, BADGES, PASTILLAS, TITULARES
+========================================================= -->
+<style>
+  /* Botones base */
+  .btn{ 
+    display:inline-flex; align-items:center; gap:.5rem;
+    border:1px solid var(--line); background:#fff; color:#111;
+    border-radius:10px; height:38px; padding:0 .9rem; cursor:pointer;
+  }
+  .btn:hover{ background:#f8f9fb }
+  .btn--pri{ border-color:#ef4444; background:#ef4444; color:#fff }
+  .btn--pri:hover{ filter:brightness(.98) }
+  .btn--ghost{ border-color:transparent; background:transparent }
+  .btn--icon{ width:38px; padding:0; justify-content:center }
+
+  /* Badges/pastillas de estado */
+  .pill{ display:inline-flex; align-items:center; gap:.4rem; height:26px;
+         padding:0 .6rem; border-radius:999px; border:1px solid var(--line); background:#fff; color:#111; font-weight:600; }
+  .pill--ok{ border-color:rgba(22,163,74,.25); background:rgba(22,163,74,.08); color:#0a5b27 }
+  .pill--warn{ border-color:rgba(245,158,11,.25); background:rgba(245,158,11,.08); color:#6b4400 }
+  .pill--stop{ border-color:rgba(220,38,38,.25); background:rgba(220,38,38,.08); color:#7a1010 }
+
+  /* Titulares y barras */
+  .sect{ display:grid; gap:.75rem; margin:1rem 0 }
+  .sect__hdr{ display:flex; align-items:center; justify-content:space-between; gap:1rem }
+  .sect__title{ font-weight:800; font-size:1.1rem; display:flex; align-items:center; gap:.6rem }
+  .bar{ height:1px; background:var(--line) }
+</style>
+
+<!-- =========================================================
+     BLOQUE 08 · CSS · TARJETAS KPI + LISTAS COMPACTAS
+========================================================= -->
+<style>
+  .kpis{ display:grid; grid-template-columns:repeat(12,1fr); gap:1rem }
+  .kpi{ border:1px solid var(--line); border-radius:12px; padding:.75rem; background:#fff; display:grid; gap:.35rem }
+  .kpi__label{ color:#606978; font-weight:600; font-size:.85rem }
+  .kpi__value{ font-weight:800; font-size:1.4rem }
+  .kpi__trend{ font-size:.82rem }
+  /* columnas responsivas */
+  @media (max-width:1200px){ .kpis{ grid-template-columns:repeat(8,1fr) } }
+  @media (max-width:900px){  .kpis{ grid-template-columns:repeat(4,1fr) } }
+  @media (max-width:600px){  .kpis{ grid-template-columns:repeat(2,1fr) } }
+
+  /* Listas compactas tipo timeline/últimas acciones */
+  .list{ display:grid; gap:.5rem }
+  .item{
+    display:flex; align-items:center; justify-content:space-between; gap:.6rem;
+    border:1px solid var(--line); border-radius:12px; background:#fff; padding:.6rem .7rem;
+  }
+  .item__main{ display:flex; align-items:center; gap:.6rem; min-width:0 }
+  .item__title{ font-weight:600; white-space:nowrap; text-overflow:ellipsis; overflow:hidden }
+  .item__meta{ color:#606978; font-size:.85rem }
+</style>
+
+<!-- =========================================================
+     BLOQUE 09 · CSS · TABLA RESPONSIVE (STICKY HEAD + CELDAS)
+========================================================= -->
+<style>
+  .table{
+    border:1px solid var(--line); border-radius:12px; overflow:auto; background:#fff;
+  }
+  .table table{ width:100%; border-collapse:separate; border-spacing:0; min-width:720px }
+  .table th, .table td{ padding:.65rem .7rem; text-align:left; border-bottom:1px solid var(--line) }
+  .table thead th{
+    position:sticky; top:0; background:#f8f9fb; z-index:1; font-weight:800; font-size:.9rem;
+    border-bottom:1px solid var(--line);
+  }
+  .table tr:last-child td{ border-bottom:none }
+  .td-num{ text-align:right; font-variant-numeric:tabular-nums }
+  .td-st{ white-space:nowrap }
+  .tag{ display:inline-block; padding:.18rem .45rem; border-radius:6px; border:1px solid var(--line); font-size:.82rem; background:#fff }
+</style>
+
+<!-- =========================================================
+     BLOQUE 10 · CSS · TABS / SEGMENTED CONTROL
+========================================================= -->
+<style>
+  .tabs{ display:flex; flex-wrap:wrap; gap:.4rem; background:#fff; border:1px solid var(--line); border-radius:12px; padding:.35rem }
+  .tab{
+    appearance:none; border:none; background:transparent; cursor:pointer;
+    padding:.45rem .7rem; border-radius:8px; font-weight:600;
+  }
+  .tab[aria-selected="true"]{ background:#ef4444; color:#fff }
+  .tabpanels{ margin-top:.75rem }
+  .tabpanel[hidden]{ display:none !important }
+</style>
+
+<!-- =========================================================
+     BLOQUE 11 · CSS · FORMULARIOS BASE + GRID DE CAMPOS
+========================================================= -->
+<style>
+  .form{ display:grid; gap:.75rem }
+  .field{ display:grid; gap:.35rem }
+  .label{ font-weight:600; font-size:.9rem }
+  .input, .select, .textarea{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding:.55rem .6rem; background:#fff;
+  }
+  .row{ display:grid; gap:.75rem; grid-template-columns:repeat(12,1fr) }
+  .col-6{ grid-column:span 6 }
+  .col-4{ grid-column:span 4 }
+  .col-3{ grid-column:span 3 }
+  @media (max-width:900px){ .col-6,.col-4,.col-3{ grid-column:1/-1 } }
+</style>
+
+<!-- =========================================================
+     BLOQUE 12 · TEMPLATES HTML (para inyección por JS)
+     - No renderizan hasta que el JS clona el contenido
+========================================================= -->
+<template id="tpl-kpi">
+  <div class="kpi">
+    <div class="kpi__label">{{label}}</div>
+    <div class="kpi__value">{{value}}</div>
+    <div class="kpi__trend">{{trend}}</div>
+  </div>
+</template>
+
+<template id="tpl-row-incid">
+  <tr>
+    <td class="td-st"><span class="tag">{{id}}</span></td>
+    <td>{{equipo}}</td>
+    <td>{{titulo}}</td>
+    <td class="td-num">{{h_paro}}</td>
+    <td>{{estado}}</td>
+    <td>{{fecha}}</td>
+  </tr>
+</template>
+
+<template id="tpl-item-feed">
+  <div class="item">
+    <div class="item__main">
+      <span class="pill pill--{{status}}">{{status_txt}}</span>
+      <div>
+        <div class="item__title">{{title}}</div>
+        <div class="item__meta">{{meta}}</div>
+      </div>
+    </div>
+    <button class="btn btn--ghost btn--icon" aria-label="Ver">›</button>
+  </div>
+</template>
+
+<!-- =========================================================
+     DOM · HOME / DASHBOARD
+     (Los datos se inyectan en PARTE 5/6; aquí dejamos estructura)
+========================================================= -->
+<section class="sect" id="home">
+  <div class="sect__hdr">
+    <div class="sect__title">Resumen</div>
+    <div class="actions">
+      <button class="btn btn--ghost" id="refreshBtn">↻ Actualizar</button>
+      <button class="btn btn--pri" id="newIncidBtn">+ Nueva incidencia</button>
+    </div>
+  </div>
+  <div class="kpis" id="kpiGrid">
+    <!-- KPIs se inyectarán con tpl-kpi -->
+  </div>
+
+  <div class="bar"></div>
+
+  <div class="row">
+    <div class="col-6">
+      <div class="sect">
+        <div class="sect__hdr">
+          <div class="sect__title">Últimos movimientos</div>
+          <a class="btn btn--ghost" href="#incidencias" id="goIncid">Ver todo</a>
+        </div>
+        <div class="list" id="feedList">
+          <!-- Items con tpl-item-feed -->
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6">
+      <div class="sect">
+        <div class="sect__hdr">
+          <div class="sect__title">Alertas</div>
+          <button class="btn btn--ghost btn--icon" id="muteAlerts" aria-label="Silenciar alertas">🔕</button>
+        </div>
+        <div class="list" id="alertList">
+          <!-- Alertas inyectadas -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     DOM · INCIDENCIAS
+========================================================= -->
+<section class="sect" id="incidencias" hidden>
+  <div class="sect__hdr">
+    <div class="sect__title">Incidencias</div>
+    <div class="tabs" role="tablist" aria-label="Filtro de incidencias" id="incidTabs">
+      <button class="tab" role="tab" aria-selected="true" aria-controls="tabIncidTodas" id="tabTodas">Todas</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="tabIncidAbiertas" id="tabAbiertas">Abiertas</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="tabIncidCerradas" id="tabCerradas">Cerradas</button>
+    </div>
+  </div>
+
+  <div class="tabpanels">
+    <div class="tabpanel" id="tabIncidTodas" role="tabpanel">
+      <div class="table">
+        <table aria-label="Listado de incidencias">
+          <thead>
+            <tr>
+              <th>ID</th><th>Equipo</th><th>Título</th><th class="td-num">h Paro</th><th>Estado</th><th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="incidTBody"><!-- filas con tpl-row-incid --></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="tabpanel" id="tabIncidAbiertas" role="tabpanel" hidden></div>
+    <div class="tabpanel" id="tabIncidCerradas" role="tabpanel" hidden></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     DOM · INVENTARIO (placeholder, datos y lógica en PARTE 5/6)
+========================================================= -->
+<section class="sect" id="inventario" hidden>
+  <div class="sect__hdr">
+    <div class="sect__title">Inventario</div>
+    <div>
+      <button class="btn btn--ghost" id="btnScanQR">📷 Escanear</button>
+      <button class="btn btn--pri" id="btnAddItem">+ Añadir</button>
+    </div>
+  </div>
+  <div class="table">
+    <table aria-label="Inventario de repuestos">
+      <thead>
+        <tr>
+          <th>Ref</th><th>Descripción</th><th>Ubicación</th><th class="td-num">Stock</th><th>Mín.</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="invTBody"><!-- filas por JS --></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- (El resto de secciones —OT, Personal, Config— se añaden en PARTE 5/6) -->
+<!-- =========================================================
+     PARTE 3/6 · JS CORE (UTILIDADES + ROUTER + ACCESIBILIDAD)
+     Contiene BLOQUES 13–18
+     - Helpers DOM (qs/qsa), show/hide, on/off
+     - Estado UI (nav, tabs)
+     - Panel lateral: apertura/cierre + focus-trap accesible
+     - Router simple por hash (#home, #incidencias, #inventario, ...)
+     - Sin funciones duplicadas
+========================================================= -->
+<script>
+/* =========================
+   BLOQUE 13 · HELPERS DOM
+========================= */
+const $  = (sel, ctx=document) => ctx.querySelector(sel);
+const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+function on(el, ev, fn, opts){ el.addEventListener(ev, fn, opts); return ()=>el.removeEventListener(ev, fn, opts); }
+function delegate(root, event, selector, handler){
+  return on(root, event, e=>{
+    const t = e.target.closest(selector);
+    if(t && root.contains(t)) handler(e, t);
+  });
+}
+
+function show(el){ if(el.hasAttribute('hidden')) el.removeAttribute('hidden'); }
+function hide(el){ if(!el.hasAttribute('hidden')) el.setAttribute('hidden',''); }
+function setExpanded(btn, v){ btn.setAttribute('aria-expanded', String(v)); }
+
+/* =========================
+   BLOQUE 14 · ESTADO BÁSICO
+   - Páginas registradas
+   - Hash inicial
+========================= */
+const PAGES = ['home','incidencias','inventario']; // se ampliará en PARTE 5/6
+let CURRENT_PAGE = 'home';
+
+/* =========================
+   BLOQUE 15 · PANEL LATERAL
+   - Abrir/cerrar con accesibilidad
+   - Focus trap básico
+========================= */
+const sidePanel     = $('#sidePanel');
+const hambBtn       = $('#hambBtn');
+const closePanelBtn = $('#closePanelBtn');
+
+let lastFocused = null;
+let removeKeydownTrap = null;
+
+function trapFocus(container){
+  const FOCUSABLE = 'a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])';
+  function keyHandler(e){
+    if(e.key !== 'Tab') return;
+    const focusables = $$(FOCUSABLE, container).filter(el=>!el.hasAttribute('disabled') && el.tabIndex !== -1);
+    if(!focusables.length) return;
+    const first = focusables[0], last = focusables[focusables.length-1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+  return on(document, 'keydown', keyHandler);
+}
+
+function openPanel(){
+  lastFocused = document.activeElement;
+  sidePanel.classList.add('is-open');
+  show(sidePanel);
+  setExpanded(hambBtn, true);
+  // foco al primer control útil
+  const first = $('#panelNav a, #closePanelBtn', sidePanel) || sidePanel;
+  (first || sidePanel).focus();
+  removeKeydownTrap = trapFocus(sidePanel);
+}
+
+function closePanel(){
+  sidePanel.classList.remove('is-open');
+  setExpanded(hambBtn, false);
+  hide(sidePanel);
+  if(removeKeydownTrap){ removeKeydownTrap(); removeKeydownTrap = null; }
+  if(lastFocused) lastFocused.focus();
+}
+
+on(hambBtn, 'click', e=>{
+  const isOpen = sidePanel.classList.contains('is-open');
+  isOpen ? closePanel() : openPanel();
+});
+on(closePanelBtn, 'click', closePanel);
+// Cerrar con ESC
+on(document, 'keydown', e=>{
+  if(e.key === 'Escape' && sidePanel.classList.contains('is-open')) closePanel();
+});
+// Cerrar si clic fuera
+on(document, 'click', e=>{
+  if(!sidePanel.classList.contains('is-open')) return;
+  if(e.target.closest('#sidePanel') || e.target.closest('#hambBtn')) return;
+  closePanel();
+});
+
+/* =========================
+   BLOQUE 16 · ROUTER SENCILLO
+   - Navega con #hash
+   - Muestra/oculta secciones
+   - Marca item activo en panel
+========================= */
+function nav(id){
+  if(!PAGES.includes(id)) id = 'home';
+  CURRENT_PAGE = id;
+  // Ocultar todas
+  PAGES.forEach(p=>{
+    const sec = document.getElementById(p);
+    if(sec) hide(sec);
+  });
+  // Mostrar activa
+  const active = document.getElementById(id);
+  if(active) show(active);
+  // Marcar enlace activo en panel
+  $$('#panelNav a').forEach(a=>{
+    a.removeAttribute('aria-current');
+    const href = a.getAttribute('href') || '';
+    if(href.replace('#','') === id) a.setAttribute('aria-current','page');
+  });
+  // Cerrar panel al navegar
+  if(sidePanel.classList.contains('is-open')) closePanel();
+}
+
+function handleHash(){
+  const id = (location.hash || '#home').replace('#','');
+  nav(id);
+}
+
+on(window, 'hashchange', handleHash);
+
+/* =========================
+   BLOQUE 17 · TABS ACCESIBLES
+   - role=tablist / tab / tabpanel
+   - Click y teclado (← → Home End)
+========================= */
+function initTabs(root=document){
+  const lists = $$('[role="tablist"]', root);
+  lists.forEach(list=>{
+    const tabs = $$('[role="tab"]', list);
+    tabs.forEach(tab=>{
+      on(tab, 'click', ()=>{
+        const selectedId = tab.getAttribute('aria-controls');
+        // desactivar todos
+        tabs.forEach(t=>{
+          t.setAttribute('aria-selected','false');
+          const panelId = t.getAttribute('aria-controls');
+          const panel = document.getElementById(panelId);
+          if(panel) hide(panel);
+        });
+        // activar seleccionado
+        tab.setAttribute('aria-selected','true');
+        const panel = document.getElementById(selectedId);
+        if(panel) panel.removeAttribute('hidden');
+      });
+      // navegación por teclas
+      on(tab, 'keydown', (e)=>{
+        const idx = tabs.indexOf(tab);
+        if(['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){
+          e.preventDefault();
+          let targetIdx = idx;
+          if(e.key==='ArrowRight') targetIdx = (idx+1)%tabs.length;
+          if(e.key==='ArrowLeft')  targetIdx = (idx-1+tabs.length)%tabs.length;
+          if(e.key==='Home')       targetIdx = 0;
+          if(e.key==='End')        targetIdx = tabs.length-1;
+          tabs[targetIdx].focus();
+        }
+      });
+    });
+  });
+}
+
+/* =========================
+   BLOQUE 18 · INIT
+   - Construye menú lateral
+   - Arranca router y tabs
+========================= */
+function buildPanelNav(){
+  const panelNav = $('#panelNav');
+  if(!panelNav) return;
+  // Generamos opciones base; podrás añadir más en PARTE 5/6
+  const items = [
+    {id:'home',       label:'Inicio',       icon:'🏠'},
+    {id:'incidencias',label:'Incidencias', icon:'🛠️'},
+    {id:'inventario', label:'Inventario',  icon:'📦'}
+  ];
+  panelNav.innerHTML = items.map(i=>(
+    `<a href="#${i.id}" data-id="${i.id}">
+       <span aria-hidden="true">${i.icon}</span> ${i.label}
+     </a>`
+  )).join('');
+  // Delegación: navegar
+  delegate(panelNav, 'click', 'a', (e, a)=>{
+    e.preventDefault();
+    const id = a.getAttribute('href').replace('#','');
+    location.hash = '#'+id;
+  });
+}
+
+function init(){
+  buildPanelNav();
+  initTabs(document);
+  // hash inicial
+  if(!location.hash) location.hash = '#home';
+  handleHash();
+  // Failsafes de overflow (por si algo externo mete ancho extra)
+  document.body.style.overflowX = 'hidden';
+}
+
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+<!-- =========================================================
+     PARTE 4/6 · API/IO + ESTADO
+     Contiene BLOQUES 19–24
+     - Config API (endpoint + key)
+     - Fetch robusto (timeout, reintentos, JSON seguro)
+     - Wrapper de recursos (state, incid, inv, ot, personal, cuentas, logs, alert, admin/seedall)
+     - Estado/cache en memoria + helpers
+========================================================= -->
+<script>
+/* =========================
+   BLOQUE 19 · CONFIG API
+========================= */
+const API = {
+  API_BASE: 'https://script.google.com/macros/s/AKfycbz9kkvafoc65UBOqZQq8mKA0eeYsreOuHE3W4HDjZ3GK-Ihr8Uoq574a1_LQyl3ANTG/exec', // <- PÉGALA AQUÍ
+  API_KEY:  '',                                                     // <- opcional
+  SHEET_ID: '',                                                     // <- si tu backend lo requiere
+  TIMEOUT_MS: 12000,
+  RETRIES: 2
+};
+
+/* =========================
+   BLOQUE 20 · NET UTILS
+   - qs() para querystring
+   - fetchJSON() con timeout/reintentos
+========================= */
+function qs(params={}){
+  const u = new URLSearchParams();
+  Object.entries(params).forEach(([k,v])=>{
+    if(v===undefined || v===null) return;
+    if(Array.isArray(v)) v.forEach(x=>u.append(k, x));
+    else u.append(k, String(v));
+  });
+  return u.toString();
+}
+
+async function fetchJSON(url, {method='GET', headers={}, body=null, timeout=API.TIMEOUT_MS, retries=API.RETRIES}={}){
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort('timeout'), timeout);
+  const opts = { method, headers: { 'Accept':'application/json', ...headers }, signal: ctrl.signal };
+  if(body){
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+
+  try{
+    const res = await fetch(url, opts);
+    clearTimeout(t);
+    const ct = res.headers.get('content-type') || '';
+    if(!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    if(ct.includes('application/json')) return await res.json();
+    // tolerar texto/HTML de Apps Script con JSON dentro
+    const txt = await res.text();
+    try{ return JSON.parse(txt); }catch{ return { ok:true, raw:txt }; }
+  }catch(err){
+    clearTimeout(t);
+    if(retries>0 && (err.name==='AbortError' || /HTTP 5\d\d/.test(String(err)))){
+      return fetchJSON(url, {method, headers, body, timeout, retries:retries-1});
+    }
+    throw err;
+  }
+}
+
+/* =========================
+   BLOQUE 21 · API WRAPPER
+   Convención: ?res=<recurso>&fn=<operación>
+   Recursos: state, incid, inv, ot, personal, cuentas, logs, alert, admin
+========================= */
+function apiURL(res, fn, query={}){
+  const base = API.API_BASE;
+  const common = { res, fn };
+  const auth = {};
+  if(API.API_KEY) auth.key = API.API_KEY;
+  if(API.SHEET_ID) auth.sheet = API.SHEET_ID;
+  const full = qs({ ...common, ...auth, ...query });
+  return `${base}?${full}`;
+}
+
+const api = {
+  // ----- STATE -----
+  state: {
+    get(){ return fetchJSON(apiURL('state','get')); },
+    set(payload){ return fetchJSON(apiURL('state','set'), {method:'POST', body:payload}); }
+  },
+
+  // ----- INCIDENCIAS -----
+  incid: {
+    list(params={}){ return fetchJSON(apiURL('incid','list', params)); },
+    add(payload){ return fetchJSON(apiURL('incid','add'), {method:'POST', body:payload}); },
+    set(payload){ return fetchJSON(apiURL('incid','set'), {method:'POST', body:payload}); },
+    del(params){ return fetchJSON(apiURL('incid','del', params)); }
+  },
+
+  // ----- INVENTARIO -----
+  inv: {
+    list(params={}){ return fetchJSON(apiURL('inv','list', params)); },
+    add(payload){ return fetchJSON(apiURL('inv','add'), {method:'POST', body:payload}); },
+    delta(payload){ return fetchJSON(apiURL('inv','delta'), {method:'POST', body:payload}); }
+  },
+
+  // ----- ORDENES DE TRABAJO -----
+  ot: {
+    list(params={}){ return fetchJSON(apiURL('ot','list', params)); },
+    add(payload){ return fetchJSON(apiURL('ot','add'), {method:'POST', body:payload}); },
+    set(payload){ return fetchJSON(apiURL('ot','set'), {method:'POST', body:payload}); }
+  },
+
+  // ----- PERSONAL -----
+  personal: {
+    list(){ return fetchJSON(apiURL('personal','list')); }
+  },
+
+  // ----- CUENTAS / AUTH -----
+  cuentas: {
+    list(){ return fetchJSON(apiURL('cuentas','list')); },
+    add(payload){ return fetchJSON(apiURL('cuentas','add'), {method:'POST', body:payload}); },
+    set(payload){ return fetchJSON(apiURL('cuentas','set'), {method:'POST', body:payload}); }
+  },
+
+  // ----- LOGS -----
+  logs: {
+    list(params={}){ return fetchJSON(apiURL('logs','list', params)); },
+    add(payload){ return fetchJSON(apiURL('logs','add'), {method:'POST', body:payload}); }
+  },
+
+  // ----- ALERTAS -----
+  alert: {
+    push(payload){ return fetchJSON(apiURL('alert','push'), {method:'POST', body:payload}); },
+    forceStop(payload){ return fetchJSON(apiURL('alert','forzarParada'), {method:'POST', body:payload}); }
+  },
+
+  // ----- ADMIN -----
+  admin: {
+    seedall(){ return fetchJSON(apiURL('admin','seedall')); }
+  }
+};
+
+/* =========================
+   BLOQUE 22 · ESTADO/CACHE
+   - Memoria en vivo (no localStorage por defecto)
+   - Hydrate desde API
+   - Selectores rápidos
+========================= */
+const store = {
+  ready: false,
+  now: Date.now(),
+  state: null,
+  incidencias: [],
+  inventario: [],
+  ot: [],
+  personal: [],
+  accounts: [],
+  logs: [],
+};
+
+const selectors = {
+  incidAbiertas: () => store.incidencias.filter(x=>String(x.estado).toLowerCase()==='abierta'),
+  incidCerradas: () => store.incidencias.filter(x=>String(x.estado).toLowerCase()==='cerrada'),
+  stockBajo: (min=1) => store.inventario.filter(x=>Number(x.stock)<=Number(x.min||min)),
+};
+
+async function hydrate(options={ fast:false }){
+  // Cargas paralelas; “fast” puede limitar datasets pesados
+  const tasks = [
+    api.state.get().then(d=>store.state=d).catch(()=>{}),
+    api.incid.list().then(d=>store.incidencias=d.items||d||[]).catch(()=>{}),
+    api.inv.list().then(d=>store.inventario=d.items||d||[]).catch(()=>{}),
+  ];
+  if(!options.fast){
+    tasks.push(
+      api.ot.list().then(d=>store.ot=d.items||d||[]).catch(()=>{}),
+      api.personal.list().then(d=>store.personal=d.items||d||[]).catch(()=>{}),
+      api.cuentas.list().then(d=>store.accounts=d.items||d||[]).catch(()=>{}),
+      api.logs.list({limit:100}).then(d=>store.logs=d.items||d||[]).catch(()=>{})
+    );
+  }
+  await Promise.all(tasks);
+  store.ready = true;
+  store.now = Date.now();
+  return store;
+}
+
+/* =========================
+   BLOQUE 23 · REGISTRO/AUDITORÍA
+========================= */
+async function audit(event, payload={}){
+  try{
+    await api.logs.add({
+      ts: new Date().toISOString(),
+      event, payload
+    });
+  }catch(e){
+    // Silencioso: no romper UX por logging
+    console.warn('audit error', e);
+  }
+}
+
+/* =========================
+   BLOQUE 24 · CARGA INICIAL LIGERA
+   - Hidratación rápida para pintar dashboard
+   - Posterior enriquecimiento
+========================= */
+(async function bootData(){
+  try{
+    await hydrate({fast:true});
+    // Aquí podrás llamar a funciones de pintado (PARTE 5/6)
+    // ej: renderKPIs(), renderFeed(), renderIncidTable()
+    // y luego ampliar datos:
+    hydrate({fast:false});
+  }catch(e){
+    console.error('Error al hidratar datos:', e);
+  }
+})();
+</script>
+<!-- =========================================================
+     PARTE 5/6 · MÓDULOS UI + ACCIONES
+     Contiene BLOQUES 25–31
+     - Render KPIs, feed, incidencias (tabla)
+     - Inventario (listado + acciones básicas)
+     - Handlers: nueva incidencia, refrescar, tabs
+========================================================= -->
+<script>
+/* =========================
+   BLOQUE 25 · RENDER HELPERS
+========================= */
+function tpl(id){ return document.getElementById(id); }
+function fill(str, data){
+  return str.replace(/\{\{(\w+)\}\}/g, (_,k)=> (data[k] ?? ''));
+}
+function mount(container, html){ container.innerHTML = html; }
+
+/* =========================
+   BLOQUE 26 · KPIs + FEED
+========================= */
+function computeKPIs(){
+  const incid = store.incidencias||[];
+  const abiertas = incid.filter(x=>String(x.estado).toLowerCase()==='abierta').length;
+  const cerradas = incid.filter(x=>String(x.estado).toLowerCase()==='cerrada').length;
+  const horasParo = incid.reduce((acc,x)=> acc + Number(x.h_paro||0), 0);
+
+  return [
+    {label:'Incidencias abiertas', value: abiertas, trend:''},
+    {label:'Incidencias cerradas', value: cerradas, trend:''},
+    {label:'Horas de paro', value: horasParo.toFixed(1), trend:''},
+  ];
+}
+
+function renderKPIs(){
+  const grid = document.getElementById('kpiGrid'); if(!grid) return;
+  const t = tpl('tpl-kpi').innerHTML;
+  const html = computeKPIs().map(d=> fill(t, d)).join('');
+  mount(grid, html);
+}
+
+function renderFeed(){
+  const list = document.getElementById('feedList'); if(!list) return;
+  const t = tpl('tpl-item-feed').innerHTML;
+  const latest = (store.logs||[]).slice(0,8).map(e=>({
+    status: 'ok',
+    status_txt: (e.event||'log').slice(0,16),
+    title: e.event || 'Evento',
+    meta: new Date(e.ts||Date.now()).toLocaleString()
+  }));
+  mount(list, latest.map(d=> fill(t,d)).join(''));
+}
+
+/* =========================
+   BLOQUE 27 · INCIDENCIAS
+========================= */
+function normIncidRows(rows){
+  return rows.map(r=>({
+    id: r.id ?? r.ID ?? '',
+    equipo: r.equipo ?? r.Equipo ?? '',
+    titulo: r.titulo ?? r.Título ?? r.tittle ?? '',
+    h_paro: Number(r.h_paro ?? r.horas ?? 0),
+    estado: r.estado ?? r.Estado ?? '',
+    fecha: r.fecha ?? r.Fecha ?? ''
+  }));
+}
+
+function renderIncidTable(rows){
+  const tbody = document.getElementById('incidTBody'); if(!tbody) return;
+  const t = tpl('tpl-row-incid').innerHTML;
+  const data = normIncidRows(rows);
+  mount(tbody, data.map(d=> fill(t,d)).join(''));
+}
+
+function filterIncid(view){
+  const all = normIncidRows(store.incidencias||[]);
+  if(view==='abiertas')  return all.filter(x=>String(x.estado).toLowerCase()==='abierta');
+  if(view==='cerradas')  return all.filter(x=>String(x.estado).toLowerCase()==='cerrada');
+  return all;
+}
+
+function bindIncidTabs(){
+  const tabTodas   = document.getElementById('tabTodas');
+  const tabAbiertas= document.getElementById('tabAbiertas');
+  const tabCerradas= document.getElementById('tabCerradas');
+  if(!tabTodas) return;
+
+  const renderByTab = ()=>{
+    const selected = $$('.tabs [role="tab"]').find(t=>t.getAttribute('aria-selected')==='true')?.id;
+    if(selected==='tabAbiertas') renderIncidTable(filterIncid('abiertas'));
+    else if(selected==='tabCerradas') renderIncidTable(filterIncid('cerradas'));
+    else renderIncidTable(filterIncid('todas'));
+  };
+
+  on(tabTodas, 'click', renderByTab);
+  on(tabAbiertas, 'click', renderByTab);
+  on(tabCerradas, 'click', renderByTab);
+  // Render inicial
+  renderByTab();
+}
+
+/* =========================
+   BLOQUE 28 · INVENTARIO
+========================= */
+function renderInventario(rows){
+  const tbody = document.getElementById('invTBody'); if(!tbody) return;
+  const html = (rows||[]).map(r=>{
+    const ref = r.ref ?? r.Ref ?? '';
+    const desc = r.desc ?? r.Descripción ?? r.descripcion ?? '';
+    const ubi = r.ubi ?? r.Ubicación ?? r.ubicacion ?? '';
+    const stock = Number(r.stock ?? 0);
+    const min = Number(r.min ?? r.minimo ?? 0);
+    const danger = stock<=min ? ' style="background:#fff5f5"' : '';
+    return `<tr${danger}>
+      <td><span class="tag">${ref}</span></td>
+      <td>${desc}</td>
+      <td>${ubi}</td>
+      <td class="td-num">${stock}</td>
+      <td class="td-num">${min}</td>
+      <td>
+        <button class="btn btn--ghost btn--icon act-dec" data-ref="${ref}" aria-label="Descontar">−</button>
+        <button class="btn btn--ghost btn--icon act-inc" data-ref="${ref}" aria-label="Incrementar">+</button>
+      </td>
+    </tr>`;
+  }).join('');
+  mount(tbody, html);
+}
+
+function bindInventarioActions(){
+  const tbody = document.getElementById('invTBody'); if(!tbody) return;
+  delegate(tbody, 'click', '.act-inc', async (e, btn)=>{
+    const ref = btn.dataset.ref;
+    try{
+      await api.inv.delta({ ref, delta:+1 });
+      await refreshData({inv:true});
+    }catch(err){ console.error(err); }
+  });
+  delegate(tbody, 'click', '.act-dec', async (e, btn)=>{
+    const ref = btn.dataset.ref;
+    try{
+      await api.inv.delta({ ref, delta:-1 });
+      await refreshData({inv:true});
+    }catch(err){ console.error(err); }
+  });
+}
+
+/* =========================
+   BLOQUE 29 · ACCIONES UI
+========================= */
+async function refreshData(opts={ all:true, inv:false, incid:false }){
+  // fast hydrate para no bloquear
+  await hydrate({fast:true});
+  renderKPIs();
+  renderFeed();
+  // Incidencias
+  if(opts.all || opts.incid) renderIncidTable(filterIncid('todas'));
+  // Inventario
+  if(opts.all || opts.inv) renderInventario(store.inventario);
+}
+
+async function addNuevaIncidencia(){
+  // Plantilla mínima; en PARTE 6/6 podemos conectar con un modal/form
+  const payload = {
+    equipo: 'GENÉRICO',
+    titulo: 'Nueva incidencia',
+    estado: 'abierta',
+    h_paro: 0,
+    fecha: new Date().toISOString().slice(0,10)
+  };
+  try{
+    await api.incid.add(payload);
+    await audit('incid.add', payload);
+    await refreshData({incid:true});
+    // Navegar a incidencias
+    location.hash = '#incidencias';
+  }catch(e){
+    console.error('Error al añadir incidencia', e);
+  }
+}
+
+function bindTopActions(){
+  const refreshBtn = document.getElementById('refreshBtn');
+  const newIncidBtn= document.getElementById('newIncidBtn');
+  if(refreshBtn) on(refreshBtn, 'click', ()=> refreshData({all:true}));
+  if(newIncidBtn) on(newIncidBtn, 'click', addNuevaIncidencia);
+}
+
+/* =========================
+   BLOQUE 30 · RENDER INICIAL
+========================= */
+function initialRender(){
+  renderKPIs();
+  renderFeed();
+  renderIncidTable(filterIncid('todas'));
+  renderInventario(store.inventario);
+  bindIncidTabs();
+  bindInventarioActions();
+  bindTopActions();
+}
+
+/* =========================
+   BLOQUE 31 · BOOT UI
+   - Espera a que bootData (PARTE 4/6) haya rellenado store fast
+========================= */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Pequeña espera a bootData(); si ya tenemos datos, pinta.
+  const tick = setInterval(()=>{
+    if(store.ready){
+      clearInterval(tick);
+      initialRender();
+    }
+  }, 60);
+});
+</script>
+<!-- =========================================================
+     PARTE 6/6 · MODALES + TOASTS + INIT FINAL + CIERRE
+     Contiene BLOQUES 32–36
+========================================================= -->
+
+<!-- =========================================================
+     BLOQUE 32 · CSS · MODAL, OVERLAY, TOASTS, PRINT
+========================================================= -->
+<style>
+  /* Overlay + modal centrado */
+  .overlay{
+    position:fixed; inset:0; background:rgba(15,23,42,.45);
+    display:none; align-items:center; justify-content:center; z-index:1200;
+  }
+  .overlay.is-open{ display:flex }
+  .modal{
+    width:min(92vw,640px); background:#fff; color:#111;
+    border:1px solid var(--line); border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.18);
+    display:grid; grid-template-rows:auto 1fr auto; max-height:86vh;
+  }
+  .modal__hdr{ padding:1rem; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:.75rem }
+  .modal__body{ padding:1rem; overflow:auto }
+  .modal__ftr{ padding:1rem; border-top:1px solid var(--line); display:flex; gap:.5rem; justify-content:flex-end }
+
+  /* Toasts */
+  .toasts{ position:fixed; right:16px; bottom:16px; display:grid; gap:.5rem; z-index:1300 }
+  .toast{
+    background:#111; color:#fff; border-radius:10px; padding:.6rem .8rem;
+    box-shadow:0 6px 22px rgba(0,0,0,.22); max-width:min(90vw,380px)
+  }
+  .toast--ok{ background:#166534 }
+  .toast--warn{ background:#92400e }
+  .toast--err{ background:#7f1d1d }
+
+  /* Print mínimo */
+  @media print{
+    .cdl-header, .cdl-hamb, #sidePanel, .toasts, .overlay { display:none !important }
+    .page__content{ padding:0 }
+    body{ background:#fff; color:#000 }
+  }
+</style>
+
+<!-- =========================================================
+     BLOQUE 33 · DOM · MODAL “NUEVA INCIDENCIA” + TOASTS
+========================================================= -->
+<div class="overlay" id="modalOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="miTitle">
+    <div class="modal__hdr">
+      <strong id="miTitle">Nueva incidencia</strong>
+      <button class="btn btn--ghost btn--icon" id="miClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal__body">
+      <form class="form" id="miForm">
+        <div class="row">
+          <div class="col-6">
+            <div class="field">
+              <label class="label" for="miEquipo">Equipo</label>
+              <input class="input" id="miEquipo" name="equipo" placeholder="Ej. KDP1" required>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="field">
+              <label class="label" for="miEstado">Estado</label>
+              <select class="select" id="miEstado" name="estado">
+                <option value="abierta">Abierta</option>
+                <option value="cerrada">Cerrada</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="miTitulo">Título</label>
+          <input class="input" id="miTitulo" name="titulo" placeholder="Descripción breve" required>
+        </div>
+
+        <div class="row">
+          <div class="col-3">
+            <div class="field">
+              <label class="label" for="miParo">h Paro</label>
+              <input class="input" id="miParo" name="h_paro" type="number" step="0.1" min="0" value="0">
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="field">
+              <label class="label" for="miFecha">Fecha</label>
+              <input class="input" id="miFecha" name="fecha" type="date">
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal__ftr">
+      <button class="btn" id="miCancel">Cancelar</button>
+      <button class="btn btn--pri" id="miSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="true"></div>
+
+<!-- =========================================================
+     BLOQUE 34 · JS · TOASTS + MODAL (ACCESIBLE)
+========================================================= -->
+<script>
+/* ---- TOASTS ---- */
+function toast(msg, type='ok', ttl=3000){
+  const box = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = `toast toast--${type}`;
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(()=> el.remove(), ttl);
+}
+
+/* ---- MODAL ---- */
+const modalOverlay = document.getElementById('modalOverlay');
+const miForm = document.getElementById('miForm');
+const miClose = document.getElementById('miClose');
+const miCancel = document.getElementById('miCancel');
+const miSave = document.getElementById('miSave');
+let modalLastFocus = null;
+
+function openIncidModal(prefill={}){
+  modalLastFocus = document.activeElement;
+  // Prefills
+  miForm.reset();
+  const today = new Date().toISOString().slice(0,10);
+  $('#miFecha').value = today;
+  $('#miEquipo').value = prefill.equipo || '';
+  $('#miTitulo').value = prefill.titulo || '';
+  $('#miEstado').value = prefill.estado || 'abierta';
+  $('#miParo').value   = prefill.h_paro ?? 0;
+
+  modalOverlay.classList.add('is-open');
+  modalOverlay.removeAttribute('aria-hidden');
+  $('#miTitulo').focus();
+}
+function closeIncidModal(){
+  modalOverlay.classList.remove('is-open');
+  modalOverlay.setAttribute('aria-hidden','true');
+  if(modalLastFocus) modalLastFocus.focus();
+}
+
+on(miClose,'click', closeIncidModal);
+on(miCancel,'click', closeIncidModal);
+on(modalOverlay,'click', (e)=>{ if(e.target===modalOverlay) closeIncidModal(); });
+on(document,'keydown', (e)=>{ if(e.key==='Escape' && modalOverlay.classList.contains('is-open')) closeIncidModal(); });
+
+/* Guardar incidencia desde modal */
+async function saveIncidFromModal(){
+  const data = Object.fromEntries(new FormData(miForm).entries());
+  // normalización mínima
+  data.h_paro = Number(data.h_paro || 0);
+  data.fecha = data.fecha || new Date().toISOString().slice(0,10);
+
+  try{
+    await api.incid.add(data);
+    await audit('incid.add', data);
+    toast('Incidencia creada', 'ok');
+    closeIncidModal();
+    await refreshData({incid:true});
+    location.hash = '#incidencias';
+  }catch(e){
+    console.error(e);
+    toast('Error al crear incidencia', 'err', 4500);
+  }
+}
+on(miSave,'click', (e)=>{ e.preventDefault(); saveIncidFromModal(); });
+
+/* Reemplazar el click de “Nueva incidencia” de PARTE 5/6 por el modal */
+(function upgradeNewIncidBtn(){
+  const btn = document.getElementById('newIncidBtn');
+  if(!btn) return;
+  // Elimina listeners previos clonando el nodo
+  const clone = btn.cloneNode(true);
+  btn.parentNode.replaceChild(clone, btn);
+  on(clone, 'click', (e)=>{ e.preventDefault(); openIncidModal(); });
+})();
+</script>
+
+<!-- =========================================================
+     BLOQUE 35 · MANEJO DE ERRORES GLOBAL (no intrusivo)
+========================================================= -->
+<script>
+window.addEventListener('error', (e)=>{
+  console.warn('window error', e.message);
+  toast('Se produjo un error no esperado', 'warn', 4000);
+});
+window.addEventListener('unhandledrejection', (e)=>{
+  console.warn('promise rejection', e.reason);
+  toast('Fallo de red o servidor', 'warn', 4000);
+});
+</script>
+
+<!-- =========================================================
+     BLOQUE 36 · CIERRE DEL DOCUMENTO
+========================================================= -->
+</main> <!-- cierre de .page__content abierto en PARTE 1/6 -->
+</body>
+</html>
