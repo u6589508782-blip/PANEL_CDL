@@ -630,7 +630,6 @@ async function accionParadaProlongada(equipo){ /* igual que antes */ }
   };
 })(window);
 </script>    
-
 <!-- =========================================================
 BLOQUE 10 — ESTILOS DE IMPRESIÓN + PULIDO CABECERA + SHEETS API
 (Reemplaza tu bloque 10 y elimina cualquier BLOQUE B duplicado)
@@ -675,8 +674,8 @@ SHEETS API (Apps Script publicado como Web App)
 ========================================================= */
 (function(){
   // 👇 Tu Web App URL (Apps Script v25)
-  const GSCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9kkvafoc65UBOqZQq8mKA0eeYsreOuHE3W4HDjZ3GK-Ihr8Uoq574a1_LQyl3ANTG/exec";
-
+  const GSCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPxPJztSCo7dX-xmzYW_pBwkQne3aACe1EzzlNDsjr0nuRXZaOSOrRGzVrYZsN5cgF/exec";
+  
   async function sheetFetch(path='', {method='GET', data=null}={}){
     if(!GSCRIPT_URL){ console.warn('[Sheets] GSCRIPT_URL vacío'); return null; }
     const url = GSCRIPT_URL + (path||'');
@@ -11173,12 +11172,15 @@ BLOQUE 440 — Backdrop del panel lateral (CSS + JS)
 })();
 </script>
 <!-- =========================================================
-BLOQUE 70 — CABECERA + MENÚ + TÍTULOS + “PLANTAS”
-(FIX responsive cabecera, logo, menú fullscreen, títulos con angular,
-ocultar "Todas las plantas", autocierre panel, migas alineadas)
+BLOQUE 10 — ESTILOS DE IMPRESIÓN + CABECERA + MENÚ FULL + TÍTULOS
++ MIGAS + “PLANTAS” OFF + SHEETS API (compat)
+(Reemplaza tu bloque 10 actual y elimina cualquier bloque 70/B duplicado)
 ========================================================= -->
 <style>
-  /* ---------- Cabecera fija y limpia (siempre blanca) ---------- */
+  /* ---------- Pulido responsive ---------- */
+  main.cdl-container section + section{ margin-top:16px; }
+
+  /* ---------- Cabecera fija (siempre blanca) ---------- */
   #cdlHeader.cdl-header{
     position:sticky; top:0; z-index:1000;
     height:var(--hdr-h,76px);
@@ -11189,19 +11191,21 @@ ocultar "Todas las plantas", autocierre panel, migas alineadas)
     height:inherit; display:flex; align-items:center; justify-content:space-between;
     gap:.75rem; overflow:hidden; /* evita desbordes en móvil */
   }
+  /* User area */
+  .cdl-user{ display:flex; align-items:center; gap:.5rem; }
+  .cdl-user__role{ font-weight:800; color:#111; }
+  .cdl-user__btn{ width:42px; height:42px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; color:#111; }
 
-  /* Logo sin recorte (alto fijo, quepa completo) */
+  /* Logo sin recortes */
   .cdl-logo img{
     display:block; height:28px; width:auto;
     object-fit:contain; object-position:left center;
   }
 
-  /* Hamburguesa sin píldora; líneas juntas */
-  .cdl-hamb{
-    all:unset; display:grid; place-items:center; width:42px; height:42px; cursor:pointer;
-  }
+  /* Hamburguesa sin píldora; líneas más juntas */
+  .cdl-hamb{ all:unset; display:grid; place-items:center; width:42px; height:42px; cursor:pointer; }
   .cdl-hamb span{ width:18px; height:2px; background:#111; display:block; }
-  .cdl-hamb span+span{ margin-top:3px; } /* más juntas */
+  .cdl-hamb span+span{ margin-top:3px; }
 
   /* ---------- Menú lateral a pantalla completa ---------- */
   .cdl-panel{
@@ -11218,10 +11222,8 @@ ocultar "Todas las plantas", autocierre panel, migas alineadas)
     justify-content:space-between; padding:0 16px; border-bottom:1px solid #e5e7eb;
   }
   .cdl-panel__top img{ height:26px; width:auto; display:block; }
-  .cdl-panel__close{
-    all:unset; width:40px; height:40px; display:grid; place-items:center;
-    font-size:20px; line-height:1; color:#111; cursor:pointer;
-  }
+  .cdl-panel__close{ all:unset; width:40px; height:40px; display:grid; place-items:center;
+    font-size:20px; line-height:1; color:#111; cursor:pointer; }
 
   /* Zona de búsqueda oscura bajo la franja blanca */
   .cdl-panel__search{ padding:12px 16px; border-bottom:1px solid rgba(255,255,255,.06); }
@@ -11235,12 +11237,11 @@ ocultar "Todas las plantas", autocierre panel, migas alineadas)
   .cdl-panel__nav{ display:grid; gap:.25rem; padding:12px 10px 24px; }
   .cdl-panel__nav a{
     text-decoration:none; text-transform:uppercase; color:#fff;
-    font-weight:700; letter-spacing:.02em; padding:.5rem .75rem; border-radius:8px;
-    display:block;
+    font-weight:700; letter-spacing:.02em; padding:.5rem .75rem; border-radius:8px; display:block;
   }
   .cdl-panel__nav a:hover{ background:rgba(255,255,255,.06); }
 
-  /* Backdrop controlado por JS (se añade si no existe) */
+  /* Backdrop */
   .cdl-panel__backdrop{
     position:fixed; inset:0; background:rgba(0,0,0,.28); z-index:1090;
     opacity:0; pointer-events:none; transition:opacity .2s ease;
@@ -11249,21 +11250,23 @@ ocultar "Todas las plantas", autocierre panel, migas alineadas)
 
   /* ---------- Títulos H1/H2/H3 en mayúsculas + angular rojo ---------- */
   h1, h2, h3{ text-transform:uppercase; position:relative; }
-  /* Angular: dos trazos formando “L” que ARRANCAN en el 2º tercio del alto del título */
+  /* Angular arrancando en el 2º tercio */
   h1::before, h2::before, h3::before,
   h1::after,  h2::after,  h3::after{ content:""; position:absolute; left:-14px; background:#E43B3B; }
-  h1::before, h2::before, h3::before{  /* trazo vertical */
-    top:33%; width:3px; height:16px; border-radius:2px;
-  }
-  h1::after, h2::after, h3::after{   /* trazo horizontal */
-    top:33%; width:14px; height:3px; border-radius:2px; transform:translateX(-14px);
-  }
+  h1::before, h2::before, h3::before{ top:33%; width:3px; height:16px; border-radius:2px; }
+  h1::after,  h2::after,  h3::after{ top:33%; width:14px; height:3px; border-radius:2px; transform:translateX(-14px); }
 
-  /* ---------- Migas / breadcrumb alineadas ---------- */
-  .cdl-breadcrumbs, nav[aria-label="breadcrumb"]{
-    display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
-  }
+  /* ---------- Migas alineadas ---------- */
+  .cdl-breadcrumbs, nav[aria-label="breadcrumb"]{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
   .cdl-breadcrumbs *{ vertical-align:middle; }
+
+  /* ---------- Print: ficha equipo ---------- */
+  @media print{
+    header, #cdlHeader, #pagesPanel, #panelBackdrop, .btn-cdl, .cdl-divider, #equiposView { display:none !important; }
+    #equipoView{ display:block !important; }
+    .eq-detail{ grid-template-columns: 1.2fr .8fr !important; gap:10px; }
+    body{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
 
   /* Utilidad genérica */
   [hidden]{ display:none !important; }
@@ -11271,22 +11274,46 @@ ocultar "Todas las plantas", autocierre panel, migas alineadas)
 
 <script>
 (function(){
-  /* ---------- 1) Eliminar “Todas las plantas” en cabecera ---------- */
+  /* =========================================================
+  1) SHEETS API (compat con apiSheet.get/post desde HTML)
+  Pon tu URL en window.GSCRIPT_URL en cualquier bloque, o aquí:
+  ========================================================= */
+  window.GSCRIPT_URL = window.GSCRIPT_URL || ''; // <-- si quieres, define aquí tu Web App URL
+
+  async function sheetFetch(path='', {method='GET', data=null}={}){
+    if(!window.GSCRIPT_URL){ console.warn('GSCRIPT_URL vacío'); return null; }
+    const url = window.GSCRIPT_URL + (path||'');
+    const opt = { method, headers:{ 'Content-Type':'application/json' } };
+    if(data) opt.body = JSON.stringify(data);
+    const res = await fetch(url, opt);
+    if(!res.ok) throw new Error('Sheets API error: '+res.status);
+    return res.json();
+  }
+  window.apiSheet = {
+    async get(key){ return sheetFetch('?key='+encodeURIComponent(key), {method:'GET'}); },
+    async post(key, payload){ return sheetFetch('?key='+encodeURIComponent(key), {method:'POST', data:payload}); }
+  };
+
+  /* =========================================================
+  2) Ocultar “Todas las plantas” de la cabecera
+  ========================================================= */
   window.addEventListener('load', ()=>{
-    const candidates = Array.from(document.querySelectorAll('button, a, [role="button"], .pill, .chip'))
+    const pills = Array.from(document.querySelectorAll('button, a, [role="button"], .pill, .chip'))
       .filter(el => /todas\s+las\s+plantas/i.test(el.textContent||''));
-    candidates.forEach(el => el.remove());
+    pills.forEach(el => el.remove());
   });
 
-  /* ---------- 2) Construir franja blanca + buscador dentro del panel si falta ---------- */
+  /* =========================================================
+  3) Menú fullscreen: franja blanca + buscador + backdrop + autocierre
+  ========================================================= */
   const panel    = document.getElementById('pagesPanel');
   const openBtn  = document.getElementById('btnMenu');
-  const closeBtn = document.getElementById('btnClosePanel'); // si existe el tuyo
+  const closeBtn = document.getElementById('btnClosePanel'); // si ya existe
   let   backdrop = document.getElementById('panelBackdrop');
 
   function ensurePanelChrome(){
     if(!panel) return;
-    // A) Top bar blanca con logo + X
+    // Franja superior blanca con logo + X
     if(!panel.querySelector('.cdl-panel__top')){
       const top = document.createElement('div');
       top.className = 'cdl-panel__top';
@@ -11296,7 +11323,7 @@ ocultar "Todas las plantas", autocierre panel, migas alineadas)
       panel.prepend(top);
       top.querySelector('.cdl-panel__close').addEventListener('click', close);
     }
-    // B) Bloque de búsqueda oscuro
+    // Buscador
     if(!panel.querySelector('.cdl-panel__search')){
       const box = document.createElement('div');
       box.className='cdl-panel__search';
@@ -11304,7 +11331,7 @@ ocultar "Todas las plantas", autocierre panel, migas alineadas)
       const afterTop = panel.querySelector('.cdl-panel__top');
       (afterTop?.nextSibling) ? panel.insertBefore(box, afterTop.nextSibling) : panel.appendChild(box);
     }
-    // C) Backdrop si no existe
+    // Backdrop
     if(!backdrop){
       backdrop = document.createElement('div');
       backdrop.id='panelBackdrop'; backdrop.className='cdl-panel__backdrop'; backdrop.hidden=true;
@@ -11312,7 +11339,6 @@ ocultar "Todas las plantas", autocierre panel, migas alineadas)
     }
   }
 
-  /* ---------- 3) Abrir / cerrar + autocierre ---------- */
   function open(){
     ensurePanelChrome();
     panel?.setAttribute('aria-hidden','false');
@@ -11327,27 +11353,171 @@ ocultar "Todas las plantas", autocierre panel, migas alineadas)
 
   openBtn?.addEventListener('click', open);
   closeBtn?.addEventListener('click', close);
-  document.addEventListener('click', (e)=>{
-    if(!panel) return;
-    // Cierra al pulsar un enlace del menú
-    if(e.target.closest && e.target.closest('.cdl-panel__nav a')) close();
-  });
   backdrop?.addEventListener('click', close);
   window.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+  document.addEventListener('click', (e)=>{
+    if(e.target.closest && e.target.closest('.cdl-panel__nav a')) close(); // autocierra al elegir
+  });
   window.addEventListener('load', ()=>{ if(backdrop) backdrop.hidden = true; });
 
-  /* ---------- 4) Asegurar cabecera no desborde en iOS ---------- */
-  // Forzamos repaint si la altura cambia (teclado, zoom)
+  /* =========================================================
+  4) Anti-desbordes cabecera en iOS (repaint suave al rotar/zoom)
+  ========================================================= */
   let lastW = innerWidth;
   window.addEventListener('resize', ()=>{
     if(Math.abs(innerWidth - lastW) > 1){
-      document.getElementById('cdlHeader')?.style.setProperty('will-change','transform');
-      requestAnimationFrame(()=>document.getElementById('cdlHeader')?.style.removeProperty('will-change'));
+      const h = document.getElementById('cdlHeader');
+      if(h){
+        h.style.setProperty('will-change','transform');
+        requestAnimationFrame(()=>h.style.removeProperty('will-change'));
+      }
       lastW = innerWidth;
     }
   });
 })();
 </script>
+<!-- =========================================================
+BLOQUE 500 — Ajustes cabecera + menú full-screen + títulos + dark
+(AÑADIR al final, sin borrar nada)
+========================================================= -->
+<style>
+  /* 1) Cabecera: robustez + no desborde */
+  .cdl-header{ position:sticky; top:0; z-index:1000; width:100%; box-sizing:border-box; }
+  .cdl-header__inner{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; min-height:var(--hdr-h,72px); }
+  /* Logo: que NO se corte */
+  .cdl-logo img{ display:block; height:32px; max-width:180px; object-fit:contain; }
 
+  /* 2) Hamburguesa: sin píldora, líneas más juntas */
+  .cdl-hamb{ width:42px; height:42px; display:grid; place-items:center; background:transparent !important; border:none !important; border-radius:0 !important; }
+  .cdl-hamb span{ display:block; width:18px; height:2px; background:#111; }
+  .cdl-hamb span+span{ margin-top:3px; }
+  /* Dark */
+  .theme-dark .cdl-hamb span{ background:#fff; }
+
+  /* 3) Menú lateral como overlay full-screen */
+  aside.cdl-panel{
+    position:fixed; inset:0; width:100vw; max-width:none !important;
+    background:#000; color:#fff; transform:translateX(-102%);
+    transition:transform .28s cubic-bezier(.2,.8,.2,1);
+    display:flex; flex-direction:column; z-index:1100; border-right:0 !important;
+  }
+  .cdl-panel[aria-hidden="false"]{ transform:translateX(0); }
+  /* Franja superior blanca con logo + X */
+  .cdl-panel .cdl-panel__head{
+    background:#fff; color:#111; display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px; border-bottom:1px solid #e5e7eb;
+  }
+  .cdl-panel .cdl-panel__head img{ height:26px; object-fit:contain; }
+  .cdl-x{ width:36px; height:36px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; font-weight:900; }
+  /* Cuerpo oscuro: buscador + enlaces */
+  .cdl-panel__search{ display:flex; gap:.5rem; padding:12px 16px; border-bottom:1px solid rgba(255,255,255,.06); background:#000; }
+  .cdl-panel__search input{
+    flex:1; height:40px; border:1px solid rgba(255,255,255,.18); border-radius:10px; padding:0 .7rem;
+    background:#0b0b0b; color:#fff; caret-color:#fff;
+  }
+  .cdl-panel__nav{ display:grid; gap:.2rem; padding:10px 8px; background:#000; }
+  .cdl-panel__nav a{
+    display:block; padding:.7rem .8rem; border-radius:12px; font-weight:800;
+    color:#fff !important; background:transparent; text-decoration:none !important; text-transform:uppercase;
+  }
+  .cdl-panel__nav a:hover{ background:#111; }
+  .cdl-panel__foot{ margin-top:auto; padding:10px 16px; border-top:1px solid rgba(255,255,255,.06); color:#9ca3af; background:#000; }
+
+  /* Backdrop: click-cierre y transición */
+  .cdl-panel__backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:1090;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .cdl-panel[aria-hidden="false"] + .cdl-panel__backdrop{ opacity:1; pointer-events:auto; }
+
+  /* 4) Títulos en mayúsculas + angular rojo posicionado al 2/3 */
+  .cdl-container h1, .cdl-container h2, .cdl-container h3{ text-transform:uppercase; position:relative; }
+  /* Decorador tipo “angular rojo CDL” */
+  .ttl-cdl{
+    --cdl-red:#E43B3B;
+    padding-bottom:8px;
+    background:
+      linear-gradient(135deg, transparent 66%, var(--cdl-red) 66% 100%) 0 100% / 100% 8px no-repeat;
+  }
+
+  /* 5) Breadcrumb: alineación y consistencia si existe */
+  .breadcrumb, .cdl-breadcrumb{
+    display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; line-height:1.2;
+  }
+  .breadcrumb a, .cdl-breadcrumb a{ color:inherit; text-decoration:none; }
+  .breadcrumb .sep, .cdl-breadcrumb .sep{ opacity:.4; }
+
+  /* 6) Ocultar selector de plantas si existe (varias variantes) */
+  #plantas, #plantasSel, .plantas-select, [data-role="plantas"]{ display:none !important; }
+
+  /* 7) Modo oscuro: header/roles/btns ya forzados */
+  .theme-dark .cdl-header{ background:#0b0f14; border-bottom-color:#111827; }
+  .theme-dark .cdl-user__role{ color:#fff; }
+  .theme-dark .cdl-user__btn{ background:#0b0f14; border-color:#1f2937; color:#fff; }
+
+  /* 8) Util: cualquier [hidden] de verdad oculto */
+  [hidden]{ display:none !important; }
+</style>
+
+<script>
+(function(){
+  // ---------- 0) Helper seguro ----------
+  const $  = (s,sc)=> (sc||document).querySelector(s);
+  const $$ = (s,sc)=> Array.from((sc||document).querySelectorAll(s));
+
+  // ---------- 1) Logo no recortado ----------
+  const logo = document.querySelector('.cdl-logo img');
+  if(logo){ logo.removeAttribute('width'); logo.setAttribute('height','32'); logo.style.objectFit='contain'; }
+
+  // ---------- 2) Aplicar decorador angular a H1/H2/H3 existentes ----------
+  $$('.cdl-container h1, .cdl-container h2, .cdl-container h3').forEach(h=>{
+    if(!h.classList.contains('ttl-cdl')) h.classList.add('ttl-cdl');
+  });
+
+  // ---------- 3) Menú: abrir/cerrar, cerrar al navegar / clicar fuera ----------
+  const panel    = $('#pagesPanel');
+  const openBtn  = $('#btnMenu');
+  const closeBtn = $('#btnClosePanel');
+  const backdrop = $('#panelBackdrop');
+
+  function open(){ panel?.setAttribute('aria-hidden','false'); if(backdrop) backdrop.hidden=false; openBtn?.setAttribute('aria-expanded','true'); }
+  function close(){ panel?.setAttribute('aria-hidden','true'); if(backdrop) backdrop.hidden=true; openBtn?.setAttribute('aria-expanded','false'); }
+  openBtn?.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  backdrop?.addEventListener('click', close);
+  window.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+
+  // Cerrar al hacer click en un enlace del menú
+  $$('.cdl-panel__nav a', panel).forEach(a=>{
+    a.addEventListener('click', ()=>{ close(); });
+  });
+
+  // ---------- 4) Dark-mode: asegurar contraste en nav (por si hay clases propias) ----------
+  // (Ya reforzado en CSS; esto es por si hay toggle dinámico)
+  function ensureMenuContrast(){
+    $$('.cdl-panel__nav a', panel).forEach(a=>{
+      a.style.color = '#fff';
+      a.style.textDecoration = 'none';
+      a.style.textTransform = 'uppercase';
+    });
+  }
+  ensureMenuContrast();
+  const obs = new MutationObserver(ensureMenuContrast);
+  if(panel) obs.observe(panel, {subtree:true, attributes:true, childList:true});
+
+  // ---------- 5) Quitar selector de plantas si existe ----------
+  ['#plantas', '#plantasSel', '.plantas-select', '[data-role="plantas"]'].forEach(sel=>{
+    $$(sel).forEach(el=> el.remove());
+  });
+
+  // ---------- 6) Breadcrumb: alineación básica si existe ----------
+  const bc = $('.breadcrumb, .cdl-breadcrumb');
+  if(bc){
+    bc.style.display='flex';
+    bc.style.alignItems='center';
+    bc.style.gap='.5rem';
+  }
+})();
+</script>
 </body>
 </html>
