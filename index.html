@@ -31,7 +31,7 @@ img{max-width:100%;display:block}
 .header{ position:sticky; top:0; z-index:1000; min-height:var(--hdr-h); background:#fff; border-bottom:1px solid #eee; }
 .header::before{
   content:""; position:absolute; inset:0;
-  background:url("/logo_mantenimiento.png") center top/70% no-repeat;
+  background:url("logo_mantenimiento.png") center top/70% no-repeat;
   opacity:.10; pointer-events:none;
 }
 .h__in{height:var(--hdr-h); display:flex; align-items:flex-end; gap:10px; padding:10px 14px; position:relative; z-index:1}
@@ -105,7 +105,7 @@ img{max-width:100%;display:block}
 h1,h2,h3{ position:relative; margin:18px 0 10px; padding-left:42px; line-height:1.1; }
 h1::before,h2::before,h3::before{
   content:""; position:absolute; left:0; bottom:0.2em; /* borde inferior del angular a ~2/3 de la primera letra */
-  width:28px; height:28px; background:url("/angular.png") left bottom/contain no-repeat;
+  width:28px; height:28px; background:url("angular.png") left bottom/contain no-repeat;
 }
 
 /* Utilidades */
@@ -126,7 +126,7 @@ h1::before,h2::before,h3::before{
       <span></span><span></span><span></span>
     </button>
     <div class="brand" aria-label="Inicio">
-      <img src="/logo-cdl.png" alt="CDL">
+      <img src="logo-cdl.png" alt="CDL">
       <span class="brand__title">PANEL DE CONTROL</span>
     </div>
     <div style="flex:1"></div>
@@ -227,7 +227,7 @@ h1::before,h2::before,h3::before{
   <!-- EQUIPOS -->
   <section id="equipos" hidden>
     <div class="kalt-title">
-      <img src="/linea-kaltenbach.png" alt="LÍNEA KALTENBACH">
+      <img src="linea-kaltenbach.png" alt="LÍNEA KALTENBACH">
     </div>
     <div class="grid cols-2" id="equiposList"></div>
   </section>
@@ -906,7 +906,7 @@ await refresh();
 setInterval(()=>refresh(), 60000);
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 </script>
 
