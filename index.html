@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CDL · Panel de control</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0c0f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --brand1:#A60000; --brand2:#E43B3B;
+  --ink:#0f172a; --muted:#475569; --line:#e5e7eb; --bg:#f3f4f6;
+  --panel:#ffffff;
+  --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626; --info:#2563eb;
+  --hdr-h:100px; --nav-w:320px; --radius:18px; --radius-sm:12px; --gap:14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+a{color:#0ea5e9;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ======== CABECERA ======== */
+.header{ position:sticky; top:0; z-index:1000; min-height:var(--hdr-h); background:#fff; border-bottom:1px solid #eee; }
+.header::before{
+  content:""; position:absolute; inset:0;
+  background:url("/logo_mantenimiento.png") center top/70% no-repeat;
+  opacity:.10; pointer-events:none;
+}
+.h__in{height:var(--hdr-h); display:flex; align-items:flex-end; gap:10px; padding:10px 14px; position:relative; z-index:1}
+.rolechip{ position:absolute; left:10px; top:6px; padding:4px 10px; border:1px solid #e5e7eb; border-radius:999px; font-size:12px; background:#fff; color:#111827; font-weight:800 }
+.hbtn{width:44px; height:44px; display:grid; place-items:center; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:12px; color:#0f172a}
+.hamb span{display:block; width:18px; height:2px; background:#0f172a; margin:2px 0}
+.brand{display:flex; align-items:center; gap:10px; transform:translateY(10px)}
+.brand img{height:44px}
+.brand__title{font-weight:800; letter-spacing:.02em; text-transform:uppercase}
+
+/* ======== LATERAL ======== */
+.sidenav{position:fixed; inset:0; width:0; background:rgba(0,0,0,.15); z-index:900; transition:.2s}
+.sidenav.open{width:100%}
+.sidenav__panel{ width:min(92vw,var(--nav-w)); height:100%; background:#0f141c; color:#e6eef7; border-left:1px solid #1e2a38; padding:16px; transform:translateX(100%); transition:transform .2s }
+.sidenav.open .sidenav__panel{transform:none}
+.navlist{display:flex; flex-direction:column; gap:8px; margin-top:8px}
+.navlist a{ color:#fff; padding:14px 10px; font-weight:800; letter-spacing:.3px; border-bottom:1px solid #1e2a38 }
+.navlist a:hover{opacity:.9}
+
+/* ======== MENÚ USUARIO (⋯) ======== */
+.userpanel{ position:fixed; right:10px; top:calc(10px + env(safe-area-inset-top)); width:320px; max-width:calc(100vw - 20px); background:#0f141c; color:#e6eef7; border:1px solid #223046; border-radius:14px; box-shadow:0 18px 36px rgba(0,0,0,.45); padding:14px; display:none; z-index:950 }
+.userpanel.show{display:block}
+.userpanel h3{margin:6px 0 10px 0; font-size:14px; color:#cbd5e1}
+.userpanel label{display:block; font-size:12px; color:#9fb0c6; margin:10px 0 6px}
+.userpanel input,.userpanel select{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid #243046; background:#0b101a; color:#e6eef7 }
+.eye{position:absolute; right:12px; top:36px; cursor:pointer; user-select:none}
+.btn{border:0; border-radius:999px; padding:10px 14px; font-weight:700; cursor:pointer}
+.btn--primary{background:var(--brand2); color:#fff}
+.btn--ghost{background:#0b101a; color:#e6eef7; border:1px solid #243046}
+
+/* ======== LAYOUT ======== */
+.main{padding:16px; max-width:1100px; margin:0 auto}
+.card{ background:#fff; color:#0f172a; border:1px solid #e5e7eb; border-radius:18px; padding:14px; box-shadow:0 4px 12px rgba(0,0,0,.06) }
+.card__hdr{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+.card__title{font-weight:800}
+.grid{display:grid; gap:14px}
+@media(min-width:1000px){ .grid.cols-2{grid-template-columns:1fr 1fr} .grid.cols-3{grid-template-columns:repeat(3,1fr)} }
+
+/* Píldoras */
+.pill{display:inline-block; padding:4px 10px; border-radius:999px; font-weight:800; font-size:12px}
+.pill--ok{background:#dcfce7;color:#065f46;border:1px solid #bbf7d0}
+.pill--warn{background:#fef9c3;color:#854d0e;border:1px solid #fde68a}
+.pill--stop{background:#fee2e2;color:#7f1d1d;border:1px solid #fecaca}
+.pill--info{background:#dbeafe;color:#1e3a8a;border:1px solid #bfdbfe}
+
+/* Listas 1 línea */
+.line-1{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-bottom:1px dashed #e5e7eb; padding:10px 6px; cursor:pointer}
+.line-1:hover{background:#f8fafc}
+.details{display:none; padding:8px 6px; color:#475569}
+.open + .details{display:block}
+
+/* Tarjeta equipo */
+.item{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px; border-radius:12px; border:1px solid #e5e7eb; background:#fff}
+.item__title{font-weight:800}
+.item__meta{color:#64748b; font-size:12px}
+.actions{display:flex; gap:8px; flex-wrap:wrap}
+
+/* Inventario */
+.catgrid{display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.cat{padding:16px; border-radius:12px; border:1px solid #e5e7eb; background:#f8fafc; font-weight:800}
+.searchbar{display:flex; gap:8px; margin:10px 0}
+.searchbar input{flex:1}
+
+/* Dashboard TV */
+.tvgrid{display:grid; gap:16px}
+@media(min-width:1100px){ .tvgrid{grid-template-columns:repeat(2,1fr)} }
+.collapse-head{display:flex; align-items:center; justify-content:space-between; cursor:pointer}
+.badge{display:inline-block; padding:2px 8px; border-radius:999px; font-weight:700; font-size:12px; background:#eef2f7; color:#334155; border:1px solid #e2e8f0}
+
+/* === Angular corporativo en TODOS los H1/H2/H3 === */
+h1,h2,h3{ position:relative; margin:18px 0 10px; padding-left:42px; line-height:1.1; }
+h1::before,h2::before,h3::before{
+  content:""; position:absolute; left:0; bottom:0.2em; /* borde inferior del angular a ~2/3 de la primera letra */
+  width:28px; height:28px; background:url("/angular.png") left bottom/contain no-repeat;
+}
+
+/* Utilidades */
+[hidden]{display:none !important}
+.muted{color:#94a3b8}
+
+/* Título gráfico Línea KALTENBACH en EQUIPOS */
+.kalt-title{display:flex; align-items:center; margin:6px 0 10px}
+.kalt-title img{max-width:100%; opacity:.85}
+</style>
+</head>
+<body>
+
+<header class="header" id="hdr">
+  <span class="rolechip" id="roleChip">Invitado</span>
+  <div class="h__in">
+    <button class="hbtn hamb" id="hamb" aria-label="Abrir menú">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="brand" aria-label="Inicio">
+      <img src="/logo-cdl.png" alt="CDL">
+      <span class="brand__title">PANEL DE CONTROL</span>
+    </div>
+    <div style="flex:1"></div>
+    <button class="hbtn" id="moreBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userPanel">⋯</button>
+  </div>
+</header>
+
+<!-- LATERAL -->
+<aside class="sidenav" id="sidenav" aria-hidden="true">
+  <div class="sidenav__panel">
+    <div class="card" style="background:#0f141c;color:#e6eef7;border-color:#1e2a38">
+      <div class="card__title">Menú</div>
+    </div>
+    <nav class="navlist" id="navList"></nav>
+  </div>
+</aside>
+
+<!-- USUARIO -->
+<section class="userpanel" id="userPanel" role="dialog" aria-modal="true" aria-labelledby="upTitle">
+  <h3 id="upTitle">Acceso de usuario</h3>
+  <label>Rol</label>
+  <select id="roleSelect">
+    <option value="invitado">Invitado</option>
+    <option value="administrador">Administrador</option>
+    <option value="gerente">Gerente</option>
+    <option value="encargado">Encargado</option>
+    <option value="resp_produccion">Responsable de producción</option>
+    <option value="resp_turno">Responsable de turno</option>
+    <option value="externa">Empresa externa</option>
+  </select>
+
+  <label>Usuario</label>
+  <input id="userName" placeholder="usuario (opcional)" autocomplete="username">
+
+  <label>Contraseña</label>
+  <div style="position:relative">
+    <input id="userPass" type="password" placeholder="contraseña (opcional)" autocomplete="current-password">
+    <span class="eye" id="toggleEye">👁</span>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-top:12px;">
+    <button class="btn btn--primary" id="loginBtn">Acceder</button>
+    <button class="btn btn--ghost" id="logoutBtn">Salir</button>
+  </div>
+
+  <h3 style="margin-top:14px">Cambiar contraseña</h3>
+  <label>Actual</label>
+  <input id="chgOld" type="password" autocomplete="current-password">
+  <label>Nueva</label>
+  <input id="chgNew" type="password" autocomplete="new-password">
+  <button class="btn btn--ghost" id="chgBtn" style="margin-top:8px">Guardar nueva</button>
+</section>
+
+<main class="main" id="appRoot">
+  <!-- DASHBOARD TV (HOME) -->
+  <section id="dashboard" class="grid tvgrid">
+    <div class="card">
+      <div class="collapse-head" data-coll="dash-paradas">
+        <h2 class="card__title">Máquinas paradas</h2>
+        <span class="badge" id="countParadas">0</span>
+      </div>
+      <div id="dash-paradas" hidden></div>
+    </div>
+
+    <div class="card">
+      <div class="collapse-head" data-coll="dash-restr">
+        <h2 class="card__title">Máquinas con restricciones</h2>
+        <span class="badge" id="countRestr">0</span>
+      </div>
+      <div id="dash-restr" hidden></div>
+    </div>
+
+    <div class="card">
+      <div class="collapse-head" data-coll="dash-stock">
+        <h2 class="card__title">Alertas stock mínimo</h2>
+        <span class="badge" id="countStock">0</span>
+      </div>
+      <div id="dash-stock" hidden></div>
+    </div>
+
+    <div class="card">
+      <div class="collapse-head" data-coll="dash-externas">
+        <h2 class="card__title">Avisos empresas externas</h2>
+        <span class="badge" id="countExt">0</span>
+      </div>
+      <div id="dash-externas" hidden></div>
+    </div>
+
+    <div class="card">
+      <div class="collapse-head" data-coll="dash-req">
+        <h2 class="card__title">Solicitudes de repuestos pendientes</h2>
+        <span class="badge" id="countReq">0</span>
+      </div>
+      <div id="dash-req" hidden></div>
+    </div>
+  </section>
+
+  <!-- EQUIPOS -->
+  <section id="equipos" hidden>
+    <div class="kalt-title">
+      <img src="/linea-kaltenbach.png" alt="LÍNEA KALTENBACH">
+    </div>
+    <div class="grid cols-2" id="equiposList"></div>
+  </section>
+
+  <!-- GRÚAS -->
+  <section id="gruas" hidden>
+    <h1>Puentes grúa</h1>
+    <div class="grid cols-2" id="gruasList"></div>
+  </section>
+
+  <!-- AUXILIARES -->
+  <section id="auxiliares" hidden>
+    <h1>Auxiliares (otros)</h1>
+    <div class="grid cols-2" id="auxList"></div>
+  </section>
+
+  <!-- INCIDENCIAS -->
+  <section id="incidencias" hidden>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+      <h1 class="card__title">Incidencias</h1>
+      <button class="btn btn--primary" id="btnNewInc">Crear nueva incidencia</button>
+    </div>
+
+    <div class="card" id="incFormWrap" hidden>
+      <div class="grid cols-2">
+        <div>
+          <label>Equipo</label>
+          <div class="searchbar">
+            <input id="incEquipo" list="equiposDatalist" placeholder="Escribe o selecciona equipo…">
+          </div>
+          <datalist id="equiposDatalist"></datalist>
+
+          <label>Tipo de fallo</label>
+          <select id="incTipo">
+            <option value="mecanico">Fallo mecánico</option>
+            <option value="electrico">Fallo eléctrico</option>
+            <option value="hidraulico">Fallo hidráulico</option>
+            <option value="neumatico">Fallo neumático</option>
+            <option value="proceso">Fallo de proceso productivo</option>
+            <option value="desconocido">Origen desconocido</option>
+          </select>
+
+          <label>Descripción breve</label>
+          <input id="incDesc" placeholder="Describe el problema…">
+        </div>
+
+        <div>
+          <label>Solucionado</label>
+          <select id="incSol">
+            <option value="no">No</option>
+            <option value="si">Sí</option>
+            <option value="restricciones">Con restricciones</option>
+          </select>
+
+          <div id="incSiWrap" hidden>
+            <label>Descripción de la solución</label>
+            <input id="incSolDesc" placeholder="¿Cómo se solucionó?">
+            <label>Repuestos empleados</label>
+            <input id="incSolRep" placeholder="Escribe para buscar…">
+          </div>
+
+          <div id="incNoWrap">
+            <label>Descripción de la intervención</label>
+            <input id="incNoDesc" placeholder="¿Qué se ha hecho hasta ahora?">
+            <label>Repuestos empleados</label>
+            <input id="incNoRep" placeholder="Opcional">
+          </div>
+
+          <label>Reportado por</label>
+          <select id="incReportadoPor">
+            <option>administrador</option><option>gerente</option><option>encargado</option>
+            <option>resp_produccion</option><option>resp_turno</option><option>externa</option>
+          </select>
+
+          <label>Intervenido por</label>
+          <input id="incIntervenido" placeholder="Nombre del técnico…">
+
+          <div class="grid cols-2">
+            <div>
+              <label>Fecha de inicio</label>
+              <input id="incIni" type="date">
+            </div>
+            <div>
+              <label>Fecha de reparación</label>
+              <input id="incFin" type="date">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:10px">
+        <button class="btn btn--primary" id="incGuardar">Guardar incidencia</button>
+        <button class="btn btn--ghost" id="incCancelar">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__hdr">
+        <h2 class="card__title">Últimas incidencias</h2>
+        <div style="display:flex; gap:8px">
+          <input id="incFilter" placeholder="Filtrar…">
+          <button class="btn btn--ghost" id="incRecargar">Recargar</button>
+        </div>
+      </div>
+      <div id="incList"></div>
+    </div>
+  </section>
+    <!-- INVENTARIO -->
+  <section id="inventario" hidden>
+    <div class="card">
+      <div class="card__hdr">
+        <h1 class="card__title">Inventario</h1>
+        <div>
+          <button class="btn btn--primary" id="btnAddRep">Añadir repuesto</button>
+          <button class="btn btn--ghost" id="btnDelRep">Eliminar / descontar</button>
+        </div>
+      </div>
+      <div id="invAlerts"></div>
+    </div>
+
+    <div class="card">
+      <div class="card__hdr"><h2 class="card__title">Buscar</h2></div>
+      <div class="searchbar">
+        <input id="invSearch" placeholder="Código, referencia, nombre…">
+        <button class="btn btn--ghost" id="invClear">Limpiar</button>
+      </div>
+      <div class="catgrid" id="invCats"></div>
+    </div>
+  </section>
+
+  <!-- REPUESTOS (SOLICITUDES) -->
+  <section id="repuestos" hidden>
+    <div class="card">
+      <div class="card__hdr"><h1 class="card__title">Solicitar repuesto</h1></div>
+      <div class="grid cols-2">
+        <div>
+          <label>Repuesto</label>
+          <input id="reqRef" placeholder="Ref o nombre…">
+          <label>Cantidad</label>
+          <input id="reqQty" type="number" min="1" value="1">
+        </div>
+        <div>
+          <label>Observaciones</label>
+          <input id="reqObs" placeholder="Urgente, alternativa, etc.">
+          <button class="btn btn--primary" id="reqEnviar" style="margin-top:12px">Enviar solicitud</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__hdr">
+        <h2 class="card__title">Solicitudes</h2>
+        <div class="badge" id="reqCountBadge">0</div>
+      </div>
+      <div id="reqList"></div>
+    </div>
+  </section>
+
+  <!-- INDICADORES -->
+  <section id="indicadores" hidden>
+    <h1>Indicadores</h1>
+    <div class="grid cols-3">
+      <div class="card"><h3 class="card__title">MTBF</h3><div class="kpi" id="kpiMtbf">—</div></div>
+      <div class="card"><h3 class="card__title">Disponibilidad</h3><div class="kpi" id="kpiDisp">—</div></div>
+      <div class="card"><h3 class="card__title">OEE</h3><div class="kpi" id="kpiOee">—</div></div>
+    </div>
+    <div style="margin-top:10px">
+      <button class="btn btn--ghost" id="btnExpCSV">Exportar CSV</button>
+    </div>
+  </section>
+
+  <!-- ÓRDENES DE TRABAJO -->
+  <section id="ot" hidden>
+    <div class="card">
+      <div class="card__hdr"><h1 class="card__title">Crear OT</h1></div>
+      <div class="grid cols-3">
+        <div>
+          <label>Equipo</label>
+          <input id="otEquipo" list="equiposDatalist" placeholder="Escribe o selecciona…">
+        </div>
+        <div>
+          <label>Tipo</label>
+          <select id="otTipo">
+            <option>Engrase</option><option>Lubricación</option>
+            <option>Ajuste mecánico</option><option>Ajuste eléctrico</option>
+          </select>
+        </div>
+        <div>
+          <label>Fecha</label>
+          <input id="otFecha" type="date">
+        </div>
+      </div>
+      <label>Tarea</label>
+      <input id="otTarea" placeholder="Describe la OT…">
+      <div style="margin-top:10px">
+        <button class="btn btn--primary" id="otCrear">Crear OT</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__hdr">
+        <h2 class="card__title">Listado de OT</h2>
+        <div class="searchbar">
+          <input id="otFilter" placeholder="Filtrar…">
+          <button class="btn btn--ghost" id="otBorrarMode">Modo borrar</button>
+        </div>
+      </div>
+      <div id="otList"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* =========================
+   CONFIG + API (Apps Script)
+========================= */
+const API_BASE = "https://script.google.com/macros/s/AKfycbycKrLO0jIEDXB_AZi91PopCj1uNXCOEu9zWHeqq_aK_DJo7TpWO_kKKWMs4exwyNRW/exec";
+const API_KEY  = ""; // opcional (puedes dejarlo vacío)
+
+const STORE_KEY = "cdl_cache_v1";
+
+const store = {
+  state:{
+    user:{rol:'invitado', nombre:'Invitado', token:''},
+    equipos:[], gruas:[], auxiliares:[],
+    incidencias:[], inventario:[], solicitudes:[],
+    ots:[], externas:[]
+  },
+  save(){ localStorage.setItem(STORE_KEY, JSON.stringify(this.state)); },
+  load(){ try{ Object.assign(this.state, JSON.parse(localStorage.getItem(STORE_KEY)||"{}")); }catch{} }
+};
+
+// Helpers HTTP contra router ?res=..&fn=..
+async function apiGet(res, params={}){
+  try{
+    const url = new URL(API_BASE);
+    url.searchParams.set("res", res);
+    if(params.fn) url.searchParams.set("fn", params.fn);
+    if(API_KEY)   url.searchParams.set("key", API_KEY);
+    for(const k in params) if(k!=="fn") url.searchParams.set(k, params[k]);
+    // token de sesión
+    const tok = store?.state?.user?.token;
+    if(tok) url.searchParams.set("token", tok);
+
+    const r = await fetch(url.toString(), {method:"GET"});
+    return await r.json();
+  }catch(e){ console.warn("GET error/offline", e); return {ok:false,error:String(e)}; }
+}
+async function apiPost(res, body={}){
+  try{
+    const url = new URL(API_BASE);
+    url.searchParams.set("res", res);
+    if(body.fn) url.searchParams.set("fn", body.fn);
+    const payload = {...body};
+    if(API_KEY) payload.key = API_KEY;
+    // token de sesión
+    const tok2 = store?.state?.user?.token;
+    if(tok2) payload.token = tok2;
+
+    const r = await fetch(url.toString(), {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    return await r.json();
+  }catch(e){ console.warn("POST error/offline", e); return {ok:false,error:String(e)}; }
+}
+// Atajos legibles
+const apiList  = (res, extra={})      => apiGet(res, Object.assign({fn:"list"}, extra));
+const apiAdd   = (res, item)          => apiPost(res, {fn:"add",  item});
+const apiSet   = (res, obj)           => apiPost(res, Object.assign({fn:"set"}, obj));
+const apiDelta = (res, ref, delta)    => apiPost(res, {fn:"delta", ref, delta});
+
+/* =========================
+   ROLES Y PERMISOS (front)
+========================= */
+const PERMS = {
+  administrador:["*"],
+  gerente:["view:*","write:*"],
+  encargado:["view:*","write:incidencias","write:ot","write:inv","write:req"],
+  resp_produccion:["view:*","write:req:gestionar","write:inv"],
+  resp_turno:["view:*","write:incidencias"],
+  externa:["view:equipos","view:gruas","view:auxiliares","view:incidencias"],
+  invitado:["view:dashboard","view:equipos","view:gruas","view:auxiliares"]
+};
+function can(perm){
+  const rol = store.state.user.rol||"invitado";
+  const list = PERMS[rol]||[];
+  return list.includes("*") || list.includes(perm) || (list.includes("view:*") && perm.startsWith("view:"));
+}
+
+/* =========================
+   ROUTER + NAV
+========================= */
+const PAGES = ["dashboard","equipos","gruas","auxiliares","incidencias","inventario","repuestos","ot","indicadores"];
+const TITLES = {
+  dashboard:"Dashboard TV", equipos:"Equipos", gruas:"Puentes grúa", auxiliares:"Auxiliares (otros)",
+  incidencias:"Incidencias", inventario:"Inventario", repuestos:"Repuestos", ot:"Órdenes de trabajo", indicadores:"Indicadores"
+};
+
+function buildNav(){
+  const nav = document.getElementById("navList");
+  nav.innerHTML = PAGES.map(id=>`<a href="#${id}" data-id="${id}">${TITLES[id]}</a>`).join("");
+}
+function navTo(id){
+  PAGES.forEach(p=>document.getElementById(p).hidden = (p!==id));
+  location.hash = "#"+id;
+}
+function onHash(){
+  const id = (location.hash||"#dashboard").replace("#","");
+  if(!PAGES.includes(id)) return navTo("dashboard");
+  navTo(id);
+  render();
+}
+
+/* =========================
+   HEADER / MENÚS
+========================= */
+const sidenav = document.getElementById("sidenav");
+document.getElementById("hamb").onclick = ()=> sidenav.classList.toggle("open");
+sidenav.onclick = (e)=>{ if(e.target===sidenav) sidenav.classList.remove("open"); };
+
+const userPanel = document.getElementById("userPanel");
+document.getElementById("moreBtn").onclick = ()=>{
+  userPanel.classList.toggle("show");
+  document.getElementById("moreBtn").setAttribute("aria-expanded", userPanel.classList.contains("show"));
+};
+document.getElementById("toggleEye").onclick = ()=>{
+  const i = document.getElementById("userPass");
+  i.type = (i.type==="password"?"text":"password");
+};
+
+// LOGIN REAL con token
+document.getElementById("loginBtn").onclick = async ()=>{
+  const user = document.getElementById("userName").value;
+  const pass = document.getElementById("userPass").value;
+  if(!user || !pass){ alert("Introduce usuario y contraseña"); return; }
+  const r = await apiPost("auth", {fn:"login", user, pass});
+  if(!r?.ok){ alert("Acceso denegado"); return; }
+  store.state.user = {rol:(r.rol||"invitado").toLowerCase(), nombre:r.usuario||user, token:r.token||""};
+  store.save();
+  document.getElementById("roleChip").textContent = store.state.user.nombre;
+  userPanel.classList.remove("show");
+  render();
+};
+document.getElementById("logoutBtn").onclick = ()=>{
+  store.state.user = {rol:"invitado", nombre:"Invitado", token:""};
+  store.save(); document.getElementById("roleChip").textContent = "Invitado";
+  render();
+};
+document.getElementById("chgBtn").onclick = async ()=>{
+  const u = document.getElementById("userName").value;
+  const oldp = document.getElementById("chgOld").value;
+  const nu = document.getElementById("chgNew").value;
+  if(!u||!oldp||!nu) return alert("Rellena usuario y contraseñas");
+  const r = await apiPost("auth", {fn:"changepwd", user:u, old:oldp, nu});
+  alert(r?.ok ? "Contraseña actualizada" : "No se pudo cambiar");
+};
+
+/* =========================
+   CARGA DE DATOS DESDE APP SCRIPT
+========================= */
+function splitByGrupo(items){
+  const equipos=[], gruas=[], auxiliares=[];
+  for(const it of (items||[])){
+    const g = (it.grupo||"").toUpperCase();
+    const row = { id: it.nombre, nombre: it.nombre, grupo: it.grupo, estado: it.estado };
+    if(g.startsWith("NAVE ")) gruas.push(Object.assign({nave: it.grupo}, row));
+    else if(g.includes("KALTENBACH") || g.includes("LÁSER") || g.includes("LASER") || g.includes("MÁQUINAS"))
+      equipos.push(row);
+    else auxiliares.push(Object.assign({tipo: it.grupo}, row));
+  }
+  return {equipos, gruas, auxiliares};
+}
+async function loadAllFromAPI(){
+  const [st, incid, inv, rep, cons, ot] = await Promise.all([
+    apiList("state"),
+    apiList("incid"),
+    apiList("inv"),
+    apiList("rep"),
+    apiList("cons"),
+    apiList("ot")
+  ]);
+
+  if(st?.ok){
+    const {equipos, gruas, auxiliares} = splitByGrupo(st.items||[]);
+    store.state.equipos = equipos;
+    store.state.gruas = gruas;
+    store.state.auxiliares = auxiliares;
+  }
+  if(incid?.ok) store.state.incidencias = (incid.items||[]).map(x=>({
+    id:x.id, fecha:(x.created||"").slice(0,10), equipo:x.equipo, tipo:x.tipo, desc:x.desc||x.repTxt||"",
+    solucionado: (x.res||"").toLowerCase().includes("solucionado") ? "si" :
+                 (x.res||"").toLowerCase().includes("restr") ? "restricciones" :
+                 (x.res||"").toLowerCase().includes("parada") ? "no" : "no"
+  }));
+
+  const invItems = inv?.ok ? (inv.items||[]).map(i=>({
+    id:i.ref, ref:i.ref, nombre:i.nombre, stock:i.stock, stock_min:i.minimo,
+    categoria: (i.ref||"").includes("GRASA") ? "Lubricantes" :
+               (i.ref||"").includes("TORX")  ? "Tornillería" : "Otros"
+  })) : [];
+  store.state.inventario = invItems;
+
+  if(rep?.ok) store.state.solicitudes = (rep.items||[]).map(r=>({
+    id:r.id, ref:r.ref, nombre:r.nombre, qty:1, estado:(r.estado||"Pendiente").toLowerCase(), fecha_entrega:""
+  }));
+
+  if(ot?.ok) store.state.ots = (ot.items||[]).map(o=>({
+    id:o.id, equipo:o.equipo, tipo:o.titulo||"OT", fecha:(o.vencimiento||"").slice(0,10), tarea:o.desc||o.titulo||""
+  }));
+
+  store.save();
+}
+
+/* =========================
+   HELPERS DE UI
+========================= */
+function pill(estado){
+  const s = (estado||"").toLowerCase();
+  if(s.includes("parada")) return `<span class="pill pill--stop">Parada</span>`;
+  if(s.includes("restr")) return `<span class="pill pill--warn">Restricciones</span>`;
+  if(s.includes("marcha")) return `<span class="pill pill--ok">En marcha</span>`;
+  return `<span class="pill pill--info">${estado||"—"}</span>`;
+}
+function cardEquipo(e){
+  return `<div class="item">
+    <div>
+      <div>${pill(e.estado)}</div>
+      <div class="item__title">${e.nombre}</div>
+      <div class="item__meta">${e.linea||e.grupo||e.nave||e.tipo||""}</div>
+    </div>
+    <div class="actions">
+      <button class="btn btn--ghost" data-act="ficha" data-id="${e.id}">Ficha</button>
+      <button class="btn btn--ghost" data-act="prog" data-id="${e.id}">Parada prog.</button>
+      <button class="btn btn--primary" data-act="prolong" data-id="${e.id}">Parada prolongada</button>
+      <button class="btn btn--ghost" data-act="incid" data-id="${e.id}">Nueva incidencia</button>
+    </div>
+  </div>`;
+}
+
+/* Renders por página (1ª tanda) */
+function renderEquipos(){
+  const out = [];
+  const grupos = ["LÍNEA KALTENBACH","LÁSER TRUMP","MÁQUINAS INDEPENDIENTES"];
+  grupos.forEach(g=>{
+    const list = store.state.equipos.filter(x=>x.grupo?.toUpperCase()===g);
+    if(!list.length) return;
+    out.push(`<div class="card"><h2 class="card__title">${g}</h2>${list.map(cardEquipo).join("")}</div>`);
+  });
+  document.getElementById("equiposList").innerHTML = out.join("");
+}
+function renderGruas(){
+  const cont = document.getElementById("gruasList");
+  const naves = ["NAVE 1","NAVE 2","NAVE 3","NAVE 4"];
+  cont.innerHTML = naves.map(n=>{
+    const list = store.state.gruas.filter(x=>x.nave?.toUpperCase()===n);
+    if(!list.length) return "";
+    return `<div class="card"><h2 class="card__title">${n}</h2>${list.map(cardEquipo).join("")}</div>`;
+  }).join("");
+}
+function renderAux(){
+  const list = store.state.auxiliares||[];
+  document.getElementById("auxList").innerHTML =
+    `<div class="card"><h2 class="card__title">Auxiliares</h2>${list.map(cardEquipo).join("")}</div>`;
+}
+
+/* =========================
+   Renders (2ª tanda)
+========================= */
+function renderIncidencias(){
+  const wrap = document.getElementById("incList");
+  if(!wrap) return;
+  const filtro = (document.getElementById("incFilter").value||"").toLowerCase();
+  const arr = (store.state.incidencias||[])
+    .filter(i=>!filtro || (i.equipo+i.tipo+i.desc).toLowerCase().includes(filtro))
+    .sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+  wrap.innerHTML = arr.map(i=>`<div class="line-1">${i.fecha} · ${i.equipo} · ${i.tipo} · ${i.desc}</div>`).join("");
+}
+
+function renderInventario(){
+  const low = (store.state.inventario||[]).filter(i=>Number(i.stock)<Number(i.stock_min));
+  document.getElementById("invAlerts").innerHTML =
+    low.length ? `<span class="pill pill--stop">⚠ ${low.length} referencias por debajo del mínimo</span>` :
+                 `<span class="pill pill--ok">Stock correcto</span>`;
+
+  const q = (document.getElementById("invSearch").value||"").toLowerCase();
+  const items = (store.state.inventario||[]).filter(i=>{
+    const text = (i.ref+" "+i.nombre).toLowerCase();
+    return !q || text.includes(q);
+  });
+
+  const cats = {};
+  items.forEach(i=>{
+    const c = i.categoria || "Otros";
+    (cats[c] ||= []).push(i);
+  });
+
+  const html = Object.keys(cats).sort().map(c=>{
+    const n = cats[c].length;
+    return `<div class="cat">
+      <b>${c}</b><br>${n} items
+    </div>`;
+  }).join("");
+  document.getElementById("invCats").innerHTML = html;
+}
+
+function renderRepuestos(){
+  const list = store.state.solicitudes||[];
+  const body = list.map(r=>{
+    const v = (r.estado||"pendiente").toLowerCase();
+    return `<div class="line-1">
+      ${r.id} · ${r.nombre} (${r.qty||1})
+      · <select class="reqState" data-req="${r.id}">
+          <option ${v==="pendiente"?"selected":""} value="Pendiente">Pendiente</option>
+          <option ${v==="aceptado"?"selected":""} value="Aceptado">Aceptado</option>
+          <option ${v==="denegado"?"selected":""} value="Denegado">Denegado</option>
+          <option ${v==="en camino"?"selected":""} value="En camino">En camino</option>
+          <option ${v==="pendiente de entrega"?"selected":""} value="Pendiente de entrega">Pendiente de entrega</option>
+          <option ${v==="recibido"?"selected":""} value="Recibido">Recibido</option>
+        </select>
+    </div>`;
+  }).join("");
+  document.getElementById("reqList").innerHTML = body;
+  document.getElementById("reqCountBadge").textContent = list.length;
+
+  document.querySelectorAll(".reqState").forEach(sel=>{
+    sel.onchange = async ()=>{
+      const id = sel.getAttribute("data-req");
+      const rr = await apiSet("rep", {id, estado: sel.value, comentario: ""});
+      if(!rr?.ok) alert("Error actualizando solicitud");
+      await refresh();
+    };
+  });
+}
+
+function renderOT(){
+  const q = (document.getElementById("otFilter").value||"").toLowerCase();
+  const list = (store.state.ots||[])
+    .filter(o=>!q || (o.id+o.equipo+o.tipo+o.tarea).toLowerCase().includes(q));
+  document.getElementById("otList").innerHTML = list.map(o=>
+    `<div class="line-1">${o.id} · ${o.equipo} · ${o.tipo} · ${o.fecha} · ${o.tarea}</div>`
+  ).join("");
+}
+
+function renderIndicadores(){
+  const incs = store.state.incidencias||[];
+  document.getElementById("kpiMtbf").textContent = (incs.length ? (200/incs.length).toFixed(1)+' h' : '—');
+  document.getElementById("kpiDisp").textContent = "98.6%";
+  document.getElementById("kpiOee").textContent = "91.2%";
+}
+
+function renderDashboard(){
+  const eqStop  = store.state.equipos.filter(x=>(x.estado||"").toLowerCase().includes("parada"));
+  const eqRestr = store.state.equipos.filter(x=>(x.estado||"").toLowerCase().includes("restr"));
+  const grStop  = store.state.gruas.filter(x=>(x.estado||"").toLowerCase().includes("parada"));
+  const auxRestr= store.state.auxiliares.filter(x=>(x.estado||"").toLowerCase().includes("restr"));
+  const low     = store.state.inventario.filter(i=>i.stock<i.stock_min);
+  const reqPend = store.state.solicitudes.filter(r=>(r.estado||"").toLowerCase()==="pendiente");
+
+  document.getElementById("countParadas").textContent = eqStop.length + grStop.length;
+  document.getElementById("countRestr").textContent  = eqRestr.length + auxRestr.length;
+  document.getElementById("countStock").textContent  = low.length;
+  document.getElementById("countReq").textContent    = reqPend.length;
+  document.getElementById("countExt").textContent    = store.state.externas.length;
+
+  document.getElementById("dash-paradas").innerHTML = eqStop.concat(grStop).map(x=>
+    `<div class="line-1">${x.nombre} · ${x.linea||x.nave||''} · ${x.t_paro||''}</div>`
+  ).join("");
+  document.getElementById("dash-restr").innerHTML = eqRestr.concat(auxRestr).map(x=>
+    `<div class="line-1">${x.nombre} · ${x.linea||x.tipo||''} · ${x.t_restr||''}</div>`
+  ).join("");
+  document.getElementById("dash-stock").innerHTML = low.map(i=>
+    `<div class="line-1">${i.ref} · ${i.nombre} (${i.stock}/${i.stock_min})</div>`
+  ).join("");
+  document.getElementById("dash-req").innerHTML = reqPend.map(r=>
+    `<div class="line-1">${r.id} · ${r.nombre} (${r.qty||1})</div>`
+  ).join("");
+  document.getElementById("dash-externas").innerHTML = (store.state.externas||[]).map(e=>
+    `<div class="line-1">${e.proveedor} · ${e.asunto} · ${e.prioridad}</div>`
+  ).join("");
+}
+
+/* =========================
+   Render general
+========================= */
+function render(){
+  const dl = document.getElementById("equiposDatalist");
+  if(dl){ dl.innerHTML = (store.state.equipos||[]).map(e=>`<option value="${e.nombre}">`).join(""); }
+  renderEquipos(); renderGruas(); renderAux();
+  renderIncidencias(); renderInventario(); renderRepuestos();
+  renderOT(); renderIndicadores(); renderDashboard();
+}
+
+/* =========================
+   Acciones (escritura en hoja)
+========================= */
+document.getElementById("btnNewInc").onclick = ()=>{ document.getElementById("incFormWrap").hidden = false; };
+document.getElementById("incCancelar").onclick = ()=>{ document.getElementById("incFormWrap").hidden = true; };
+document.getElementById("incGuardar").onclick = async ()=>{
+  const sol = document.getElementById("incSol").value;
+  const mapRes = sol==="si" ? "Solucionado" : (sol==="restricciones" ? "Restricciones" : "Parada");
+  const inc = {
+    equipo: document.getElementById("incEquipo").value,
+    tipo:   document.getElementById("incTipo").value,
+    res:    mapRes,
+    rep:    (sol==="si" ? (document.getElementById("incSolRep").value ? "Sí" : "No")
+                        : (document.getElementById("incNoRep").value ? "Sí" : "No")),
+    repTxt: document.getElementById("incSolRep").value || document.getElementById("incNoRep").value || "",
+    inicio: document.getElementById("incIni").value || "",
+    fin:    document.getElementById("incFin").value || "",
+    reportante: store.state.user?.nombre || "web",
+    asignado:   document.getElementById("incIntervenido").value || "",
+    desc:       document.getElementById("incDesc").value
+  };
+  const r = await apiAdd("incid", inc);
+  if(!r?.ok) return alert("Error guardando incidencia (¿sesión?)");
+  await refresh();
+  document.getElementById("incFormWrap").hidden = true;
+};
+
+document.getElementById("reqEnviar").onclick = async ()=>{
+  if(!can("write:req")) return alert("Sin permiso para solicitar.");
+  const item = { ref: (reqRef.value||"").toUpperCase(), nombre: reqRef.value };
+  const r = await apiAdd("rep", item);
+  if(!r?.ok) return alert("Error solicitando repuesto (¿sesión?)");
+  reqRef.value=""; reqQty.value=1; reqObs.value="";
+  await refresh();
+};
+
+document.getElementById("otCrear").onclick = async ()=>{
+  if(!can("write:ot")) return alert("Sin permiso para crear OT.");
+  const item = {
+    equipo: otEquipo.value, prioridad:"A",
+    titulo: `${otTipo.value} · ${otTarea.value}`.trim(),
+    vencimiento: otFecha.value,
+    desc: otTarea.value
+  };
+  const r = await apiAdd("ot", item);
+  if(!r?.ok) return alert("Error creando OT (¿sesión?)");
+  otTarea.value="";
+  await refresh();
+};
+
+document.addEventListener("click", async (ev)=>{
+  const btn = ev.target.closest("[data-act]");
+  if(!btn) return;
+  const act = btn.getAttribute("data-act");
+  const id  = btn.getAttribute("data-id");
+  if(act==="prolong"){
+    const rr = await apiPost("alert", {fn:"parada", equipo:id});
+    if(!rr?.ok) return alert("Error registrando parada (¿sesión?)");
+    await refresh();
+  }
+  if(act==="incid"){
+    document.getElementById("incEquipo").value = id;
+    document.getElementById("incFormWrap").hidden = false;
+    location.hash = "#incidencias";
+  }
+});
+
+/* Colapsables Dashboard */
+document.querySelectorAll(".collapse-head").forEach(el=>{
+  el.onclick = ()=>{ const id = el.dataset.coll; const box = document.getElementById(id); box.hidden = !box.hidden; };
+});
+
+/* =========================
+   INIT
+========================= */
+async function refresh(){ await loadAllFromAPI(); render(); }
+
+store.load();
+buildNav();
+window.addEventListener("hashchange", onHash);
+onHash();
+await refresh();
+setInterval(()=>refresh(), 60000);
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+</script>
+
+</body>
+</html>
