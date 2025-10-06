@@ -39,7 +39,7 @@ img{max-width:100%; display:block}
 .header::before,.appbar::before{
   content:""; position:absolute; inset:0;
   background:url("logo_mantenimiento.png") center top/70% no-repeat;
-  opacity:.10; pointer-events:none;
+  opacity:0.15; pointer-events:none;
 }
 .h__in{height:var(--hdr-h); display:flex; align-items:flex-end; gap:10px; padding:10px 14px; position:relative; z-index:1}
 
@@ -159,6 +159,35 @@ h1::before,h2::before,h3::before{
 /* Título gráfico Línea KALTENBACH */
 .kalt-title{display:flex; align-items:center; margin:6px 0 10px}
 .kalt-title img{max-width:100%; opacity:.85}
+/* Títulos SIEMPRE en una línea y sin cortar el angular */
+h1,h2,h3{
+  position:relative; margin:18px 0 10px;
+  padding-left:40px; line-height:1.15;
+  white-space:nowrap; overflow:visible; text-overflow:ellipsis;
+}
+h1::before,h2::before,h3::before{
+  content:""; position:absolute; left:0; bottom:.35em; /* ~2/3 de la 1ª letra */
+  width:30px; height:30px; background:url("angular.png") left bottom/contain no-repeat;
+}
+
+/* Título de marca en una sola línea */
+.brand__title{white-space:nowrap}
+
+/* Botones cabecera sin píldora y visibles sobre fondo blanco */
+#hamb,#moreBtn{background:transparent!important; border:none!important; box-shadow:none!important; color:#0f172a}
+#hamb .i{ display:inline-block; width:22px; height:16px; position:relative; }
+#hamb .i::before,#hamb .i::after,#hamb .i span{content:""; position:absolute; left:0; right:0; height:2px; background:#0f172a}
+#hamb .i::before{top:0} #hamb .i span{top:7px; display:block} #hamb .i::after{bottom:0}
+#moreBtn .i{ display:inline-block; width:18px; text-align:center; letter-spacing:2px; font-weight:700 }
+#moreBtn .i::before{ content:"···"; }
+
+/* Dashboard TV: integrado en el fondo (sin borde ni sombra) */
+.card--dash{ background:transparent; border:0; box-shadow:none; padding:8px 0 14px; }
+.card--dash .card__title{ display:flex; align-items:center; gap:10px; }
+
+/* Badges compactas al lado del título */
+.badge{ padding:2px 8px; border-radius:999px; font-weight:700; font-size:12px;
+        background:#eef2f7; color:#334155; border:1px solid #e2e8f0 }
 </style>
 </head>
 <body>
@@ -225,7 +254,6 @@ h1::before,h2::before,h3::before{
 </section>
 
 <main class="main" id="appRoot">
-<!-- ===== DASHBOARD / PANEL PRINCIPAL ===== -->
 <section id="dashboard" class="page active">
   <header class="h__in">
     <h1>PANEL DE CONTROL</h1>
@@ -234,38 +262,52 @@ h1::before,h2::before,h3::before{
   <div class="cards-grid">
 
     <!-- 1 · EQUIPOS EN PARADA -->
-    <article class="card card--dash" onclick="nav('equiposParada')">
-      <h2 class="card__title"><span class="black">EQUIPOS EN</span> <span class="red">PARADA</span></h2>
-      <p class="card__desc">Ver listado de equipos actualmente fuera de servicio.</p>
+    <article class="card card--dash" onclick="navTo('equipos')">
+      <h2 class="card__title">
+        <span class="black">EQUIPOS EN</span> <span class="red">PARADA</span>
+        <span class="badge" id="countParadas">0</span>
+      </h2>
+      <div id="dash-paradas" hidden></div>
     </article>
 
     <!-- 2 · EQUIPOS CON RESTRICCIONES -->
-    <article class="card card--dash" onclick="nav('equiposRestric')">
-      <h2 class="card__title"><span class="black">EQUIPOS CON</span> <span class="red">RESTRICCIONES</span></h2>
-      <p class="card__desc">Equipos operativos con limitaciones o incidencias leves.</p>
+    <article class="card card--dash" onclick="navTo('equipos')">
+      <h2 class="card__title">
+        <span class="black">EQUIPOS CON</span> <span class="red">RESTRICCIONES</span>
+        <span class="badge" id="countRestr">0</span>
+      </h2>
+      <div id="dash-restr" hidden></div>
     </article>
 
     <!-- 3 · ALERTAS STOCK MÍNIMO -->
-    <article class="card card--dash" onclick="nav('stockMinimo')">
-      <h2 class="card__title"><span class="black">ALERTAS</span> <span class="red">STOCK</span> <span class="black">MÍNIMO</span></h2>
-      <p class="card__desc">Materiales o consumibles por debajo del stock mínimo.</p>
+    <article class="card card--dash" onclick="navTo('inventario')">
+      <h2 class="card__title">
+        <span class="black">ALERTAS</span> <span class="red">STOCK</span> <span class="black">MÍNIMO</span>
+        <span class="badge" id="countStock">0</span>
+      </h2>
+      <div id="dash-stock" hidden></div>
     </article>
 
     <!-- 4 · AVISOS SUBCONTRATAS -->
-    <article class="card card--dash" onclick="nav('avisosSubcontratas')">
-      <h2 class="card__title"><span class="black">AVISOS</span> <span class="red">SUBCONTRATAS</span></h2>
-      <p class="card__desc">Notificaciones y trabajos pendientes de empresas externas.</p>
+    <article class="card card--dash" onclick="navTo('ot')">
+      <h2 class="card__title">
+        <span class="black">AVISOS</span> <span class="red">SUBCONTRATAS</span>
+        <span class="badge" id="countExt">0</span>
+      </h2>
+      <div id="dash-externas" hidden></div>
     </article>
 
     <!-- 5 · SOLICITUDES PRIORITARIAS -->
-    <article class="card card--dash" onclick="nav('solicitudesPrioritarias')">
-      <h2 class="card__title"><span class="black">SOLICITUDES</span> <span class="red">PRIORITARIAS</span></h2>
-      <p class="card__desc">Solicitudes urgentes de repuestos o intervenciones.</p>
+    <article class="card card--dash" onclick="navTo('repuestos')">
+      <h2 class="card__title">
+        <span class="black">SOLICITUDES</span> <span class="red">PRIORITARIAS</span>
+        <span class="badge" id="countReq">0</span>
+      </h2>
+      <div id="dash-req" hidden></div>
     </article>
 
   </div>
 </section>
-<!-- ===== FIN DASHBOARD ===== -->
 
   <!-- EQUIPOS -->
   <section id="equipos" hidden>
@@ -937,56 +979,69 @@ document.querySelectorAll(".collapse-head").forEach(el=>{
 });
 
 /* =========================
-   INIT
+   INIT ÚNICO (limpio)
 ========================= */
-async function refresh(){ await loadAllFromAPI(); render(); }
-
-store.load();
-buildNav();
-window.addEventListener("hashchange", onHash);
-onHash();
-await refresh();
-setInterval(()=>refresh(), 60000);
-
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+async function refresh(){ 
+  await loadAllFromAPI(); 
+  render(); 
 }
-/* ====== PACK v1 — Fix menús, z-index y cierres ====== */
-document.addEventListener("DOMContentLoaded", ()=>{
-  // Cerrar panel lateral si quedó abierto y evitar scroll horizontal
-  const sidenav = document.getElementById("sidenav");
-  if (sidenav) sidenav.classList.remove("open");
-  document.body.style.overflowX = "hidden";
 
-  // Botón hamburguesa
-  const hamb = document.getElementById("hamb");
+document.addEventListener("DOMContentLoaded", ()=>{
+  // 1) Carga de estado y navegación
+  store.load();
+  buildNav();
+
+  // 2) Cabecera / menús
+  document.body.style.overflowX = "hidden";
+  const sidenav   = document.getElementById("sidenav");
+  const hamb      = document.getElementById("hamb");
+  const moreBtn   = document.getElementById("moreBtn");
+  const userPanel = document.getElementById("userPanel");
+
+  if (sidenav) sidenav.classList.remove("open");
+
+  // 🍔 Hamburguesa
   if (hamb && sidenav){
     hamb.onclick = ()=> sidenav.classList.toggle("open");
-    // maqueta de icono (3 líneas) si no existe el span central
-    if (!hamb.querySelector("span")) {
-      const i = document.createElement("span");
-      i.className = "i";
-      const mid = document.createElement("span");
-      i.appendChild(mid);
+    // icono 3 líneas si no existe
+    if (!hamb.querySelector(".i")){
+      const i=document.createElement("span"); i.className="i";
+      const mid=document.createElement("span"); i.appendChild(mid);
       hamb.appendChild(i);
     }
   }
-
-  // Cerrar al pulsar fuera del contenido del panel (si el contenedor usa #sidenav como backdrop)
+  // Cerrar lateral pulsando en backdrop
   if (sidenav){
     sidenav.addEventListener("click",(e)=>{
       if (e.target.id === "sidenav") sidenav.classList.remove("open");
     });
   }
 
-  // Botón de usuario (⋯) sin píldora
-  const moreBtn = document.getElementById("moreBtn");
-  const userPanel = document.getElementById("userPanel");
+  // ⋯ Menú usuario
   if (moreBtn && userPanel){
-    moreBtn.onclick = ()=> userPanel.classList.toggle("show");
-    if (!moreBtn.querySelector(".i")) {
-      const i = document.createElement("span"); i.className="i"; moreBtn.appendChild(i);
+    moreBtn.onclick = ()=>{
+      userPanel.classList.toggle("show");
+      moreBtn.setAttribute("aria-expanded", userPanel.classList.contains("show"));
+    };
+    // icono ⋯ si no existe
+    if (!moreBtn.querySelector(".i")){
+      const i=document.createElement("span"); i.className="i";
+      moreBtn.appendChild(i);
     }
+  }
+
+  // 3) Navegación por hash y primer render
+  window.addEventListener("hashchange", onHash);
+  onHash();
+
+  (async ()=>{
+    await refresh();               // carga desde API + render inicial
+    setInterval(refresh, 60000);   // refresco cada 60s
+  })();
+
+  // 4) Service Worker (ruta relativa para GitHub Pages)
+  if ('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
 });
 </script>
