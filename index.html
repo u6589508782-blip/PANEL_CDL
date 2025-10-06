@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>CDL · Panel de control</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+
+<style>
+/* ========= Variables ========= */
+:root{
+  --brand1:#A60000; --brand2:#E43B3B;      /* rojo corporativo */
+  --ink:#0f172a; --muted:#475569; --line:#e5e7eb;
+  --bg:#ffffff;                             /* blanco unificado */
+  --panel:#ffffff;
+  --hdr-h:100px; --nav-w:380px; --radius:18px; --gap:16px;
+}
+
+/* ========= Reset ========= */
+*{box-sizing:border-box}
+html,body{height:100%; background:var(--bg); overflow-x:hidden}
+body{margin:0; font-family:Inter,system-ui,sans-serif; color:var(--ink)}
+img{max-width:100%; display:block}
+a{color:inherit; text-decoration:none}
+
+/* ========= Cabecera ========= */
+.header{
+  position:sticky; top:0; z-index:1000;
+  min-height:var(--hdr-h); background:#fff; border-bottom:1px solid #eee;
+}
+.header::before{
+  content:""; position:absolute; inset:0;
+  background:url("logo_mantenimiento.png") center 8%/70% no-repeat; /* degradado/logo de fondo */
+  opacity:.12; pointer-events:none;
+}
+.h__in{
+  height:var(--hdr-h); display:flex; align-items:flex-end; gap:12px;
+  padding:10px 14px 16px;  /* margen inferior extra para que no “corte” el logo CDL */
+  position:relative; z-index:1
+}
+
+/* Rol arriba-derecha (sin píldora) */
+#roleChip{ position:absolute; right:14px; top:6px; font-weight:800; font-size:12px }
+
+/* Botones cabecera (sin píldora) */
+#hamb,#moreBtn{
+  width:44px; height:44px; display:grid; place-items:center;
+  background:transparent; border:0; color:#0f172a; padding:6px;
+}
+
+/* Icono hamburguesa clásico (líneas más juntas) */
+#hamb .i{ width:22px; height:16px; position:relative; display:inline-block }
+#hamb .i::before,#hamb .i::after,#hamb .i span{
+  content:""; position:absolute; left:0; right:0; height:2px; background:#0f172a; border-radius:2px;
+}
+#hamb .i::before{ top:0 } 
+#hamb .i span{ top:7px; display:block } 
+#hamb .i::after{ bottom:0 }
+
+/* Icono ⋯ compacto */
+#moreBtn .i{ display:inline-block; width:18px; text-align:center; letter-spacing:2px; font-weight:800 }
+#moreBtn .i::before{ content:"···" }
+
+/* Marca central */
+.brand{display:flex; align-items:center; gap:10px; transform:translateY(8px)}
+.brand img{height:44px}
+.brand__title{font-weight:800; letter-spacing:.02em; white-space:nowrap; text-transform:uppercase}
+
+/* ========= SideNav (pantalla completa, NO tapa cabecera) ========= */
+#sidenav{
+  position:fixed; left:0; top:var(--hdr-h);
+  width:100vw; height:calc(100dvh - var(--hdr-h));
+  background:#fff; color:#0f172a;
+  transform:translateX(-100%); transition:transform .25s ease; z-index:998;
+  overflow:auto; -webkit-overflow-scrolling:touch; border-right:1px solid #e5e7eb;
+}
+#sidenav.open{ transform:none }
+
+/* Cabecera del menú (logo + buscador + X) */
+.sidenav__top{ position:sticky; top:0; background:#fff; padding:14px; z-index:1 }
+.sidenav__head{ display:flex; align-items:center; gap:10px }
+.sidenav__head img{ height:28px } /* agrandado respecto a tu captura */
+#btnCloseNav{
+  margin-left:auto; width:40px; height:40px; display:grid; place-items:center;
+  background:transparent; border:0; font-size:22px; line-height:1; cursor:pointer; color:#0f172a;
+}
+.sidenav__search{ margin:10px 0 4px }
+.sidenav__search input{
+  width:100%; padding:12px; border:1px solid #e5e7eb; border-radius:12px; font-weight:600;
+}
+
+/* Lista de secciones del menú (MAYÚSCULAS + separadores difuminados) */
+.navlist{ padding:8px 0 }
+.navlist a{
+  display:block; padding:16px 16px; font-weight:800; text-transform:uppercase; letter-spacing:.3px;
+}
+.navlist a + a{ position:relative }
+.navlist a + a::before{
+  content:""; position:absolute; left:10%; right:10%; top:-1px; height:1px;
+  background:linear-gradient(90deg, rgba(15,23,42,0) 0%, rgba(15,23,42,.18) 50%, rgba(15,23,42,0) 100%);
+}
+
+/* ========= Panel de usuario (bajo cabecera, con ✕ y cierre al pulsar fuera) ========= */
+#userPanel{
+  position:fixed; right:10px; top:calc(var(--hdr-h) + 8px);
+  width:min(360px, calc(100vw - 20px));
+  background:#0f141c; color:#e6eef7; border:1px solid #223046; border-radius:14px;
+  box-shadow:0 18px 36px rgba(0,0,0,.45); padding:14px; display:none; z-index:999;
+}
+#userPanel.show{ display:block }
+#userPanel h3{ margin:6px 0 12px; font-size:14px; color:#cbd5e1; display:flex; align-items:center; justify-content:space-between }
+#closeUser{
+  background:transparent; border:0; color:#cbd5e1; font-size:18px; line-height:1; cursor:pointer;
+}
+#userPanel label{ display:block; font-size:12px; color:#9fb0c6; margin:10px 0 6px }
+#userPanel input,#userPanel select{
+  width:100%; padding:10px 12px; border-radius:10px; border:1px solid #243046; background:#0b101a; color:#e6eef7
+}
+/* Botón/ojito: SVG simple */
+.eyeBtn{
+  position:absolute; right:12px; top:36px; width:24px; height:24px; border:0; background:transparent; cursor:pointer; padding:0;
+}
+.eyeBtn svg{ width:22px; height:22px; display:block; fill:none; stroke:#cbd5e1; stroke-width:2 }
+
+.btn{border:0; border-radius:999px; padding:10px 14px; font-weight:700; cursor:pointer}
+.btn--primary{background:var(--brand2); color:#fff}
+.btn--ghost{background:#0b101a; color:#e6eef7; border:1px solid #243046}
+
+/* ========= Layout básico ========= */
+.main{padding:16px; max-width:1100px; margin:0 auto}
+.grid{display:grid; gap:16px}
+.card{ background:#fff; color:#0f172a; border:1px solid #e5e7eb; border-radius:18px; padding:14px; box-shadow:0 4px 12px rgba(0,0,0,.06) }
+
+/* Títulos con angular (subido y sin recortar) */
+h1,h2,h3{
+  position:relative; margin:22px 0 10px; padding-left:46px; line-height:1.15;
+  white-space:nowrap; overflow:visible; text-overflow:ellipsis;
+}
+h1::before,h2::before,h3::before{
+  content:""; position:absolute; left:0; bottom:.40em; /* ~ 2/3 de la primera letra */
+  width:30px; height:30px; background:url("angular.png") left bottom/contain no-repeat;
+}
+.red{ color:var(--brand2)!important } .black{ color:var(--ink)!important }
+
+/* Dashboard integrado (sin borde/sombra) + badges */
+.card--dash{ background:transparent; border:0; box-shadow:none; padding:8px 0 6px }
+.badge{ display:inline-block; padding:2px 8px; border-radius:999px; font-weight:800; font-size:12px;
+        background:#eef2f7; color:#334155; border:1px solid #e2e8f0; margin-left:8px }
+
+/* Separador entre páginas */
+.sep{
+  height:1px; margin:28px auto; width:85%;
+  background:linear-gradient(90deg, rgba(15,23,42,0) 0%, rgba(15,23,42,.20) 50%, rgba(15,23,42,0) 100%);
+  border:0;
+}
+
+/* Línea KALTENBACH como “título gráfico” */
+.kalt-title{display:flex; align-items:center; margin:6px 0 10px}
+.kalt-title img{max-width:100%; opacity:.9}
+
+/* Footer */
+.footer{
+  margin-top:40px; padding:24px 16px; border-top:1px solid #e5e7eb; background:#fff; color:#0f172a
+}
+.footer small{ display:block; opacity:.8 }
+.footer a{ text-decoration:underline }
+
+/* Utilidades */
+[hidden]{display:none !important}
+.muted{color:#94a3b8}
+</style>
+</head>
+<body>
+
+<header class="header" id="hdr">
+  <span id="roleChip">Invitado</span>
+  <div class="h__in">
+    <button id="hamb" aria-label="Abrir menú"><span class="i"><span></span></span></button>
+    <div class="brand" aria-label="Inicio">
+      <img src="logo-cdl.png" alt="CDL" />
+      <span class="brand__title">PANEL DE CONTROL</span>
+    </div>
+    <div style="flex:1"></div>
+    <button id="moreBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userPanel"><span class="i"></span></button>
+  </div>
+</header>
+
+<!-- ========= Menú lateral pantalla completa (no tapa cabecera) ========= -->
+<aside id="sidenav" aria-hidden="true">
+  <div class="sidenav__top">
+    <div class="sidenav__head">
+      <img src="logo_mantenimiento.png" alt="CDL · MANTENIMIENTO" />
+      <button id="btnCloseNav" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="sidenav__search">
+      <input id="globalSearch" placeholder="Buscar en la app…" />
+    </div>
+  </div>
+  <nav class="navlist" id="navList"></nav>
+</aside>
+
+<!-- ========= Panel usuario ========= -->
+<section id="userPanel" role="dialog" aria-modal="true" aria-labelledby="upTitle">
+  <h3 id="upTitle">Acceso de usuario <button id="closeUser" aria-label="Cerrar">✕</button></h3>
+
+  <label>Rol</label>
+  <select id="roleSelect">
+    <option value="invitado">Invitado</option>
+    <option value="administrador">Administrador</option>
+    <option value="gerente">Gerente</option>
+    <option value="encargado">Encargado</option>
+    <option value="resp_produccion">Responsable de producción</option>
+    <option value="resp_turno">Responsable de turno</option>
+    <option value="externa">Empresa externa</option>
+  </select>
+
+  <label>Usuario</label>
+  <input id="userName" placeholder="usuario (opcional)" autocomplete="username" />
+
+  <label>Contraseña</label>
+  <div style="position:relative">
+    <input id="userPass" type="password" placeholder="contraseña (opcional)" autocomplete="current-password" />
+    <button class="eyeBtn" id="toggleEye" aria-label="Mostrar/Ocultar contraseña">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+        <circle cx="12" cy="12" r="3.5"/>
+      </svg>
+    </button>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-top:12px">
+    <button class="btn btn--primary" id="loginBtn">Acceder</button>
+    <button class="btn btn--ghost" id="logoutBtn">Salir</button>
+  </div>
+
+  <h3 style="margin-top:14px">Cambiar contraseña</h3>
+  <label>Actual</label>
+  <input id="chgOld" type="password" autocomplete="current-password" />
+  <label>Nueva</label>
+  <input id="chgNew" type="password" autocomplete="new-password" />
+  <button class="btn btn--ghost" id="chgBtn" style="margin-top:8px">Guardar nueva</button>
+</section>
+
+<main class="main" id="appRoot">
+  <!-- Páginas llegarán en Parte 2/3 -->
+</main>
+
+<footer class="footer">
+  <small>© CDL — Comercial de Laminados</small>
+  <small>Gestión del mantenimiento</small>
+  <div style="margin-top:8px">
+    <a href="#reportar" id="btnReportar">Informar sobre un problema con la app/web</a>
+  </div>
+  <!-- Formulario oculto (se mostrará al pulsar) -->
+  <div id="formReporte" hidden style="margin-top:12px">
+    <label for="repDesc" style="display:block;margin:6px 0 4px">Descripción del problema</label>
+    <textarea id="repDesc" rows="4" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn--primary" id="repEnviar">Enviar</button>
+      <button class="btn btn--ghost" id="repCancelar">Cancelar</button>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ========= JS base de cabecera/menús (sin duplicados) ========= */
+document.addEventListener("DOMContentLoaded", ()=>{
+  const sidenav   = document.getElementById("sidenav");
+  const hamb      = document.getElementById("hamb");
+  const btnClose  = document.getElementById("btnCloseNav");
+  const moreBtn   = document.getElementById("moreBtn");
+  const userPanel = document.getElementById("userPanel");
+  const closeUser = document.getElementById("closeUser");
+
+  // Construir iconos si faltan
+  if (hamb && !hamb.querySelector(".i")){
+    const i=document.createElement("span"); i.className="i"; const mid=document.createElement("span"); i.appendChild(mid); hamb.appendChild(i);
+  }
+  if (moreBtn && !moreBtn.querySelector(".i")){
+    const i=document.createElement("span"); i.className="i"; moreBtn.appendChild(i);
+  }
+
+  // Abrir/cerrar SideNav (pantalla completa, no tapa cabecera)
+  if (hamb)  hamb.onclick  = ()=> sidenav.classList.toggle("open");
+  if (btnClose) btnClose.onclick = ()=> sidenav.classList.remove("open");
+  // Cerrar sidenav al pulsar fuera del contenido (arrastre a la izquierda no necesario)
+  sidenav.addEventListener("click", (e)=>{ /* si haces click en zonas “vacías” no pasará nada al ir a pantalla completa */ });
+
+  // Abrir/cerrar Panel usuario
+  const toggleUser = ()=>{
+    userPanel.classList.toggle("show");
+    moreBtn.setAttribute("aria-expanded", userPanel.classList.contains("show"));
+  };
+  if (moreBtn) moreBtn.onclick = toggleUser;
+  if (closeUser) closeUser.onclick = ()=> userPanel.classList.remove("show");
+  // Cerrar panel usuario clicando fuera
+  document.addEventListener("click",(e)=>{
+    const insideUser = e.target.closest("#userPanel") || e.target.closest("#moreBtn");
+    if(!insideUser) userPanel.classList.remove("show");
+  });
+
+  // Toggle ojo
+  const eye = document.getElementById("toggleEye");
+  const pass= document.getElementById("userPass");
+  if (eye && pass){
+    eye.onclick = ()=>{ pass.type = (pass.type==="password") ? "text" : "password"; };
+  }
+
+  // Footer -> Reporte problema
+  const btnRep = document.getElementById("btnReportar");
+  const formRep= document.getElementById("formReporte");
+  const repCancel = document.getElementById("repCancelar");
+  const repEnviar = document.getElementById("repEnviar");
+  btnRep.onclick = (e)=>{ e.preventDefault(); formRep.hidden = !formRep.hidden; };
+  repCancelar.onclick = ()=>{ formRep.hidden = true; };
+  repEnviar.onclick = ()=>{ alert("Gracias. Tu incidencia ha sido registrada."); formRep.hidden = true; };
+});
+</script>
+<!-- ============ PÁGINAS ============ -->
+<main class="main" id="appRoot">
+
+  <!-- DASHBOARD TV -->
+  <section id="dashboard" class="page active">
+    <div class="cards-grid">
+
+      <article class="card card--dash" onclick="navTo('equipos')">
+        <h2><span class="black">EQUIPOS EN</span> <span class="red">PARADA</span>
+          <span class="badge" id="countParadas">0</span></h2>
+      </article>
+
+      <article class="card card--dash" onclick="navTo('equipos')">
+        <h2><span class="black">EQUIPOS CON</span> <span class="red">RESTRICCIONES</span>
+          <span class="badge" id="countRestr">0</span></h2>
+      </article>
+
+      <article class="card card--dash" onclick="navTo('inventario')">
+        <h2><span class="black">ALERTAS</span> <span class="red">STOCK</span> <span class="black">MÍNIMO</span>
+          <span class="badge" id="countStock">0</span></h2>
+      </article>
+
+      <article class="card card--dash" onclick="navTo('externas')">
+        <h2><span class="black">AVISOS</span> <span class="red">SUBCONTRATAS</span>
+          <span class="badge" id="countExt">0</span></h2>
+      </article>
+
+      <article class="card card--dash" onclick="navTo('repuestos')">
+        <h2><span class="black">SOLICITUDES</span> <span class="red">PRIORITARIAS</span>
+          <span class="badge" id="countReq">0</span></h2>
+      </article>
+
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- EQUIPOS -->
+  <section id="equipos" hidden>
+    <!-- título gráfico -->
+    <div class="kalt-title">
+      <img src="linea-kaltenbach.png" alt="LÍNEA KALTENBACH">
+    </div>
+
+    <h1><span class="black">EQUIPOS</span> <span class="red">EN LÍNEA</span></h1>
+
+    <!-- tarjetas por grupo (sin títulos duplicados dentro) -->
+    <div id="equiposGrid" class="grid"></div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- PUENTES GRÚA -->
+  <section id="gruas" hidden>
+    <h1><span class="black">PUENTES</span> <span class="red">GRÚA</span></h1>
+    <div id="gruasGrid" class="grid"></div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- AUXILIARES -->
+  <section id="auxiliares" hidden>
+    <h1><span class="black">AUXILIARES</span> <span class="red">(OTROS)</span></h1>
+    <div id="auxGrid" class="grid"></div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- INCIDENCIAS -->
+  <section id="incidencias" hidden>
+    <h1><span class="black">GESTIÓN DE</span> <span class="red">INCIDENCIAS</span></h1>
+
+    <div style="display:flex;justify-content:center;margin:10px 0 16px">
+      <button id="btnNewInc" class="btn btn--primary" style="font-size:16px;padding:12px 18px">Crear nueva incidencia</button>
+    </div>
+
+    <!-- Formulario oculto (se abrirá con el botón) -->
+    <div id="incFormWrap" class="card" hidden>
+      <div class="grid" style="grid-template-columns:1fr;gap:12px">
+        <div>
+          <label>Equipo</label>
+          <input id="incEquipo" list="equiposDatalist" placeholder="Escribe o selecciona equipo…">
+          <datalist id="equiposDatalist"></datalist>
+        </div>
+
+        <div>
+          <label>Tipo de fallo</label>
+          <select id="incTipo">
+            <option value="mecanico">Fallo mecánico</option>
+            <option value="electrico">Fallo eléctrico</option>
+            <option value="hidraulico">Fallo hidráulico</option>
+            <option value="neumatico">Fallo neumático</option>
+            <option value="proceso">Fallo de proceso productivo</option>
+            <option value="desconocido">Origen desconocido</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Descripción breve</label>
+          <input id="incDesc" placeholder="Describe el problema…">
+        </div>
+
+        <div>
+          <label>Solucionado</label>
+          <select id="incSol">
+            <option value="no">No</option>
+            <option value="si">Sí</option>
+            <option value="restricciones">Con restricciones</option>
+          </select>
+        </div>
+
+        <div id="incSiWrap" hidden>
+          <label>Descripción de la solución</label>
+          <input id="incSolDesc" placeholder="¿Cómo se solucionó?">
+          <label>Repuestos empleados</label>
+          <input id="incSolRep" placeholder="Escribe para buscar…">
+        </div>
+
+        <div id="incNoWrap">
+          <label>Descripción de la intervención</label>
+          <input id="incNoDesc" placeholder="¿Qué se ha hecho hasta ahora?">
+          <label>Repuestos empleados</label>
+          <input id="incNoRep" placeholder="Opcional">
+        </div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label>Fecha de inicio</label>
+            <input id="incIni" type="date">
+          </div>
+          <div>
+            <label>Fecha de reparación</label>
+            <input id="incFin" type="date">
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label>Reportado por</label>
+            <select id="incReportadoPor">
+              <option>administrador</option><option>gerente</option><option>encargado</option>
+              <option>resp_produccion</option><option>resp_turno</option><option>externa</option>
+            </select>
+          </div>
+          <div>
+            <label>Intervenido por</label>
+            <input id="incIntervenido" placeholder="Nombre del técnico…">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="btn btn--primary" id="incGuardar">Guardar</button>
+          <button class="btn btn--ghost" id="incCancelar">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
+        <h2>Últimas incidencias</h2>
+        <input id="incFilter" placeholder="Filtrar…" style="max-width:240px">
+      </div>
+      <div id="incList"></div>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- INVENTARIO (alerta + buscador de categorías) -->
+  <section id="inventario" hidden>
+    <h1><span class="black">INVENTARIO DE</span> <span class="red">REPUESTOS</span></h1>
+
+    <div id="invAlerts" class="card" style="font-weight:700"></div>
+
+    <div class="card">
+      <div class="searchbar" style="display:flex;gap:8px">
+        <input id="invSearch" placeholder="Código, referencia, nombre…">
+        <button class="btn btn--ghost" id="invClear">Limpiar</button>
+      </div>
+      <div class="catgrid" id="invCats"></div>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- SOLICITUDES -->
+  <section id="repuestos" hidden>
+    <h1><span class="black">SOLICITUDES</span> <span class="red">PRIORITARIAS</span></h1>
+
+    <div class="card">
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label>Repuesto</label>
+          <input id="reqRef" placeholder="Ref o nombre…">
+          <label>Cantidad</label>
+          <input id="reqQty" type="number" min="1" value="1">
+        </div>
+        <div>
+          <label>Observaciones</label>
+          <input id="reqObs" placeholder="Urgente, alternativa, etc.">
+          <button class="btn btn--primary" id="reqEnviar" style="margin-top:12px">Enviar solicitud</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <h2>Solicitudes</h2>
+        <div class="badge" id="reqCountBadge">0</div>
+      </div>
+      <div id="reqList"></div>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- AVISOS SUBCONTRATAS -->
+  <section id="externas" hidden>
+    <h1><span class="black">AVISOS</span> <span class="red">SUBCONTRATAS</span></h1>
+    <div id="extList" class="card"></div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- INDICADORES -->
+  <section id="indicadores" hidden>
+    <h1><span class="black">INDICADORES</span> <span class="red">CLAVE</span></h1>
+    <div class="grid" style="grid-template-columns:1fr;gap:12px">
+      <div class="card"><h3>MTBF</h3><div id="kpiMtbf">—</div></div>
+      <div class="card"><h3>Disponibilidad</h3><div id="kpiDisp">—</div></div>
+      <div class="card"><h3>OEE</h3><div id="kpiOee">—</div></div>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- ÓRDENES DE TRABAJO -->
+  <section id="ot" hidden>
+    <h1><span class="black">ÓRDENES DE</span> <span class="red">TRABAJO</span></h1>
+
+    <div class="card">
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr; gap:12px">
+        <div>
+          <label>Equipo</label>
+          <input id="otEquipo" list="equiposDatalist" placeholder="Escribe o selecciona…">
+        </div>
+        <div>
+          <label>Tipo</label>
+          <select id="otTipo">
+            <option>Engrase</option><option>Lubricación</option>
+            <option>Ajuste mecánico</option><option>Ajuste eléctrico</option>
+          </select>
+        </div>
+        <div>
+          <label>Fecha</label>
+          <input id="otFecha" type="date">
+        </div>
+      </div>
+      <label>Tarea</label>
+      <input id="otTarea" placeholder="Describe la OT…">
+      <div style="margin-top:10px">
+        <button class="btn btn--primary" id="otCrear">Crear OT</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <h2>Listado de OT</h2>
+        <div class="searchbar" style="display:flex;gap:8px">
+          <input id="otFilter" placeholder="Filtrar…">
+          <button class="btn btn--ghost" id="otBorrarMode">Modo borrar</button>
+        </div>
+      </div>
+      <div id="otList"></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ============ Estado mínimo + navegación + renders base ============ */
+
+/* Estado (se rellenará en Parte 3 desde Apps Script) */
+const store = {
+  state:{
+    user:{rol:'invitado', nombre:'Invitado'},
+    equipos:[], gruas:[], auxiliares:[],
+    incidencias:[], inventario:[], solicitudes:[],
+    externas:[], ots:[]
+  },
+  save(){ localStorage.setItem("cdl_state", JSON.stringify(this.state)); },
+  load(){ try{ Object.assign(this.state, JSON.parse(localStorage.getItem("cdl_state")||"{}")); }catch{} }
+};
+
+/* Páginas del menú */
+const PAGES=["dashboard","equipos","gruas","auxiliares","incidencias","inventario","repuestos","externas","indicadores","ot"];
+const TITLES={
+  dashboard:"Dashboard TV", equipos:"Equipos", gruas:"Puentes grúa", auxiliares:"Auxiliares (otros)",
+  incidencias:"Incidencias", inventario:"Inventario", repuestos:"Solicitudes",
+  externas:"Avisos subcontratas", indicadores:"Indicadores", ot:"Órdenes de trabajo"
+};
+
+/* Construir menú lateral */
+function buildNav(){
+  const nav = document.getElementById("navList");
+  nav.innerHTML = PAGES.map(id=>`<a href="#${id}" data-id="${id}">${TITLES[id].toUpperCase()}</a>`).join("");
+}
+
+/* Router */
+function navTo(id){
+  PAGES.forEach(p=>{
+    const el = document.getElementById(p);
+    if(el) el.hidden = (p!==id);
+  });
+  if(location.hash !== "#"+id) location.hash = "#"+id;
+  render();
+}
+function onHash(){
+  const id = (location.hash||"#dashboard").replace("#","");
+  if(!PAGES.includes(id)) return navTo("dashboard");
+  PAGES.forEach(p=>{ const el = document.getElementById(p); if(el) el.hidden = (p!==id); });
+  render();
+}
+window.addEventListener("hashchange", onHash);
+
+/* Helpers UI */
+function pill(estado){
+  const s=(estado||"").toLowerCase();
+  if(s.includes("parada")) return `<span class="pill pill--stop">Parada</span>`;
+  if(s.includes("restr"))  return `<span class="pill pill--warn">Restricciones</span>`;
+  if(s.includes("marcha")) return `<span class="pill pill--ok">En marcha</span>`;
+  return `<span class="pill pill--info">${estado||"—"}</span>`;
+}
+function cardEquipo(e){
+  return `<div class="card">
+    <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
+      <div>
+        <div>${pill(e.estado)}</div>
+        <div class="item__title" style="font-weight:800">${e.nombre||e.id}</div>
+        <div class="item__meta muted">${e.linea||e.grupo||e.nave||e.tipo||""}</div>
+      </div>
+      <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn--ghost" data-act="ficha" data-id="${e.id}">Ver ficha</button>
+        <button class="btn btn--ghost" data-act="prog" data-id="${e.id}">Parada prog.</button>
+        <button class="btn btn--primary" data-act="prolong" data-id="${e.id}">Parada prolongada</button>
+        <button class="btn btn--ghost" data-act="incid" data-id="${e.id}">Nueva incidencia</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* Renders */
+function renderDashboard(){
+  const eqStop  = (store.state.equipos||[]).filter(x=>(x.estado||"").toLowerCase().includes("parada"));
+  const eqRestr = (store.state.equipos||[]).filter(x=>(x.estado||"").toLowerCase().includes("restr"));
+  const grStop  = (store.state.gruas||[]).filter(x=>(x.estado||"").toLowerCase().includes("parada"));
+  const auxRestr= (store.state.auxiliares||[]).filter(x=>(x.estado||"").toLowerCase().includes("restr"));
+  const low     = (store.state.inventario||[]).filter(i=>Number(i.stock)<Number(i.stock_min));
+  const reqPend = (store.state.solicitudes||[]).filter(r=>(r.estado||"").toLowerCase()==="pendiente");
+
+  document.getElementById("countParadas").textContent = eqStop.length + grStop.length;
+  document.getElementById("countRestr").textContent  = eqRestr.length + auxRestr.length;
+  document.getElementById("countStock").textContent  = low.length;
+  document.getElementById("countReq").textContent    = reqPend.length;
+  document.getElementById("countExt").textContent    = (store.state.externas||[]).length;
+}
+function renderEquipos(){
+  const cont = document.getElementById("equiposGrid");
+  if(!cont) return;
+  const grupos = ["LÍNEA KALTENBACH","LÁSER TRUMP","MÁQUINAS INDEPENDIENTES"];
+  const html = grupos.map(g=>{
+    const list = (store.state.equipos||[]).filter(x=>(x.grupo||"").toUpperCase()===g);
+    if(!list.length) return "";
+    return `<div>${list.map(cardEquipo).join("")}</div>`;
+  }).join("");
+  cont.innerHTML = html || `<div class="muted">Sin datos de equipos.</div>`;
+  // datalist para buscadores
+  const dl = document.getElementById("equiposDatalist");
+  if(dl) dl.innerHTML = (store.state.equipos||[]).map(e=>`<option value="${e.nombre}">`).join("");
+}
+function renderGruas(){
+  const cont = document.getElementById("gruasGrid");
+  if(!cont) return;
+  const naves = ["NAVE 1","NAVE 2","NAVE 3","NAVE 4"];
+  cont.innerHTML = naves.map(n=>{
+    const list = (store.state.gruas||[]).filter(x=>(x.nave||"").toUpperCase()===n);
+    return list.length ? `<div><h3>${n}</h3>${list.map(cardEquipo).join("")}</div>` : "";
+  }).join("") || `<div class="muted">Sin datos de puentes grúa.</div>`;
+}
+function renderAux(){
+  const cont = document.getElementById("auxGrid");
+  cont.innerHTML = (store.state.auxiliares||[]).length ? 
+    `<div><h3>Auxiliares</h3>${store.state.auxiliares.map(cardEquipo).join("")}</div>` :
+    `<div class="muted">Sin datos de auxiliares.</div>`;
+}
+function renderIncidencias(){
+  const wrap = document.getElementById("incList");
+  if(!wrap) return;
+  const filtro = (document.getElementById("incFilter").value||"").toLowerCase();
+  const arr = (store.state.incidencias||[])
+    .filter(i=>!filtro || (i.equipo+i.tipo+i.desc).toLowerCase().includes(filtro))
+    .sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+  wrap.innerHTML = arr.map(i=>`<div class="line-1" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:10px 6px; border-bottom:1px dashed #e5e7eb">
+    ${i.fecha||"—"} · ${i.equipo||"—"} · ${i.tipo||"—"} · ${i.desc||""}
+  </div>`).join("") || `<div class="muted" style="padding:10px">Sin incidencias.</div>`;
+}
+function renderInventario(){
+  const low = (store.state.inventario||[]).filter(i=>Number(i.stock)<Number(i.stock_min));
+  const invAlerts = document.getElementById("invAlerts");
+  invAlerts.innerHTML = low.length
+    ? `<span class="pill pill--stop">⚠ ${low.length} referencias por debajo del mínimo</span>`
+    : `<span class="pill pill--ok">Stock correcto</span>`;
+
+  const q = (document.getElementById("invSearch").value||"").toLowerCase();
+  const items = (store.state.inventario||[]).filter(i=>{
+    const text = ((i.ref||"")+" "+(i.nombre||"")).toLowerCase();
+    return !q || text.includes(q);
+  });
+  const cats = {};
+  items.forEach(i=>{ const c=i.categoria||"Otros"; (cats[c] ||= []).push(i); });
+  document.getElementById("invCats").innerHTML = Object.keys(cats).sort().map(c=>{
+    const n=cats[c].length;
+    return `<div class="cat" style="padding:16px;border-radius:12px;border:1px solid #e5e7eb;background:#f8fafc;font-weight:800">
+      ${c} · ${n} items
+    </div>`;
+  }).join("") || `<div class="muted">Sin resultados.</div>`;
+}
+function renderRepuestos(){
+  const list = store.state.solicitudes||[];
+  document.getElementById("reqCountBadge").textContent = list.length;
+  document.getElementById("reqList").innerHTML = list.map(r=>`
+    <div class="line-1" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:10px 6px; border-bottom:1px dashed #e5e7eb">
+      ${r.id||"—"} · ${r.nombre||r.ref||"—"} (${r.qty||1}) · ${r.estado||"Pendiente"}
+    </div>`).join("") || `<div class="muted" style="padding:10px">Sin solicitudes.</div>`;
+}
+function renderExternas(){
+  document.getElementById("extList").innerHTML =
+    (store.state.externas||[]).map(e=>`<div class="line-1">${e.proveedor||"—"} · ${e.asunto||"—"} · ${e.prioridad||""}</div>`).join("")
+    || `<div class="muted">Sin avisos de subcontratas.</div>`;
+}
+function renderOT(){
+  const q=(document.getElementById("otFilter")?.value||"").toLowerCase();
+  const list=(store.state.ots||[]).filter(o=>!q||(o.id+o.equipo+o.tipo+o.tarea).toLowerCase().includes(q));
+  document.getElementById("otList").innerHTML = list.map(o=>
+    `<div class="line-1">${o.id||"—"} · ${o.equipo||"—"} · ${o.tipo||"OT"} · ${o.fecha||"—"} · ${o.tarea||""}</div>`
+  ).join("") || `<div class="muted" style="padding:10px">Sin OT.</div>`;
+}
+function renderIndicadores(){
+  const incs = store.state.incidencias||[];
+  document.getElementById("kpiMtbf").textContent = (incs.length ? (200/incs.length).toFixed(1)+' h' : '—');
+  document.getElementById("kpiDisp").textContent = "98.6%";
+  document.getElementById("kpiOee").textContent  = "91.2%";
+}
+
+/* Render general */
+function render(){
+  renderDashboard(); renderEquipos(); renderGruas(); renderAux();
+  renderIncidencias(); renderInventario(); renderRepuestos();
+  renderExternas(); renderOT(); renderIndicadores();
+}
+
+/* INIT */
+store.load();
+buildNav();
+onHash();         // muestra la página del hash o dashboard
+render();         // primer render con estado local
+</script>
+<!-- ======= MODALES + FOOTER ======= -->
+<!-- Modal genérico (fichas/QR) -->
+<div id="modal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000;background:rgba(0,0,0,.45)">
+  <div id="modalBox" style="background:#fff;border-radius:16px;max-width:420px;width:92vw;padding:16px;position:relative">
+    <button id="modalClose" aria-label="Cerrar" style="position:absolute;right:8px;top:8px;border:0;background:transparent;font-size:22px;cursor:pointer">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="margin:60px auto 30px;max-width:1100px;padding:16px 12px;color:#475569;text-align:center">
+  <div>© <span id="yearNow"></span> <b>CDL</b></div>
+  <div>COMERCIAL DE LAMINADOS</div>
+  <div>GESTIÓN DEL MANTENIMIENTO</div>
+  <div style="margin-top:12px">
+    <button id="btnReport" class="btn btn--ghost">Informar sobre un problema con la app/web</button>
+  </div>
+  <form id="reportForm" class="card" style="display:none;max-width:780px;margin:14px auto;text-align:left">
+    <label>Asunto</label>
+    <input id="repAsunto" placeholder="Breve descripción…">
+    <label>Detalle</label>
+    <input id="repDetalle" placeholder="Explica qué sucede, pasos para reproducir…">
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <label>Tu nombre</label>
+        <input id="repNombre" placeholder="Opcional">
+      </div>
+      <div>
+        <label>Contacto</label>
+        <input id="repContacto" placeholder="Email o teléfono (opcional)">
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <button id="repEnviar" class="btn btn--primary">Enviar informe</button>
+      <button id="repCancelar" class="btn btn--ghost" type="button">Cancelar</button>
+    </div>
+  </form>
+</footer>
+
+<script>
+/* =========================================================
+   PARTE 3/3 — DATA + ACCIONES + MEJORAS DE UX
+   (Reutiliza el store, PAGES, render()… definidos en la Parte 2)
+   ========================================================= */
+
+/* ---------- Apps Script API ---------- */
+const API_BASE = "https://script.google.com/macros/s/AKfycbycKrLO0jIEDXB_AZi91PopCj1uNXCOEu9zWHeqq_aK_DJo7TpWO_kKKWMs4exwyNRW/exec";
+const API_KEY  = ""; // puedes dejarlo vacío si tu script no lo exige
+
+async function apiGet(res, params={}){
+  try{
+    const url = new URL(API_BASE);
+    url.searchParams.set("res", res);
+    if(params.fn) url.searchParams.set("fn", params.fn);
+    if(API_KEY)   url.searchParams.set("key", API_KEY);
+    for(const k in params) if(k!=="fn") url.searchParams.set(k, params[k]);
+    const tok = store?.state?.user?.token; if(tok) url.searchParams.set("token", tok);
+    const r = await fetch(url.toString());
+    return await r.json();
+  }catch(e){ console.warn("GET error/offline", e); return {ok:false,error:String(e)}; }
+}
+async function apiPost(res, body={}){
+  try{
+    const url = new URL(API_BASE);
+    url.searchParams.set("res", res);
+    if(body.fn) url.searchParams.set("fn", body.fn);
+    const payload = {...body};
+    if(API_KEY) payload.key = API_KEY;
+    const tok = store?.state?.user?.token; if(tok) payload.token = tok;
+    const r = await fetch(url.toString(), {method:"POST", headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    return await r.json();
+  }catch(e){ console.warn("POST error/offline", e); return {ok:false,error:String(e)}; }
+}
+const apiList  = (res, extra={})      => apiGet(res, Object.assign({fn:"list"}, extra));
+const apiAdd   = (res, item)          => apiPost(res, {fn:"add",  item});
+const apiSet   = (res, obj)           => apiPost(res, Object.assign({fn:"set"}, obj));
+const apiDelta = (res, ref, delta)    => apiPost(res, {fn:"delta", ref, delta});
+
+/* ---------- Carga de datos ---------- */
+function splitByGrupo(items){
+  const equipos=[], gruas=[], auxiliares=[];
+  for(const it of (items||[])){
+    const g = (it.grupo||"").toUpperCase();
+    const row = { id: it.id||it.nombre, nombre: it.nombre, grupo: it.grupo, estado: it.estado, linea: it.linea };
+    if(g.startsWith("NAVE ")) gruas.push(Object.assign({nave: it.grupo}, row));
+    else if(g.includes("KALTENBACH") || g.includes("LÁSER") || g.includes("LASER") || g.includes("MÁQUINAS"))
+      equipos.push(row);
+    else auxiliares.push(Object.assign({tipo: it.grupo}, row));
+  }
+  return {equipos, gruas, auxiliares};
+}
+
+async function loadAllFromAPI(){
+  const [st, incid, inv, rep, ext, ot] = await Promise.all([
+    apiList("state"),
+    apiList("incid"),
+    apiList("inv"),
+    apiList("rep"),
+    apiList("cons"),
+    apiList("ot")
+  ]);
+
+  if(st?.ok){
+    const {equipos, gruas, auxiliares} = splitByGrupo(st.items||[]);
+    store.state.equipos = equipos;
+    store.state.gruas = gruas;
+    store.state.auxiliares = auxiliares;
+  }
+  if(incid?.ok) store.state.incidencias = (incid.items||[]).map(x=>({
+    id:x.id, fecha:(x.created||"").slice(0,10), equipo:x.equipo, tipo:x.tipo, desc:x.desc||x.repTxt||"",
+    solucionado: (x.res||"").toLowerCase().includes("solucionado") ? "si" :
+                 (x.res||"").toLowerCase().includes("restr") ? "restricciones" :
+                 (x.res||"").toLowerCase().includes("parada") ? "no" : "no"
+  }));
+
+  store.state.inventario = inv?.ok ? (inv.items||[]).map(i=>({
+    id:i.ref, ref:i.ref, nombre:i.nombre, stock:Number(i.stock), stock_min:Number(i.minimo),
+    categoria: i.categoria||"Otros"
+  })) : [];
+
+  if(rep?.ok) store.state.solicitudes = (rep.items||[]).map(r=>({
+    id:r.id, ref:r.ref, nombre:r.nombre, qty:Number(r.qty||1),
+    estado:(r.estado||"Pendiente"), fecha_entrega:r.fecha_entrega||""
+  }));
+
+  if(ext?.ok) store.state.externas = (ext.items||[]);
+
+  if(ot?.ok) store.state.ots = (ot.items||[]).map(o=>({
+    id:o.id, equipo:o.equipo, tipo:o.titulo||"OT", fecha:(o.vencimiento||"").slice(0,10), tarea:o.desc||o.titulo||""
+  }));
+
+  store.save();
+}
+
+/* ---------- Mejora: semáforo + QR en “Ver ficha” (sobrescribe cardEquipo) ---------- */
+function cardEquipo(e){
+  const estado = (e.estado||"").toLowerCase();
+  const on = (c)=> estado.includes(c) ? 'outline:3px solid rgba(0,0,0,.15);' : '';
+  return `<div class="card">
+    <div style="display:flex;align-items:flex-start;gap:12px;justify-content:space-between">
+      <div>
+        <div style="margin-bottom:6px">${pill(e.estado)}</div>
+        <div class="item__title" style="font-weight:800">${e.nombre||e.id}</div>
+        <div class="item__meta muted">${e.linea||e.grupo||e.nave||e.tipo||""}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <button class="btn btn--ghost" data-act="ficha" data-id="${e.id}">Ver ficha</button>
+          <button class="btn btn--ghost" data-act="prog" data-id="${e.id}">Parada prog.</button>
+          <button class="btn btn--primary" data-act="prolong" data-id="${e.id}">Parada prolongada</button>
+          <button class="btn btn--ghost" data-act="incid" data-id="${e.id}">Nueva incidencia</button>
+        </div>
+      </div>
+      <!-- Semáforo -->
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+        <button class="sem" title="En marcha" data-act="estado" data-id="${e.id}" data-val="marcha"
+          style="width:22px;height:22px;border-radius:50%;border:0;background:#22c55e;${on('marcha')};cursor:pointer"></button>
+        <button class="sem" title="Restricciones" data-act="estado" data-id="${e.id}" data-val="restricciones"
+          style="width:22px;height:22px;border-radius:50%;border:0;background:#f59e0b;${on('restr')};cursor:pointer"></button>
+        <button class="sem" title="Parada" data-act="estado" data-id="${e.id}" data-val="parada"
+          style="width:22px;height:22px;border-radius:50%;border:0;background:#ef4444;${on('parada')};cursor:pointer"></button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Eventos globales (acciones) ---------- */
+document.addEventListener("click", async (ev)=>{
+  const btn = ev.target.closest("[data-act]");
+  if(!btn) return;
+  const act = btn.getAttribute("data-act");
+  const id  = btn.getAttribute("data-id");
+
+  // Cambiar estado via semáforo
+  if(act==="estado"){
+    const val = btn.getAttribute("data-val"); // 'marcha' | 'restricciones' | 'parada'
+    // 1) Persistir en API si procede:
+    await apiSet("state", { id, estado: val }); // ajusta al nombre de recurso si es distinto
+    // 2) Actualizar local y re-render
+    const upd = (list)=>{ const i=list.findIndex(x=>String(x.id)===String(id)); if(i>-1) list[i].estado = val; };
+    upd(store.state.equipos); upd(store.state.gruas); upd(store.state.auxiliares);
+    store.save(); render();
+    return;
+  }
+
+  if(act==="prolong"){
+    const rr = await apiPost("alert", {fn:"parada", equipo:id});
+    if(!rr?.ok) alert("No se pudo registrar la parada prolongada");
+    await refresh();
+    return;
+  }
+
+  if(act==="incid"){
+    // Pre-cargar equipo y abrir formulario en la página Incidencias
+    const el = document.getElementById("incEquipo");
+    if(el) el.value = id;
+    location.hash = "#incidencias";
+    document.getElementById("incFormWrap").hidden = false;
+    return;
+  }
+
+  if(act==="ficha"){
+    // Muestra ficha simple + QR (el QR usa un endpoint público de imagen)
+    const data = encodeURIComponent(`CDL|EQUIPO=${id}`);
+    const qr   = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${data}`;
+    document.getElementById("modalBody").innerHTML = `
+      <h3 style="margin:0 0 8px;font-weight:800">Ficha del equipo</h3>
+      <div style="display:flex;gap:14px;align-items:center">
+        <img src="${qr}" alt="QR ${id}" width="180" height="180" style="border:1px solid #e5e7eb;border-radius:8px">
+        <div style="font-size:14px">
+          <div><b>ID:</b> ${id}</div>
+          <div><b>Nombre:</b> ${(store.state.equipos||[]).concat(store.state.gruas||[], store.state.auxiliares||[]).find(x=>String(x.id)===String(id))?.nombre||id}</div>
+          <div><b>Grupo:</b> ${(store.state.equipos||[]).concat(store.state.gruas||[], store.state.auxiliares||[]).find(x=>String(x.id)===String(id))?.grupo||"—"}</div>
+        </div>
+      </div>`;
+    openModal();
+    return;
+  }
+});
+
+/* Guardar incidencia (form) */
+document.getElementById("incGuardar")?.addEventListener("click", async ()=>{
+  const sol = document.getElementById("incSol").value;
+  const mapRes = sol==="si" ? "Solucionado" : (sol==="restricciones" ? "Restricciones" : "Parada");
+  const inc = {
+    equipo: document.getElementById("incEquipo").value,
+    tipo:   document.getElementById("incTipo").value,
+    res:    mapRes,
+    rep:    (sol==="si" ? (document.getElementById("incSolRep").value ? "Sí" : "No")
+                        : (document.getElementById("incNoRep").value ? "Sí" : "No")),
+    repTxt: document.getElementById("incSolRep").value || document.getElementById("incNoRep").value || "",
+    inicio: document.getElementById("incIni").value || "",
+    fin:    document.getElementById("incFin").value || "",
+    reportante: store.state.user?.nombre || "web",
+    asignado:   document.getElementById("incIntervenido").value || "",
+    desc:       document.getElementById("incDesc").value
+  };
+  const r = await apiAdd("incid", inc);
+  if(!r?.ok) return alert("Error guardando incidencia");
+  await refresh();
+  document.getElementById("incFormWrap").hidden = true;
+});
+document.getElementById("incCancelar")?.addEventListener("click", ()=>{ document.getElementById("incFormWrap").hidden = true; });
+document.getElementById("incSol")?.addEventListener("change", (e)=>{
+  const v=e.target.value;
+  document.getElementById("incSiWrap").hidden = (v!=="si");
+  document.getElementById("incNoWrap").hidden = (v==="si");
+});
+
+/* Enviar solicitud de repuesto */
+document.getElementById("reqEnviar")?.addEventListener("click", async ()=>{
+  const item = { ref:(reqRef.value||"").toUpperCase(), nombre:reqRef.value, qty:Number(reqQty.value||1), obs:reqObs.value||"" };
+  const r = await apiAdd("rep", item);
+  if(!r?.ok) return alert("Error solicitando repuesto");
+  reqRef.value=""; reqQty.value=1; reqObs.value="";
+  await refresh();
+});
+
+/* Crear OT */
+document.getElementById("otCrear")?.addEventListener("click", async ()=>{
+  const item = {
+    equipo: otEquipo.value, prioridad:"A",
+    titulo: `${otTipo.value} · ${otTarea.value}`.trim(),
+    vencimiento: otFecha.value, desc: otTarea.value
+  };
+  const r = await apiAdd("ot", item);
+  if(!r?.ok) return alert("Error creando OT");
+  otTarea.value="";
+  await refresh();
+});
+
+/* Inventario: limpiar búsqueda */
+document.getElementById("invClear")?.addEventListener("click", ()=>{
+  const i=document.getElementById("invSearch"); if(i){ i.value=""; render(); }
+});
+
+/* ---------- Menú usuario: cerrar con X y clic fuera ---------- */
+(function enhanceUserPanel(){
+  const up = document.getElementById("userPanel");
+  const moreBtn = document.getElementById("moreBtn");
+  if(!up || !moreBtn) return;
+
+  // Añade X si no existe
+  if(!up.querySelector(".up-close")){
+    const btn = document.createElement("button");
+    btn.className="up-close";
+    btn.setAttribute("aria-label","Cerrar");
+    btn.textContent="✕";
+    Object.assign(btn.style,{position:"absolute",right:"8px",top:"8px",background:"transparent",border:"0",color:"#cbd5e1",fontSize:"18px",cursor:"pointer"});
+    up.style.position = "fixed"; // ya está en Parte 2, pero nos aseguramos
+    up.appendChild(btn);
+    btn.onclick = ()=> up.classList.remove("show");
+  }
+
+  // Clic fuera para cerrar
+  document.addEventListener("click",(e)=>{
+    const clickedInside = up.contains(e.target) || moreBtn.contains(e.target);
+    if(!clickedInside) up.classList.remove("show");
+  });
+
+  // Escape
+  document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") up.classList.remove("show"); });
+})();
+
+/* ---------- Modal helpers ---------- */
+function openModal(){ document.getElementById("modal").style.display="flex"; }
+function closeModal(){ document.getElementById("modal").style.display="none"; }
+document.getElementById("modalClose").onclick = closeModal;
+document.getElementById("modal").addEventListener("click",(e)=>{ if(e.target.id==="modal") closeModal(); });
+
+/* ---------- Footer: reporte de problema ---------- */
+document.getElementById("yearNow").textContent = new Date().getFullYear();
+document.getElementById("btnReport").onclick = ()=>{
+  const f=document.getElementById("reportForm");
+  f.style.display = (f.style.display==="none"||!f.style.display) ? "block":"none";
+};
+document.getElementById("repCancelar").onclick = ()=>{ document.getElementById("reportForm").style.display="none"; };
+document.getElementById("repEnviar").addEventListener("click", async (ev)=>{
+  ev.preventDefault();
+  const item = {
+    asunto: repAsunto.value, detalle: repDetalle.value,
+    autor: repNombre.value, contacto: repContacto.value,
+    when: new Date().toISOString()
+  };
+  if(!item.asunto || !item.detalle){ alert("Por favor, completa Asunto y Detalle."); return; }
+  const r = await apiAdd("issues", item); // crea un handler 'issues' en tu Apps Script o cámbialo al recurso que uses.
+  if(!r?.ok){ alert("No se pudo enviar. Lo guardo localmente."); }
+  document.getElementById("reportForm").style.display="none";
+  repAsunto.value=""; repDetalle.value=""; repNombre.value=""; repContacto.value="";
+  alert("Gracias. Hemos recibido tu informe.");
+});
+
+/* ---------- Refresh + primer arranque ---------- */
+async function refresh(){ await loadAllFromAPI(); render(); }
+(async ()=>{
+  await refresh();
+  setInterval(refresh, 60000);
+})();
+// Service Worker (opcional)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
