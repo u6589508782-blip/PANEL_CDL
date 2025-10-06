@@ -16,9 +16,9 @@
 <style>
 /* ============ Variables base ============ */
 :root{
-  --brand1:#A60000; --brand2:#E43B3B;         /* rojo corporativo */
+  --brand1:#A60000; --brand2:#E43B3B;        /* rojo corporativo */
   --ink:#0f172a; --muted:#475569; --line:#e5e7eb;
-  --bg:#ffffff;                                /* blanco unificado */
+  --bg:#ffffff;                               /* blanco unificado en toda la app */
   --panel:#ffffff;
   --hdr-h:100px; --nav-w:360px; --radius:18px; --gap:16px;
 }
@@ -45,7 +45,7 @@ a{color:inherit; text-decoration:none}
 /* Botones cabecera sin píldora */
 #hamb,#moreBtn{
   width:44px; height:44px; display:grid; place-items:center;
-  background:transparent; border:0; border-radius:0; color:#0f172a; padding:6px;
+  background:transparent; border:0; border-radius:0; color:#0f172a; padding:6px; cursor:pointer;
 }
 
 /* Icono hamburguesa compacto (3 líneas normales) */
@@ -57,7 +57,7 @@ a{color:inherit; text-decoration:none}
 #hamb .i span{ top:7px; display:block } 
 #hamb .i::after{ bottom:0 }
 
-/* Icono ⋯ compacto */
+/* Icono ⋯ compacto (sin duplicarlo por JS) */
 #moreBtn .i{ display:inline-block; width:18px; text-align:center; letter-spacing:2px; font-weight:800 }
 #moreBtn .i::before{ content:"···" }
 
@@ -94,9 +94,14 @@ a{color:inherit; text-decoration:none}
 }
 .navlist a:hover{ background:#f8fafc }
 
-/* Separador con degradado (grueso en el centro, fino a los extremos) */
-.sep{ height:1px; margin:6px 14px; background:
+/* Separador con degradado (entre páginas y también variante para menú) */
+.sep{ height:1px; margin:32px auto; width:min(92%,1100px); background:
   linear-gradient(90deg, rgba(15,23,42,0) 0%, rgba(15,23,42,.22) 50%, rgba(15,23,42,0) 100%);
+}
+.navlist a:not(:last-child){ position:relative }
+.navlist a:not(:last-child)::after{
+  content:""; position:absolute; left:10%; right:10%; bottom:0; height:1px;
+  background:radial-gradient(circle, rgba(0,0,0,.22) 0%, rgba(0,0,0,0) 70%);
 }
 
 /* ============ Panel usuario (debajo cabecera, no la tapa) ============ */
@@ -112,16 +117,12 @@ a{color:inherit; text-decoration:none}
 #userPanel input,#userPanel select{
   width:100%; padding:10px 12px; border-radius:10px; border:1px solid #243046; background:#0b101a; color:#e6eef7
 }
+
 /* Botón/ojito: SVG sencillo (sin emoticonos) */
 .eyeBtn{
   position:absolute; right:12px; top:36px; width:24px; height:24px; border:0; background:transparent; cursor:pointer; padding:0;
 }
 .eyeBtn svg{ width:22px; height:22px; display:block; fill:none; stroke:#cbd5e1; stroke-width:2 }
-
-/* Botones */
-.btn{border:0; border-radius:999px; padding:10px 14px; font-weight:700; cursor:pointer}
-.btn--primary{background:var(--brand2); color:#fff}
-.btn--ghost{background:#0b101a; color:#e6eef7; border:1px solid #243046}
 
 /* ============ Layout / Tarjetas / Utilidades ============ */
 .main{padding:16px; max-width:1100px; margin:0 auto}
@@ -135,46 +136,34 @@ a{color:inherit; text-decoration:none}
 .pill--stop{background:#fee2e2;color:#7f1d1d;border:1px solid #fecaca}
 .pill--info{background:#dbeafe;color:#1e3a8a;border:1px solid #bfdbfe}
 
-/* Listas 1 línea */
-.line-1{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-bottom:1px dashed #e5e7eb; padding:10px 6px; cursor:pointer}
-.line-1:hover{background:#f8fafc}
-.details{display:none; padding:8px 6px; color:#475569}
-.open + .details{display:block}
-
-/* Tarjeta equipo */
-.item{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px; border-radius:12px; border:1px solid #e5e7eb; background:#fff}
-.item__title{font-weight:800}
-.item__meta{color:#64748b; font-size:12px}
-.actions{display:flex; gap:8px; flex-wrap:wrap}
-
-/* Inventario */
-.catgrid{display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
-.cat{padding:16px; border-radius:12px; border:1px solid #e5e7eb; background:#f8fafc; font-weight:800}
-.searchbar{display:flex; gap:8px; margin:10px 0}
-.searchbar input{flex:1}
-
-/* Dashboard integrado en fondo (sin borde/sombra) + contadores */
-.card--dash{ background:transparent; border:0; box-shadow:none; padding:8px 0 6px }
-.card--dash .card__title{ font-weight:800 }
-.red{ color:var(--brand2)!important } .black{ color:var(--ink)!important }
-.badge{ display:inline-block; padding:2px 8px; border-radius:999px; font-weight:800; font-size:12px;
-        background:#eef2f7; color:#334155; border:1px solid #e2e8f0; margin-left:8px }
-.cards-grid{ display:grid; gap:18px }
-@media(min-width:1100px){ .cards-grid{ grid-template-columns:repeat(2,1fr) } }
-
-/* Angular corporativo en H1/H2/H3, alineado 2/3 y sin cortar */
+/* Títulos SIEMPRE 1 línea + angular corporativo sin cortar */
 h1,h2,h3{
-  position:relative; margin:22px 0 10px; padding-left:42px; line-height:1.15;
+  position:relative; margin:26px 0 14px; padding-left:46px; line-height:1.15;
   white-space:nowrap; overflow:visible; text-overflow:ellipsis;
 }
 h1::before,h2::before,h3::before{
-  content:""; position:absolute; left:0; bottom:.36em;
+  content:""; position:absolute; left:0; bottom:.42em;   /* ≈arranque en el último tercio de la 1ª letra */
   width:30px; height:30px; background:url("angular.png") left bottom/contain no-repeat;
 }
+
+/* Dashboard integrado en fondo (sin bordes/sombras) + contadores */
+.card--dash{ background:transparent; border:0; box-shadow:none; padding:8px 0 6px }
+.card--dash .card__title{ font-weight:800 }
+.red{ color:var(--brand2)!important } .black{ color:var(--ink)!important }
+.badge{
+  display:inline-block; padding:2px 8px; border-radius:999px; font-weight:800; font-size:12px;
+  background:#eef2f7; color:#334155; border:1px solid #e2e8f0; margin-left:8px
+}
+.cards-grid{ display:grid; gap:18px }
+@media(min-width:1100px){ .cards-grid{ grid-template-columns:repeat(2,1fr) } }
 
 /* Título gráfico Línea KALTENBACH */
 .kalt-title{display:flex; align-items:center; margin:6px 0 10px}
 .kalt-title img{max-width:100%; opacity:.85}
+
+/* Utilidades */
+[hidden]{display:none !important}
+.muted{color:#94a3b8}
 </style>
 </head>
 <body>
@@ -201,7 +190,6 @@ h1::before,h2::before,h3::before{
   <div class="sidenav__search">
     <input id="globalSearch" placeholder="Buscar en la app…">
   </div>
-  <div class="sep"></div>
   <nav class="navlist" id="navList"></nav>
 </aside>
 
@@ -246,40 +234,50 @@ h1::before,h2::before,h3::before{
   <input id="chgNew" type="password" autocomplete="new-password">
   <button class="btn btn--ghost" id="chgBtn" style="margin-top:8px">Guardar nueva</button>
 </section>
-
 <main class="main" id="appRoot">
+
   <!-- ========== DASHBOARD TV (HOME) ========== -->
   <section id="dashboard" class="page active">
     <div class="cards-grid">
 
       <!-- 1 -->
       <article class="card card--dash" onclick="navTo('equipos')">
-        <h2 class="card__title"><span class="black">EQUIPOS EN</span> <span class="red">PARADA</span>
-          <span class="badge" id="countParadas">0</span></h2>
+        <h2 class="card__title">
+          <span class="black">EQUIPOS EN</span> <span class="red">PARADA</span>
+          <span class="badge" id="countParadas">0</span>
+        </h2>
       </article>
 
       <!-- 2 -->
       <article class="card card--dash" onclick="navTo('equipos')">
-        <h2 class="card__title"><span class="black">EQUIPOS CON</span> <span class="red">RESTRICCIONES</span>
-          <span class="badge" id="countRestr">0</span></h2>
+        <h2 class="card__title">
+          <span class="black">EQUIPOS CON</span> <span class="red">RESTRICCIONES</span>
+          <span class="badge" id="countRestr">0</span>
+        </h2>
       </article>
 
       <!-- 3 -->
       <article class="card card--dash" onclick="navTo('inventario')">
-        <h2 class="card__title"><span class="black">ALERTAS</span> <span class="red">STOCK</span> <span class="black">MÍNIMO</span>
-          <span class="badge" id="countStock">0</span></h2>
+        <h2 class="card__title">
+          <span class="black">ALERTAS</span> <span class="red">STOCK</span> <span class="black">MÍNIMO</span>
+          <span class="badge" id="countStock">0</span>
+        </h2>
       </article>
 
       <!-- 4 -->
       <article class="card card--dash" onclick="navTo('ot')">
-        <h2 class="card__title"><span class="black">AVISOS</span> <span class="red">SUBCONTRATAS</span>
-          <span class="badge" id="countExt">0</span></h2>
+        <h2 class="card__title">
+          <span class="black">AVISOS</span> <span class="red">SUBCONTRATAS</span>
+          <span class="badge" id="countExt">0</span>
+        </h2>
       </article>
 
       <!-- 5 -->
       <article class="card card--dash" onclick="navTo('repuestos')">
-        <h2 class="card__title"><span class="black">SOLICITUDES</span> <span class="red">PRIORITARIAS</span>
-          <span class="badge" id="countReq">0</span></h2>
+        <h2 class="card__title">
+          <span class="black">SOLICITUDES</span> <span class="red">PRIORITARIAS</span>
+          <span class="badge" id="countReq">0</span>
+        </h2>
       </article>
 
     </div>
@@ -298,18 +296,18 @@ h1::before,h2::before,h3::before{
 
   <hr class="sep">
 
-  <!-- ========== GRÚAS ========== -->
+  <!-- ========== PUENTES GRÚA ========== -->
   <section id="gruas" hidden>
     <h1><span class="black">PUENTES</span> <span class="red">GRÚA</span></h1>
-    <div id="gruasList" class="grid cols-2"></div>
+    <div class="grid cols-2" id="gruasList"></div>
   </section>
 
   <hr class="sep">
 
-  <!-- ========== AUXILIARES ========== -->
+  <!-- ========== AUXILIARES (OTROS) ========== -->
   <section id="auxiliares" hidden>
     <h1><span class="black">AUXILIARES</span> <span class="red">(OTROS)</span></h1>
-    <div id="auxList" class="grid cols-2"></div>
+    <div class="grid cols-2" id="auxList"></div>
   </section>
 
   <hr class="sep">
@@ -317,10 +315,11 @@ h1::before,h2::before,h3::before{
   <!-- ========== INCIDENCIAS ========== -->
   <section id="incidencias" hidden>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
-      <h1 class="card__title"><span class="black">INCIDENCIAS</span></h1>
+      <h1><span class="black">GESTIÓN DE</span> <span class="red">INCIDENCIAS</span></h1>
       <button class="btn btn--primary" id="btnNewInc">Crear nueva incidencia</button>
     </div>
 
+    <!-- Formulario (colapsable por JS) -->
     <div class="card" id="incFormWrap" hidden>
       <div class="grid cols-2">
         <div>
@@ -332,10 +331,10 @@ h1::before,h2::before,h3::before{
 
           <label>Tipo de fallo</label>
           <select id="incTipo">
-            <option value="mecanico">Fallo mecánico</option>
-            <option value="electrico">Fallo eléctrico</option>
-            <option value="hidraulico">Fallo hidráulico</option>
-            <option value="neumatico">Fallo neumático</option>
+            <option value="mecánico">Fallo mecánico</option>
+            <option value="eléctrico">Fallo eléctrico</option>
+            <option value="hidráulico">Fallo hidráulico</option>
+            <option value="neumático">Fallo neumático</option>
             <option value="proceso">Fallo de proceso productivo</option>
             <option value="desconocido">Origen desconocido</option>
           </select>
@@ -394,13 +393,14 @@ h1::before,h2::before,h3::before{
     </div>
 
     <div class="card">
-      <div class="card__hdr">
+      <div class="card__hdr" style="display:flex;justify-content:space-between;align-items:center">
         <h2 class="card__title">Últimas incidencias</h2>
         <div style="display:flex; gap:8px">
           <input id="incFilter" placeholder="Filtrar…">
           <button class="btn btn--ghost" id="incRecargar">Recargar</button>
         </div>
       </div>
+      <!-- listado compacto de 1 línea por incidencia -->
       <div id="incList"></div>
     </div>
   </section>
@@ -410,30 +410,39 @@ h1::before,h2::before,h3::before{
   <!-- ========== INVENTARIO ========== -->
   <section id="inventario" hidden>
     <h1><span class="black">INVENTARIO DE</span> <span class="red">REPUESTOS</span></h1>
-    <div class="card">
-      <div class="card__hdr">
-        <h2 class="card__title">Alertas</h2>
-      </div>
-      <div id="invAlerts"></div>
-    </div>
 
+    <!-- Alerta stock mínimo -->
+    <div id="invAlerts" style="margin-bottom:12px"></div>
+
+    <!-- Búsqueda -->
     <div class="card">
       <div class="card__hdr"><h2 class="card__title">Buscar</h2></div>
       <div class="searchbar">
-        <input type="text" id="invSearch" placeholder="Código, referencia, nombre…">
+        <input id="invSearch" placeholder="Código, referencia, nombre…">
         <button class="btn btn--ghost" id="invClear">Limpiar</button>
       </div>
-      <div id="invCats" class="catgrid"></div>
+      <!-- Home por categorías (rellena JS) -->
+      <div class="catgrid" id="invCats"></div>
     </div>
   </section>
 
   <hr class="sep">
 
-  <!-- ========== REPUESTOS (SOLICITUDES) ========== -->
+  <!-- ========== AVISOS SUBCONTRATAS (OT externas) ========== -->
+  <section id="ot" hidden>
+    <h1><span class="black">AVISOS</span> <span class="red">SUBCONTRATAS</span></h1>
+    <div id="avisosList" class="grid cols-2"></div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- ========== SOLICITUDES DE REPUESTOS ========== -->
   <section id="repuestos" hidden>
     <h1><span class="black">SOLICITUDES</span> <span class="red">PRIORITARIAS</span></h1>
+
+    <!-- Solicitar repuesto -->
     <div class="card">
-      <div class="card__hdr"><h2 class="card__title">Solicitar repuesto</h2></div>
+      <div class="card__hdr"><h2 class="card__title">Nueva solicitud</h2></div>
       <div class="grid cols-2">
         <div>
           <label>Repuesto</label>
@@ -449,6 +458,7 @@ h1::before,h2::before,h3::before{
       </div>
     </div>
 
+    <!-- Listado y estado -->
     <div class="card">
       <div class="card__hdr">
         <h2 class="card__title">Solicitudes</h2>
@@ -460,9 +470,9 @@ h1::before,h2::before,h3::before{
 
   <hr class="sep">
 
-  <!-- ========== INDICADORES ========== -->
+  <!-- ========== INDICADORES (solo admin/gerente) ========== -->
   <section id="indicadores" hidden>
-    <h1><span class="black">INDICADORES</span></h1>
+    <h1><span class="black">INDICADORES</span> <span class="red">CLAVE</span></h1>
     <div class="grid cols-3">
       <div class="card"><h3 class="card__title">MTBF</h3><div class="kpi" id="kpiMtbf">—</div></div>
       <div class="card"><h3 class="card__title">Disponibilidad</h3><div class="kpi" id="kpiDisp">—</div></div>
@@ -476,8 +486,9 @@ h1::before,h2::before,h3::before{
   <hr class="sep">
 
   <!-- ========== ÓRDENES DE TRABAJO (OT) ========== -->
-  <section id="ot" hidden>
-    <h1><span class="black">ÓRDENES</span> <span class="red">DE TRABAJO</span></h1>
+  <section id="ots" hidden>
+    <h1><span class="black">ÓRDENES DE</span> <span class="red">TRABAJO</span></h1>
+
     <div class="card">
       <div class="card__hdr"><h2 class="card__title">Crear OT</h2></div>
       <div class="grid cols-3">
@@ -515,21 +526,19 @@ h1::before,h2::before,h3::before{
       <div id="otList"></div>
     </div>
   </section>
+
 </main>
-
-<!-- ========== SCRIPT ========== -->
 <script>
-/* =========================
-   CONFIG + API (Apps Script)
-========================= */
-/* ⚠️ Ajusta si cambias el despliegue */
+/* =========================================
+   CONFIG · API (Apps Script) · Cache local
+========================================= */
 const API_BASE = "https://script.google.com/macros/s/AKfycbz9kkvafoc65UBOqZQq8mKA0eeYsreOuHE3W4HDjZ3GK-Ihr8Uoq574a1_LQyl3ANTG/exec";
-const API_KEY  = ""; // opcional (puedes dejarlo vacío)
-
+const API_KEY  = ""; // opcional
 const STORE_KEY = "cdl_cache_v1";
+
 const store = {
   state:{
-    user:{rol:'invitado', nombre:'Invitado', token:''},
+    user:{rol:"invitado", nombre:"Invitado", token:""},
     equipos:[], gruas:[], auxiliares:[],
     incidencias:[], inventario:[], solicitudes:[],
     ots:[], externas:[]
@@ -538,7 +547,7 @@ const store = {
   load(){ try{ Object.assign(this.state, JSON.parse(localStorage.getItem(STORE_KEY)||"{}")); }catch{} }
 };
 
-// Helpers HTTP contra router ?res=..&fn=..
+// HTTP helpers (router ?res=..&fn=..)
 async function apiGet(res, params={}){
   try{
     const url = new URL(API_BASE);
@@ -547,108 +556,170 @@ async function apiGet(res, params={}){
     if(API_KEY)   url.searchParams.set("key", API_KEY);
     for(const k in params) if(k!=="fn") url.searchParams.set(k, params[k]);
     const tok = store?.state?.user?.token; if(tok) url.searchParams.set("token", tok);
-    const r = await fetch(url.toString(), {method:"GET"}); return await r.json();
-  }catch(e){ console.warn("GET error/offline", e); return {ok:false,error:String(e)}; }
+    const r = await fetch(url.toString(), {method:"GET"});
+    return await r.json();
+  }catch(e){ console.warn("GET offline/fail", e); return {ok:false,error:String(e)}; }
 }
 async function apiPost(res, body={}){
   try{
     const url = new URL(API_BASE);
     url.searchParams.set("res", res);
     if(body.fn) url.searchParams.set("fn", body.fn);
-    const payload = {...body}; if(API_KEY) payload.key = API_KEY;
-    const tok2 = store?.state?.user?.token; if(tok2) payload.token = tok2;
+    const payload = {...body};
+    if(API_KEY) payload.key = API_KEY;
+    const tok = store?.state?.user?.token; if(tok) payload.token = tok;
     const r = await fetch(url.toString(), {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(payload)
+      method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload)
     });
     return await r.json();
-  }catch(e){ console.warn("POST error/offline", e); return {ok:false,error:String(e)}; }
+  }catch(e){ console.warn("POST offline/fail", e); return {ok:false,error:String(e)}; }
 }
-const apiList  = (res, extra={})      => apiGet(res, Object.assign({fn:"list"}, extra));
-const apiAdd   = (res, item)          => apiPost(res, {fn:"add",  item});
-const apiSet   = (res, obj)           => apiPost(res, Object.assign({fn:"set"}, obj));
-const apiDelta = (res, ref, delta)    => apiPost(res, {fn:"delta", ref, delta});
+const apiList  = (res, extra={})   => apiGet(res, Object.assign({fn:"list"}, extra));
+const apiAdd   = (res, item)       => apiPost(res, {fn:"add",  item});
+const apiSet   = (res, obj)        => apiPost(res, Object.assign({fn:"set"}, obj));
+const apiDelta = (res, ref, delta) => apiPost(res, {fn:"delta", ref, delta});
 
-/* =========================
-   ROLES Y PERMISOS (front)
-========================= */
+/* =========================================
+   ROLES/PERMISOS (front)
+========================================= */
 const PERMS = {
   administrador:["*"],
   gerente:["view:*","write:*"],
-  encargado:["view:*","write:incidencias","write:ot","write:inv","write:req"],
+  encargado:["view:*","write:incidencias","write:ots","write:inv","write:req"],
   resp_produccion:["view:*","write:req:gestionar","write:inv"],
   resp_turno:["view:*","write:incidencias"],
   externa:["view:equipos","view:gruas","view:auxiliares","view:incidencias"],
   invitado:["view:dashboard","view:equipos","view:gruas","view:auxiliares"]
 };
-function can(perm){
+const can = (perm)=>{
   const rol = store.state.user.rol||"invitado";
   const list = PERMS[rol]||[];
   return list.includes("*") || list.includes(perm) || (list.includes("view:*") && perm.startsWith("view:"));
-}
+};
 
-/* =========================
+/* =========================================
    ROUTER + NAV
-========================= */
-const PAGES = ["dashboard","equipos","gruas","auxiliares","incidencias","inventario","repuestos","ot","indicadores"];
+========================================= */
+const PAGES = ["dashboard","equipos","gruas","auxiliares","incidencias","inventario","repuestos","ot","indicadores","ots"];
 const TITLES = {
-  dashboard:"Dashboard TV", equipos:"Equipos", gruas:"Puentes grúa", auxiliares:"Auxiliares (otros)",
-  incidencias:"Incidencias", inventario:"Inventario", repuestos:"Repuestos", ot:"Órdenes de trabajo", indicadores:"Indicadores"
+  dashboard:"Dashboard TV",
+  equipos:"Equipos",
+  gruas:"Puentes grúa",
+  auxiliares:"Auxiliares (otros)",
+  incidencias:"Incidencias",
+  inventario:"Inventario",
+  repuestos:"Solicitudes",
+  ot:"Avisos subcontratas",
+  indicadores:"Indicadores",
+  ots:"Órdenes de trabajo"
 };
 function buildNav(){
   const nav = document.getElementById("navList");
+  if(!nav) return;
   nav.innerHTML = PAGES.map(id=>`<a href="#${id}" data-id="${id}">${TITLES[id]}</a>`).join("");
 }
 function navTo(id){
-  PAGES.forEach(p=>document.getElementById(p).hidden = (p!==id));
+  PAGES.forEach(p=>{
+    const el = document.getElementById(p);
+    if(el) el.hidden = (p!==id);
+  });
   location.hash = "#"+id;
 }
 function onHash(){
   const id = (location.hash||"#dashboard").replace("#","");
   if(!PAGES.includes(id)) return navTo("dashboard");
-  navTo(id);
-  render();
+  navTo(id); render();
 }
 
-/* =========================
-   HELPERS DE UI
-========================= */
-function pill(estado){
+/* =========================================
+   CARGA DE DATOS
+========================================= */
+function splitByGrupo(items){
+  const equipos=[], gruas=[], auxiliares=[];
+  for(const it of (items||[])){
+    const g = (it.grupo||"").toUpperCase();
+    const row = { id: it.nombre, nombre: it.nombre, grupo: it.grupo, estado: it.estado };
+    if(g.startsWith("NAVE ")) gruas.push(Object.assign({nave: it.grupo}, row));
+    else if(g.includes("KALTENBACH") || g.includes("LÁSER") || g.includes("LASER") || g.includes("MÁQUINAS"))
+      equipos.push(row);
+    else auxiliares.push(Object.assign({tipo: it.grupo}, row));
+  }
+  return {equipos, gruas, auxiliares};
+}
+async function loadAllFromAPI(){
+  const [st, incid, inv, rep, cons, ot] = await Promise.all([
+    apiList("state"), apiList("incid"), apiList("inv"),
+    apiList("rep"),   apiList("cons"),  apiList("ot")
+  ]);
+  if(st?.ok){
+    const {equipos, gruas, auxiliares} = splitByGrupo(st.items||[]);
+    store.state.equipos = equipos;
+    store.state.gruas = gruas;
+    store.state.auxiliares = auxiliares;
+  }
+  if(incid?.ok) store.state.incidencias = (incid.items||[]).map(x=>({
+    id:x.id, fecha:(x.created||"").slice(0,10), equipo:x.equipo, tipo:x.tipo, desc:x.desc||x.repTxt||"",
+    solucionado: (x.res||"").toLowerCase().includes("solucionado") ? "si" :
+                 (x.res||"").toLowerCase().includes("restr") ? "restricciones" :
+                 (x.res||"").toLowerCase().includes("parada") ? "no" : "no"
+  }));
+
+  const invItems = inv?.ok ? (inv.items||[]).map(i=>({
+    id:i.ref, ref:i.ref, nombre:i.nombre, stock:+i.stock, stock_min:+i.minimo,
+    categoria: (i.ref||"").includes("GRASA") ? "Lubricantes" :
+               (i.ref||"").includes("TORX")  ? "Tornillería" : "Otros"
+  })) : [];
+  store.state.inventario = invItems;
+
+  if(rep?.ok) store.state.solicitudes = (rep.items||[]).map(r=>({
+    id:r.id, ref:r.ref, nombre:r.nombre, qty:1, estado:(r.estado||"Pendiente").toLowerCase(), fecha_entrega:""
+  }));
+
+  if(ot?.ok) store.state.ots = (ot.items||[]).map(o=>({
+    id:o.id, equipo:o.equipo, tipo:o.titulo||"OT", fecha:(o.vencimiento||"").slice(0,10),
+    tarea:o.desc||o.titulo||""
+  }));
+
+  store.save();
+}
+
+/* =========================================
+   HELPERS UI
+========================================= */
+const pill = (estado)=>{
   const s = (estado||"").toLowerCase();
   if(s.includes("parada")) return `<span class="pill pill--stop">Parada</span>`;
-  if(s.includes("restr")) return `<span class="pill pill--warn">Restricciones</span>`;
+  if(s.includes("restr"))  return `<span class="pill pill--warn">Restricciones</span>`;
   if(s.includes("marcha")) return `<span class="pill pill--ok">En marcha</span>`;
   return `<span class="pill pill--info">${estado||"—"}</span>`;
-}
-function cardEquipo(e){
-  return `<div class="item">
-    <div>
-      <div>${pill(e.estado)}</div>
-      <div class="item__title">${e.nombre}</div>
-      <div class="item__meta">${e.linea||e.grupo||e.nave||e.tipo||""}</div>
-    </div>
-    <div class="actions">
-      <button class="btn btn--ghost" data-act="ficha" data-id="${e.id}">Ficha</button>
-      <button class="btn btn--ghost" data-act="prog" data-id="${e.id}">Parada prog.</button>
-      <button class="btn btn--primary" data-act="prolong" data-id="${e.id}">Parada prolongada</button>
-      <button class="btn btn--ghost" data-act="incid" data-id="${e.id}">Nueva incidencia</button>
-    </div>
-  </div>`;
-}
+};
+const cardEquipo = (e)=>`<div class="item">
+  <div>
+    <div>${pill(e.estado)}</div>
+    <div class="item__title">${e.nombre}</div>
+    <div class="item__meta">${e.linea||e.grupo||e.nave||e.tipo||""}</div>
+  </div>
+  <div class="actions">
+    <button class="btn btn--ghost" data-act="ficha" data-id="${e.id}">Ficha</button>
+    <button class="btn btn--ghost" data-act="prog" data-id="${e.id}">Parada prog.</button>
+    <button class="btn btn--primary" data-act="prolong" data-id="${e.id}">Parada prolongada</button>
+    <button class="btn btn--ghost" data-act="incid" data-id="${e.id}">Nueva incidencia</button>
+  </div>
+</div>`;
 
-/* =========================
-   RENDER PÁGINAS
-========================= */
+/* =========================================
+   RENDER POR PÁGINA
+========================================= */
 function renderEquipos(){
-  const cont = document.getElementById("equiposList"); if(!cont) return;
-  const grupos = ["LÍNEA KALTENBACH","LÁSER TRUMP","MÁQUINAS INDEPENDIENTES"];
   const out = [];
+  const grupos = ["LÍNEA KALTENBACH","LÁSER TRUMP","MÁQUINAS INDEPENDIENTES"];
   grupos.forEach(g=>{
     const list = store.state.equipos.filter(x=>x.grupo?.toUpperCase()===g);
     if(!list.length) return;
     out.push(`<div class="card"><h2 class="card__title">${g}</h2>${list.map(cardEquipo).join("")}</div>`);
   });
-  cont.innerHTML = out.join("");
+  const el = document.getElementById("equiposList");
+  if(el) el.innerHTML = out.join("");
 }
 function renderGruas(){
   const cont = document.getElementById("gruasList"); if(!cont) return;
@@ -660,9 +731,9 @@ function renderGruas(){
   }).join("");
 }
 function renderAux(){
-  const cont = document.getElementById("auxList"); if(!cont) return;
   const list = store.state.auxiliares||[];
-  cont.innerHTML = `<div class="card"><h2 class="card__title">Auxiliares</h2>${list.map(cardEquipo).join("")}</div>`;
+  const cont = document.getElementById("auxList");
+  if(cont) cont.innerHTML = `<div class="card"><h2 class="card__title">Auxiliares</h2>${list.map(cardEquipo).join("")}</div>`;
 }
 function renderIncidencias(){
   const wrap = document.getElementById("incList"); if(!wrap) return;
@@ -673,17 +744,13 @@ function renderIncidencias(){
   wrap.innerHTML = arr.map(i=>`<div class="line-1">${i.fecha} · ${i.equipo} · ${i.tipo} · ${i.desc}</div>`).join("");
 }
 function renderInventario(){
-  const alertBox = document.getElementById("invAlerts");
-  const search = document.getElementById("invSearch");
-  const catsBox = document.getElementById("invCats");
-  if(!alertBox||!catsBox) return;
-
   const low = (store.state.inventario||[]).filter(i=>Number(i.stock)<Number(i.stock_min));
-  alertBox.innerHTML = low.length
+  const alerts = document.getElementById("invAlerts");
+  if(alerts) alerts.innerHTML = low.length
     ? `<span class="pill pill--stop">⚠ ${low.length} referencias por debajo del mínimo</span>`
     : `<span class="pill pill--ok">Stock correcto</span>`;
 
-  const q = (search?.value||"").toLowerCase();
+  const q = (document.getElementById("invSearch")?.value||"").toLowerCase();
   const items = (store.state.inventario||[]).filter(i=>{
     const text = (i.ref+" "+i.nombre).toLowerCase();
     return !q || text.includes(q);
@@ -694,12 +761,11 @@ function renderInventario(){
     const c = i.categoria || "Otros";
     (cats[c] ||= []).push(i);
   });
-
   const html = Object.keys(cats).sort().map(c=>{
     const n = cats[c].length;
     return `<div class="cat"><b>${c}</b><br>${n} items</div>`;
   }).join("");
-  catsBox.innerHTML = html;
+  const grid = document.getElementById("invCats"); if(grid) grid.innerHTML = html;
 }
 function renderRepuestos(){
   const list = store.state.solicitudes||[];
@@ -717,9 +783,9 @@ function renderRepuestos(){
         </select>
     </div>`;
   }).join("");
-  const box = document.getElementById("reqList");
+  const listEl = document.getElementById("reqList");
+  if(listEl) listEl.innerHTML = body;
   const badge = document.getElementById("reqCountBadge");
-  if(box) box.innerHTML = body;
   if(badge) badge.textContent = list.length;
 
   document.querySelectorAll(".reqState").forEach(sel=>{
@@ -733,12 +799,9 @@ function renderRepuestos(){
 }
 function renderOT(){
   const q = (document.getElementById("otFilter")?.value||"").toLowerCase();
-  const list = (store.state.ots||[])
-    .filter(o=>!q || (o.id+o.equipo+o.tipo+o.tarea).toLowerCase().includes(q));
-  const box = document.getElementById("otList");
-  if(box) box.innerHTML = list.map(o=>
-    `<div class="line-1">${o.id} · ${o.equipo} · ${o.tipo} · ${o.fecha} · ${o.tarea}</div>`
-  ).join("");
+  const list = (store.state.ots||[]).filter(o=>!q || (o.id+o.equipo+o.tipo+o.tarea).toLowerCase().includes(q));
+  const el = document.getElementById("otList"); if(!el) return;
+  el.innerHTML = list.map(o=>`<div class="line-1">${o.id} · ${o.equipo} · ${o.tipo} · ${o.fecha} · ${o.tarea}</div>`).join("");
 }
 function renderIndicadores(){
   const incs = store.state.incidencias||[];
@@ -757,13 +820,17 @@ function renderDashboard(){
   const low     = store.state.inventario.filter(i=>i.stock<i.stock_min);
   const reqPend = store.state.solicitudes.filter(r=>(r.estado||"").toLowerCase()==="pendiente");
 
-  const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.textContent = val; };
+  const set = (id,val)=>{ const el = document.getElementById(id); if(el) el.textContent = val; };
   set("countParadas", eqStop.length + grStop.length);
   set("countRestr",  eqRestr.length + auxRestr.length);
   set("countStock",  low.length);
   set("countReq",    reqPend.length);
-  set("countExt",    store.state.externas.length);
+  set("countExt",    store.state.externas.length||0);
 }
+
+/* =========================================
+   RENDER GLOBAL
+========================================= */
 function render(){
   const dl = document.getElementById("equiposDatalist");
   if(dl){ dl.innerHTML = (store.state.equipos||[]).map(e=>`<option value="${e.nombre}">`).join(""); }
@@ -772,74 +839,33 @@ function render(){
   renderOT(); renderIndicadores(); renderDashboard();
 }
 
-/* =========================
-   CARGA DESDE API
-========================= */
-function splitByGrupo(items){
-  const equipos=[], gruas=[], auxiliares=[];
-  for(const it of (items||[])){
-    const g = (it.grupo||"").toUpperCase();
-    const row = { id: it.nombre, nombre: it.nombre, grupo: it.grupo, estado: it.estado };
-    if(g.startsWith("NAVE ")) gruas.push(Object.assign({nave: it.grupo}, row));
-    else if(g.includes("KALTENBACH") || g.includes("LÁSER") || g.includes("LASER") || g.includes("MÁQUINAS"))
-      equipos.push(row);
-    else auxiliares.push(Object.assign({tipo: it.grupo}, row));
+/* =========================================
+   ACCIONES (escritura)
+========================================= */
+document.addEventListener("click", async (ev)=>{
+  const btn = ev.target.closest("[data-act]");
+  if(!btn) return;
+  const act = btn.getAttribute("data-act");
+  const id  = btn.getAttribute("data-id");
+  if(act==="prolong"){
+    const rr = await apiPost("alert", {fn:"parada", equipo:id});
+    if(!rr?.ok) return alert("Error registrando parada");
+    await refresh();
   }
-  return {equipos, gruas, auxiliares};
-}
-async function loadAllFromAPI(){
-  const [st, incid, inv, rep, cons, ot] = await Promise.all([
-    apiList("state"),
-    apiList("incid"),
-    apiList("inv"),
-    apiList("rep"),
-    apiList("cons"),
-    apiList("ot")
-  ]);
-
-  if(st?.ok){
-    const {equipos, gruas, auxiliares} = splitByGrupo(st.items||[]);
-    store.state.equipos = equipos;
-    store.state.gruas = gruas;
-    store.state.auxiliares = auxiliares;
+  if(act==="incid"){
+    const i = document.getElementById("incEquipo");
+    if(i) i.value = id;
+    const f = document.getElementById("incFormWrap"); if(f) f.hidden = false;
+    location.hash = "#incidencias";
   }
-  if(incid?.ok) store.state.incidencias = (incid.items||[]).map(x=>({
-    id:x.id, fecha:(x.created||"").slice(0,10), equipo:x.equipo, tipo:x.tipo, desc:x.desc||x.repTxt||"",
-    solucionado: (x.res||"").toLowerCase().includes("solucionado") ? "si" :
-                 (x.res||"").toLowerCase().includes("restr") ? "restricciones" :
-                 (x.res||"").toLowerCase().includes("parada") ? "no" : "no"
-  }));
-
-  const invItems = inv?.ok ? (inv.items||[]).map(i=>({
-    id:i.ref, ref:i.ref, nombre:i.nombre, stock:i.stock, stock_min:i.minimo,
-    categoria: (i.ref||"").includes("GRASA") ? "Lubricantes" :
-               (i.ref||"").includes("TORX")  ? "Tornillería" : "Otros"
-  })) : [];
-  store.state.inventario = invItems;
-
-  if(rep?.ok) store.state.solicitudes = (rep.items||[]).map(r=>({
-    id:r.id, ref:r.ref, nombre:r.nombre, qty:1, estado:(r.estado||"Pendiente").toLowerCase(), fecha_entrega:""
-  }));
-
-  if(ot?.ok) store.state.ots = (ot.items||[]).map(o=>({
-    id:o.id, equipo:o.equipo, tipo:o.titulo||"OT", fecha:(o.vencimiento||"").slice(0,10), tarea:o.desc||o.titulo||""
-  }));
-
-  store.save();
-}
-
-/* =========================
-   ACCIONES
-========================= */
-// Dashboard colapsables (si los activas en el futuro)
-document.querySelectorAll(".collapse-head")?.forEach(el=>{
-  el.onclick = ()=>{ const id = el.dataset.coll; const box = document.getElementById(id); if(box) box.hidden = !box.hidden; };
 });
 
-// Incidencias
-document.getElementById("btnNewInc").onclick = ()=>{ document.getElementById("incFormWrap").hidden = false; };
-document.getElementById("incCancelar").onclick = ()=>{ document.getElementById("incFormWrap").hidden = true; };
-document.getElementById("incGuardar").onclick = async ()=>{
+const incBtn = document.getElementById("btnNewInc");
+if(incBtn) incBtn.onclick = ()=>{ const f=document.getElementById("incFormWrap"); if(f) f.hidden=false; };
+const incCancel = document.getElementById("incCancelar");
+if(incCancel) incCancel.onclick = ()=>{ const f=document.getElementById("incFormWrap"); if(f) f.hidden=true; };
+const incSave = document.getElementById("incGuardar");
+if(incSave) incSave.onclick = async ()=>{
   const sol = document.getElementById("incSol").value;
   const mapRes = sol==="si" ? "Solucionado" : (sol==="restricciones" ? "Restricciones" : "Parada");
   const inc = {
@@ -856,106 +882,135 @@ document.getElementById("incGuardar").onclick = async ()=>{
     desc:       document.getElementById("incDesc").value
   };
   const r = await apiAdd("incid", inc);
-  if(!r?.ok) return alert("Error guardando incidencia (¿sesión?)");
+  if(!r?.ok) return alert("Error guardando incidencia");
   await refresh();
-  document.getElementById("incFormWrap").hidden = true;
+  const f = document.getElementById("incFormWrap"); if(f) f.hidden = true;
 };
 
-// Repuestos (solicitudes)
-document.getElementById("reqEnviar").onclick = async ()=>{
+const reqSend = document.getElementById("reqEnviar");
+if(reqSend) reqSend.onclick = async ()=>{
   if(!can("write:req")) return alert("Sin permiso para solicitar.");
   const item = { ref: (reqRef.value||"").toUpperCase(), nombre: reqRef.value };
   const r = await apiAdd("rep", item);
-  if(!r?.ok) return alert("Error solicitando repuesto (¿sesión?)");
+  if(!r?.ok) return alert("Error solicitando repuesto");
   reqRef.value=""; reqQty.value=1; reqObs.value="";
   await refresh();
 };
 
-// OT
-document.getElementById("otCrear").onclick = async ()=>{
-  if(!can("write:ot")) return alert("Sin permiso para crear OT.");
+const otCrear = document.getElementById("otCrear");
+if(otCrear) otCrear.onclick = async ()=>{
+  if(!can("write:ots")) return alert("Sin permiso para crear OT.");
   const item = {
     equipo: otEquipo.value, prioridad:"A",
     titulo: `${otTipo.value} · ${otTarea.value}`.trim(),
-    vencimiento: otFecha.value,
-    desc: otTarea.value
+    vencimiento: otFecha.value, desc: otTarea.value
   };
   const r = await apiAdd("ot", item);
-  if(!r?.ok) return alert("Error creando OT (¿sesión?)");
+  if(!r?.ok) return alert("Error creando OT");
   otTarea.value="";
   await refresh();
 };
 
-// Acciones rápidas en tarjetas de equipo
-document.addEventListener("click", async (ev)=>{
-  const btn = ev.target.closest("[data-act]");
-  if(!btn) return;
-  const act = btn.getAttribute("data-act");
-  const id  = btn.getAttribute("data-id");
-  if(act==="prolong"){
-    const rr = await apiPost("alert", {fn:"parada", equipo:id});
-    if(!rr?.ok) return alert("Error registrando parada (¿sesión?)");
-    await refresh();
-  }
-  if(act==="incid"){
-    document.getElementById("incEquipo").value = id;
-    document.getElementById("incFormWrap").hidden = false;
-    location.hash = "#incidencias";
-  }
-});
-
-/* =========================
-   INIT (único y limpio)
-========================= */
+/* =========================================
+   INIT ÚNICO: Menús, header y refresco
+========================================= */
 async function refresh(){ await loadAllFromAPI(); render(); }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-  // 1) Estado + navegación
+  // 1) Estado + NAV
   store.load(); buildNav();
-
-  // 2) Cabecera / menús
   document.body.style.overflowX = "hidden";
+
+  // 2) Header: role chip (sin píldora) + botones limpios
+  const roleChip = document.getElementById("roleChip");
+  if(roleChip) roleChip.textContent = store.state.user?.nombre || "Invitado";
+
+  // 3) Menú lateral (izquierda, bajo cabecera, sin taparla)
   const sidenav   = document.getElementById("sidenav");
   const hamb      = document.getElementById("hamb");
-  const btnClose  = document.getElementById("btnCloseNav");
+  const closeBtn  = document.getElementById("btnCloseNav");
+  if(sidenav) sidenav.classList.remove("open");
+  if(hamb && sidenav) hamb.onclick = ()=> sidenav.classList.toggle("open");
+  if(closeBtn && sidenav) closeBtn.onclick = ()=> sidenav.classList.remove("open");
+
+  // Cerrar lateral si se hace click fuera del panel (si usas backdrop)
+  document.addEventListener("click",(e)=>{
+    if(e.target && e.target.id==="sidenav" && sidenav) sidenav.classList.remove("open");
+  });
+
+  // 4) Menú usuario (debajo cabecera, sin taparla, sin duplicar ⋯)
   const moreBtn   = document.getElementById("moreBtn");
   const userPanel = document.getElementById("userPanel");
-
-  if (sidenav) sidenav.classList.remove("open");
-
-  // 🍔 Hamburguesa
-  if (hamb && sidenav){
-    hamb.onclick = ()=> sidenav.classList.toggle("open");
-  }
-  // ✕ cerrar
-  if(btnClose && sidenav){ btnClose.onclick = ()=> sidenav.classList.remove("open"); }
-  // cerrar tocando backdrop del aside (si lo amplías a overlay)
-  // document.addEventListener("click",(e)=>{ if(e.target.id==="sidenav") sidenav.classList.remove("open"); });
-
-  // ⋯ Menú usuario
-  if (moreBtn && userPanel){
+  if(moreBtn && userPanel){
     moreBtn.onclick = ()=>{
       userPanel.classList.toggle("show");
       moreBtn.setAttribute("aria-expanded", userPanel.classList.contains("show"));
     };
-  }
-  // Ojo password
-  const toggleEye = document.getElementById("toggleEye");
-  const userPass  = document.getElementById("userPass");
-  if (toggleEye && userPass){
-    toggleEye.onclick = ()=>{ userPass.type = (userPass.type === "password") ? "text" : "password"; };
+    // garantiza un solo icono ⋯ sencillo
+    if(!moreBtn.querySelector(".i")){
+      const i=document.createElement("span"); i.className="i"; moreBtn.appendChild(i);
+    }else{
+      // si había dos, deja solo uno
+      [...moreBtn.querySelectorAll(".i")].slice(1).forEach(n=>n.remove());
+    }
   }
 
-  // 3) Navegación por hash + primer render
+  // 5) Ojo de password (SVG simple)
+  const toggleEye = document.getElementById("toggleEye");
+  const userPass  = document.getElementById("userPass");
+  if(toggleEye && userPass){
+    toggleEye.onclick = ()=>{ userPass.type = (userPass.type==="password") ? "text" : "password"; };
+  }
+
+  // 6) Login / Logout / Change pwd
+  const loginBtn  = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const chgBtn    = document.getElementById("chgBtn");
+
+  if(loginBtn){
+    loginBtn.onclick = async ()=>{
+      const user = document.getElementById("userName").value;
+      const pass = document.getElementById("userPass").value;
+      if(!user || !pass){ alert("Introduce usuario y contraseña"); return; }
+      const r = await apiPost("auth", {fn:"login", user, pass});
+      if(!r?.ok){ alert("Acceso denegado"); return; }
+      store.state.user = {rol:(r.rol||"invitado").toLowerCase(), nombre:r.usuario||user, token:r.token||""};
+      store.save();
+      if(roleChip) roleChip.textContent = store.state.user.nombre;
+      userPanel?.classList.remove("show");
+      render();
+    };
+  }
+  if(logoutBtn){
+    logoutBtn.onclick = ()=>{
+      store.state.user = {rol:"invitado", nombre:"Invitado", token:""};
+      store.save();
+      if(roleChip) roleChip.textContent = "Invitado";
+      render();
+    };
+  }
+  if(chgBtn){
+    chgBtn.onclick = async ()=>{
+      const u   = document.getElementById("userName").value;
+      const oldp= document.getElementById("chgOld").value;
+      const nu  = document.getElementById("chgNew").value;
+      if(!u||!oldp||!nu) return alert("Rellena usuario y contraseñas");
+      const r = await apiPost("auth", {fn:"changepwd", user:u, old:oldp, nu});
+      alert(r?.ok ? "Contraseña actualizada" : "No se pudo cambiar");
+    };
+  }
+
+  // 7) Navegación + primer render + refresco periódico
   window.addEventListener("hashchange", onHash);
   onHash();
   (async ()=>{ await refresh(); setInterval(refresh, 60000); })();
 
-  // 4) Service Worker (ruta relativa para GitHub Pages / static)
+  // 8) Service Worker (ruta relativa para GitHub Pages)
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
 });
 </script>
+
 </body>
 </html>
