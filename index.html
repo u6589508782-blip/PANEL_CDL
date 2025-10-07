@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c0f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CDL · CMMS</title>
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --brand1:#A60000; --brand2:#E43B3B;
+  --ok:#16a34a; --warn:#f59e0b; --stop:#dc2626;
+  --ink:#e8eef7; --muted:#9aa7b4; --line:#232b36;
+  --bg:#0c0f14;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Inter,system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);
+  line-height:1.4;overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;height:auto}
+button{cursor:pointer;font-family:inherit}
+h1,h2,h3{font-weight:800;margin-bottom:.3em}
+hr.sep{border:0;height:1px;background:rgba(255,255,255,.1);margin:25px 0}
+.main{padding:70px 16px 60px;max-width:1100px;margin:auto}
+.black{color:#fff}.red{color:var(--brand2)}
+
+/* CABECERA */
+header.hdr{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(12,15,20,.95);backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(255,255,255,.05);
+  height:56px;padding:0 14px;z-index:900;
+  transition:box-shadow .25s;
+}
+.hdr.scrolled{box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.logo{font-weight:900;font-size:17px;letter-spacing:.5px}
+#hamb,#moreBtn{
+  background:none;border:0;color:var(--ink);
+  font-size:24px;line-height:1;padding:6px;
+}
+.rolechip{padding:4px 10px;border-radius:999px;background:#11151d;font-size:13px;font-weight:600}
+
+/* SIDENAV */
+#sidenav{
+  position:fixed;inset:0;display:flex;justify-content:flex-start;
+  background:rgba(0,0,0,.45);z-index:950;visibility:hidden;opacity:0;
+  transition:opacity .25s,visibility .25s;
+}
+#sidenav.open{visibility:visible;opacity:1}
+#sidenav aside{
+  width:240px;max-width:75vw;height:100%;background:#11151d;
+  padding:20px;overflow-y:auto;
+}
+#sidenav a{display:block;padding:10px 4px;border-radius:8px;font-weight:600}
+#sidenav a:hover,#sidenav a.is-active{background:#e43b3b;color:#fff}
+#closeNav{background:none;border:0;color:#fff;font-size:22px;position:absolute;top:8px;right:12px}
+
+/* USER PANEL */
+#userPanel{
+  position:absolute;right:10px;top:56px;width:240px;max-width:90vw;
+  background:#11151d;border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:14px;display:none;flex-direction:column;gap:8px;z-index:970;
+}
+#userPanel.show{display:flex}
+#closeUser{align-self:flex-end;background:none;border:0;color:#fff;font-size:20px}
+input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #334155;background:#0f141c;color:#e8eef7}
+.btn{padding:8px 14px;border-radius:8px;font-weight:700;border:0}
+.btn--primary{background:var(--brand2);color:#fff}
+.btn--ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.1)}
+.btn--primary:hover{filter:brightness(1.1)}
+.grid{display:grid;gap:10px}
+.card{background:#11151d;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px}
+.card__title{font-weight:800;font-size:16px;margin-bottom:6px}
+</style>
+</head>
+
+<body>
+<header class="hdr" id="hdr">
+  <button id="hamb" aria-label="Menú">☰</button>
+  <div class="logo">CDL · CMMS</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div id="roleChip" class="rolechip">Invitado</div>
+    <button id="moreBtn" aria-label="Usuario">⋯</button>
+  </div>
+</header>
+
+<!-- SIDENAV -->
+<div id="sidenav">
+  <aside>
+    <button id="closeNav" aria-label="Cerrar">✕</button>
+    <nav id="navList"></nav>
+  </aside>
+</div>
+
+<!-- PANEL USUARIO -->
+<div id="userPanel">
+  <button id="closeUser">✕</button>
+  <label>Rol</label>
+  <select id="roleSelect">
+    <option value="admin">Admin</option><option value="mantenimiento">Mantenimiento</option>
+    <option value="produccion">Producción</option><option value="invitado" selected>Invitado</option>
+  </select>
+  <label>Contraseña</label>
+  <div style="display:flex;gap:4px">
+    <input id="userPass" type="password" placeholder="••••••"><button id="toggleEye">👁</button>
+  </div>
+  <button id="loginBtn" class="btn btn--primary">Entrar</button>
+  <button id="logoutBtn" class="btn btn--ghost">Salir</button>
+  <a id="reportLink" style="text-align:center;margin-top:6px;font-size:13px;opacity:.7" href="#">Informar problema</a>
+</div>
+
+<!-- MAIN -->
+<main class="main" id="appRoot">
+  <section id="dashboard" class="page active">
+    <h1><span class="black">DASHBOARD</span> <span class="red">TV</span></h1>
+    <div class="grid dash-grid">
+      <article class="card"><h2 class="card__title">Paradas <span class="badge" id="countParadas">0</span></h2><div id="dash-paradas"></div></article>
+      <article class="card"><h2 class="card__title">Restricciones <span class="badge" id="countRestr">0</span></h2><div id="dash-restr"></div></article>
+      <article class="card"><h2 class="card__title">Stock mínimo <span class="badge" id="countStock">0</span></h2><div id="dash-stock"></div></article>
+      <article class="card"><h2 class="card__title">Avisos externas <span class="badge" id="countExt">0</span></h2><div id="dash-externas"></div></article>
+      <article class="card"><h2 class="card__title">Solicitudes <span class="badge" id="countReq">0</span></h2><div id="dash-req"></div></article>
+    </div>
+  </section>
+
+  <hr class="sep">
+  <section id="equipos" hidden><h1>EQUIPOS</h1><div id="equiposGrid" class="grid"></div></section>
+  <hr class="sep">
+  <section id="gruas" hidden><h1>PUENTES GRÚA</h1><div id="gruasList"></div></section>
+  <hr class="sep">
+  <section id="auxiliares" hidden><h1>AUXILIARES</h1><div id="auxList"></div></section>
+  <hr class="sep">
+  <section id="incidencias" hidden><h1>INCIDENCIAS</h1><div id="incList"></div></section>
+  <hr class="sep">
+  <section id="inventario" hidden><h1>INVENTARIO</h1><div id="invAlerts"></div><div id="invCats"></div></section>
+  <hr class="sep">
+  <section id="solicitudes" hidden><h1>SOLICITUDES</h1><div id="reqList"></div></section>
+  <hr class="sep">
+  <section id="indicadores" hidden><h1>INDICADORES</h1>
+    <canvas id="chartMtbf" height="150"></canvas>
+    <canvas id="chartDisp" height="150"></canvas>
+    <canvas id="chartOee"  height="150"></canvas>
+  </section>
+</main>
+
+<!-- PLANTILLA EQUIPO -->
+<template id="tplEquipo">
+  <article class="card equipo">
+    <div><div class="eq-estado">—</div><div class="eq-nombre">NOMBRE</div><div class="eq-meta">—</div></div>
+    <div class="semaforo">
+      <button class="bulb bulb--ok" data-state="marcha"></button>
+      <button class="bulb bulb--warn" data-state="restricciones"></button>
+      <button class="bulb bulb--stop" data-state="parada"></button>
+    </div>
+  </article>
+</template>
+
+<!-- MODALES -->
+<div id="fichaModal" class="modal-backdrop">
+  <div class="card modal-card">
+    <button id="closeFicha" class="x-btn">✕</button>
+    <h2 id="fichaTitle">Ficha</h2>
+    <img id="fichaQR" src="" alt="QR">
+    <div id="fichaNombre"></div>
+  </div>
+</div>
+<div id="reportModal" class="modal-backdrop">
+  <div class="card modal-card">
+    <button id="closeReport" class="x-btn">✕</button>
+    <h2>Informar problema</h2>
+    <input id="rpSubject" placeholder="Asunto">
+    <textarea id="rpDesc" rows="5" placeholder="Descripción"></textarea>
+    <button id="rpEnviar" class="btn btn--primary">Enviar</button>
+    <button id="rpCancelar" class="btn btn--ghost">Cancelar</button>
+  </div>
+</div>
+
+<script>
+/* ================================
+   CMMS CDL – UI + Lógica (compacto)
+================================ */
+const API_BASE="https://script.google.com/macros/s/AKfycbycKrLO0jIEDXB_AZi91PopCj1uNXCOEu9zWHeqq_aK_DJo7TpWO_kKKWMs4exwyNRW/exec";
+const $=(s,d=document)=>d.querySelector(s);const $$=(s,d=document)=>[...d.querySelectorAll(s)];
+const STORE_KEY="cdl_cache_v1",LAST_TAB_KEY="cdl_last_tab";
+const store={state:{user:{rol:"invitado",nombre:"Invitado",token:""},equipos:[],gruas:[],auxiliares:[],incidencias:[],inventario:[],solicitudes:[],ots:[],externas:[]},
+save(){localStorage.setItem(STORE_KEY,JSON.stringify(this.state));},
+load(){Object.assign(this.state,JSON.parse(localStorage.getItem(STORE_KEY)||"{}"));}};
+function demoSeedIfEmpty(){if(!store.state.equipos.length){store.state.equipos=[{id:"KALT-01",nombre:"SIERRA KALT",grupo:"LÍNEA KALTENBACH",estado:"marcha"},
+{id:"KALT-02",nombre:"TALADRO KALT",grupo:"LÍNEA KALTENBACH",estado:"restricciones"}];}store.save();}
+function toast(m){let b=$("#toastBox");if(!b){b=document.createElement("div");b.id="toastBox";b.style="position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:1500;";document.body.appendChild(b);}const d=document.createElement("div");
+d.textContent=m;d.style="background:#000c;padding:10px 16px;border-radius:20px;margin:4px;color:#fff;font-weight:700";b.appendChild(d);setTimeout(()=>d.remove(),2000);}
+function buildNav(){const n=$("#navList");const P=["dashboard","equipos","gruas","auxiliares","incidencias","inventario","solicitudes","indicadores"];
+const T={dashboard:"Dashboard",equipos:"Equipos",gruas:"Grúas",auxiliares:"Auxiliares",incidencias:"Incidencias",inventario:"Inventario",solicitudes:"Solicitudes",indicadores:"Indicadores"};
+n.innerHTML=P.map(i=>`<a href="#${i}" data-id="${i}">${T[i]}</a>`).join("");$$("a",n).forEach(a=>a.onclick=e=>{e.preventDefault();closeSideNav();navTo(a.dataset.id);});}
+function navTo(id){$$("main>section").forEach(s=>s.hidden=s.id!==id);location.hash="#"+id;localStorage.setItem(LAST_TAB_KEY,id);}
+function openSideNav(){$("#sidenav").classList.add("open");}
+function closeSideNav(){$("#sidenav").classList.remove("open");}
+function openUserPanel(){$("#userPanel").classList.add("show");}
+function closeUserPanel(){$("#userPanel").classList.remove("show");}
+function renderDashboard(){const c=(id,v)=>$("#"+id).textContent=v;const e=store.state.equipos;c("countParadas",e.filter(x=>x.estado==="parada").length);c("countRestr",e.filter(x=>x.estado==="restricciones").length);}
+function renderEquipos(){const g=$("#equiposGrid");const t=$("#tplEquipo");g.innerHTML="";store.state.equipos.forEach(e=>{const n=t.content.cloneNode(true);n.querySelector(".eq-nombre").textContent=e.nombre;n.querySelector(".eq-estado").textContent=e.estado;n.querySelectorAll(".bulb").forEach(b=>b.onclick=()=>{e.estado=b.dataset.state;store.save();render();toast(e.nombre+" → "+b.dataset.state);});g.appendChild(n);});}
+function render(){renderDashboard();renderEquipos();}
+document.addEventListener("DOMContentLoaded",()=>{store.load();demoSeedIfEmpty();buildNav();render();
+$("#hamb").onclick=openSideNav;$("#closeNav").onclick=closeSideNav;$("#moreBtn").onclick=openUserPanel;$("#closeUser").onclick=closeUserPanel;
+$("#loginBtn").onclick=()=>{const r=$("#roleSelect").value;store.state.user.rol=r;store.save();$("#roleChip").textContent=r;toast("Sesión "+r);}
+$("#logoutBtn").onclick=()=>{store.state.user={rol:"invitado"};store.save();$("#roleChip").textContent="Invitado";toast("Cierre de sesión");};
+window.addEventListener("hashchange",()=>navTo(location.hash.slice(1)||"dashboard"));
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
+});
+</script>
+</body>
+</html>
