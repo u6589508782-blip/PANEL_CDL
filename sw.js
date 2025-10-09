@@ -1,5 +1,5 @@
 /* =========================================================
-   CDL · Service Worker (v11)
+   CDL · Service Worker (v12)
    - Instala core assets
    - Limpia cachés viejas
    - Mensaje SKIP_WAITING para activar al instante
@@ -9,7 +9,7 @@
    - Fallback elegante a offline.html cuando no hay red
 ========================================================= */
 
-const CACHE_VERSION = 'v11';
+const CACHE_VERSION = 'v12';
 const CACHE_NAME = `cdl-cache-${CACHE_VERSION}`;
 
 // Archivos esenciales de tu app (mismo listado que el actual)
