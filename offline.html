@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CDL · Sin conexión</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<style>
+  :root{
+    --brand:#E43B3B; --ink:#0f172a; --muted:#475569; --line:#e5e7eb; --bg:#ffffff;
+    --radius:18px; --shadow:0 8px 24px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--ink); background:linear-gradient(180deg,#fff,#f8fafc);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .card{
+    width:min(720px,100%); background:#fff; border:1px solid var(--line);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:20px;
+  }
+  .hdr{display:flex; align-items:center; gap:12px; margin-bottom:8px}
+  .hdr img{height:40px}
+  .title{font-size:22px; font-weight:900; margin:0}
+  .sub{color:#64748b; font-weight:700; margin:6px 0 14px}
+  .hero{
+    position:relative; border-radius:16px; border:1px solid #eef2f7; padding:18px; overflow:hidden;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.5) 100%),
+      url("logo_mantenimiento.png") center / 480px auto no-repeat;
+    min-height:120px;
+  }
+  .msg{font-size:16px; font-weight:700; margin:0 0 10px}
+  .hint{color:#64748b; font-size:13px; margin:6px 0}
+  .btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+  .btn{
+    border:0; border-radius:999px; padding:10px 14px; font-weight:800; cursor:pointer;
+  }
+  .btn--primary{background:var(--brand); color:#fff}
+  .btn--ghost{background:#fff; color:var(--ink); border:1px solid var(--line)}
+  .badge{display:inline-block; padding:2px 8px; border-radius:999px; font-weight:800; font-size:12px; background:#eef2f7; color:#334155; border:1px solid #e2e8f0}
+  .diag{margin-top:14px; padding-top:12px; border-top:1px dashed #e5e7eb; font-size:13px; color:#475569}
+  .list{margin:8px 0 0; padding-left:18px}
+  .list li{margin:4px 0}
+</style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="ttl">
+    <header class="hdr">
+      <img src="logo-cdl.png" alt="CDL">
+      <h1 class="title" id="ttl">Sin conexión</h1>
+      <span class="badge" id="netBadge" aria-live="polite">Offline</span>
+    </header>
+
+    <p class="sub">No hemos podido cargar la página desde la red.</p>
+
+    <section class="hero" aria-label="Marca CDL"></section>
+
+    <p class="msg">Puedes seguir usando la app y volver a intentarlo más tarde.</p>
+    <ul class="list">
+      <li>Si ya visitaste una sección antes, puede abrirse desde la <em>caché</em> aunque no haya red.</li>
+      <li>Cuando vuelva la conexión, esta pantalla intentará recargar automáticamente.</li>
+    </ul>
+
+    <div class="btns">
+      <button class="btn btn--primary" id="retryBtn">Reintentar ahora</button>
+      <a class="btn btn--ghost" href="./#dashboard" id="goHome">Ir al Dashboard</a>
+    </div>
+
+    <div class="diag" id="diagWrap" hidden>
+      <div><strong>Estado:</strong> <span id="stateTxt">Comprobando…</span></div>
+      <div><strong>Service Worker:</strong> <span id="swTxt">—</span></div>
+      <div><strong>Último intento:</strong> <span id="tsTxt">—</span></div>
+    </div>
+
+    <p class="hint">Consejo: si ves este mensaje muchas veces con buena cobertura, revisa que la URL de la API (Apps Script) siga activa y publicada como “cualquiera (anónimo)”.</p>
+  </main>
+
+<script>
+  // Mostrar/actualizar estado online/offline
+  const netBadge = document.getElementById('netBadge');
+  const stateTxt = document.getElementById('stateTxt');
+  const swTxt    = document.getElementById('swTxt');
+  const tsTxt    = document.getElementById('tsTxt');
+  const diagWrap = document.getElementById('diagWrap');
+
+  function setNetUI(){
+    const on = navigator.onLine;
+    netBadge.textContent = on ? 'Online' : 'Offline';
+    netBadge.style.background = on ? '#ecfdf5' : '#fee2e2';
+    netBadge.style.color      = on ? '#065f46' : '#991b1b';
+    stateTxt.textContent = on ? 'Conectado' : 'Sin conexión';
+  }
+
+  // Intento de recarga cuando vuelve la red
+  window.addEventListener('online', tryReload);
+  window.addEventListener('offline', setNetUI);
+
+  function stamp(){
+    const d = new Date();
+    tsTxt.textContent = d.toLocaleString();
+  }
+
+  async function swState(){
+    try{
+      const reg = await navigator.serviceWorker?.getRegistration();
+      if(!reg){ swTxt.textContent = 'No registrado'; return; }
+      const sw = reg.active || reg.waiting || reg.installing;
+      swTxt.textContent = sw ? (sw.state || 'activo') : '—';
+    }catch{ swTxt.textContent = '—'; }
+  }
+
+  async function tryReload(){
+    setNetUI(); stamp(); swState();
+    // Pequeño ping al propio origen (sin cache) para comprobar red real
+    try{
+      await fetch('./', {cache:'no-store', method:'GET', mode:'no-cors'});
+      // Si no lanza error, recargamos la app
+      location.replace('./');
+    }catch(e){
+      // seguimos en offline.html
+      diagWrap.hidden = false;
+    }
+  }
+
+  document.getElementById('retryBtn')?.addEventListener('click', tryReload);
+
+  // Init
+  setNetUI(); stamp(); swState();
+</script>
+</body>
+</html>
