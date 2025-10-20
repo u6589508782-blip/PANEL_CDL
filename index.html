@@ -202,6 +202,12 @@ h1::before,h2::before,h3::before{
 .badge{display:inline-block; padding:3px 10px; border-radius:999px; font-weight:800; font-size:12px; background:#eef2f7; color:#334155; border:1px solid #e2e8f0}
 .red{color:var(--brand)!important}
 .black{color:var(--ink)!important}
+/* columnas utilitarias si no existen */
+.grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px){
+  .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; }
+}
 
 /* botones compactos */
 .btn{border:0; border-radius:999px; padding:10px 14px; font-weight:800}
@@ -336,10 +342,7 @@ h1::before,h2::before,h3::before{
       </picture>
     </div>
     <div class="carousel-slide">
-      <picture>
-        <source type="image/webp" srcset="./img/carrusel/kaltenbach.webp">
-        <img src="./img/carrusel/kaltenbach.jpeg" alt="Kaltenbach">
-      </picture>
+      <img src="./img/carrusel/kaltenbach.webp" alt="Kaltenbach">
     </div>
     <div class="carousel-slide">
       <picture>
