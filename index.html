@@ -1,0 +1,2690 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CDL · Panel de control</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Fuente -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   VARIABLES
+========================================================= */
+:root{
+  --brand:#E43B3B; --ink:#0f172a; --muted:#475569; --line:#e5e7eb; --bg:#ffffff;
+  --hdr-h:128px;
+  --radius:18px;
+  --shadow:0 4px 12px rgba(0,0,0,.06);
+  --angular-size:30px;
+  --angular-up:.80em;
+  --angular-gap:24px;
+
+  --carousel-h: clamp(160px, 26vw, 320px);
+  --modal-bg: rgba(3,6,23,.55);
+  --modal-panel: #0f141c;
+}
+
+/* =========================================================
+   RESET & BASE
+========================================================= */
+*{box-sizing:border-box}
+html,body{height:100%; background:#fff; overflow-x:hidden}
+body{margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink)}
+a{color:inherit; text-decoration:none}
+img{display:block; max-width:100%}
+button{font:inherit; cursor:pointer}
+:focus-visible{outline:2px solid #0ea5e9; outline-offset:2px}
+@media (prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto; transition:none!important; animation:none!important}
+}
+
+/* =========================================================
+   CABECERA
+========================================================= */
+.header{
+  position:sticky; top:0; z-index:1000; background:#fff;
+  border-bottom:1px solid #eee; transition:box-shadow .25s ease;
+}
+.header.scrolled{ box-shadow:0 6px 14px rgba(0,0,0,.06) }
+.h__in{
+  height:var(--hdr-h);
+  display:grid; grid-template-columns:auto 1fr auto; align-items:end;
+  gap:12px; padding:10px 16px 12px; position:relative;
+}
+/* Fondo: logo mantenimiento atenuado */
+.header::before{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.02) 60%, rgba(255,255,255,.06) 100%),
+    url("logo_mantenimiento.png") center -6px / clamp(180px, 38vw, 340px) auto no-repeat;
+  opacity:.10; pointer-events:none;
+}
+
+/* Marca CDL centrada */
+.brand{display:flex; align-items:flex-end; gap:10px; justify-self:center}
+.brand img{height:42px}
+
+/* Chip rol */
+#roleChip{position:absolute; right:16px; top:8px; font-weight:800; font-size:12px; color:var(--ink)}
+
+/* Botones cabecera */
+.hbtn{width:44px; height:44px; display:grid; place-items:center; background:transparent; border:0; color:var(--ink)}
+#hamb .i{width:22px; height:16px; position:relative; display:inline-block}
+#hamb .i:before,#hamb .i:after,#hamb .i span{
+  content:""; position:absolute; left:0; right:0; height:2px; background:var(--ink); border-radius:2px;
+}
+#hamb .i:before{top:0} #hamb .i span{top:7px} #hamb .i:after{bottom:0}
+#moreBtn .i{display:inline-block; width:18px; text-align:center; letter-spacing:2px; font-weight:800}
+#moreBtn .i::before{content:"···"}
+
+/* =========================================================
+   CARRUSEL DE FOTOS (WebP + fallback JPEG)
+   - Auto (sin JS): muestra la 1ª imagen.
+   - Con JS (Parte 2): autoplay, swipe, botones, dots.
+========================================================= */
+.hero-carousel{
+  position:relative; overflow:hidden; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#fff,#f8fafc);
+}
+.carousel-track{
+  display:flex; touch-action:pan-y; user-select:none; -webkit-user-drag:none;
+  width:100%; height:var(--carousel-h); transform:translateX(0); will-change:transform;
+}
+.carousel-slide{
+  min-width:100%; height:100%; position:relative; overflow:hidden;
+  display:grid; place-items:center;
+}
+.carousel-slide picture, .carousel-slide img{
+  width:100%; height:100%; object-fit:cover;
+}
+/* Controles (se habilitan visualmente en Parte 2 con JS) */
+.carousel-ctrl{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+  width:40px; height:40px; border-radius:999px; border:1px solid #e5e7eb;
+  background:#ffffffc7; display:grid; place-items:center; opacity:.0; pointer-events:none;
+}
+.carousel-ctrl svg{ width:18px; height:18px }
+.hero-carousel:hover .carousel-ctrl{ opacity:1; pointer-events:auto }
+.carousel-prev{ left:10px } .carousel-next{ right:10px }
+/* Puntos */
+.carousel-dots{
+  position:absolute; left:0; right:0; bottom:8px; display:flex; justify-content:center; gap:8px; z-index:2;
+}
+.carousel-dots button{
+  width:8px; height:8px; border-radius:50%; border:1px solid rgba(0,0,0,.15); background:#fff; opacity:.7;
+}
+.carousel-dots button[aria-current="true"]{ opacity:1; transform:scale(1.15); }
+
+/* =========================================================
+   SIDENAV
+========================================================= */
+#sidenav{
+  position:fixed; inset:var(--hdr-h) 0 0 0; background:#fff; color:var(--ink);
+  transform:translateX(-100%); transition:transform .25s ease; z-index:900; box-shadow:4px 0 24px rgba(0,0,0,.08);
+}
+#sidenav.open{transform:none}
+.sidenav__head{display:flex; align-items:center; gap:12px; padding:14px 16px}
+.sidenav__head img{
+  height:120px; display:block; margin:6px 0 2px 0;
+}
+#closeNav{margin-left:auto; width:40px; height:40px; background:transparent; border:0; font-size:22px}
+.sidenav__search{padding:0 16px 10px}
+.sidenav__search input{width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:12px; font-weight:600}
+
+/* navegación */
+.navlist{padding:6px 0}
+.navlist a{display:block; padding:16px; font-weight:800; text-transform:uppercase; outline:none}
+.navlist a:not(:last-child){position:relative}
+.navlist a:not(:last-child)::after{
+  content:""; position:absolute; left:10%; right:10%; bottom:-1px; height:1.5px;
+  background:linear-gradient(90deg,rgba(0,0,0,0),rgba(15,23,42,.25) 50%,rgba(0,0,0,0));
+}
+.navlist a[aria-current="page"]{background:#f6f8fb; box-shadow:inset 4px 0 0 var(--brand)}
+
+/* blur fondo cuando el menú está abierto */
+body.menu-open::after{
+  content:""; position:fixed; inset:var(--hdr-h) 0 0 0; backdrop-filter:blur(4px); background:rgba(0,0,0,.18); z-index:800;
+}
+
+/* =========================================================
+   PANEL USUARIO
+========================================================= */
+#userPanel{
+  position:fixed; right:12px; top:calc(var(--hdr-h) + 10px);
+  width:360px; max-width:calc(100vw - 24px);
+  background:#0f141c; color:#e6eef7;
+  border:1px solid #223046; border-radius:16px; box-shadow:0 20px 36px rgba(0,0,0,.45);
+  padding:14px; display:none; z-index:950;
+}
+#userPanel.show{display:block}
+#userPanel .up__head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
+#userPanel h3{margin:0; font-size:14px}
+#closeUser{background:transparent; border:0; font-size:22px; color:#e6eef7}
+#userPanel label{display:block; font-size:12px; color:#9fb0c6; margin:10px 0 6px}
+#userPanel select,#userPanel input{width:100%; padding:10px 12px; border-radius:10px; border:1px solid #243046; background:#0b101a; color:#e6eef7}
+
+/* ojo mostrar/ocultar password */
+.eyeBtn{position:absolute; right:12px; top:38px; width:24px; height:24px; border:0; background:transparent; padding:0}
+.eyeBtn svg{width:22px; height:22px; fill:none; stroke:#cbd5e1; stroke-width:2}
+
+/* =========================================================
+   TÍTULOS CON ANGULAR
+========================================================= */
+h1,h2,h3{
+  position:relative; margin:26px 0 14px; padding-left:var(--angular-gap); line-height:1.12;
+  white-space:nowrap; overflow:visible; text-overflow:ellipsis;
+}
+h1::before,h2::before,h3::before{
+  content:""; position:absolute; left:0; bottom:var(--angular-up);
+  width:var(--angular-size); height:var(--angular-size);
+  background:url("angular.png") left bottom/contain no-repeat;
+  z-index:1; pointer-events:none;
+}
+.card .card__title{padding-left:0}
+.card .card__title::before{display:none}
+
+/* =========================================================
+   UTILIDADES & COMPONENTES
+========================================================= */
+.main{padding:16px; max-width:1100px; margin:0 auto}
+.sep{height:1px; margin:26px 0; background:linear-gradient(90deg,rgba(15,23,42,0),rgba(15,23,42,.22) 50%,rgba(15,23,42,0))}
+.card{background:#fff; border:1px solid var(--line); border-radius:18px; padding:14px; box-shadow:var(--shadow)}
+.grid{display:grid; gap:16px}
+.badge{display:inline-block; padding:3px 10px; border-radius:999px; font-weight:800; font-size:12px; background:#eef2f7; color:#334155; border:1px solid #e2e8f0}
+.red{color:var(--brand)!important}
+.black{color:var(--ink)!important}
+/* columnas utilitarias si no existen */
+.grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px){
+  .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; }
+}
+
+/* botones compactos */
+.btn{border:0; border-radius:999px; padding:10px 14px; font-weight:800}
+.btn--primary{background:var(--brand); color:#fff}
+.btn--ghost{background:#fff; color:var(--ink); border:1px solid var(--line)}
+.btn:active{transform:translateY(1px)}
+/* utilidades nuevas */
+.btn--sm{ padding:6px 10px; font-size:12px; }
+.btn--dark{ background:#111; color:#fff; border:1px solid #000; }
+.btn--dark:active{ transform:translateY(1px); }
+
+/* Dashboard TV */
+.dash-grid{gap:20px}
+.card--dash{background:transparent; border:0; box-shadow:none; padding:6px 0}
+.card__title.big{font-size:18px; font-weight:900; letter-spacing:.3px; padding-left:0}
+.card__title.big .badge{margin-left:10px}
+.dash-list .line-1{padding:8px 12px; border:1px dashed var(--line); border-radius:12px; margin:8px 0; font-weight:600}
+
+/* Hero (texto) */
+.hero{
+  background:linear-gradient(180deg,#fff,#f8fafc);
+  border:1px solid #eef2f7; padding:20px; border-radius:20px;
+}
+.hero h1{margin:0; padding-left:0}
+.hero h1::before{display:none}
+.hero .sub{color:#64748b; font-weight:800; margin-top:4px}
+
+/* Tablas */
+.table{width:100%; border-collapse:collapse}
+.table th,.table td{border:1px solid var(--line); padding:8px; text-align:left; font-size:14px}
+.table th{background:#f8fafc; font-weight:800}
+.table tr:hover{background:#fafafa}
+.badge--ok{background:#ecfdf5; color:#047857; border-color:#a7f3d0}
+.badge--low{background:#fff7ed; color:#c2410c; border-color:#fed7aa}
+.qr-mini{width:72px; height:72px}
+
+/* KPI */
+.kpi-foot{color:#64748b; font-size:12px; margin-top:8px}
+
+/* Responsivo */
+@media (min-width:900px){ .dash-grid{grid-template-columns:repeat(2,1fr)} }
+@media (min-width:1200px){ .dash-grid{grid-template-columns:repeat(3,1fr)} }
+
+/* Helpers */
+.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.touch-target{min-height:44px;min-width:44px}
+
+/* ======= NUEVO: filas compactas para inventario/consumibles ======= */
+.item-row{
+  display:grid;
+  grid-template-columns: 1fr auto auto;
+  align-items:center;
+  gap:12px;
+}
+@media (max-width:600px){
+  .item-row{ grid-template-columns: 1fr; }
+}
+.qty{ display:flex; gap:8px; flex-wrap:wrap; }
+.qty .btn{ min-width:54px; height:36px; padding:0 10px; font-size:13px; line-height:34px; border-radius:999px; }
+.qty .btn--ghost{ border:1px solid var(--line); }
+
+/* ====== Tarjetas “pro” + semáforo (utilidades visuales) ====== */
+.card--equip{
+  background:linear-gradient(180deg,#fff,#f8fafc);
+  border:1px solid #e6e8ee;
+  box-shadow:0 6px 16px rgba(15,23,42,.06);
+}
+.card--equip .title{
+  font-weight:900; letter-spacing:.2px; margin-bottom:6px;
+}
+.card--equip .meta{
+  color:#64748b; font-size:12px; font-weight:700;
+}
+.traffic{ display:flex; gap:8px; align-items:center; }
+.traffic .dot{
+  width:12px; height:12px; border-radius:50%; border:1px solid rgba(0,0,0,.15);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.6);
+}
+.state--ok   .dot{ background:#10b981; }
+.state--warn .dot{ background:#f59e0b; }
+.state--stop .dot{ background:#ef4444; }
+
+/* =========================================================
+   MODAL (backdrop + panel)
+========================================================= */
+#cdlModalBackdrop{
+  position:fixed; inset:0; background:var(--modal-bg); backdrop-filter:blur(2px);
+  opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:990;
+}
+#cdlModal{
+  position:fixed; inset:auto 16px 16px 16px; top:calc(var(--hdr-h) + 12px);
+  background:var(--modal-panel); color:#e6eef7; border:1px solid #223046; border-radius:16px;
+  box-shadow:0 20px 36px rgba(0,0,0,.45); padding:14px; width:800px; max-width:calc(100vw - 32px);
+  transform:translateY(12px); opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease;
+  z-index:995;
+}
+#cdlModal header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+#cdlModal h3{ margin:0; font-size:16px; }
+#cdlModal .close{ background:transparent; border:0; color:#e6eef7; font-size:22px; line-height:1; }
+#cdlModal .content{ margin-top:8px; max-height:min(60vh, 520px); overflow:auto; }
+#cdlModal.is-open{ opacity:1; transform:none; pointer-events:auto; }
+#cdlModalBackdrop.is-open{ opacity:1; pointer-events:auto; }
+</style>
+<style id="patch-css">
+/* ===== CABECERA: logo MANTENIMIENTO más alto y un pelín más ancho ===== */
+.header::before{
+  /* subimos un poco y ampliamos tamaño */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.02) 60%, rgba(255,255,255,.06) 100%),
+    url("logo_mantenimiento.png") center -28px / clamp(220px, 42vw, 380px) auto no-repeat !important;
+  opacity:.12 !important;
+}
+
+/* ===== CARRUSEL CENTRADO (sólo Dashboard) ===== */
+#dashboard .carousel{
+  aspect-ratio: 16/9; border-radius:12px; overflow:hidden;
+}
+#dashboard .carousel img{
+  width:100%; height:100%;
+  object-fit: cover;           /* centra y recorta lo justo */
+  object-position: center;     /* NO se queda solo la parte de arriba */
+}
+section:not(#dashboard) .carousel{ display:none !important; } /* carrusel sólo en Dashboard */
+
+/* ===== BOTONES ROJOS COMPACTOS ===== */
+.btn--primary{
+  padding:6px 10px !important; font-size:.9rem !important; border-radius:12px !important;
+}
+.btn{ padding:6px 10px !important; border-radius:12px !important; }
+
+/* ===== Formularios en una línea (la tarjeta de búsqueda) ===== */
+.form-inline{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+.form-inline__label{ font-weight:800 }
+.form-inline input[type="search"],
+.form-inline input[type="text"],
+.form-inline select{
+  padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px; min-width:200px;
+}
+
+/* ===== Semáforos por si faltan ===== */
+.sem{display:inline-block; width:10px; height:10px; border-radius:50%}
+.sem--ok{background:#16a34a} .sem--warn{background:#f59e0b} .sem--err{background:#dc2626}
+
+/* ===== Menú usuario encima de todo cuando se despliega ===== */
+#userMenu, #userPanel{ z-index: 1000 !important; }
+</style>
+</head>
+<body>
+
+<!-- =======================================================
+     CABECERA
+======================================================= -->
+<header class="header" id="hdr" role="banner">
+  <span id="roleChip">Invitado</span>
+  <div class="h__in">
+    <button class="hbtn" id="hamb" aria-label="Abrir menú" aria-controls="sidenav" aria-expanded="false"><span class="i"><span></span></span></button>
+    <a class="brand" aria-label="Inicio" href="#dashboard">
+      <img src="logo-cdl.png" alt="CDL">
+    </a>
+    <button class="hbtn" id="moreBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="userPanel"><span class="i"></span></button>
+  </div>
+</header>
+
+<!-- =======================================================
+     CARRUSEL DE FOTOS (dashboard) · WebP + fallback JPEG
+     Subir imágenes a ./img/carrusel/
+     Nombres: corte, kaltenbach, trumpf, hgg, tecoi, mazzak
+======================================================= -->
+<section class="hero-carousel" aria-label="Fotos de producción">
+  <div class="carousel-track" id="hcTrack">
+    <div class="carousel-slide">
+      <picture>
+        <source type="image/webp" srcset="./img/carrusel/corte.webp">
+        <img src="./img/carrusel/corte.jpeg" alt="Corte">
+      </picture>
+    </div>
+    <div class="carousel-slide">
+      <img src="./img/carrusel/kaltenbach.webp" alt="Kaltenbach">
+    </div>
+    <div class="carousel-slide">
+      <picture>
+        <source type="image/webp" srcset="./img/carrusel/trumpf.webp">
+        <img src="./img/carrusel/trumpf.jpeg" alt="Trumpf">
+      </picture>
+    </div>
+    <div class="carousel-slide">
+      <picture>
+        <source type="image/webp" srcset="./img/carrusel/hgg.webp">
+        <img src="./img/carrusel/hgg.jpeg" alt="HGG">
+      </picture>
+    </div>
+    <div class="carousel-slide">
+      <picture>
+        <source type="image/webp" srcset="./img/carrusel/tecoi.webp">
+        <img src="./img/carrusel/tecoi.jpeg" alt="Tecoi">
+      </picture>
+    </div>
+    <div class="carousel-slide">
+      <picture>
+        <source type="image/webp" srcset="./img/carrusel/mazzak.webp">
+        <img src="./img/carrusel/mazzak.jpeg" alt="Mazzak">
+      </picture>
+    </div>
+  </div>
+
+  <!-- Controles (se activan en Parte 2 con JS) -->
+  <button class="carousel-ctrl carousel-prev" id="hcPrev" aria-label="Anterior" aria-controls="hcTrack">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="carousel-ctrl carousel-next" id="hcNext" aria-label="Siguiente" aria-controls="hcTrack">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg>
+  </button>
+  <div class="carousel-dots" id="hcDots" aria-label="Indicadores"></div>
+</section>
+
+<!-- =======================================================
+     SIDENAV
+======================================================= -->
+<aside id="sidenav" aria-hidden="true" aria-label="Navegación principal">
+  <div class="sidenav__head">
+    <img src="logo_mantenimiento.png" alt="CDL Mantenimiento">
+    <button id="closeNav" aria-label="Cerrar menú">✕</button>
+  </div>
+  <div class="sidenav__search">
+    <input id="globalSearch" placeholder="Buscar en la app…" aria-label="Buscar">
+  </div>
+  <nav class="navlist" id="navList"><!-- items por JS --></nav>
+</aside>
+
+<!-- =========================================================
+     PANEL USUARIO
+========================================================= -->
+<section id="userPanel" role="dialog" aria-modal="true" aria-labelledby="upTitle">
+  <div class="up__head">
+    <h3 id="upTitle">Acceso de usuario</h3>
+    <button id="closeUser" aria-label="Cerrar">✕</button>
+  </div>
+
+  <label for="roleSelect">Rol</label>
+  <select id="roleSelect">
+    <option value="invitado" selected>Invitado</option>
+    <!-- (Parte 2) Se completará con roles reales -->
+  </select>
+
+  <label for="userPass">Contraseña</label>
+  <div style="position:relative">
+    <input id="userPass" type="password" placeholder="contraseña" autocomplete="current-password" aria-describedby="pwdHelp">
+    <button class="eyeBtn" id="toggleEye" aria-label="Mostrar/Ocultar contraseña">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+        <circle cx="12" cy="12" r="3.5"/>
+      </svg>
+    </button>
+  </div>
+  <div id="pwdHelp" style="color:#9fb0c6; font-size:12px; margin-top:4px">Introduce contraseña</div>
+
+  <div style="display:flex; gap:8px; margin-top:12px">
+    <button class="btn btn--primary" id="loginBtn">Acceder</button>
+    <button class="btn btn--ghost" id="logoutBtn">Salir</button>
+  </div>
+
+  <!-- Bloque "Cambiar contraseña" se colapsará por JS en Parte 2 -->
+  <h3 style="margin-top:14px">Cambiar contraseña</h3>
+  <label for="chgOld">Actual</label>
+  <input id="chgOld" type="password" autocomplete="current-password">
+  <label for="chgNew">Nueva</label>
+  <input id="chgNew" type="password" autocomplete="new-password">
+  <button class="btn btn--ghost" id="chgBtn" style="margin-top:8px">Guardar nueva</button>
+</section>
+
+<!-- =======================================================
+     MAIN
+======================================================= -->
+<main class="main" id="appRoot">
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="page" aria-labelledby="dashTitle">
+    <article class="hero">
+      <h1 id="dashTitle"><span class="black">DASHBOARD</span> <span class="red">TV</span></h1>
+      <div class="sub">Panel de control</div>
+    </article>
+
+    <div class="grid dash-grid" style="margin-top:10px">
+      <article class="card card--dash">
+        <h2 class="card__title big"><span class="black">EQUIPOS EN</span> <span class="red">PARADA</span>
+          <span class="badge" id="countParadas">0</span>
+        </h2>
+        <div id="dash-paradas" class="dash-list"></div>
+      </article>
+
+      <article class="card card--dash">
+        <h2 class="card__title big"><span class="black">EQUIPOS CON</span> <span class="red">RESTRICCIONES</span>
+          <span class="badge" id="countRestr">0</span>
+        </h2>
+        <div id="dash-restr" class="dash-list"></div>
+      </article>
+
+      <article class="card card--dash">
+        <h2 class="card__title big"><span class="black">ALERTAS</span> <span class="red">STOCK</span> <span class="black">MÍNIMO</span>
+          <span class="badge" id="countStock">0</span>
+        </h2>
+        <div id="dash-stock" class="dash-list"></div>
+      </article>
+
+      <!-- CONSUMIBLES BAJO STOCK -->
+      <article class="card card--dash" id="card-consumibles">
+        <h2 class="card__title big"><span class="black">CONSUMIBLES</span> <span class="red">BAJO STOCK</span>
+          <span class="badge" id="countConsLow">0</span>
+        </h2>
+        <div id="dash-cons" class="dash-list"></div>
+      </article>
+
+      <article class="card card--dash">
+        <h2 class="card__title big"><span class="black">AVISOS</span> <span class="red">SUBCONTRATAS</span>
+          <span class="badge" id="countExt">0</span>
+        </h2>
+        <div id="dash-externas" class="dash-list"></div>
+      </article>
+
+      <article class="card card--dash">
+        <h2 class="card__title big"><span class="black">SOLICITUDES</span> <span class="red">PRIORITARIAS</span>
+          <span class="badge" id="countReq">0</span>
+        </h2>
+        <div id="dash-req" class="dash-list"></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- EQUIPOS -->
+  <section id="equipos" class="page" hidden aria-labelledby="equipTitle">
+    <h1 id="equipTitle">Equipos</h1>
+    <div class="kalt-title" aria-hidden="true" style="margin-top:-6px">
+      <img src="linea-kaltenbach.png" alt="LÍNEA KALTENBACH">
+    </div>
+    <div class="card">
+      <div class="grid" style="grid-template-columns: 1fr auto; align-items:center">
+        <input id="equipSearch" placeholder="Buscar equipo…">
+        <datalist id="equiposDatalist"></datalist>
+        <button class="btn btn--ghost" id="equipClear">Limpiar</button>
+      </div>
+    </div>
+    <div class="grid cols-2" id="equiposList"></div>
+  </section>
+
+  <!-- GRÚAS -->
+  <section id="gruas" class="page" hidden aria-labelledby="gruasTitle">
+    <h1 id="gruasTitle">Puentes grúa</h1>
+    <div class="card">
+      <div class="grid" style="grid-template-columns: 1fr auto; align-items:center">
+        <input id="gruasSearch" placeholder="Buscar por nave o referencia…">
+        <button class="btn btn--ghost" id="gruasClear">Limpiar</button>
+      </div>
+    </div>
+    <div class="grid cols-2" id="gruasList"></div>
+  </section>
+
+  <!-- AUXILIARES -->
+  <section id="auxiliares" class="page" hidden aria-labelledby="auxTitle">
+    <h1 id="auxTitle">Auxiliares (otros)</h1>
+    <div class="card">
+      <div class="grid" style="grid-template-columns: 1fr auto; align-items:center">
+        <input id="auxSearch" placeholder="Buscar instalación auxiliar…">
+        <button class="btn btn--ghost" id="auxClear">Limpiar</button>
+      </div>
+    </div>
+    <div class="grid cols-2" id="auxList"></div>
+  </section>
+
+  <!-- INCIDENCIAS -->
+  <section id="incidencias" class="page" hidden aria-labelledby="incTitle">
+    <div style="display:flex; justify-content:space-between; align-items:center">
+      <h1 id="incTitle">Incidencias</h1>
+      <button class="btn btn--primary" id="btnNewInc">Crear nueva incidencia</button>
+    </div>
+
+    <div class="card" id="incFormWrap" hidden>
+      <div class="grid cols-2">
+        <div>
+          <label for="incEquipo">Equipo</label>
+          <input id="incEquipo" list="equiposDatalist" placeholder="Escribe o selecciona…">
+
+          <label for="incTipo">Tipo de fallo</label>
+          <select id="incTipo">
+            <option value="mecanico">Fallo mecánico</option>
+            <option value="electrico">Fallo eléctrico</option>
+            <option value="hidraulico">Fallo hidráulico</option>
+            <option value="neumatico">Fallo neumático</option>
+            <option value="proceso">Fallo de proceso productivo</option>
+            <option value="desconocido">Origen desconocido</option>
+          </select>
+
+          <label for="incDesc">Descripción breve</label>
+          <input id="incDesc" placeholder="Describe la avería…">
+        </div>
+        <div>
+          <label for="incSol">Estado</label>
+          <select id="incSol">
+            <option value="no">No solucionado</option>
+            <option value="si">Solucionado</option>
+            <option value="restricciones">Con restricciones</option>
+          </select>
+
+          <div id="incSiWrap" hidden>
+            <label for="incSolDesc">Descripción de la solución</label>
+            <input id="incSolDesc" placeholder="¿Qué se hizo?">
+            <label for="incSolRep">Repuestos empleados</label>
+            <input id="incSolRep" placeholder="Escribe para buscar…">
+          </div>
+
+          <div id="incNoWrap">
+            <label for="incNoDesc">Intervención realizada</label>
+            <input id="incNoDesc" placeholder="Qué se ha hecho…">
+            <label for="incNoRep">Repuestos empleados</label>
+            <input id="incNoRep" placeholder="Opcional">
+          </div>
+
+          <label for="incReportadoPor">Reportado por</label>
+          <select id="incReportadoPor">
+            <option>administrador</option>
+            <option>gerente</option>
+            <option>encargado</option>
+            <option>resp_produccion</option>
+            <option>resp_turno</option>
+            <option>externa</option>
+          </select>
+
+          <label for="incIntervenido">Intervenido por</label>
+          <input id="incIntervenido" placeholder="Nombre del técnico…">
+
+          <div class="grid cols-2">
+            <div>
+              <label for="incIni">Fecha de inicio</label>
+              <input id="incIni" type="date">
+            </div>
+            <div>
+              <label for="incFin">Fecha reparación</label>
+              <input id="incFin" type="date">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:10px">
+        <button class="btn btn--primary" id="incGuardar">Guardar</button>
+        <button class="btn btn--ghost" id="incCancelar">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__hdr" style="display:flex; justify-content:space-between; align-items:center">
+        <h2 class="card__title">Últimas incidencias</h2>
+        <div style="display:flex; gap:8px">
+          <input id="incFilter" placeholder="Filtrar por texto…">
+          <button class="btn btn--ghost" id="incRecargar">Recargar</button>
+        </div>
+      </div>
+      <div id="incList"></div>
+    </div>
+  </section>
+
+  <!-- INVENTARIO -->
+  <section id="inventario" class="page" hidden aria-labelledby="invTitle">
+    <h1 id="invTitle">Inventario</h1>
+
+    <div class="card">
+      <div class="card__hdr" style="display:flex; justify-content:space-between; align-items:center">
+        <h2 class="card__title">Estado de stock</h2>
+        <div>
+          <button class="btn btn--primary" id="btnAddRep">Añadir repuesto</button>
+          <button class="btn btn--ghost" id="btnDelRep">Eliminar / descontar</button>
+        </div>
+      </div>
+      <div id="invAlerts"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card__title">Buscar</h2>
+      <div style="display:flex; gap:8px; margin:10px 0; flex-wrap:wrap">
+        <input id="invSearch" placeholder="Código, referencia, nombre…">
+        <button class="btn btn--ghost" id="invClear">Limpiar</button>
+        <button class="btn btn--ghost" id="btnScan">Escanear QR</button>
+        <video id="scanVideo" playsinline style="display:none; width:100%; max-width:420px; border:1px solid var(--line); border-radius:12px; margin-top:8px"></video>
+      </div>
+
+      <div class="catgrid" id="invCats"><!-- dinámico --></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card__title">Inventario (CSV + QR)</h2>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+        <input id="invCsvUrl" placeholder="URL CSV (ej: ./TOH_inventario_GitHubPages.csv)" style="flex:1 1 320px">
+        <button class="btn btn--primary" id="invLoadCsv">Cargar CSV</button>
+        <input type="file" id="invCsvFile" accept=".csv" style="display:none">
+        <button class="btn btn--ghost" id="invPickCsv">Cargar archivo…</button>
+        <button class="btn btn--ghost" id="invPrintQR">Imprimir QR seleccionados</button>
+      </div>
+      <div class="hint" style="margin-top:8px;color:#64748b;font-size:12px">
+        Columnas admitidas: <strong>codigo|ref|sku</strong>, <strong>nombre|descripcion</strong>, <strong>ubicacion</strong>,
+        <strong>stock|cantidad</strong>, <strong>minimo|stock_min</strong>.
+      </div>
+      <div id="invTableWrap" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- CONSUMIBLES -->
+  <section id="consumibles" class="page" hidden aria-labelledby="consTitle">
+    <h1 id="consTitle">Consumibles</h1>
+    <div class="card">
+      <div class="card__hdr" style="display:flex; justify-content:space-between; align-items:center">
+        <h2 class="card__title">Listado y ajustes</h2>
+        <span class="badge" id="consCount">0</span>
+      </div>
+      <div id="consList"><!-- dinámico --></div>
+    </div>
+  </section>
+
+  <!-- REPUESTOS -->
+  <section id="repuestos" class="page" hidden aria-labelledby="repTitle">
+    <h1 id="repTitle">Repuestos</h1>
+    <div class="card">
+      <div class="grid cols-2">
+        <div>
+          <label for="reqRef">Repuesto (ref o nombre)</label>
+          <input id="reqRef" placeholder="Ej. TOH-M12x60">
+          <label for="reqQty">Cantidad</label>
+          <input id="reqQty" type="number" min="1" value="1">
+        </div>
+        <div>
+          <label for="reqObs">Observaciones</label>
+          <input id="reqObs" placeholder="Urgente, alternativa, etc.">
+          <button class="btn btn--primary" id="reqEnviar" style="margin-top:12px">Enviar solicitud</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__hdr" style="display:flex; justify-content:space-between; align-items:center">
+        <h2 class="card__title">Solicitudes</h2>
+        <div class="badge" id="reqCountBadge">0</div>
+      </div>
+      <div id="reqList"></div>
+    </div>
+  </section>
+
+  <!-- INDICADORES -->
+  <section id="indicadores" class="page" hidden aria-labelledby="indTitle">
+    <h1 id="indTitle">Indicadores</h1>
+    <div class="grid cols-3">
+      <article class="card">
+        <h3 class="card__title">MTBF</h3>
+        <canvas id="chMtbf" width="640" height="260"></canvas>
+        <div class="kpi-foot">MTBF (Tiempo Medio Entre Fallos): horas promedio operativas entre dos fallos. Eje X: meses. Eje Y: horas.</div>
+      </article>
+      <article class="card">
+        <h3 class="card__title">MTTR</h3>
+        <canvas id="chMttr" width="640" height="260"></canvas>
+        <div class="kpi-foot">MTTR (Tiempo Medio de Reparación): horas promedio desde que se inicia la intervención hasta que se finaliza. Eje Y: horas.</div>
+      </article>
+      <article class="card">
+        <h3 class="card__title">Disponibilidad</h3>
+        <canvas id="chDisp" width="640" height="260"></canvas>
+        <div class="kpi-foot">Disponibilidad = Tiempo Operativo / Tiempo Total. Eje Y: % mensual.</div>
+      </article>
+    </div>
+    <div style="margin-top:10px">
+      <button class="btn btn--ghost" id="btnExpCSV">Exportar CSV</button>
+    </div>
+  </section>
+
+  <!-- ÓRDENES DE TRABAJO -->
+  <section id="ot" class="page" hidden aria-labelledby="otTitle">
+    <h1 id="otTitle">Órdenes de trabajo</h1>
+    <div class="card">
+      <h2 class="card__title">Crear OT</h2>
+      <div class="grid cols-3">
+        <div>
+          <label for="otEquipo">Equipo</label>
+          <input id="otEquipo" list="equiposDatalist" placeholder="Escribe o selecciona…">
+        </div>
+        <div>
+          <label for="otTipo">Tipo</label>
+          <select id="otTipo">
+            <option>Engrase</option>
+            <option>Lubricación</option>
+            <option>Ajuste mecánico</option>
+            <option>Ajuste eléctrico</option>
+          </select>
+        </div>
+        <div>
+          <label for="otFecha">Fecha</label>
+          <input id="otFecha" type="date">
+        </div>
+      </div>
+      <label for="otTarea">Tarea</label>
+      <input id="otTarea" placeholder="Describe la OT…">
+      <div style="margin-top:10px">
+        <button class="btn btn--primary" id="otCrear">Crear OT</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__hdr" style="display:flex; justify-content:space-between; align-items:center">
+        <h2 class="card__title">Listado</h2>
+        <div style="display:flex; gap:8px">
+          <input id="otFilter" placeholder="Filtrar…">
+          <button class="btn btn--ghost" id="otBorrarMode">Modo borrar</button>
+        </div>
+      </div>
+      <div id="otList"></div>
+    </div>
+  </section>
+
+  <!-- REGISTRO DE MANTENIMIENTO (único) -->
+  <section id="registro" class="page" hidden aria-labelledby="regTitle">
+    <h1 id="regTitle">Registro de mantenimiento</h1>
+    <div class="card">
+      <div class="card__hdr" style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap">
+        <h2 class="card__title">Histórico (automático)</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+          <input id="regFilter" placeholder="Filtrar por equipo, técnico, texto…">
+          <select id="regTipo" class="btn btn--ghost" style="padding:8px 10px">
+            <option value="">Todo</option>
+            <option value="incidencia">Incidencias</option>
+            <option value="ot">Órdenes de trabajo</option>
+          </select>
+          <button class="btn btn--ghost" id="regReload">Recargar</button>
+        </div>
+      </div>
+      <div class="hint" style="margin:6px 0; color:#64748b; font-size:12px">
+        Cada incidencia resuelta y cada OT completada se reflejará aquí automáticamente.
+      </div>
+      <div id="regList"><!-- se inyectan líneas con “Informe completo” --></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- =======================================================
+     Backdrop + contenedor modal
+======================================================= -->
+<div id="cdlModalBackdrop" onclick="cdlCloseModal()"></div>
+<div id="cdlModal" role="dialog" aria-modal="true" aria-labelledby="cdlModalTitle">
+  <header>
+    <h3 id="cdlModalTitle">Detalle</h3>
+    <button class="close" aria-label="Cerrar" onclick="cdlCloseModal()">✕</button>
+  </header>
+  <div class="content"></div>
+</div>
+
+<script>
+/* =========================================================
+   API · Helpers
+========================================================= */
+const API_URL = (typeof window.API_BASE==="string" && window.API_BASE)
+  ? window.API_BASE
+  : "https://script.google.com/macros/s/AKfycbzgTZ8zMOOKiYt2JygDLX39xQoU3elE_7T8DDFhiBYk5UOvV3F4Tp6EAE3jenj3Njzr1g/exec";
+
+const CDL_TOKEN_KEY = "cdl_token";
+
+async function cdlApiGet(params){
+  const qs = new URLSearchParams(params).toString();
+  const res = await fetch(`${API_URL}?${qs}`, {cache:"no-store"});
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+async function cdlApiPostAuth(body){
+  const tok = localStorage.getItem(CDL_TOKEN_KEY) || "";
+  const payload = JSON.stringify({ ...body, token: tok });
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" }, // evita preflight
+    body: payload,
+    cache: "no-store",
+    redirect: "follow"
+  });
+
+  const text = await res.text();
+  if (!res.ok) throw new Error(`HTTP ${res.status} · ${text.slice(0,120)}`);
+
+  try { return JSON.parse(text); }
+  catch { throw new Error("La API no devolvió JSON: " + text.slice(0,120)); }
+}
+async function cdlEnsureLoginIfNeeded(){
+  if(localStorage.getItem(CDL_TOKEN_KEY)) return true;
+  const user = prompt("Usuario (Apps Script):","");
+  const pass = prompt("Contraseña:","");
+  if(!user||!pass) return false;
+  const r = await cdlApiPostAuth({res:"auth",fn:"login",user,pass});
+  if(r.ok && r.token){ localStorage.setItem(CDL_TOKEN_KEY, r.token); return true; }
+  alert("Login fallido"); return false;
+}
+
+/* Utils */
+function cdlSafeId(s){ return String(s).replace(/[^a-zA-Z0-9_-]/g,'_'); }
+function ucFirst(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g,' ') : s; }
+</script>
+
+<script>
+/* =========================================================
+   MODAL global oscuro (abre/cierra + helpers)
+========================================================= */
+function cdlOpenModal(title, html){
+  const m = document.getElementById('cdlModal');
+  const b = document.getElementById('cdlModalBackdrop');
+  if(!m || !b) return;
+  m.querySelector('#cdlModalTitle').textContent = title || 'Detalle';
+  m.querySelector('.content').innerHTML = html || '';
+  m.classList.add('is-open');
+  b.classList.add('is-open');
+}
+function cdlCloseModal(){
+  document.getElementById('cdlModal')?.classList.remove('is-open');
+  document.getElementById('cdlModalBackdrop')?.classList.remove('is-open');
+}
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') cdlCloseModal(); });
+</script>
+<script>
+/* =========================================================
+   FICHAS TÉCNICAS (unificadas) + dataset de puentes imanes
+========================================================= */
+
+/* 1) Esquema por defecto para cualquier equipo */
+const CDL_EQUIP_DEFAULT = {
+  id: "", nombre: "PENDIENTE", grupo: "PENDIENTE",
+  ubicacion: "PENDIENTE", nave: "PENDIENTE",
+  fabricante: "PENDIENTE", modelo: "PENDIENTE", anno: "PENDIENTE", numero_serie: "PENDIENTE",
+  tension_trabajo: "PENDIENTE", tension_entrada_trabajo: "PENDIENTE",
+  presion_neumatica: "PENDIENTE", tension_neumatica_entrada: "PENDIENTE",
+  horas_paro: 0, horas_marcha: 0, horas_restricciones: 0, ot_pendientes: 0,
+  componentes_criticos: [], observaciones: "",
+  incidencias: [], ots: [], despiece: []
+};
+
+/* 2) Overrides iniciales conocidos (KDP-1 + puentes con imanes) */
+const cdlEquipOverrides = [
+  {
+    id: "KDP-1",
+    nombre: "KDP-1 (Línea Kaltenbach)",
+    grupo: "Línea de taladrado + sierra",
+    ubicacion: "Línea principal",
+    nave: "Nave 1",
+    fabricante: "Kaltenbach",
+    modelo: "PENDIENTE",
+    anno: "PENDIENTE",
+    numero_serie: "PENDIENTE",
+    tension_trabajo: "PENDIENTE",
+    tension_entrada_trabajo: "PENDIENTE",
+    presion_neumatica: "PENDIENTE",
+    tension_neumatica_entrada: "PENDIENTE",
+    despiece: [
+      { id:"M150", nombre:"M150", notas:"PENDIENTE" },
+      { id:"T13-INT", nombre:"T13 Rodillo de transporte interno", notas:"PENDIENTE" },
+      { id:"CAB-TAL", nombre:"Cabina de taladrado", notas:"PENDIENTE" },
+      { id:"STAMP", nombre:"Bloque de estampado", notas:"PENDIENTE" },
+      { id:"KBS1036", nombre:"Sierra KBS 1036", notas:"PENDIENTE" },
+      { id:"ASO", nombre:"ASO / Autosortes", notas:"PENDIENTE" },
+      { id:"SEG", nombre:"Barreras de seguridad", notas:"PENDIENTE" },
+      { id:"PUP", nombre:"Pupitre de mando", notas:"PENDIENTE" },
+      { id:"BANC-CORT", nombre:"Bancadas para piezas cortas", notas:"PENDIENTE" },
+      { id:"BANC-ENT", nombre:"Bancada grande de entrada (T13)", notas:"PENDIENTE" },
+      { id:"BANC-SAL", nombre:"Bancada grande de salida (T13)", notas:"PENDIENTE" }
+    ],
+    observaciones: "Estructura base del tren Kaltenbach."
+  },
+
+  { id:"N2-IMAN", nombre:"Puente birraíl — Nave 2 (portaimanes doble telescópico)",
+    grupo:"Puente grúa", ubicacion:"Nave 2", nave:"Nave 2",
+    fabricante:"PENDIENTE", modelo:"PENDIENTE", anno:"PENDIENTE", numero_serie:"PENDIENTE",
+    tension_trabajo:"PENDIENTE", tension_entrada_trabajo:"PENDIENTE",
+    presion_neumatica:"PENDIENTE", tension_neumatica_entrada:"PENDIENTE",
+    observaciones:"Sistema de imanes igual al antiguo N1 (doble con travesaño telescópico)."
+  },
+  { id:"N1-DEMAG-LIBRE", nombre:"Puente Demag 5+5 t — Nave 1 (SIN imanes)",
+    grupo:"Puente grúa", ubicacion:"Nave 1", nave:"Nave 1",
+    fabricante:"Demag", modelo:"PENDIENTE", anno:"PENDIENTE", numero_serie:"PENDIENTE",
+    observaciones:"Antiguo portaimanes; ahora liberado y disponible para otros usos."
+  },
+  { id:"N1-ESTRUC-RETIRADA", nombre:"Antigua estructura portaimanes — Nave 1 (RETIRADA/ALMACÉN)",
+    grupo:"Puente grúa", ubicacion:"Nave 1", nave:"Nave 1",
+    fabricante:"PENDIENTE", modelo:"PENDIENTE", anno:"PENDIENTE", numero_serie:"PENDIENTE",
+    observaciones:"Estructura obsoleta retirada a almacén secundario."
+  },
+  { id:"N3-IMAN", nombre:"Puente dedicado a imanes — Nave 3 (2 imanes)",
+    grupo:"Puente grúa", ubicacion:"Nave 3", nave:"Nave 3",
+    fabricante:"PENDIENTE", modelo:"PENDIENTE", anno:"PENDIENTE", numero_serie:"PENDIENTE",
+    observaciones:"Recibe 2 imanes del antiguo sistema de N1."
+  },
+  { id:"N4-IMAN-BAJO", nombre:"Puente dedicado a imanes — Nave 4 (carril bajo, 2 imanes)",
+    grupo:"Puente grúa", ubicacion:"Nave 4", nave:"Nave 4",
+    fabricante:"PENDIENTE", modelo:"PENDIENTE", anno:"PENDIENTE", numero_serie:"PENDIENTE",
+    observaciones:"Nuevo puente exclusivo con carril bajo; recibe 2 imanes del conjunto original."
+  }
+];
+
+/* 3) Catálogo de puentes con portaimanes (array especializado) */
+const cdlPuentesImanes = [
+  /* ───────── Nave 2: igual que el antiguo N1 ───────── */
+  {
+    id: "N2-IMAN",
+    nombre: "Puente birraíl — Nave 2 (portaimanes doble telescópico)",
+    nave: "Nave 2",
+    estado: "activo",
+    rail_bajo: false,
+    fabricante: "PENDIENTE",
+    modelo: "PENDIENTE",
+    anno: "PENDIENTE",
+    luz_m: "PENDIENTE",
+    polipastos: "2 × 5 t",
+    capacidad_puente: "10 t",
+    carros: "2 carros motorizados",
+    portaimanes: {
+      tipo: "Doble con travesaño telescópico",
+      marca: "PENDIENTE",
+      rectificador: "Carro maestro",
+      tension_cc: "110 V CC",
+      imanes_por_carro: 2,
+      imanes_totales: 4,
+      travesano: "Telescópico con unión entre carros",
+      capacidad_unidad_kg: "PENDIENTE",
+      capacidad_sistema_segura_kg: "PENDIENTE",
+      piezas_min: "PENDIENTE",
+      placas_min: "PENDIENTE"
+    },
+    observaciones: "Sistema idéntico al antiguo portaimanes de Nave 1.",
+    fotos: [
+      "./img/puentes/n2_frontal.jpeg",
+      "./img/puentes/n2_travesaño.jpeg",
+      "./img/puentes/n2_rectificador.jpeg"
+    ]
+  },
+
+  /* ───────── Nave 1: Demag 5+5 t LIBRE (sin imanes) ───────── */
+  {
+    id: "N1-DEMAG-LIBRE",
+    nombre: "Puente Demag 5+5 t — Nave 1 (SIN imanes)",
+    nave: "Nave 1",
+    estado: "activo (sin imanes)",
+    rail_bajo: false,
+    fabricante: "Demag",
+    modelo: "PENDIENTE",
+    anno: "PENDIENTE",
+    luz_m: "PENDIENTE",
+    polipastos: "2 × 5 t",
+    capacidad_puente: "10 t",
+    carros: "2 carros motorizados",
+    portaimanes: null,
+    observaciones: "Liberado del sistema de imanes. Disponible para otros usos.",
+    fotos: [
+      "./img/puentes/n1_demag_libre.jpeg"
+    ]
+  },
+
+  /* ───────── Nave 1: antigua estructura de imanes (RETIRADA) ───────── */
+  {
+    id: "N1-ESTRUC-RETIRADA",
+    nombre: "Antigua estructura portaimanes — Nave 1 (RETIRADA/ALMACÉN)",
+    nave: "Nave 1",
+    estado: "retirada · almacenada",
+    rail_bajo: false,
+    fabricante: "PENDIENTE",
+    modelo: "PENDIENTE",
+    anno: "PENDIENTE",
+    luz_m: "PENDIENTE",
+    polipastos: "—",
+    capacidad_puente: "—",
+    carros: "—",
+    portaimanes: {
+      tipo: "Doble con travesaño telescópico",
+      marca: "PENDIENTE",
+      rectificador: "PENDIENTE",
+      tension_cc: "110 V CC",
+      imanes_por_carro: 2,
+      imanes_totales: 4,
+      travesano: "Telescópico",
+      capacidad_unidad_kg: "PENDIENTE",
+      capacidad_sistema_segura_kg: "PENDIENTE",
+      piezas_min: "PENDIENTE",
+      placas_min: "PENDIENTE"
+    },
+    observaciones: "Estructura obsoleta retirada a almacén secundario de forma permanente.",
+    fotos: [
+      "./img/puentes/n1_estructura_retirada.jpeg"
+    ]
+  },
+
+  /* ───────── Nave 3: puente dedicado a imanes (2 imanes) ───────── */
+  {
+    id: "N3-IMAN",
+    nombre: "Puente dedicado a imanes — Nave 3 (2 imanes)",
+    nave: "Nave 3",
+    estado: "activo",
+    rail_bajo: false,
+    fabricante: "PENDIENTE",
+    modelo: "PENDIENTE",
+    anno: "PENDIENTE",
+    luz_m: "PENDIENTE",
+    polipastos: "PENDIENTE",
+    capacidad_puente: "PENDIENTE",
+    carros: "PENDIENTE",
+    portaimanes: {
+      tipo: "Simple (sin travesaño entre carros)",
+      marca: "PENDIENTE",
+      rectificador: "PENDIENTE",
+      tension_cc: "110 V CC",
+      imanes_por_carro: 1,
+      imanes_totales: 2,
+      travesano: "No aplica",
+      capacidad_unidad_kg: "PENDIENTE",
+      capacidad_sistema_segura_kg: "PENDIENTE",
+      piezas_min: "PENDIENTE",
+      placas_min: "PENDIENTE"
+    },
+    observaciones: "Recibe 2 imanes del antiguo sistema de N1.",
+    fotos: [
+      "./img/puentes/n3_iman_1.jpeg",
+      "./img/puentes/n3_iman_2.jpeg"
+    ]
+  },
+
+  /* ───────── Nave 4: nuevo puente de imanes con carril bajo (2 imanes) ───────── */
+  {
+    id: "N4-IMAN-BAJO",
+    nombre: "Puente dedicado a imanes — Nave 4 (carril bajo, 2 imanes)",
+    nave: "Nave 4",
+    estado: "activo",
+    rail_bajo: true,
+    fabricante: "PENDIENTE",
+    modelo: "PENDIENTE",
+    anno: "PENDIENTE",
+    luz_m: "PENDIENTE",
+    polipastos: "PENDIENTE",
+    capacidad_puente: "PENDIENTE",
+    carros: "PENDIENTE",
+    portaimanes: {
+      tipo: "Simple (dedicado)",
+      marca: "PENDIENTE",
+      rectificador: "PENDIENTE",
+      tension_cc: "110 V CC",
+      imanes_por_carro: 1,
+      imanes_totales: 2,
+      travesano: "No aplica",
+      capacidad_unidad_kg: "PENDIENTE",
+      capacidad_sistema_segura_kg: "PENDIENTE",
+      piezas_min: "PENDIENTE",
+      placas_min: "PENDIENTE"
+    },
+    observaciones: "Nuevo puente exclusivo para imanes con carril por debajo de los otros puentes. Recibe 2 imanes del conjunto original.",
+    fotos: [
+      "./img/puentes/n4_iman_bajo_1.jpeg",
+      "./img/puentes/n4_iman_bajo_2.jpeg"
+    ]
+  }
+];
+
+/* 4) Persistencia local ligera (edición rápida) */
+const CDL_EQUIP_LS_KEY = 'cdl_equip_overrides';
+function cdlEquipMergeDefault(raw){ return { ...CDL_EQUIP_DEFAULT, ...(raw||{}) }; }
+function cdlEquipFindLocal(id){
+  try{
+    const cache = JSON.parse(localStorage.getItem(CDL_EQUIP_LS_KEY)||'[]');
+    return cache.find(x=>String(x.id).toLowerCase()===String(id).toLowerCase()) || null;
+  }catch{ return null; }
+}
+function cdlEquipUpsertLocal(item){
+  try{
+    const arr = JSON.parse(localStorage.getItem(CDL_EQUIP_LS_KEY)||'[]');
+    const i = arr.findIndex(x=>x.id===item.id);
+    if(i>=0) arr[i]=item; else arr.push(item);
+    localStorage.setItem(CDL_EQUIP_LS_KEY, JSON.stringify(arr));
+  }catch(e){ console.warn('No se pudo guardar en localStorage', e); }
+}
+
+async function cdlEquipGet(id){
+  if(!id) return null;
+  try{
+    const r = await cdlApiGet({res:'equip', fn:'get', id});
+    if(r && r.ok && r.item){ return cdlEquipMergeDefault(r.item); }
+  }catch{}
+  const loc = cdlEquipFindLocal(id);
+  if(loc) return cdlEquipMergeDefault(loc);
+  const ov = cdlEquipOverrides.find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
+  if(ov) return cdlEquipMergeDefault(ov);
+  return cdlEquipMergeDefault({id, nombre:id});
+}
+async function cdlEquipSave(item){
+  try{
+    const okLogin = await cdlEnsureLoginIfNeeded(); if(!okLogin) return {ok:false, error:'login'};
+    const r = await cdlApiPostAuth({res:'equip', fn:'save', item});
+    if(r && r.ok) return r;
+  }catch{}
+  cdlEquipUpsertLocal(item);
+  return {ok:true, local:true};
+}
+
+/* 5) Render de ficha técnica + mini editor */
+function cdlRenderKV(label, val){ return `<div class="badge"><strong>${label}:</strong> ${val ?? '—'}</div>`; }
+function cdlRenderEquipFicha(e){
+  const compCrit = (e.componentes_criticos||[]).map(x=>`<li>${x}</li>`).join('') || '<li>—</li>';
+  const incs = (e.incidencias||[]).slice(-10).map(x=>
+    `<div class="line-1">[${x.fecha||'—'}] <a href="#incidencias" data-open-inc="${x.id||''}">${x.resumen||x.id||'Incidencia'}</a></div>`
+  ).join('') || '<div class="line-1" style="color:#94a3b8">Sin incidencias listadas</div>';
+  const ots  = (e.ots||[]).slice(-10).map(x=>
+    `<div class="line-1">[${x.fecha||'—'}] <a href="#ot" data-open-ot="${x.id||''}">${x.tarea||x.id||'OT'}</a></div>`
+  ).join('') || '<div class="line-1" style="color:#94a3b8">Sin OTs listadas</div>';
+  const desp = (e.despiece||[]).map(p=>
+    `<div class="line-1">• <b>${p.id||''}</b> — ${p.nombre||''} <span style="color:#94a3b8">${p.notas||''}</span></div>`
+  ).join('') || '<div class="line-1" style="color:#94a3b8">Despiece pendiente</div>';
+
+  return `
+    <div class="kv" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+      ${cdlRenderKV('Ubicación', e.ubicacion)}
+      ${cdlRenderKV('Nave', e.nave)}
+      ${cdlRenderKV('Grupo', e.grupo)}
+      ${cdlRenderKV('Fabricante', e.fabricante)}
+      ${cdlRenderKV('Modelo', e.modelo)}
+      ${cdlRenderKV('Año', e.anno)}
+      ${cdlRenderKV('Nº serie', e.numero_serie)}
+    </div>
+
+    <h4 style="margin:10px 0 6px">Parámetros</h4>
+    <div class="kv" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+      ${cdlRenderKV('Tensión de trabajo', e.tension_trabajo)}
+      ${cdlRenderKV('Tensión de entrada', e.tension_entrada_trabajo)}
+      ${cdlRenderKV('Presión neumática', e.presion_neumatica)}
+      ${cdlRenderKV('Neumática entrada', e.tension_neumatica_entrada)}
+    </div>
+
+    <h4 style="margin:10px 0 6px">Métricas</h4>
+    <div class="kv" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+      ${cdlRenderKV('OTs pendientes', e.ot_pendientes)}
+      ${cdlRenderKV('Horas paro', e.horas_paro)}
+      ${cdlRenderKV('Horas marcha', e.horas_marcha)}
+      ${cdlRenderKV('Horas con restricciones', e.horas_restricciones)}
+    </div>
+
+    <h4 style="margin:10px 0 6px">Componentes críticos</h4>
+    <ul style="margin:0 0 8px 16px">${compCrit}</ul>
+
+    <h4 style="margin:10px 0 6px">Observaciones</h4>
+    <div class="card" style="background:#0b101a;color:#cfe1f7;border:1px solid #243046">${e.observaciones||'—'}</div>
+
+    <h4 style="margin:10px 0 6px">Incidencias recientes</h4>
+    <div>${incs}</div>
+
+    <h4 style="margin:10px 0 6px">Órdenes de trabajo recientes</h4>
+    <div>${ots}</div>
+
+    <h4 style="margin:10px 0 6px">Despiece</h4>
+    <div>${desp}</div>
+
+    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+      <button class="btn btn--dark btn--sm" data-equip-edit="${e.id}">Editar rápido</button>
+      <button class="btn btn--ghost btn--sm" onclick="location.hash='#registro'">Abrir Registro</button>
+    </div>
+  `;
+}
+function cdlEquipMiniEdit(e){
+  const fields = [
+    ['ubicacion','Ubicación'],['nave','Nave'],['fabricante','Fabricante'],
+    ['modelo','Modelo'],['anno','Año'],['numero_serie','Número de serie'],
+    ['tension_trabajo','Tensión de trabajo'],['tension_entrada_trabajo','Tensión de entrada'],
+    ['presion_neumatica','Presión neumática'],['tension_neumatica_entrada','Neumática entrada'],
+    ['observaciones','Observaciones']
+  ];
+  const edited = {...e};
+  for(const [k,label] of fields){
+    const nv = prompt(`${label}:`, edited[k] ?? '');
+    if(nv===null) continue;
+    edited[k] = nv.trim() || 'PENDIENTE';
+  }
+  return edited;
+}
+async function cdlOpenEquipFicha(id){
+  const data = await cdlEquipGet(id);
+  cdlOpenModal(`${data.nombre} — Ficha técnica`, cdlRenderEquipFicha(data));
+  const btn = document.querySelector('[data-equip-edit]');
+  btn?.addEventListener('click', async ()=>{
+    const edited = cdlEquipMiniEdit(data);
+    const res = await cdlEquipSave(edited);
+    if(res.ok){
+      cdlOpenModal(`${edited.nombre} — Ficha técnica`, cdlRenderEquipFicha(edited));
+      alert(res.local ? 'Guardado local (sin API). Se subirá cuando esté disponible.' : 'Guardado en servidor.');
+    }else{
+      alert('No se pudo guardar.');
+    }
+  });
+}
+
+/* 6) UI específica: tarjeta selector de “portaimanes” en la página GRÚAS */
+function cdlBadgeKV(k,v){ return `<span class="badge"><strong>${k}:</strong> ${v}</span>`; }
+
+function cdlRenderPortaIman(item){
+  const fotos = (item.fotos||[]).map((src,i)=>`
+    <div class="carousel-slide">
+      <picture>
+        <source type="image/webp" srcset="${src.replace(/\.jpeg?$/i,'.webp')}">
+        <img src="${src}" alt="${item.nombre} foto ${i+1}">
+      </picture>
+    </div>
+  `).join('');
+
+  const pim = item.portaimanes ? `
+    <h4 style="margin:10px 0 6px">Portaimanes</h4>
+    <div class="kv" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      ${cdlBadgeKV('Tipo', item.portaimanes.tipo)}
+      ${cdlBadgeKV('Rectificador', item.portaimanes.rectificador)}
+      ${cdlBadgeKV('Tensión CC', item.portaimanes.tension_cc)}
+      ${cdlBadgeKV('Imanes por carro', item.portaimanes.imanes_por_carro)}
+      ${cdlBadgeKV('Imanes totales', item.portaimanes.imanes_totales)}
+      ${cdlBadgeKV('Travesaño', item.portaimanes.travesano)}
+      ${cdlBadgeKV('Cap. unidad (kg)', item.portaimanes.capacidad_unidad_kg)}
+      ${cdlBadgeKV('Cap. segura sistema (kg)', item.portaimanes.capacidad_sistema_segura_kg)}
+    </div>
+  ` : `<div class="card" style="background:#0b101a;color:#cfe1f7;border:1px solid #243046">SIN portaimanes</div>`;
+
+  return `
+    <div class="kv" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      ${cdlBadgeKV('Estado', item.estado)}
+      ${cdlBadgeKV('Carril bajo', item.rail_bajo ? 'Sí' : 'No')}
+      ${cdlBadgeKV('Fabricante', item.fabricante)}
+      ${cdlBadgeKV('Modelo', item.modelo)}
+      ${cdlBadgeKV('Año', item.anno)}
+      ${cdlBadgeKV('Luz (m)', item.luz_m)}
+      ${cdlBadgeKV('Polipastos', item.polipastos)}
+      ${cdlBadgeKV('Capacidad puente', item.capacidad_puente)}
+      ${cdlBadgeKV('Carros', item.carros)}
+    </div>
+
+    ${pim}
+
+    <h4 style="margin:10px 0 6px">Observaciones</h4>
+    <div class="card" style="background:#0b101a;color:#cfe1f7;border:1px solid #243046">${item.observaciones||'—'}</div>
+
+    ${(item.fotos&&item.fotos.length) ? `
+      <h4 style="margin:10px 0 6px">Galería</h4>
+      <div class="hero-carousel" style="border:1px solid #243046;border-radius:12px">
+        <div class="carousel-track">${fotos}</div>
+      </div>` : ''
+    }
+  `;
+}
+
+function cdlInjectPortaimanesCard(){
+  const page = document.getElementById('gruas'); if(!page) return;
+  const uid  = 'cdlPortaImanCard';
+  if(document.getElementById(uid)) return;
+
+  const card = document.createElement('div');
+  card.className = 'card'; card.id = uid;
+  const opts = cdlPuentesImanes.map(x=>`<option value="${x.id}">${x.nombre}</option>`).join('');
+  card.innerHTML = `
+    <div class="grid" style="grid-template-columns:1fr auto; align-items:center">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <strong>Portaimanes</strong>
+        <input id="selPorta" list="listPorta" placeholder="Buscar puente… (ej: N2-IMAN, Demag)" style="min-width:260px">
+        <datalist id="listPorta">${opts}</datalist>
+      </div>
+      <div style="display:flex; gap:8px">
+        <button class="btn btn--primary" id="btnPorta">Ver ficha portaimanes</button>
+        <button class="btn btn--ghost" id="btnPortaEquip">Abrir ficha técnica</button>
+      </div>
+    </div>`;
+  const anchor = page.querySelector('.card'); // la primera card del buscador
+  page.insertBefore(card, anchor);
+
+  const input = card.querySelector('#selPorta');
+  const findItem = ()=>{
+    const val = (input.value||'').trim();
+    if(!val) return null;
+    return cdlPuentesImanes.find(x=> x.id.toLowerCase()===val.toLowerCase()
+      || x.nombre.toLowerCase().includes(val.toLowerCase()));
+  };
+  card.querySelector('#btnPorta').addEventListener('click', ()=>{
+    const item = findItem();
+    if(!item){ alert('Escribe/selecciona un puente del listado'); return; }
+    cdlOpenModal(`${item.nombre}`, cdlRenderPortaIman(item));
+  });
+  card.querySelector('#btnPortaEquip').addEventListener('click', ()=>{
+    const item = findItem();
+    if(!item){ alert('Escribe/selecciona un puente del listado'); return; }
+    cdlOpenEquipFicha(item.id);
+  });
+}
+</script>
+
+<script>
+/* =========================================================
+   INYECCIÓN DE UI: “Ver ficha técnica” en Equipos/Grúas/Aux
+========================================================= */
+function cdlInjectEquipFichaSelector(pageId, title='Ficha técnica'){
+  const page = document.getElementById(pageId); if(!page) return;
+  const anchor = page.querySelector('.card'); if(!anchor) return;
+  const uid = `equipSel_${pageId}`;
+  if(document.getElementById(uid)) return;
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="grid" style="grid-template-columns:1fr auto; align-items:center">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <strong>${title}</strong>
+        <input id="${uid}" placeholder="Escribe el ID o nombre… (ej: KDP-1, N2-IMAN)" style="min-width:240px">
+      </div>
+      <button class="btn btn--primary" id="${uid}_btn">Ver ficha</button>
+    </div>`;
+  anchor.parentElement.insertBefore(card, anchor);
+
+  document.getElementById(`${uid}_btn`)?.addEventListener('click', ()=>{
+    const id = (document.getElementById(uid).value||'').trim();
+    if(!id){ alert('Escribe un ID / nombre de equipo'); return; }
+    cdlOpenEquipFicha(id);
+  });
+}
+
+/* Delegados por si tus listados insertan enlaces con data-equip */
+function cdlAttachEquipDelegates(){
+  [['equiposList'],['gruasList'],['auxList']].forEach(([id])=>{
+    const host = document.getElementById(id); if(!host) return;
+    host.addEventListener('click', (e)=>{
+      const a = e.target.closest('.equip-link[data-equip]');
+      if(a){ e.preventDefault(); cdlOpenEquipFicha(a.getAttribute('data-equip')); }
+    });
+  });
+}
+</script>
+
+<script>
+/* =========================================================
+   NAV + SIDENAV (abrir/cerrar + routing hash)
+========================================================= */
+(function(){
+  const body     = document.body;
+  const hdr      = document.getElementById('hdr');
+  const sidenav  = document.getElementById('sidenav');
+  const navList  = document.getElementById('navList');
+  const hamb     = document.getElementById('hamb');
+  const closeNav = document.getElementById('closeNav');
+  const moreBtn  = document.getElementById('moreBtn');
+  const userPanel= document.getElementById('userPanel');
+
+  const openNav = () => {
+    sidenav.classList.add('open');
+    body.classList.add('menu-open');
+    hamb?.setAttribute('aria-expanded','true');
+    sidenav?.setAttribute('aria-hidden','false');
+  };
+  const closeNavFn = () => {
+    sidenav.classList.remove('open');
+    body.classList.remove('menu-open');
+    hamb?.setAttribute('aria-expanded','false');
+    sidenav?.setAttribute('aria-hidden','true');
+  };
+
+  hamb?.addEventListener('click', (e)=>{ e.stopPropagation(); openNav(); });
+  closeNav?.addEventListener('click', closeNavFn);
+
+  document.addEventListener('click', (e)=>{
+    if (body.classList.contains('menu-open') && !sidenav.contains(e.target) && !hamb.contains(e.target)) {
+      closeNavFn();
+    }
+  });
+
+  // Construir navegación (incluye Registro)
+  if (navList) {
+    const items = [
+      ['#dashboard','Dashboard'],
+      ['#equipos','Equipos'],
+      ['#gruas','Puentes grúa'],
+      ['#auxiliares','Auxiliares'],
+      ['#incidencias','Incidencias'],
+      ['#inventario','Inventario'],
+      ['#consumibles','Consumibles'],
+      ['#repuestos','Repuestos'],
+      ['#indicadores','Indicadores'],
+      ['#ot','Órdenes de trabajo'],
+      ['#registro','Registro']
+    ];
+    navList.innerHTML = items.map(([href,label])=> `<a href="${href}">${label}</a>`).join('');
+  }
+
+  function markCurrent(){
+    const hash = location.hash || '#dashboard';
+    navList?.querySelectorAll('a').forEach(a=>{
+      a.setAttribute('aria-current', a.getAttribute('href') === hash ? 'page' : 'false');
+    });
+    document.querySelectorAll('.page').forEach(sec=>{
+      sec.hidden = ('#' + sec.id) !== hash;
+    });
+    closeNavFn();
+  }
+  window.addEventListener('hashchange', markCurrent);
+  document.addEventListener('DOMContentLoaded', markCurrent);
+  markCurrent();
+
+  // Sombra cabecera al desplazar
+  window.addEventListener('scroll', ()=>{ hdr?.classList.toggle('scrolled', window.scrollY > 6); });
+
+  // Ajuste iPhone SE
+  const mqSE = window.matchMedia('(max-width: 360px)');
+  const applySE = () => { if (mqSE.matches) document.documentElement.style.setProperty('--hdr-h','100px'); };
+  applySE(); mqSE.addEventListener?.('change', applySE);
+
+  // Abrir/cerrar panel usuario
+  const toggleUser = () => {
+    const show = !userPanel.classList.contains('show');
+    userPanel.classList.toggle('show', show);
+    moreBtn?.setAttribute('aria-expanded', String(show));
+  };
+  moreBtn?.addEventListener('click', (e)=>{ e.stopPropagation(); toggleUser(); });
+  document.getElementById('closeUser')?.addEventListener('click', ()=> userPanel.classList.remove('show'));
+  document.addEventListener('click', (e)=>{
+    if (userPanel.classList.contains('show') && !userPanel.contains(e.target) && !moreBtn.contains(e.target)) {
+      userPanel.classList.remove('show');
+      moreBtn?.setAttribute('aria-expanded','false');
+    }
+  });
+})();
+</script>
+
+<script>
+/* =========================================================
+   PANEL USUARIO · Login + cambiar contraseña (UX)
+========================================================= */
+(function(){
+  const roleSel   = document.getElementById('roleSelect');
+  const userPass  = document.getElementById('userPass');
+  const loginBtn  = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const roleChip  = document.getElementById('roleChip');
+  const pwdHelp   = document.getElementById('pwdHelp');
+  const eyeBtn    = document.getElementById('toggleEye');
+  const userPanel = document.getElementById('userPanel');
+  const moreBtn   = document.getElementById('moreBtn');
+
+  const chgOld    = document.getElementById('chgOld');
+  const chgNew    = document.getElementById('chgNew');
+  const chgBtn    = document.getElementById('chgBtn');
+  const chgTitle  = Array.from(document.querySelectorAll('#userPanel h3'))
+                        .find(h=>/Cambiar contraseña/i.test(h.textContent));
+
+  function setHelp(msg, isError=false){
+    if (!pwdHelp) return;
+    pwdHelp.textContent = msg;
+    pwdHelp.style.color = isError ? '#ef4444' : '#9fb0c6';
+  }
+
+  // Mostrar rol guardado si hay token
+  (function initRoleChip(){
+    const tok = localStorage.getItem('cdl_token');
+    const savedRole = localStorage.getItem('cdl_role');
+    if (tok && savedRole) roleChip.textContent = ucFirst(savedRole);
+  })();
+
+  // Ojo de contraseña accesible
+  (function initEye(){
+    if (!eyeBtn) return;
+    eyeBtn.setAttribute('aria-pressed','false');
+    eyeBtn.title = 'Mostrar contraseña';
+    eyeBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const showing = userPass.type === 'password';
+      userPass.type = showing ? 'text' : 'password';
+      eyeBtn.setAttribute('aria-pressed', showing ? 'true' : 'false');
+      eyeBtn.title = showing ? 'Ocultar contraseña' : 'Mostrar contraseña';
+    });
+  })();
+
+  userPass?.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') loginBtn?.click(); });
+
+  // Login
+  let logging = false;
+  loginBtn?.addEventListener('click', async ()=>{
+    if (logging) return; logging = true; loginBtn.disabled = true;
+
+    const user = roleSel.value;
+    const pass = (userPass.value||'').trim();
+    if(!pass){ setHelp('Introduce la contraseña.', true); userPass.focus(); logging=false; loginBtn.disabled=false; return; }
+
+    try{
+      setHelp('Comprobando…');
+      const r = await cdlApiPostAuth({res:'auth', fn:'login', user, pass});
+      if(r.ok && r.token){
+        localStorage.setItem('cdl_token', r.token);
+        localStorage.setItem('cdl_role', user);
+        roleChip.textContent = ucFirst(user);
+        userPass.value = '';
+        setHelp('Acceso correcto.');
+        userPanel?.classList.remove('show');
+        moreBtn?.setAttribute('aria-expanded','false');
+      }else{
+        setHelp(r.error || 'Contraseña incorrecta.', true);
+      }
+    }catch(err){
+      console.error(err);
+      setHelp('Error de red al acceder.', true);
+    }finally{
+      logging = false; loginBtn.disabled = false;
+    }
+  });
+
+  // Logout
+  logoutBtn?.addEventListener('click', ()=>{
+    localStorage.removeItem('cdl_token');
+    localStorage.removeItem('cdl_role');
+    roleChip.textContent = 'Invitado';
+    setHelp('Sesión cerrada.');
+    userPanel?.classList.remove('show');
+    moreBtn?.setAttribute('aria-expanded','false');
+  });
+
+  // Cambiar contraseña: colapsable + antirebote
+  if (chgTitle && chgOld && chgNew && chgBtn){
+    [chgTitle, chgOld, chgNew, chgBtn].forEach(el=> el.style.display = 'none');
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'btn btn--ghost';
+    toggleBtn.textContent = 'Cambiar contraseña';
+    document.getElementById('userPanel').appendChild(toggleBtn);
+
+    let opened = false;
+    toggleBtn.addEventListener('click', ()=>{
+      opened = !opened;
+      [chgTitle, chgOld, chgNew, chgBtn].forEach(el=> el.style.display = opened ? '' : 'none');
+      toggleBtn.textContent = opened ? 'Ocultar cambio de contraseña' : 'Cambiar contraseña';
+    });
+
+    let changing = false;
+    chgBtn.addEventListener('click', async ()=>{
+      if (changing) return; changing = true; chgBtn.disabled = true;
+      const oldP = (chgOld.value||'').trim();
+      const newP = (chgNew.value||'').trim();
+      if(!oldP || !newP){ setHelp('Rellena “Actual” y “Nueva”.', true); changing=false; chgBtn.disabled=false; return; }
+      try{
+        setHelp('Guardando nueva contraseña…');
+        const r = await cdlApiPostAuth({res:'auth', fn:'change', old: oldP, neu: newP});
+        if(r.ok){
+          setHelp('Contraseña cambiada.');
+          chgOld.value = chgNew.value = '';
+          opened = false;
+          [chgTitle, chgOld, chgNew, chgBtn].forEach(el=> el.style.display = 'none');
+          toggleBtn.textContent = 'Cambiar contraseña';
+        }else{
+          setHelp(r.error || 'No se pudo cambiar la contraseña.', true);
+        }
+      }catch(err){
+        console.error(err);
+        setHelp('Error de red al cambiar contraseña.', true);
+      }finally{
+        changing = false; chgBtn.disabled = false;
+      }
+    });
+  }
+
+  setHelp('Introduce la clave según tu rol');
+})();
+</script>
+
+<script>
+/* =========================================================
+   Hook de navegación (monta selectores y portaimanes)
+========================================================= */
+function cdlAfterNavigation(){
+  // Inyectores de "Ver ficha" en 3 páginas
+  cdlInjectEquipFichaSelector('equipos', 'Ficha técnica de equipo');
+  cdlInjectEquipFichaSelector('gruas', 'Ficha técnica de puente grúa');
+  cdlInjectEquipFichaSelector('auxiliares', 'Ficha técnica de auxiliar');
+
+  // Tarjeta de portaimanes (grúas)
+  cdlInjectPortaimanesCard();
+}
+window.addEventListener("hashchange", cdlAfterNavigation);
+document.addEventListener("DOMContentLoaded", cdlAfterNavigation);
+setTimeout(cdlAfterNavigation, 300);
+</script>
+
+<script>
+/* =========================================================
+   REGISTRO — API + fallback local + renderer
+   Estructura base:
+   {
+     id:"R-...", tipo:"incidencia"|"ot",
+     equipo:"KDP-1", titulo:"Texto",
+     fecha:"YYYY-MM-DD HH:mm", intervenido_por:"Nombre",
+     enlace:"#incidencias"|"#ot"
+   }
+========================================================= */
+const CDL_REG_LS_KEY = 'cdl_registro_local';
+
+function cdlNowISOlocal(){
+  const d=new Date(); const pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+async function cdlRegistroAdd(item){
+  // 1) API si existe
+  try{
+    const ok = await cdlEnsureLoginIfNeeded(); if(!ok) throw new Error('nologin');
+    const r = await cdlApiPostAuth({res:'registro', fn:'add', item});
+    if (r && r.ok) return r;
+  }catch{}
+  // 2) LocalStorage
+  const it = { ...item, id: item.id || `R-${Date.now()}` };
+  try{
+    const arr = JSON.parse(localStorage.getItem(CDL_REG_LS_KEY)||'[]');
+    arr.push(it);
+    localStorage.setItem(CDL_REG_LS_KEY, JSON.stringify(arr));
+    return {ok:true, local:true, item:it};
+  }catch(e){ return {ok:false, error:'local-fail'}; }
+}
+
+async function cdlRegistroList(){
+  // 1) API dedicada
+  try{
+    const r = await cdlApiGet({res:'registro', fn:'list'});
+    if (r && r.items) return r.items;
+  }catch{}
+  // 2) Construcción a partir de Incidencias/OT + local
+  let items = [];
+  try{
+    const inc = await cdlApiGet({res:'incid',fn:'list'});
+    (inc.items||[]).forEach(x=>{
+      const estado = (x.res || x.estado || '').toLowerCase();
+      if(!/solucionado|si/.test(estado)) return;
+      items.push({
+        id: `INC-${x.id||x.created||Math.random()}`,
+        tipo:'incidencia',
+        equipo: x.equipo || 'PENDIENTE',
+        titulo: x.desc || 'Incidencia cerrada',
+        fecha: (x.fin||x.updated||x.created||'').slice(0,16) || cdlNowISOlocal(),
+        intervenido_por: x.intervenido||x.intervenido_por||'PENDIENTE',
+        enlace: '#incidencias'
+      });
+    });
+  }catch{}
+  try{
+    const ot = await cdlApiGet({res:'ot', fn:'list'});
+    (ot.items||[]).forEach(x=>{
+      const estado = (x.estado||'').toLowerCase();
+      if(!/finalizada|completada|cerrada|ok/.test(estado)) return;
+      items.push({
+        id: `OT-${x.id||x.created||Math.random()}`,
+        tipo:'ot',
+        equipo: x.equipo || 'PENDIENTE',
+        titulo: x.tarea || 'OT finalizada',
+        fecha: (x.fin||x.updated||x.created||'').slice(0,16) || cdlNowISOlocal(),
+        intervenido_por: x.intervenido_por || x.asignado_a || 'PENDIENTE',
+        enlace: '#ot'
+      });
+    });
+  }catch{}
+  try{
+    const loc = JSON.parse(localStorage.getItem(CDL_REG_LS_KEY)||'[]');
+    items = items.concat(loc);
+  }catch{}
+
+  items.sort((a,b)=> String(b.fecha).localeCompare(String(a.fecha)));
+  return items;
+}
+
+function cdlRenderRegistroList(items){
+  const host = document.getElementById('regList'); if(!host) return;
+  document.getElementById('regCount')?.replaceChildren(document.createTextNode(items.length||0));
+  if(!items.length){
+    host.innerHTML = `<div class="line-1" style="color:#64748b">Sin registros</div>`;
+    return;
+  }
+  host.innerHTML = items.map(x=>{
+    const tipoBadge = x.tipo==='ot'
+      ? '<span class="badge badge--ok">OT</span>'
+      : '<span class="badge">Incidencia</span>';
+    return `<div class="line-1" style="display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center">
+      <div>
+        <div style="font-weight:800">${x.equipo} · ${x.titulo}</div>
+        <div style="font-size:12px; color:#64748b">${x.fecha} · ${x.intervenido_por||'—'}</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center">
+        ${tipoBadge}
+        <a class="btn btn--ghost btn--sm" href="${x.enlace||'#'}">Informe completo</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function cdlRegistroReload(){
+  const all = await cdlRegistroList();
+  const term = (document.getElementById('regFilter')?.value||'').toLowerCase();
+  const tipoSel = document.getElementById('regTipo')?.value || '';
+  const out = all.filter(x=>{
+    const okTipo = !tipoSel || x.tipo===tipoSel;
+    const txt = `${x.equipo||''} ${x.titulo||''} ${x.intervenido_por||''}`.toLowerCase();
+    const okTxt = !term || txt.includes(term);
+    return okTipo && okTxt;
+  });
+  cdlRenderRegistroList(out);
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('regReload')?.addEventListener('click', cdlRegistroReload);
+  document.getElementById('regFilter')?.addEventListener('input', ()=>{ clearTimeout(window._reg_t); window._reg_t=setTimeout(cdlRegistroReload,200); });
+  document.getElementById('regTipo')?.addEventListener('change', cdlRegistroReload);
+  if(location.hash==='#registro') cdlRegistroReload();
+});
+window.addEventListener('hashchange', ()=>{ if(location.hash==='#registro') cdlRegistroReload(); });
+</script>
+
+<script>
+/* =========================================================
+   FINALIZAR / COMPLETAR — UI mínima + API + sincronización
+   - Incidencias: marcar como solucionada
+   - OT: marcar como finalizada
+   - Inserta un registro y refresca dashboards/registro
+========================================================= */
+
+/* === 1) Barras rápidas para finalizar (por ID) === */
+function cdlInjectFinalizeBars(){
+  // Incidencias
+  const secI = document.getElementById('incidencias');
+  if (secI && !secI.querySelector('#barFinInc')){
+    const card = document.createElement('div');
+    card.className='card'; card.id='barFinInc';
+    card.innerHTML = `
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+        <strong>Finalizar incidencia</strong>
+        <input id="finIncId" placeholder="ID incidencia (ej: INC-123)" style="min-width:180px">
+        <input id="finIncTec" placeholder="Intervenido por" style="min-width:180px">
+        <input id="finIncDesc" placeholder="Resumen solución" style="flex:1 1 240px">
+        <button class="btn btn--primary" id="finIncBtn">Marcar como solucionada</button>
+      </div>`;
+    secI.insertBefore(card, secI.querySelector('.card'));
+    document.getElementById('finIncBtn')?.addEventListener('click', async ()=>{
+      const id  = (document.getElementById('finIncId').value||'').trim();
+      const tec = (document.getElementById('finIncTec').value||'').trim() || 'PENDIENTE';
+      const desc= (document.getElementById('finIncDesc').value||'').trim() || 'Incidencia solucionada';
+      if(!id){ alert('Escribe el ID de la incidencia'); return; }
+      const ok = await cdlMarkIncidCompleted(id, tec, desc);
+      if(ok){ alert('Incidencia marcada como solucionada'); try{ cdlRegistroReload(); }catch{} }
+      else  { alert('No se pudo completar'); }
+    });
+  }
+  // OT
+  const secO = document.getElementById('ot');
+  if (secO && !secO.querySelector('#barFinOT')){
+    const card = document.createElement('div');
+    card.className='card'; card.id='barFinOT';
+    card.innerHTML = `
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+        <strong>Finalizar OT</strong>
+        <input id="finOtId" placeholder="ID OT (ej: OT-123)" style="min-width:180px">
+        <input id="finOtTec" placeholder="Intervenido por" style="min-width:180px">
+        <input id="finOtDesc" placeholder="Descripción final" style="flex:1 1 240px">
+        <button class="btn btn--primary" id="finOtBtn">Marcar como finalizada</button>
+      </div>`;
+    secO.insertBefore(card, secO.querySelector('.card'));
+    document.getElementById('finOtBtn')?.addEventListener('click', async ()=>{
+      const id  = (document.getElementById('finOtId').value||'').trim();
+      const tec = (document.getElementById('finOtTec').value||'').trim() || 'PENDIENTE';
+      const desc= (document.getElementById('finOtDesc').value||'').trim() || 'OT finalizada';
+      if(!id){ alert('Escribe el ID de la OT'); return; }
+      const ok = await cdlMarkOTCompleted(id, tec, desc);
+      if(ok){ alert('OT marcada como finalizada'); try{ cdlRegistroReload(); }catch{} }
+      else  { alert('No se pudo completar'); }
+    });
+  }
+}
+document.addEventListener('DOMContentLoaded', cdlInjectFinalizeBars);
+
+/* === 2) Funciones de completar con API + fallback === */
+async function cdlMarkIncidCompleted(incId, intervenidoPor, resumen){
+  let equipo = 'PENDIENTE';
+  try{
+    const r = await cdlApiPostAuth({res:'incid', fn:'complete', id:incId, intervenido_por:intervenidoPor, resumen});
+    if(!(r&&r.ok)) throw new Error('api-fail');
+    equipo = r.equipo || r.item?.equipo || equipo;
+  }catch(e){
+    // fallback local si quieres: aquí podrías actualizar un listado local de incidencias
+  }
+  await cdlRegistroAdd({
+    tipo:'incidencia',
+    equipo,
+    titulo: resumen || 'Incidencia solucionada',
+    fecha: cdlNowISOlocal(),
+    intervenido_por: intervenidoPor,
+    enlace:'#incidencias'
+  });
+  try{ cdlLoadReport?.(); }catch{}
+  try{ cdlLoadParadas?.(); }catch{}
+  return true;
+}
+
+async function cdlMarkOTCompleted(otId, intervenidoPor, descripcion){
+  let equipo = 'PENDIENTE';
+  try{
+    const r = await cdlApiPostAuth({res:'ot', fn:'complete', id:otId, intervenido_por:intervenidoPor, descripcion});
+    if(!(r&&r.ok)) throw new Error('api-fail');
+    equipo = r.equipo || r.item?.equipo || equipo;
+  }catch(e){
+    // fallback local si procede
+  }
+  await cdlRegistroAdd({
+    tipo:'ot',
+    equipo,
+    titulo: descripcion || 'OT finalizada',
+    fecha: cdlNowISOlocal(),
+    intervenido_por: intervenidoPor,
+    enlace:'#ot'
+  });
+  try{ cdlLoadReport?.(); }catch{}
+  return true;
+}
+
+/* === 3) Botón “Completar” auto-inyectado en listados si detecta data-complete-id === */
+const _cdlCompleteObserver = new MutationObserver(list=>{
+  list.forEach(m=>{
+    (m.addedNodes||[]).forEach(n=>{
+      if(!(n instanceof HTMLElement)) return;
+      const cand = n.matches?.('[data-complete-id]') ? [n] : [...n.querySelectorAll?.('[data-complete-id]')];
+      cand.forEach(el=>{
+        if(el.querySelector?.('.cdl-mini-complete')) return;
+        const btn = document.createElement('button');
+        btn.className='btn btn--sm btn--primary cdl-mini-complete';
+        btn.textContent='Completar';
+        btn.style.marginLeft='8px';
+        btn.addEventListener('click', (ev)=>{
+          ev.stopPropagation(); ev.preventDefault();
+          const id = el.getAttribute('data-complete-id');
+          const hostId = el.closest('#incList') ? 'inc' : 'ot';
+          const tec = prompt('Intervenido por:','') || 'PENDIENTE';
+          const desc= prompt('Resumen final:','') || (hostId==='inc'?'Incidencia solucionada':'OT finalizada');
+          if(hostId==='inc') cdlMarkIncidCompleted(id, tec, desc).then(()=>cdlRegistroReload());
+          else cdlMarkOTCompleted(id, tec, desc).then(()=>cdlRegistroReload());
+        });
+        el.appendChild(btn);
+      });
+    });
+  });
+});
+document.addEventListener('DOMContentLoaded', ()=>{
+  const inc = document.getElementById('incList'); if(inc) _cdlCompleteObserver.observe(inc,{childList:true,subtree:true});
+  const ot  = document.getElementById('otList');  if(ot)  _cdlCompleteObserver.observe(ot,{childList:true,subtree:true});
+});
+</script>
+
+<script>
+/* =========================================================
+   Service Worker — aviso de nueva versión + recarga
+========================================================= */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        nw?.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            if (confirm('Hay una nueva versión. ¿Actualizar ahora?')) {
+              nw.postMessage({ type: 'skipWaiting' });
+            }
+          }
+        });
+      });
+    });
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) { refreshing = true; location.reload(); }
+    });
+  });
+}
+</script>
+<style>
+/* === AÑADIDOS SEGUROS (no pisan tu CSS) ============================== */
+:root{
+  --cdl-brand:#E43B3B;
+}
+:where(.btn--manual){
+  background:#A60000;color:#fff;border:0;border-radius:10px;
+  padding:10px 14px;font-weight:800;letter-spacing:.2px;cursor:pointer;
+}
+:where(.btn--manual):active{transform:translateY(1px)}
+:where(.btn--ficha){
+  background:var(--cdl-brand);color:#fff;border:0;border-radius:999px;
+  padding:8px 12px;font-weight:800;cursor:pointer;
+}
+:where(.btn--ficha):active{transform:translateY(1px)}
+.badge-kv{display:flex;gap:6px;flex-wrap:wrap}
+.badge-kv .badge{margin:0 0 6px 0}
+.cdl-enh__toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.cdl-enh__qr{display:flex;align-items:center;gap:12px}
+.cdl-enh__gallery{border:1px solid #e6e8ee;border-radius:12px;overflow:hidden}
+</style>
+
+<script>
+/* === AÑADIDOS SEGUROS · SIN ROMPER TU LÓGICA ========================= */
+(function(){
+  const Enh = window.CdlEnh = window.CdlEnh || {};
+
+  /* -------- Helpers: slug + HEAD + manual fallback -------- */
+  Enh.slugPdf = function(name){
+    const map={'á':'a','é':'e','í':'i','ó':'o','ú':'u','ñ':'n','Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U','Ñ':'N'};
+    return String(name||'').replace(/[^\w\s-]/g,'').replace(/[áéíóúñÁÉÍÓÚÑ]/g,m=>map[m]||m)
+      .trim().replace(/\s+/g,'_') + '.pdf';
+  };
+  Enh.headOk = async function(url){ try{ const r=await fetch(url,{method:'HEAD',cache:'no-store'}); return r.ok; }catch{ return false; } };
+  Enh.manualUrl = async function(equipName){
+    const base='./manuales/'; const sp=base+Enh.slugPdf(equipName); const fb=base+'manual_no_disponible.pdf';
+    return (await Enh.headOk(sp)) ? sp : fb;
+  };
+
+  /* -------- QR (externo) -------- */
+  Enh.qrImg = function(data){
+    const u = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&margin=0&data=${encodeURIComponent(String(data||''))}`;
+    const img = new Image(); img.src=u; img.alt='QR'; img.width=140; img.height=140; img.loading='lazy';
+    return img;
+  };
+
+  /* -------- Zebra (BrowserPrint) namespaced -------- */
+  Enh.Zebra = {
+    available:false, device:null, tried:false,
+    init(){
+      if(this.tried) return; this.tried=true;
+      try{
+        if(window.BrowserPrint){
+          window.BrowserPrint.getDefaultDevice('printer',
+            d=>{this.available=true; this.device=d;},
+            ()=>{this.available=false;}
+          );
+        }
+      }catch{ this.available=false; }
+    },
+    sendLabel(equipName){
+      if(!this.available || !this.device){ alert('Impresora Zebra no disponible.'); return; }
+      const safe = String(equipName||'').replace(/[\^~]/g,' ');
+      const qr = `^FO40,40^BQN,2,6^FDQA,${safe}^FS`;
+      const txt= `^CF0,30^FO40,280^FD${safe}^FS`;
+      const zpl= `^XA^PW600^LH0,0${qr}${txt}^XZ`;
+      this.device.send(zpl, ()=>alert('Etiqueta enviada a Zebra'), ()=>alert('Error al enviar a Zebra'));
+    }
+  };
+  Enh.Zebra.init();
+
+  /* -------- Galería placeholder no intrusiva -------- */
+  Enh.renderGallery = function(fotos){
+    if(!fotos || !fotos.length){
+      const wrap = document.createElement('div'); wrap.className='cdl-enh__gallery';
+      wrap.innerHTML = `
+        <div class="hero-carousel"><div class="carousel-track">
+          <div class="carousel-slide">
+            <picture>
+              <source type="image/webp" srcset="./img/placeholder_equipo.webp">
+              <img src="./img/placeholder_equipo.jpeg" alt="Imagen no disponible">
+            </picture>
+          </div>
+        </div></div>`;
+      return wrap;
+    }
+    // Si hay fotos, devolvemos vacío: no tocamos tu galería original
+    const frag = document.createDocumentFragment(); return frag;
+  };
+
+  /* -------- Post-procesado de tu ficha: inyecta botones sin borrar nada -------- */
+  Enh.enhanceFichaHtml = async function(equipName){
+    const manual = await Enh.manualUrl(equipName);
+    const modal = document.getElementById('cdlModal'); if(!modal) return;
+
+    // 1) Barra de acciones (Manual, Zebra si hay, QR)
+    const toolbar = document.createElement('div'); toolbar.className='cdl-enh__toolbar';
+    const bManual = document.createElement('button'); bManual.className='btn--manual'; bManual.textContent='Manual';
+    bManual.addEventListener('click', ()=>window.open(manual,'_blank'));
+
+    const bZebra = document.createElement('button'); bZebra.className='btn btn--ficha'; bZebra.textContent='Imprimir etiqueta (Zebra)';
+    if(Enh.Zebra.available){ bZebra.addEventListener('click', ()=>Enh.Zebra.sendLabel(equipName)); }
+    else { bZebra.disabled = true; bZebra.title = 'Zebra no disponible'; }
+
+    const qrWrap = document.createElement('div'); qrWrap.className='cdl-enh__qr';
+    const qrImg = Enh.qrImg(equipName);
+    const idTag = document.createElement('div'); idTag.innerHTML = `<div class="badge">ID: ${equipName}</div>`;
+    qrWrap.append(qrImg, idTag);
+
+    toolbar.append(bManual, bZebra, qrWrap);
+
+    // 2) Intento colocar la barra bajo el título del modal o al comienzo del contenido
+    const content = modal.querySelector('.content') || modal;
+    const header = modal.querySelector('header') || modal.querySelector('.up__head');
+    if(header && header.nextSibling){
+      header.parentNode.insertBefore(toolbar, header.nextSibling);
+    }else{
+      content.prepend(toolbar);
+    }
+
+    // 3) Galería placeholder no intrusiva:
+    //    si ya detectamos una galería en tu ficha, no la tocamos; si no, añadimos un bloque de cortesía.
+    const hasGallery = content.querySelector('picture img, .hero-carousel, .gallery, [data-gallery]');
+    if(!hasGallery){
+      const gTitle = document.createElement('h4'); gTitle.textContent = 'Galería';
+      const g = Enh.renderGallery([]);
+      content.prepend(g);
+      content.prepend(gTitle);
+    }
+  };
+
+  /* -------- Wrapper seguro de tu cdlOpenEquipFicha (si existe) -------- */
+  if(typeof window.cdlOpenEquipFicha === 'function'){
+    const __orig = window.cdlOpenEquipFicha;
+    window.cdlOpenEquipFicha = async function(equipName, meta){
+      // 1) Llamamos a tu ficha original
+      const r = __orig.apply(this, arguments);
+      try{
+        // Si tu original devuelve Promesa (async), esperamos
+        await Promise.resolve(r);
+      }catch(_){/* no rompemos nada */}
+      // 2) Inyectamos añadidos (no destructivos)
+      try{
+        await Enh.enhanceFichaHtml(equipName);
+      }catch(e){ /* silencioso para no afectar UX */ }
+      return r;
+    };
+  }
+
+  /* -------- Si NO existe tu cdlOpenEquipFicha, no hacemos nada destructivo -------- */
+})();
+</script>
+<script>
+// Fallback imágenes de puentes → ghdemag.webp
+document.addEventListener('error', function (e) {
+  const el = e.target;
+  if (
+    el.tagName === 'IMG' &&
+    el.src.includes('/img/puentes/') &&
+    !el.dataset.fbApplied // evita bucle si la de fallback también falla
+  ) {
+    el.dataset.fbApplied = '1';
+    el.src = './img/puentes/ghdemag.webp';
+  }
+}, true);
+</script>
+<script>
+/* =========================================================
+   CARRUSEL: autoplay + botones + swipe + dots
+   ▸ Pausa automática con Page Visibility
+   ▸ Pausa al pasar el ratón por encima
+   ▸ API pública: window.HCCtrl.pause()/resume()
+========================================================= */
+(function cdlCarousel(){
+  const track = document.getElementById('hcTrack');
+  if(!track) return;
+
+  const slides = [...track.children];
+  const prev = document.getElementById('hcPrev');
+  const next = document.getElementById('hcNext');
+  const dotsWrap = document.getElementById('hcDots');
+
+  let idx = 0, startX = 0, dx = 0, dragging = false;
+  let timer = null, paused = false;
+  const AUTO_MS = 5000;
+
+  // Dots
+  dotsWrap.innerHTML = slides.map((_,i)=>`<button aria-label="Ir a ${i+1}" ${i===0?'aria-current="true"':''}></button>`).join('');
+  const dots = [...dotsWrap.children];
+
+  function goTo(i){
+    idx = (i + slides.length) % slides.length;
+    track.style.transition = 'transform .35s ease';
+    track.style.transform = `translateX(${idx * -100}%)`;
+    dots.forEach((d,k)=> d.setAttribute('aria-current', k===idx ? 'true':'false'));
+    resetAuto(); // relanza autoplay salvo que esté pausado
+  }
+
+  function prevSlide(){ goTo(idx-1); }
+  function nextSlide(){ goTo(idx+1); }
+
+  function startAuto(){
+    clearInterval(timer);
+    timer = setInterval(()=> goTo(idx+1), AUTO_MS);
+  }
+  function stopAuto(){
+    clearInterval(timer);
+    timer = null;
+  }
+  function resetAuto(){
+    if (!paused && !document.hidden) startAuto();
+  }
+
+  // Gestos
+  function onStart(e){
+    dragging = true; startX = (e.touches?e.touches[0].clientX:e.clientX); dx = 0;
+    track.style.transition = 'none';
+    stopAuto();
+  }
+  function onMove(e){
+    if(!dragging) return;
+    const x = (e.touches?e.touches[0].clientX:e.clientX);
+    dx = x - startX;
+    track.style.transform = `translateX(calc(${idx * -100}% + ${dx}px))`;
+  }
+  function onEnd(){
+    if(!dragging) return; dragging = false;
+    const w = track.clientWidth;
+    if (Math.abs(dx) > w*0.15){ dx<0 ? nextSlide() : prevSlide(); }
+    else goTo(idx);
+  }
+
+  // Controles
+  prev?.addEventListener('click', prevSlide);
+  next?.addEventListener('click', nextSlide);
+  dots.forEach((d,i)=> d.addEventListener('click', ()=>goTo(i)));
+
+  // Pausa por hover
+  track.addEventListener('mouseenter', ()=>{ paused = true; stopAuto(); });
+  track.addEventListener('mouseleave', ()=>{ paused = false; resetAuto(); });
+
+  // Pausa al cambiar de pestaña/ventana
+  document.addEventListener('visibilitychange', ()=>{
+    if (document.hidden) stopAuto();
+    else resetAuto();
+  });
+
+  // Gestos táctiles / ratón
+  track.addEventListener('pointerdown', onStart);
+  track.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onEnd);
+  track.addEventListener('touchstart', onStart, {passive:true});
+  track.addEventListener('touchmove', onMove, {passive:true});
+  track.addEventListener('touchend', onEnd);
+
+  // API pública opcional
+  window.HCCtrl = {
+    pause(){ paused = true; stopAuto(); },
+    resume(){ paused = false; resetAuto(); }
+  };
+
+  goTo(0); // arranque
+})();
+</script>
+<script>
+(function initAllCarousels(){
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const tracks = [...document.querySelectorAll('.hero-carousel .carousel-track')]
+    .filter(t => t.id !== 'hcTrack'); // evita el principal que ya tienes
+
+  const usePointer = 'PointerEvent' in window;
+
+  tracks.forEach(track=>{
+    const slides = [...track.children];
+    let idx = 0, startX = 0, dx = 0, dragging = false, timer = null;
+    let paused = false;
+
+    function goTo(i){
+      idx = (i + slides.length) % slides.length;
+      track.style.transition = 'transform .35s ease';
+      track.style.transform = `translateX(${idx * -100}%)`;
+    }
+    function next(){ goTo(idx+1); }
+    function start(){
+      stop();
+      if (!prefersReduced && !document.hidden && !paused) {
+        timer = setInterval(next, 5000);
+      }
+    }
+    function stop(){
+      if (timer){ clearInterval(timer); timer = null; }
+    }
+
+    function onStart(clientX){
+      dragging = true; startX = clientX; dx=0; track.style.transition='none'; stop();
+    }
+    function onMove(clientX){
+      if(!dragging) return;
+      dx = clientX - startX;
+      track.style.transform = `translateX(calc(${idx * -100}% + ${dx}px))`;
+    }
+    function onEnd(){
+      if(!dragging) return; dragging=false;
+      const w=track.clientWidth;
+      Math.abs(dx) > w*0.15 ? (dx<0?next():goTo(idx-1)) : goTo(idx);
+      start();
+    }
+
+    // Eventos (prioriza PointerEvent)
+    if (usePointer){
+      const onPD = e => { if(e.pointerType==='mouse' && e.button!==0) return; onStart(e.clientX); };
+      const onPM = e => onMove(e.clientX);
+      const onPU = () => onEnd();
+      track.addEventListener('pointerdown', onPD);
+      track.addEventListener('pointermove', onPM);
+      window.addEventListener('pointerup', onPU);
+
+      // Limpieza si el nodo se elimina
+      const obs = new MutationObserver(()=>{
+        if(!document.body.contains(track)){
+          track.removeEventListener('pointerdown', onPD);
+          track.removeEventListener('pointermove', onPM);
+          window.removeEventListener('pointerup', onPU);
+          stop();
+          obs.disconnect();
+        }
+      });
+      obs.observe(document.body, {childList:true, subtree:true});
+    }else{
+      // Fallback touch/mouse muy simple
+      track.addEventListener('touchstart', e=> onStart(e.touches[0].clientX), {passive:true});
+      track.addEventListener('touchmove',  e=> onMove(e.touches[0].clientX), {passive:true});
+      track.addEventListener('touchend',  onEnd, {passive:true});
+      track.addEventListener('mousedown', e=> onStart(e.clientX));
+      window.addEventListener('mousemove', e=> onMove(e.clientX));
+      window.addEventListener('mouseup', onEnd);
+    }
+
+    // Pausas automáticas
+    document.addEventListener('visibilitychange', ()=> document.hidden ? stop() : start());
+    track.addEventListener('mouseenter', ()=>{ paused = true; stop(); });
+    track.addEventListener('mouseleave', ()=>{ paused = false; start(); });
+
+    goTo(0);
+    start();
+  });
+})();
+</script>
+<script id="patch-js">
+(function(){
+  // ========= 0) ENDPOINTS REALES =========
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbzgTZ8zMOOKiYt2JygDLX39xQoU3elE_7T8DDFhiBYk5UOvV3F4Tp6EAE3jenj3Njzr1g/exec';
+  const API = {
+    equipos:     API_BASE + '?path=equipos',
+    gruas:       API_BASE + '?path=gruas',
+    auxiliares:  API_BASE + '?path=auxiliares',
+    incidencias: API_BASE + '?path=incidencias',
+    inventario:  API_BASE + '?path=inventario',
+    consumibles: API_BASE + '?path=consumibles'
+  };
+
+  // ========= 1) MENÚ HAMBURGUESA (navList) =========
+  const nav = document.querySelector('#navList');
+  if(nav){
+    nav.innerHTML = `
+      <a href="#dashboard">Dashboard</a>
+      <a href="#equipos">Equipos</a>
+      <a href="#gruas">Puentes Grúa</a>
+      <a href="#auxiliares">Auxiliares</a>
+      <a href="#incidencias">Incidencias</a>
+      <a href="#inventario">Inventario</a>
+      <a href="#solicitudes">Solicitudes de repuestos</a>
+      <a href="#ots">OTs</a>
+      <a href="#test">Test</a>
+    `;
+    // Buscador con Intro + botón X si tienes barra en el side (opcional)
+  }
+
+  // ========= 2) MENÚ USUARIO — quitar “Actual / Nueva” cuando está cerrado =========
+  // Si tu UI usa un panel/menú con id "userPanel" o similar:
+  const upanel = document.querySelector('#userPanel');
+  if(upanel){
+    const pwdFields = upanel.querySelectorAll('#pwdOld, #pwdNew, label[for="pwdOld"], label[for="pwdNew"]');
+    // Ocultar de inicio
+    pwdFields.forEach(el=> el.closest('div,fieldset,label,input')?.classList?.add('pwd-hidden'));
+    const btnToggle = upanel.querySelector('#togglePwdPanel') || upanel.querySelector('[data-action="toggle-pwd"]');
+    if(btnToggle){
+      btnToggle.addEventListener('click', ()=>{
+        upanel.querySelectorAll('.pwd-hidden').forEach(el=>{
+          el.classList.remove('pwd-hidden');
+        });
+      }, {once:true});
+    }
+  }
+  // Fallback genérico: si hay un contenedor #userMenu:
+  const umenu = document.querySelector('#userMenu');
+  if(umenu){
+    const toHide = umenu.querySelectorAll('#pwdOld, #pwdNew, label[for="pwdOld"], label[for="pwdNew"]');
+    toHide.forEach(el=> el.closest('div,fieldset,label,input')?.setAttribute('hidden',''));
+    const tgl = umenu.querySelector('#togglePwdPanel');
+    if(tgl){
+      tgl.addEventListener('click', ()=>{
+        toHide.forEach(el=> el.closest('div,fieldset,label,input')?.removeAttribute('hidden'));
+      }, {once:true});
+    }
+  }
+
+  // ========= 3) CARRUSEL — sólo en #dashboard y centrado =========
+  // El CSS ya lo centra; aquí quitamos carruseles fuera del dashboard si existen.
+  document.querySelectorAll('.carousel').forEach(c=>{
+    if(!c.closest('#dashboard')) c.remove();
+  });
+
+  // ========= 4) EQUIPOS / GRÚAS / AUXILIARES — limpiar buscadores redundantes y dejar 1 tarjeta con desplegable =========
+  function ensureSearchCard(sectionId, labelText, inputId, selectId, submitText){
+    const sec = document.querySelector(sectionId);
+    if(!sec) return;
+    // Elimina tarjetas con “buscar …” que no hacen nada o botones “limpiar”
+    sec.querySelectorAll('.card').forEach(card=>{
+      const t = card.textContent.toLowerCase();
+      if(/\blimpiar\b/.test(t) || /\bbuscar\b/.test(t) && !/ficha técnica/.test(t)){
+        card.remove();
+      }
+    });
+    // Si no existe nuestra tarjeta, la creamos arriba
+    if(!sec.querySelector(`#${inputId}`) || !sec.querySelector(`#${selectId}`)){
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.innerHTML = `
+        <form class="form-inline" id="${inputId}Form" autocomplete="off">
+          <label for="${inputId}" class="form-inline__label">${labelText}</label>
+          <input id="${inputId}" type="search" placeholder="Escribe ID o nombre…">
+          <select id="${selectId}" aria-label="Seleccionar de la lista">
+            <option value="">— Selecciona de la lista —</option>
+          </select>
+          <button type="submit" class="btn btn--primary">${submitText}</button>
+        </form>`;
+      const hdr = sec.querySelector('.sec-hdr');
+      hdr?.insertAdjacentElement('afterend', card);
+    }
+  }
+  ensureSearchCard('#equipos',      'Ficha técnica de equipo',          'equipoQuery', 'equipoSelect', 'Ver ficha');
+  ensureSearchCard('#gruas',        'Ficha técnica de puente de grúa',  'gruaQuery',   'gruaSelect',   'Ver ficha');
+  ensureSearchCard('#auxiliares',   'Ficha técnica de auxiliar',        'auxQuery',    'auxSelect',    'Ver ficha');
+
+  // Reordenar “Línea Kaltenbach” debajo de la tarjeta en Equipos (si estuviera arriba)
+  (function(){
+    const sec = document.querySelector('#equipos');
+    if(!sec) return;
+    const linea = [...sec.querySelectorAll('h3')].find(h=>/kaltenbach/i.test(h.textContent));
+    const card = sec.querySelector('.card');
+    if(linea && card && linea.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING){
+      // ya está debajo -> OK
+    }else if(linea && card){
+      card.insertAdjacentElement('afterend', linea);
+    }
+  })();
+
+  // ========= 5) INCIDENCIAS — estructura: botón Crear, tarjeta Finalizar, tarjeta Buscador, listado descendente =========
+  (function(){
+    const sec = document.querySelector('#incidencias');
+    if(!sec) return;
+    // Quita carrusel si hubiese
+    sec.querySelectorAll('.carousel').forEach(c=>c.remove());
+
+    // Botón Crear (si falta, lo añadimos debajo del título)
+    if(!sec.querySelector('#btnNuevaIncidencia')){
+      const p = document.createElement('p');
+      p.innerHTML = '<button id="btnNuevaIncidencia" class="btn btn--primary">Crear nueva incidencia</button>';
+      sec.querySelector('.sec-hdr')?.insertAdjacentElement('afterend', p);
+    }
+
+    // Tarjeta "Últimas incidencias" -> renombrar a "Buscador de incidencias" o la sustituimos
+    const ult = [...sec.querySelectorAll('.card')].find(c=>/últimas incidencias/i.test(c.textContent));
+    if(ult){
+      ult.innerHTML = `
+        <h3>Buscador de incidencias</h3>
+        <form id="buscaIncForm" class="filters" autocomplete="off">
+          <div class="filters__row">
+            <label for="incCat">Categoría</label>
+            <select id="incCat">
+              <option value="">Todas</option>
+              <option value="equipos">Equipos</option>
+              <option value="gruas">Grúas</option>
+              <option value="auxiliares">Auxiliares</option>
+            </select>
+            <label for="incLinea">Línea/Equipo</label>
+            <input id="incLinea" type="search" placeholder="Kaltenbach, Mazak, HGG…">
+            <label for="incFecha">Fecha</label>
+            <input id="incFecha" type="date">
+            <label for="incEstado">Estado</label>
+            <select id="incEstado">
+              <option value="">Todos</option>
+              <option value="abierta">Abierta</option>
+              <option value="sin_resolver">Sin resolver</option>
+              <option value="solucionada">Solucionada</option>
+            </select>
+            <button class="btn" type="submit">Buscar</button>
+          </div>
+        </form>`;
+    }
+
+    // Listado contenedor (si falta)
+    if(!sec.querySelector('#incList')){
+      const list = document.createElement('div');
+      list.id = 'incList';
+      list.className = 'cards-stack';
+      sec.appendChild(list);
+    }
+  })();
+
+  // ========= 6) INVENTARIO — botones, buscador 1 línea, CSV+QR sólo admin, catálogo =========
+  (function(){
+    const sec = document.querySelector('#inventario');
+    if(!sec) return;
+    // Cambiar texto del botón Eliminar/Descontar -> "Descontar"
+    sec.querySelectorAll('button').forEach(b=>{
+      if(/eliminar\b/i.test(b.textContent)) b.textContent = 'Descontar';
+      if(/eliminar\s*\/\s*descontar/i.test(b.textContent)) b.textContent = 'Descontar';
+    });
+    // Buscador en una sola línea: si existe un form largo, lo compactamos con .form-inline
+    sec.querySelectorAll('form').forEach(f=>{
+      if(/buscar/i.test(f.textContent)) f.classList.add('form-inline');
+    });
+    // Tarjeta CSV+QR -> visible sólo para admin (si la detectamos)
+    const adminCard = [...sec.querySelectorAll('.card')].find(c=>/csv\s*\+\s*qr/i.test(c.textContent));
+    if(adminCard){
+      adminCard.setAttribute('data-role','admin');
+      // por defecto oculto si rol != admin (lo gestiona abajo enforceRoleVisibility)
+      adminCard.hidden = true;
+    }
+    // Contenedor catálogo si falta
+    if(!sec.querySelector('#invCatalog')){
+      const h = document.createElement('h3'); h.textContent='Catálogo';
+      const div = document.createElement('div'); div.id='invCatalog'; div.className='catalog';
+      sec.append(h, div);
+    }
+  })();
+
+  // ========= 7) CONSUMIBLES — alarma colapsable + listado =========
+  (function(){
+    const sec = document.querySelector('#consumibles');
+    if(!sec) return;
+    if(!sec.querySelector('#consLowWrap')){
+      const det = document.createElement('details');
+      det.id = 'consLowWrap';
+      det.innerHTML = `
+        <summary class="alert alert--danger">Consumibles por debajo del mínimo (pulsa para ver)</summary>
+        <div id="consLowList" class="cards-stack"></div>`;
+      sec.querySelector('.sec-hdr')?.insertAdjacentElement('afterend', det);
+    }
+    if(!sec.querySelector('#consList')){
+      const div = document.createElement('div'); div.id='consList'; div.className='cards-grid';
+      sec.appendChild(div);
+    }
+  })();
+
+  // ========= 8) CARGA DE DATOS (poblar selects y listados) =========
+  // Si tu backend devuelve arrays simples de objetos {id,nombre,…} esto funcionará.
+  document.addEventListener('DOMContentLoaded', bootData);
+  async function bootData(){
+    await Promise.allSettled([
+      loadEquipos(),
+      loadGruas(),
+      loadAuxiliares(),
+      loadInventario(),
+      loadIncidencias(),
+      loadConsumibles()
+    ]);
+    enforceRoleVisibility();
+  }
+
+  function enforceRoleVisibility(){
+    const role = localStorage.getItem('cdl_role') || 'invitado';
+    document.querySelectorAll('[data-role="admin"]').forEach(el=>{
+      el.hidden = (role !== 'admin');
+    });
+  }
+
+  // === Loaders mínimos (ajusta si tu API devuelve otro formato) ===
+  async function loadEquipos(){
+    try{
+      const r = await fetch(API.equipos, {cache:'no-store'}); const data = await r.json();
+      // Select
+      const sel = document.querySelector('#equipoSelect'); if(sel){
+        sel.innerHTML = `<option value="">— Selecciona de la lista —</option>` +
+          data.map(d=>`<option value="${d.id}">${d.nombre||d.id}</option>`).join('');
+      }
+      // Listado por línea Kaltenbach (si hay contenedor)
+      const wrap = document.querySelector('#equiposList'); if(wrap){
+        const kal = data.filter(d=>/kaltenbach/i.test(d.linea||''));
+        wrap.innerHTML = kal.map(toEqCard).join('');
+      }
+    }catch(e){ console.warn('Equipos:', e); }
+  }
+  async function loadGruas(){
+    try{
+      const r = await fetch(API.gruas, {cache:'no-store'}); const data = await r.json();
+      const sel = document.querySelector('#gruaSelect'); if(sel){
+        sel.innerHTML = `<option value="">— Selecciona de la lista —</option>` +
+          data.map(d=>`<option value="${d.id}">${d.id}</option>`).join('');
+      }
+      // Si tienes contenedores por naves (gruasN1…4), los rellenamos
+      for(const n of [1,2,3,4]){
+        const g = data.filter(d=>String(d.nave)===String(n));
+        const div = document.querySelector('#gruasN'+n);
+        if(div) div.innerHTML = g.map(toEqCard).join('');
+      }
+    }catch(e){ console.warn('Grúas:', e); }
+  }
+  async function loadAuxiliares(){
+    try{
+      const r = await fetch(API.auxiliares, {cache:'no-store'}); const data = await r.json();
+      const sel = document.querySelector('#auxSelect'); if(sel){
+        sel.innerHTML = `<option value="">— Selecciona de la lista —</option>` +
+          data.map(d=>`<option value="${d.id}">${d.nombre||d.id}</option>`).join('');
+      }
+      const wrap = document.querySelector('#auxList'); if(wrap){
+        wrap.innerHTML = data.map(toEqCard).join('');
+      }
+    }catch(e){ console.warn('Auxiliares:', e); }
+  }
+  async function loadInventario(){
+    try{
+      const r = await fetch(API.inventario, {cache:'no-store'}); const data = await r.json();
+      renderCatalog('invCatalog', data);
+    }catch(e){ console.warn('Inventario:', e); }
+  }
+  async function loadIncidencias(){
+    try{
+      const r = await fetch(API.incidencias, {cache:'no-store'}); const data = await r.json();
+      const list = document.querySelector('#incList');
+      if(list){
+        (data||[]).sort((a,b)=> (b.ts||0)-(a.ts||0));
+        list.innerHTML = (data||[]).map(it=>`
+          <article class="card">
+            <header><strong>${it.ts? new Date(it.ts).toLocaleString() : ''}</strong> — ${it.cat||''} — ${it.equipo||''}</header>
+            <p>${it.resumen||''}</p>
+            <p><em>Estado:</em> ${it.estado||'-'}</p>
+          </article>`).join('');
+      }
+    }catch(e){ console.warn('Incidencias:', e); }
+  }
+  async function loadConsumibles(){
+    try{
+      const r = await fetch(API.consumibles, {cache:'no-store'}); const data = await r.json();
+      const low = (data||[]).filter(i=>Number(i.stock)<=Number(i.min));
+      const lowWrap = document.querySelector('#consLowWrap');
+      const lowList = document.querySelector('#consLowList');
+      if(lowWrap && lowList){
+        lowWrap.open = false;
+        lowList.innerHTML = low.map(i=>`
+          <article class="card">
+            <header><strong>${i.ref||i.nombre}</strong></header>
+            <p>Stock: ${i.stock} / Mínimo: ${i.min}</p>
+          </article>`).join('');
+      }
+      const list = document.querySelector('#consList');
+      if(list){
+        list.innerHTML = (data||[]).map(i=>`
+          <article class="card">
+            <header><strong>${i.ref||i.nombre}</strong></header>
+            <p>${i.desc||''}</p>
+            <p><strong>Stock:</strong> ${i.stock??'-'}</p>
+          </article>`).join('');
+      }
+    }catch(e){ console.warn('Consumibles:', e); }
+  }
+
+  // === Helpers UI ===
+  function toEqCard(d){
+    const state = (d.estado||'ok').toLowerCase();
+    return `<article class="card">
+      <header style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <h4 style="margin:0">${d.nombre||d.id}</h4>
+        <span class="sem sem--${state}" aria-label="${state}"></span>
+      </header>
+      <div class="eq-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <a href="#ficha?${encodeURIComponent(d.id)}" class="btn">Ver ficha</a>
+        <button class="btn btn--ghost" data-action="crear-incidencia" data-eq="${d.id}">Crear incidencia</button>
+      </div>
+    </article>`;
+  }
+  function renderCatalog(targetId, data){
+    const el = document.getElementById(targetId); if(!el) return;
+    el.innerHTML = (data||[]).map(cat=>`
+      <details>
+        <summary><strong>${cat.categoria}</strong></summary>
+        <div class="cards-grid">
+          ${(cat.items||[]).map(i=>`
+            <article class="card">
+              <header><h4 style="margin:0">${i.ref||i.codigo}</h4></header>
+              <p>${i.desc||''}</p>
+              <p><strong>Stock:</strong> ${i.stock??'-'}</p>
+              <div class="actions" style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn" data-act="plus1" data-ref="${i.ref}">+1</button>
+                <button class="btn" data-act="plus10" data-ref="${i.ref}">+10</button>
+                <button class="btn" data-act="plus100" data-ref="${i.ref}">+100</button>
+                <button class="btn" data-act="minus1" data-ref="${i.ref}">-1</button>
+                <button class="btn" data-act="minus10" data-ref="${i.ref}">-10</button>
+                <button class="btn" data-act="minus100" data-ref="${i.ref}">-100</button>
+              </div>
+            </article>
+          `).join('')}
+        </div>
+      </details>
+    `).join('');
+  }
+})();
+</script>
+</body>
+</html>
