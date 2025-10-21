@@ -1,0 +1,157 @@
+/* =========================================================
+   CDL · STYLE (Fase 2)
+   Paleta, tipografía, layouts, carrusel centrado,
+   botones compactos y formularios en una sola línea.
+========================================================= */
+
+/* ===== Variables ===== */
+:root{
+  --brand:#E43B3B; --ink:#0f172a; --muted:#475569; --line:#e5e7eb; --bg:#ffffff;
+  --ok:#16a34a; --warn:#f59e0b; --err:#dc2626;
+  --radius:18px; --shadow:0 8px 24px rgba(0,0,0,.08);
+  --pad:16px; --gap:12px;
+}
+
+/* ===== Reset mínimo + tipografía ===== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  color:var(--ink); background:#fff;
+}
+
+/* ===== Estructura principal ===== */
+.hdr-wrap{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:12px var(--pad); border-bottom:1px solid var(--line); background:#fff;
+}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit}
+.brand__mark{height:40px; width:auto}
+.brand__title{font-weight:800}
+
+.mant-wrap{
+  display:flex; align-items:center; justify-content:center;
+  padding:8px var(--pad) 10px; border-bottom:1px solid var(--line); background:#fff;
+}
+.brand__mant-img{
+  /* Altura y ancho ajustables según tu logo */
+  height:56px; max-width:min(820px,95%); width:auto; display:block;
+}
+
+/* ===== Header actions (usuario + hamburguesa) ===== */
+.hdr-actions{display:flex; align-items:center; gap:10px}
+.user-btn{
+  display:flex; align-items:center; gap:8px; border:1px solid var(--line);
+  background:#fff; padding:6px 10px; border-radius:999px; cursor:pointer; font-weight:700;
+}
+.user-role-badge{
+  display:inline-block; padding:2px 8px; border-radius:999px; font-weight:800; font-size:12px;
+  background:#eef2f7; color:#334155; border:1px solid #e2e8f0;
+}
+.btn-hamburger{
+  border:1px solid var(--line); background:#fff; padding:6px 10px; border-radius:12px; cursor:pointer;
+}
+
+/* ===== Drawer (menú hamburguesa) ===== */
+.drawer[hidden]{display:none !important}
+.drawer{
+  position:fixed; inset:0 0 0 auto; width:min(360px,92vw); background:#fff; border-left:1px solid var(--line);
+  box-shadow:-8px 0 24px rgba(0,0,0,.08); z-index:50; display:flex; flex-direction:column;
+}
+.drawer__top{padding:12px}
+.drawer__search{
+  display:flex; align-items:center; gap:8px;
+}
+.drawer__search input[type="search"]{
+  flex:1; min-width:0; padding:8px 10px; border:1px solid var(--line); border-radius:10px;
+}
+.drawer__search .btn{white-space:nowrap}
+.drawer__nav{display:flex; flex-direction:column; padding:4px 10px 14px}
+.drawer__link{
+  padding:10px 12px; border-radius:10px; text-decoration:none; color:var(--ink);
+}
+.drawer__link:hover{background:#f8fafc}
+
+/* ===== Main & secciones ===== */
+main{padding:16px var(--pad)}
+.sec-hdr{display:flex; align-items:center; justify-content:space-between; margin:8px 0 12px}
+.sec-hdr h2{margin:0; font-size:22px; font-weight:900; display:flex; align-items:center; gap:8px}
+.angular{height:18px; width:auto}
+
+/* ===== Cards y rejillas ===== */
+.card{
+  background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+  padding:14px; box-shadow:var(--shadow); margin:10px 0;
+}
+.cards-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px;
+}
+.cards-stack{display:flex; flex-direction:column; gap:12px}
+
+/* ===== Formularios compactos (una línea) ===== */
+.form-inline{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.form-inline__label{font-weight:800}
+.form-inline input[type="search"],
+.form-inline input[type="text"],
+.form-inline select{
+  padding:8px 10px; border:1px solid var(--line); border-radius:10px; min-width:200px;
+}
+.form-row{display:flex; flex-direction:column; gap:6px; margin:8px 0}
+.filters__row{display:flex; flex-wrap:wrap; gap:8px}
+.filters__row > *{min-width:180px}
+
+/* ===== Botones (compactar rojos y neutros) ===== */
+.btn{
+  border:1px solid var(--line); background:#fff; color:var(--ink);
+  padding:8px 12px; border-radius:12px; cursor:pointer; font-weight:800; line-height:1.2;
+}
+.btn--ghost{background:#fff}
+.btn--icon{padding:6px 10px}
+.btn--primary{
+  background:var(--brand); color:#fff; border-color:transparent;
+  /* Compactamos el “rojo” para que no sea escandaloso */
+  padding:8px 12px; font-weight:800;
+}
+
+/* ===== Carrusel (centrar imágenes) ===== */
+.carousel{
+  position:relative; width:100%; max-width:100%;
+  aspect-ratio:16/9; /* Mantén alto consistente y centrado */
+  border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:10px 0 16px;
+}
+.carousel__viewport{
+  width:100%; height:100%; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.carousel__viewport figure{margin:0; width:100%; height:100%}
+.carousel__viewport img{
+  width:100%; height:100%;
+  object-fit:cover;           /* —> centra y recorta lo justo */
+  object-position:center;     /* —> se ve el centro, no solo la parte de arriba */
+}
+.carousel__controls{
+  position:absolute; inset:auto 0 8px 0; display:flex; justify-content:space-between; padding:0 8px;
+}
+
+/* ===== Semáforos ejemplo ===== */
+.sem{display:inline-block; width:10px; height:10px; border-radius:50%}
+.sem--ok{background:var(--ok)} .sem--warn{background:var(--warn)} .sem--err{background:var(--err)}
+
+/* ===== Alertas ===== */
+.alert{padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-weight:800}
+.alert--danger{background:#fef2f2; color:#991b1b; border-color:#fecaca}
+
+/* ===== Accesibilidad oculta ===== */
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+/* ===== Footer ===== */
+#appFooter{padding:10px var(--pad); border-top:1px solid var(--line); color:var(--muted); text-align:right}
+
+/* ===== Responsive menores ===== */
+@media (max-width:540px){
+  .brand__mant-img{height:48px}
+  .filters__row > *{min-width:140px}
+}
