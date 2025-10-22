@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CDL · Panel de control</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Fuente -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --brand:#E43B3B; --ink:#0f172a; --muted:#475569; --line:#e5e7eb; --bg:#ffffff;
+  --hdr-h:128px; --radius:18px; --shadow:0 4px 12px rgba(0,0,0,.06);
+  --angular-size:30px; --angular-up:.80em; --angular-gap:24px;
+  --carousel-h: clamp(160px, 26vw, 320px);
+  --modal-bg: rgba(3,6,23,.55); --modal-panel: #0f141c;
+}
+*{box-sizing:border-box}
+html,body{height:100%; background:#fff; overflow-x:hidden}
+body{margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink)}
+a{color:inherit; text-decoration:none}
+img{display:block; max-width:100%}
+button{font:inherit; cursor:pointer}
+:focus-visible{outline:2px solid #0ea5e9; outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto; transition:none!important; animation:none!important}}
+
+.header{position:sticky; top:0; z-index:1000; background:#fff; border-bottom:1px solid #eee; transition:box-shadow .25s}
+.header.scrolled{ box-shadow:0 6px 14px rgba(0,0,0,.06) }
+.h__in{height:var(--hdr-h); display:grid; grid-template-columns:auto 1fr auto; align-items:end; gap:12px; padding:10px 16px 12px; position:relative}
+.header::before{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.02) 60%, rgba(255,255,255,.06) 100%),
+    url("logo_mantenimiento.png") center -28px / clamp(220px, 42vw, 380px) auto no-repeat;
+  opacity:.12; pointer-events:none;
+}
+.brand{display:flex; align-items:flex-end; gap:10px; justify-self:center}
+.brand img{height:42px}
+#roleChip{position:absolute; right:16px; top:8px; font-weight:800; font-size:12px; color:var(--ink)}
+.hbtn{width:44px; height:44px; display:grid; place-items:center; background:transparent; border:0; color:var(--ink)}
+#hamb .i{width:22px; height:16px; position:relative; display:inline-block}
+#hamb .i:before,#hamb .i:after,#hamb .i span{content:""; position:absolute; left:0; right:0; height:2px; background:var(--ink); border-radius:2px}
+#hamb .i:before{top:0} #hamb .i span{top:7px} #hamb .i:after{bottom:0}
+#moreBtn .i{display:inline-block; width:18px; text-align:center; letter-spacing:2px; font-weight:800}
+#moreBtn .i::before{content:"···"}
+
+.hero-carousel{position:relative; overflow:hidden; border-bottom:1px solid var(--line); background:linear-gradient(180deg,#fff,#f8fafc); border-radius:14px}
+.carousel-track{display:flex; touch-action:pan-y; user-select:none; width:100%; height:var(--carousel-h); transform:translateX(0)}
+.carousel-slide{min-width:100%; height:100%; display:grid; place-items:center; overflow:hidden}
+.carousel-slide img{width:100%; height:100%; object-fit:cover; object-position:center}
+.carousel-ctrl{position:absolute; top:50%; transform:translateY(-50%); z-index:2; width:40px; height:40px; border-radius:999px; border:1px solid #e5e7eb; background:#ffffffc7; display:grid; place-items:center; opacity:0; pointer-events:none}
+.hero-carousel:hover .carousel-ctrl{opacity:1; pointer-events:auto}
+.carousel-prev{left:10px} .carousel-next{right:10px}
+.carousel-dots{position:absolute; left:0; right:0; bottom:8px; display:flex; justify-content:center; gap:8px}
+.carousel-dots button{width:8px; height:8px; border-radius:50%; border:1px solid rgba(0,0,0,.15); background:#fff; opacity:.7}
+.carousel-dots button[aria-current="true"]{opacity:1; transform:scale(1.15)}
+
+#sidenav{position:fixed; inset:var(--hdr-h) 0 0 0; background:#fff; color:var(--ink); transform:translateX(-100%); transition:transform .25s; z-index:900; box-shadow:4px 0 24px rgba(0,0,0,.08)}
+#sidenav.open{transform:none}
+.sidenav__head{display:flex; align-items:center; gap:12px; padding:14px 16px}
+.sidenav__head img{height:120px; display:block; margin:6px 0 2px 0}
+#closeNav{margin-left:auto; width:40px; height:40px; background:transparent; border:0; font-size:22px}
+.sidenav__search{padding:0 16px 10px}
+.sidenav__search input{width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:12px; font-weight:600}
+.navlist{padding:6px 0}
+.navlist a{display:block; padding:16px; font-weight:800; text-transform:uppercase}
+.navlist a:not(:last-child){position:relative}
+.navlist a:not(:last-child)::after{content:""; position:absolute; left:10%; right:10%; bottom:-1px; height:1.5px; background:linear-gradient(90deg,rgba(0,0,0,0),rgba(15,23,42,.25) 50%,rgba(0,0,0,0))}
+.navlist a[aria-current="page"]{background:#f6f8fb; box-shadow:inset 4px 0 0 var(--brand)}
+body.menu-open::after{content:""; position:fixed; inset:var(--hdr-h) 0 0 0; backdrop-filter:blur(4px); background:rgba(0,0,0,.18); z-index:800}
+
+#userPanel{position:fixed; right:12px; top:calc(var(--hdr-h) + 10px); width:360px; max-width:calc(100vw - 24px); background:#0f141c; color:#e6eef7; border:1px solid #223046; border-radius:16px; box-shadow:0 20px 36px rgba(0,0,0,.45); padding:14px; display:none; z-index:950}
+#userPanel.show{display:block}
+#userPanel .up__head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
+#userPanel h3{margin:0; font-size:14px}
+#closeUser{background:transparent; border:0; font-size:22px; color:#e6eef7}
+#userPanel label{display:block; font-size:12px; color:#9fb0c6; margin:10px 0 6px}
+#userPanel select,#userPanel input{width:100%; padding:10px 12px; border-radius:10px; border:1px solid #243046; background:#0b101a; color:#e6eef7}
+.eyeBtn{position:absolute; right:12px; top:38px; width:24px; height:24px; border:0; background:transparent; padding:0}
+.eyeBtn svg{width:22px; height:22px; fill:none; stroke:#cbd5e1; stroke-width:2}
+
+h1,h2,h3{position:relative; margin:26px 0 14px; padding-left:var(--angular-gap); line-height:1.12; white-space:nowrap; overflow:visible; text-overflow:ellipsis}
+h1::before,h2::before,h3::before{content:""; position:absolute; left:0; bottom:var(--angular-up); width:var(--angular-size); height:var(--angular-size); background:url("angular.png") left bottom/contain no-repeat; z-index:1; pointer-events:none}
+.card .card__title{padding-left:0}
+.card .card__title::before{display:none}
+
+.main{padding:16px; max-width:1100px; margin:0 auto}
+.card{background:#fff; border:1px solid var(--line); border-radius:18px; padding:14px; box-shadow:var(--shadow)}
+.grid{display:grid; gap:16px}
+.badge{display:inline-block; padding:3px 10px; border-radius:999px; font-weight:800; font-size:12px; background:#eef2f7; color:#334155; border:1px solid #e2e8f0}
+.red{color:var(--brand)!important} .black{color:var(--ink)!important}
+
+.grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:900px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr}}
+
+.btn{border:0; border-radius:12px; padding:6px 10px; font-weight:800}
+.btn--primary{background:var(--brand); color:#fff}
+.btn--ghost{background:#fff; color:var(--ink); border:1px solid var(--line)}
+.btn:active{transform:translateY(1px)}
+
+.hero{background:linear-gradient(180deg,#fff,#f8fafc); border:1px solid #eef2f7; padding:20px; border-radius:20px}
+.hero h1{margin:0; padding-left:0} .hero h1::before{display:none}
+.hero .sub{color:#64748b; font-weight:800; margin-top:4px}
+
+#cdlModalBackdrop{position:fixed; inset:0; background:var(--modal-bg); backdrop-filter:blur(2px); opacity:0; pointer-events:none; transition:opacity .2s; z-index:990}
+#cdlModal{position:fixed; inset:auto 16px 16px 16px; top:calc(var(--hdr-h) + 12px); background:var(--modal-panel); color:#e6eef7; border:1px solid #223046; border-radius:16px; box-shadow:0 20px 36px rgba(0,0,0,.45); padding:14px; width:800px; max-width:calc(100vw - 32px); transform:translateY(12px); opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:995}
+#cdlModal header{display:flex; align-items:center; justify-content:space-between; gap:10px}
+#cdlModal h3{margin:0; font-size:16px}
+#cdlModal .close{background:transparent; border:0; color:#e6eef7; font-size:22px; line-height:1}
+#cdlModal .content{margin-top:8px; max-height:min(60vh,520px); overflow:auto}
+#cdlModal.is-open{opacity:1; transform:none; pointer-events:auto}
+#cdlModalBackdrop.is-open{opacity:1; pointer-events:auto}
+</style>
+</head>
+<body>
+
+<header class="header" id="hdr" role="banner">
+  <span id="roleChip">Invitado</span>
+  <div class="h__in">
+    <button class="hbtn" id="hamb" aria-label="Abrir menú" aria-controls="sidenav" aria-expanded="false"><span class="i"><span></span></span></button>
+    <a class="brand" aria-label="Inicio" href="#dashboard">
+      <img src="logo-cdl.png" alt="CDL">
+    </a>
+    <button class="hbtn" id="moreBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="userPanel"><span class="i"></span></button>
+  </div>
+</header>
+
+<aside id="sidenav" aria-hidden="true" aria-label="Navegación principal">
+  <div class="sidenav__head">
+    <img src="logo_mantenimiento.png" alt="CDL Mantenimiento">
+    <button id="closeNav" aria-label="Cerrar menú">✕</button>
+  </div>
+  <div class="sidenav__search">
+    <input id="globalSearch" placeholder="Buscar en la app…" aria-label="Buscar">
+  </div>
+  <nav class="navlist" id="navList"><!-- items por JS --></nav>
+</aside>
+
+<section id="userPanel" role="dialog" aria-modal="true" aria-labelledby="upTitle">
+  <div class="up__head">
+    <h3 id="upTitle">Acceso de usuario</h3>
+    <button id="closeUser" aria-label="Cerrar">✕</button>
+  </div>
+
+  <label for="roleSelect">Rol</label>
+  <select id="roleSelect">
+    <option value="invitado" selected>Invitado</option>
+  </select>
+
+  <label for="userPass">Contraseña</label>
+  <div style="position:relative">
+    <input id="userPass" type="password" placeholder="contraseña" autocomplete="current-password" aria-describedby="pwdHelp">
+    <button class="eyeBtn" id="toggleEye" aria-label="Mostrar/Ocultar contraseña">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3.5"/></svg>
+    </button>
+  </div>
+  <div id="pwdHelp" style="color:#9fb0c6; font-size:12px; margin-top:4px">Introduce contraseña</div>
+
+  <div style="display:flex; gap:8px; margin-top:12px">
+    <button class="btn btn--primary" id="loginBtn">Acceder</button>
+    <button class="btn btn--ghost" id="logoutBtn">Salir</button>
+  </div>
+
+  <!-- Cambiar contraseña (colapsado por defecto) -->
+  <h3 id="chgTitle" style="display:none;margin-top:14px">Cambiar contraseña</h3>
+  <label for="chgOld" style="display:none">Actual</label>
+  <input id="chgOld" type="password" autocomplete="current-password" style="display:none">
+  <label for="chgNew" style="display:none">Nueva</label>
+  <input id="chgNew" type="password" autocomplete="new-password" style="display:none">
+  <button class="btn btn--ghost" id="chgBtn" style="display:none;margin-top:8px">Guardar nueva</button>
+  <button class="btn btn--ghost" id="chgToggle" style="margin-top:10px">Cambiar contraseña</button>
+</section>
+
+<main class="main" id="appRoot">
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="page" aria-labelledby="dashTitle">
+    <article class="hero">
+      <h1 id="dashTitle"><span class="black">DASHBOARD</span> <span class="red">TV</span></h1>
+      <div class="sub">Panel de control</div>
+    </article>
+
+    <!-- CARRUSEL SOLO EN DASHBOARD · usa /img/Carousel/*.webp -->
+    <div class="hero-carousel" aria-label="Fotos de producción" style="margin-top:14px">
+      <div class="carousel-track" id="hcTrack">
+        <div class="carousel-slide"><img src="img/Carousel/kaltenbach.webp" alt="Kaltenbach"></div>
+        <div class="carousel-slide"><img src="img/Carousel/hgg.webp"         alt="HGG"></div>
+        <div class="carousel-slide"><img src="img/Carousel/mazzak.webp"      alt="Mazak"></div>
+        <div class="carousel-slide"><img src="img/Carousel/tecoi.webp"       alt="Tecoi"></div>
+        <div class="carousel-slide"><img src="img/Carousel/trumpf.webp"      alt="Trumpf"></div>
+        <div class="carousel-slide"><img src="img/Carousel/corte.webp"       alt="Corte"></div>
+      </div>
+      <button class="carousel-ctrl carousel-prev" id="hcPrev" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="carousel-ctrl carousel-next" id="hcNext" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg></button>
+      <div class="carousel-dots" id="hcDots" aria-label="Indicadores"></div>
+    </div>
+
+    <!-- (…tu grid de tarjetas de dashboard se mantiene igual…) -->
+  </section>
+
+  <!-- EQUIPOS -->
+  <section id="equipos" class="page" hidden aria-labelledby="equipTitle">
+    <h1 id="equipTitle">Equipos</h1>
+    <div class="kalt-title" aria-hidden="true" style="margin-top:-6px">
+      <img src="linea-kaltenbach.png" alt="LÍNEA KALTENBACH">
+    </div>
+    <!-- Tarjeta única: Ficha técnica -->
+    <div class="card">
+      <form class="grid" style="grid-template-columns: 1fr auto; align-items:center" autocomplete="off">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <strong>Ficha técnica de equipo</strong>
+          <input id="equipoQuery" placeholder="Escribe ID o nombre…">
+          <select id="equipoSelect" aria-label="Selecciona de la lista"><option value="">— Selecciona de la lista —</option></select>
+        </div>
+        <button class="btn btn--primary" id="equipoVer">Ver ficha</button>
+      </form>
+    </div>
+    <div class="grid cols-2" id="equiposList"></div>
+  </section>
+
+  <!-- GRÚAS -->
+  <section id="gruas" class="page" hidden aria-labelledby="gruasTitle">
+    <h1 id="gruasTitle">Puentes grúa</h1>
+    <div class="card">
+      <form class="grid" style="grid-template-columns:1fr auto; align-items:center" autocomplete="off">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <strong>Ficha técnica de puente de grúa</strong>
+          <input id="gruaQuery" placeholder="Escribe ID o nombre…">
+          <select id="gruaSelect" aria-label="Selecciona de la lista"><option value="">— Selecciona de la lista —</option></select>
+        </div>
+        <button class="btn btn--primary" id="gruaVer">Ver ficha</button>
+      </form>
+    </div>
+    <div class="grid cols-2" id="gruasList"></div>
+  </section>
+
+  <!-- AUXILIARES -->
+  <section id="auxiliares" class="page" hidden aria-labelledby="auxTitle">
+    <h1 id="auxTitle">Auxiliares (otros)</h1>
+    <div class="card">
+      <form class="grid" style="grid-template-columns:1fr auto; align-items:center" autocomplete="off">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <strong>Ficha técnica de auxiliar</strong>
+          <input id="auxQuery" placeholder="Escribe ID o nombre…">
+          <select id="auxSelect" aria-label="Selecciona de la lista"><option value="">— Selecciona de la lista —</option></select>
+        </div>
+        <button class="btn btn--primary" id="auxVer">Ver ficha</button>
+      </form>
+    </div>
+    <div class="grid cols-2" id="auxList"></div>
+  </section>
+
+  <!-- INCIDENCIAS (estructura intacta; renombraremos “Últimas” a “Buscador” por JS) -->
+  <section id="incidencias" class="page" hidden aria-labelledby="incTitle">
+    <div style="display:flex; justify-content:space-between; align-items:center">
+      <h1 id="incTitle">Incidencias</h1>
+      <button class="btn btn--primary" id="btnNewInc">Crear nueva incidencia</button>
+    </div>
+    <div class="card" id="incFormWrap" hidden><!-- … (se mantiene igual) … --></div>
+    <div class="card">
+      <div class="card__hdr" style="display:flex; justify-content:space-between; align-items:center">
+        <h2 class="card__title">Últimas incidencias</h2>
+        <div style="display:flex; gap:8px">
+          <input id="incFilter" placeholder="Filtrar por texto…">
+          <button class="btn btn--ghost" id="incRecargar">Recargar</button>
+        </div>
+      </div>
+      <div id="incList"></div>
+    </div>
+  </section>
+
+  <!-- INVENTARIO (se mantiene; CSV+QR sólo admin por JS) -->
+  <section id="inventario" class="page" hidden aria-labelledby="invTitle">
+    <h1 id="invTitle">Inventario</h1>
+    <!-- … (tus tarjetas tal cual) … -->
+  </section>
+
+  <!-- CONSUMIBLES -->
+  <section id="consumibles" class="page" hidden aria-labelledby="consTitle">
+    <h1 id="consTitle">Consumibles</h1>
+    <!-- … -->
+  </section>
+
+  <!-- SOLICITUDES DE REPUESTOS -->
+  <section id="repuestos" class="page" hidden aria-labelledby="repTitle">
+    <h1 id="repTitle">Repuestos</h1>
+    <!-- … (tu contenido existente) … -->
+  </section>
+
+  <!-- INDICADORES -->
+  <section id="indicadores" class="page" hidden aria-labelledby="indTitle">
+    <h1 id="indTitle">Indicadores</h1>
+    <!-- … -->
+  </section>
+
+  <!-- ÓRDENES DE TRABAJO -->
+  <section id="ot" class="page" hidden aria-labelledby="otTitle">
+    <h1 id="otTitle">Órdenes de trabajo</h1>
+    <!-- … (tu contenido OT existente) … -->
+  </section>
+
+  <!-- REGISTRO -->
+  <section id="registro" class="page" hidden aria-labelledby="regTitle">
+    <h1 id="regTitle">Registro de mantenimiento</h1>
+    <!-- … -->
+  </section>
+</main>
+
+<div id="cdlModalBackdrop"></div>
+<div id="cdlModal" role="dialog" aria-modal="true" aria-labelledby="cdlModalTitle">
+  <header>
+    <h3 id="cdlModalTitle">Detalle</h3>
+    <button class="close" aria-label="Cerrar" onclick="cdlCloseModal()">✕</button>
+  </header>
+  <div class="content"></div>
+</div>
+
+<script>
+/* ===== API BASE (URL real) ===== */
+const API_URL = "https://script.google.com/macros/s/AKfycbzgTZ8zMOOKiYt2JygDLX39xQoU3elE_7T8DDFhiBYk5UOvV3F4Tp6EAE3jenj3Njzr1g/exec";
+const CDL_TOKEN_KEY="cdl_token";
+async function cdlApiGet(q){const qs=new URLSearchParams(q).toString();const r=await fetch(`${API_URL}?${qs}`,{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json();}
+async function cdlApiPostAuth(body){const tok=localStorage.getItem(CDL_TOKEN_KEY)||"";const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({...body,token:tok}),cache:"no-store"});const t=await res.text();if(!res.ok)throw new Error(`HTTP ${res.status} · ${t.slice(0,120)}`);try{return JSON.parse(t);}catch{return{ok:false,error:"No JSON"}}}
+function ucFirst(s){return s? s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g,' ') : s}
+</script>
+
+<script>
+/* ===== Modal ===== */
+function cdlOpenModal(title, html){const m=document.getElementById('cdlModal'),b=document.getElementById('cdlModalBackdrop');m.querySelector('#cdlModalTitle').textContent=title||'Detalle';m.querySelector('.content').innerHTML=html||'';m.classList.add('is-open');b.classList.add('is-open')}
+function cdlCloseModal(){document.getElementById('cdlModal')?.classList.remove('is-open');document.getElementById('cdlModalBackdrop')?.classList.remove('is-open')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape') cdlCloseModal()});
+</script>
+
+<script>
+/* ===== NAV + routing + menú ===== */
+(function(){
+  const body=document.body, hdr=document.getElementById('hdr'), sidenav=document.getElementById('sidenav'), navList=document.getElementById('navList'), hamb=document.getElementById('hamb'), closeNav=document.getElementById('closeNav'), moreBtn=document.getElementById('moreBtn'), userPanel=document.getElementById('userPanel');
+  const openNav=()=>{sidenav.classList.add('open'); body.classList.add('menu-open'); hamb?.setAttribute('aria-expanded','true'); sidenav?.setAttribute('aria-hidden','false')};
+  const closeNavFn=()=>{sidenav.classList.remove('open'); body.classList.remove('menu-open'); hamb?.setAttribute('aria-expanded','false'); sidenav?.setAttribute('aria-hidden','true')};
+  hamb?.addEventListener('click',e=>{e.stopPropagation(); openNav()});
+  closeNav?.addEventListener('click', closeNavFn);
+  document.addEventListener('click',e=>{if(body.classList.contains('menu-open') && !sidenav.contains(e.target) && !hamb.contains(e.target)) closeNavFn()});
+
+  if(navList){
+    const items=[
+      ['#dashboard','Dashboard'],
+      ['#equipos','Equipos'],
+      ['#gruas','Puentes grúa'],
+      ['#auxiliares','Auxiliares'],
+      ['#incidencias','Incidencias'],
+      ['#inventario','Inventario'],
+      ['#repuestos','Solicitudes de repuestos'],
+      ['#indicadores','Indicadores'],
+      ['#ot','Órdenes de trabajo'],
+      ['#consumibles','Consumibles'],
+      ['#registro','Registro']
+    ];
+    navList.innerHTML=items.map(([href,label])=>`<a href="${href}">${label}</a>`).join('');
+  }
+
+  function markCurrent(){
+    const hash=location.hash||'#dashboard';
+    navList?.querySelectorAll('a').forEach(a=>a.setAttribute('aria-current', a.getAttribute('href')===hash ? 'page':'false'));
+    document.querySelectorAll('.page').forEach(sec=>{sec.hidden=('#'+sec.id)!==hash});
+    closeNavFn();
+  }
+  window.addEventListener('hashchange', markCurrent);
+  document.addEventListener('DOMContentLoaded', markCurrent);
+  markCurrent();
+
+  window.addEventListener('scroll', ()=>{ hdr?.classList.toggle('scrolled', window.scrollY>6) });
+
+  // Panel usuario abrir/cerrar
+  const toggleUser=()=>{const show=!userPanel.classList.contains('show'); userPanel.classList.toggle('show',show); moreBtn?.setAttribute('aria-expanded',String(show))};
+  moreBtn?.addEventListener('click',e=>{e.stopPropagation(); toggleUser()});
+  document.getElementById('closeUser')?.addEventListener('click',()=> userPanel.classList.remove('show'));
+  document.addEventListener('click',e=>{if(userPanel.classList.contains('show') && !userPanel.contains(e.target) && !moreBtn.contains(e.target)){userPanel.classList.remove('show'); moreBtn?.setAttribute('aria-expanded','false')}})
+})();
+</script>
+
+<script>
+/* ===== Login + cambio contraseña colapsable ===== */
+(function(){
+  const roleSel=document.getElementById('roleSelect'), userPass=document.getElementById('userPass'), loginBtn=document.getElementById('loginBtn'), logoutBtn=document.getElementById('logoutBtn'), roleChip=document.getElementById('roleChip'), pwdHelp=document.getElementById('pwdHelp'), eyeBtn=document.getElementById('toggleEye');
+  const chgTitle=document.getElementById('chgTitle'), chgOld=document.getElementById('chgOld'), chgNew=document.getElementById('chgNew'), chgBtn=document.getElementById('chgBtn'), chgToggle=document.getElementById('chgToggle');
+
+  function setHelp(m,e){pwdHelp.textContent=m; pwdHelp.style.color=e?'#ef4444':'#9fb0c6'}
+  (function initRole(){const tok=localStorage.getItem('cdl_token'); const saved=localStorage.getItem('cdl_role'); if(tok && saved) roleChip.textContent=ucFirst(saved)})();
+  (function initEye(){if(!eyeBtn)return; eyeBtn.addEventListener('click',e=>{e.preventDefault(); const s=userPass.type==='password'; userPass.type=s?'text':'password'})})();
+
+  userPass?.addEventListener('keydown',e=>{if(e.key==='Enter') loginBtn?.click()});
+  let logging=false;
+  loginBtn?.addEventListener('click', async()=>{
+    if(logging) return; logging=true; loginBtn.disabled=true;
+    const user=roleSel.value, pass=(userPass.value||'').trim(); if(!pass){setHelp('Introduce la contraseña.',true); logging=false; loginBtn.disabled=false; return;}
+    try{
+      setHelp('Comprobando…');
+      const r=await cdlApiPostAuth({res:'auth', fn:'login', user, pass});
+      if(r.ok && r.token){ localStorage.setItem('cdl_token',r.token); localStorage.setItem('cdl_role',user); roleChip.textContent=ucFirst(user); userPass.value=''; setHelp('Acceso correcto.'); document.getElementById('userPanel').classList.remove('show'); document.getElementById('moreBtn')?.setAttribute('aria-expanded','false'); }
+      else setHelp(r.error||'Contraseña incorrecta.',true);
+    }catch(e){setHelp('Error de red al acceder.',true)}
+    finally{logging=false; loginBtn.disabled=false;}
+  });
+  logoutBtn?.addEventListener('click',()=>{localStorage.removeItem('cdl_token'); localStorage.removeItem('cdl_role'); roleChip.textContent='Invitado'; setHelp('Sesión cerrada.')});
+
+  // Toggle cambio de contraseña
+  let open=false;
+  chgToggle?.addEventListener('click',()=>{
+    open=!open;
+    [chgTitle,chgOld,chgNew,chgBtn].forEach(el=> el.style.display=open?'':'none');
+    chgToggle.textContent=open?'Ocultar cambio de contraseña':'Cambiar contraseña';
+  });
+})();
+</script>
+
+<script>
+/* ===== Carrusel (autoplay + dots + swipe) ===== */
+(function(){
+  const track=document.getElementById('hcTrack'); if(!track) return;
+  const slides=[...track.children], prev=document.getElementById('hcPrev'), next=document.getElementById('hcNext'), dotsWrap=document.getElementById('hcDots');
+  let idx=0, startX=0, dx=0, dragging=false, timer=null, paused=false; const AUTO_MS=5000;
+
+  dotsWrap.innerHTML=slides.map((_,i)=>`<button aria-label="Ir a ${i+1}" ${i===0?'aria-current="true"':''}></button>`).join('');
+  const dots=[...dotsWrap.children];
+
+  function goTo(i){idx=(i+slides.length)%slides.length; track.style.transition='transform .35s ease'; track.style.transform=`translateX(${idx*-100}%)`; dots.forEach((d,k)=>d.setAttribute('aria-current',k===idx?'true':'false')); resetAuto();}
+  function prevS(){goTo(idx-1)} function nextS(){goTo(idx+1)}
+  function startAuto(){clearInterval(timer); timer=setInterval(()=>goTo(idx+1),AUTO_MS)}
+  function stopAuto(){clearInterval(timer); timer=null}
+  function resetAuto(){ if(!paused && !document.hidden) startAuto() }
+
+  function onStart(e){dragging=true; startX=(e.touches?e.touches[0].clientX:e.clientX); dx=0; track.style.transition='none'; stopAuto()}
+  function onMove(e){ if(!dragging) return; const x=(e.touches?e.touches[0].clientX:e.clientX); dx=x-startX; track.style.transform=`translateX(calc(${idx*-100}% + ${dx}px))` }
+  function onEnd(){ if(!dragging) return; dragging=false; const w=track.clientWidth; Math.abs(dx)>w*0.15 ? (dx<0?nextS():prevS()) : goTo(idx) }
+
+  prev?.addEventListener('click',prevS); next?.addEventListener('click',nextS); dots.forEach((d,i)=> d.addEventListener('click',()=>goTo(i)));
+  track.addEventListener('mouseenter',()=>{paused=true; stopAuto()}); track.addEventListener('mouseleave',()=>{paused=false; resetAuto()});
+  document.addEventListener('visibilitychange',()=>{document.hidden?stopAuto():resetAuto()});
+  track.addEventListener('pointerdown',onStart); track.addEventListener('pointermove',onMove); window.addEventListener('pointerup',onEnd);
+  track.addEventListener('touchstart',onStart,{passive:true}); track.addEventListener('touchmove',onMove,{passive:true}); track.addEventListener('touchend',onEnd);
+
+  goTo(0);
+})();
+</script>
+
+<script>
+/* ===== Service Worker ===== */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(reg=>{
+      reg.addEventListener('updatefound',()=>{
+        const nw=reg.installing; nw?.addEventListener('statechange',()=>{
+          if(nw.state==='installed' && navigator.serviceWorker.controller){
+            if(confirm('Hay una nueva versión. ¿Actualizar ahora?')) nw.postMessage({type:'skipWaiting'});
+          }
+        });
+      });
+    });
+    let refreshing=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!refreshing){refreshing=true; location.reload();}});
+  });
+}
+</script>
+
+</body>
+</html>
