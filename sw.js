@@ -8,7 +8,7 @@
    - Todo lo EXTERNO (Apps Script, Google Fonts/CDNs) pasa directo
 ========================================================= */
 
-const CACHE_VERSION = 'v14';
+const CACHE_VERSION = 'v15';
 const CACHE_NAME = `cdl-cache-${CACHE_VERSION}`;
 
 // Archivos esenciales (añade aquí cualquier imagen/asset nuevo que quieras offline)
