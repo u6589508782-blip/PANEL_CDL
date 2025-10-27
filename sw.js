@@ -6,7 +6,7 @@
    - Soporte SKIP_WAITING desde la app
    ========================================================= */
 
-const SW_VERSION = 'v6';
+const SW_VERSION = 'v7';
 const CACHE_CORE   = `cdl-core-${SW_VERSION}`;
 const CACHE_STATIC = `cdl-static-${SW_VERSION}`;
 const CACHE_IMAGES = `cdl-img-${SW_VERSION}`;
@@ -217,4 +217,4 @@ async function limitCacheEntries(cache, maxItems = 100) {
   for (let i = 0; i < toDelete; i++) {
     await cache.delete(keys[i]);
   }
-}
+}-
