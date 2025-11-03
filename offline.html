@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CDL · Sin conexión</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#0f172a; --muted:#64748b; --line:#e5e7eb; --brand:#E43B3B; }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; display:grid; place-items:center; background:#fff; color:var(--ink);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    padding:18px;
+  }
+  .card{
+    width:min(720px,96vw);
+    border:1px solid var(--line); border-radius:16px; padding:18px;
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+  }
+  h1{ display:flex; align-items:center; gap:10px; margin:0 0 8px }
+  h1 img{ height:32px }
+  p{ margin:.5rem 0; color:var(--muted) }
+  .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+    padding:.6rem .9rem; border-radius:10px; border:1px solid var(--line);
+    background:#fff; color:var(--ink); font-weight:800; cursor:pointer;
+  }
+  .btn--primary{ background:var(--brand); color:#fff; border-color:transparent }
+</style>
+</head>
+<body>
+  <article class="card">
+    <h1><img src="./logo-cdl.png" alt="CDL"> Sin conexión</h1>
+    <p>Estás offline. Algunas funciones necesitan Internet (actualizar inventario, crear OT, etc.).</p>
+    <p>Puedes seguir abriendo fichas y manuales cacheados. Cuando vuelva la conexión, la PWA se sincronizará sola.</p>
+    <div class="actions">
+      <button class="btn" onclick="location.reload()">Reintentar</button>
+      <a class="btn btn--primary" href="./">Ir al panel</a>
+    </div>
+  </article>
+</body>
+</html>
