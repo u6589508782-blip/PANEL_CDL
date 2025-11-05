@@ -34,7 +34,8 @@
   --angular-up:.72em;
   --angular-gap:20px;
 
-  --carousel-h:clamp(88px,16vw,150px);
+  /* más compacto para evitar cortes y acompañar el autoplay del carrusel */
+  --carousel-h:clamp(76px,14vw,132px);
 }
 
 *{box-sizing:border-box; min-width:0}
@@ -92,12 +93,12 @@ button{font:inherit; cursor:pointer; background:transparent; border:0}
   display:grid; grid-template-columns:auto 1fr auto;
   align-items:flex-start; gap:10px; padding:6px 12px 8px; position:relative;
 }
-/* Marca de agua mantenimiento */
+/* Marca de agua mantenimiento (subida y algo más ancha) */
 .header::before{
   content:""; position:absolute; inset:0;
   background:
     linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.05) 60%, rgba(255,255,255,.09) 100%),
-    url("logo_mantenimiento.png") center -18px / clamp(200px, 38vw, 340px) auto no-repeat;
+    url("logo_mantenimiento.png") center -28px / clamp(220px, 40vw, 380px) auto no-repeat;
   opacity:.09; pointer-events:none;
 }
 .brand{display:flex; align-items:flex-end; gap:10px; justify-self:center; margin-top:2px}
@@ -107,18 +108,18 @@ button{font:inherit; cursor:pointer; background:transparent; border:0}
   position:absolute; right:16px; top:8px; font-weight:900; font-size:11px; color:var(--ink)
 }
 /* Iconos header */
-.hbtn{width:42px; height:42px; display:grid; place-items:center}
+.hbtn{width:42px; height:42px; display:grid; place-items:center; color:#0f172a}
 #hamb .i{width:20px; height:14px; position:relative; display:inline-block}
 #hamb .i:before,#hamb .i:after,#hamb .i span{
   content:""; position:absolute; left:0; right:0; height:2px; background:var(--ink); border-radius:2px;
 }
 #hamb .i:before{top:0} #hamb .i span{top:6px} #hamb .i:after{bottom:0}
 #moreBtn .i{display:inline-block; width:16px; text-align:center; letter-spacing:2px; font-weight:900}
-#moreBtn .i::before{content:"···"}
+#moreBtn .i::before{content:"···"; color:#0f172a}
 
 /* Overlay menú */
 body.menu-open::after{
-  content:""; position:fixed; inset:var(--hdr-h) 0 0 0; backdrop-filter:blur(4px); background:rgba(0,0,0,.18); z-index:800;
+  content:""; position:fixed; inset:var(--hdr-h) 0 0 0; backdrop-filter:blur(4px); background:rgba(0,0,0,0.18); z-index:800;
 }
 
 /* =========================================================
@@ -151,10 +152,18 @@ body.menu-open::after{
   transform:translateX(-100%); transition:transform .25s ease; z-index:900; box-shadow:4px 0 24px rgba(0,0,0,.08);
 }
 #sidenav.open{transform:none}
-.sidenav__head{display:flex; align-items:center; gap:12px; padding:12px 14px}
-#closeNav{margin-left:auto; width:38px; height:38px; font-size:20px}
-.sidenav__search{padding:0 14px 10px; display:flex; gap:8px}
-.sidenav__search input{flex:1 1 auto; padding:10px 12px; border:1px solid var(--line); border-radius:12px; font-weight:600}
+
+/* Nueva cabecera del sidenav: X + buscador + Ir en una sola fila */
+.sidenav__head{
+  display:grid; grid-template-columns:auto 1fr auto;
+  align-items:center; gap:8px; padding:12px 14px
+}
+#closeNav{ margin-left:0; width:38px; height:38px; font-size:20px; color:#0f172a }
+.sidenav__head input{ padding:10px 12px; border:1px solid var(--line); border-radius:12px; font-weight:600 }
+.sidenav__head .btn{ padding:.6rem .9rem }
+
+/* Oculta el bloque antiguo de buscador lateral si existe */
+.sidenav__search{ display:none !important }
 
 /* navegación */
 .navlist{padding:4px 0}
@@ -173,7 +182,7 @@ body.menu-open::after{
 #userPanel{
   position:fixed; left:0; right:0; top:var(--hdr-h);
   width:100vw; max-width:none;
-  background:#0f141c; color:#e6eef7; border:1px solid #223046; border-radius:0; box-shadow:0 20px 36px rgba(0,0,0,.45);
+  background:#0f141c; color:#e6eef7; border:1px solid #223046; border-radius:0; box-shadow:0 20px 36px rgba(0,0,0,0.45);
   padding:12px; display:none; z-index:950; font-size:.95rem;
 }
 #userPanel.show{ display:block }
@@ -182,7 +191,11 @@ body.menu-open::after{
 .up__field label{ display:block; font-weight:900; margin-bottom:4px }
 .up__pwdwrap{ position:relative; display:flex; align-items:center }
 .up__pwdwrap input{ flex:1 1 auto }
-.eyeBtn{ width:36px; height:36px; display:grid; place-items:center; border:1px solid #223046; border-left:0; background:#0b101a; margin-left:4px; border-radius:0 10px 10px 0 }
+
+/* Botón ojo visible + icono en blanco */
+.eyeBtn{ width:36px; height:36px; display:grid; place-items:center; border:1px solid #223046; border-left:0; background:#0b101a; margin-left:4px; border-radius:0 10px 10px 0; color:#e6eef7 }
+#userPanel .eyeBtn svg path, #userPanel .eyeBtn svg circle{ fill:currentColor }
+
 .up__actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px }
 
 /* =========================================================
@@ -292,6 +305,35 @@ h1::before,h2::before,h3::before{
 #dashboardtv .badge{ font-size:11px }
 #dashboardtv details summary{ font-size:.98rem }
 
+/* =================== INCIDENCIAS: ajustes (pts 1,3,4) =================== */
+/* 1) Buscador plegable */
+#incSearchToggle{ margin-left:auto; font-weight:900 }
+#incSearchCard[hidden]{ display:none !important }
+
+/* 3) Botón “Programar parada” negro/blanco */
+#btnProgParada{ background:#0f172a; color:#fff; border-color:#0f172a }
+
+/* 3) Botón “Finalizar” dentro de cada tarjeta */
+.inc-card__head{ display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap }
+.inc-card__fin{ background:#16a34a; color:#fff; border:1px solid #16a34a }
+
+/* 4) Grid de logos/categorías */
+.inc-cats{ display:grid; gap:10px; grid-template-columns:repeat(3,minmax(0,1fr)) }
+.inc-cat{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; display:grid; place-items:center; cursor:pointer }
+.inc-cat img{ max-height:42px; width:auto }
+.inc-sublist{ margin-top:8px; display:none }
+.inc-sublist.show{ display:block }
+.inc-sublist .btn{ width:100%; justify-content:flex-start }
+/* Tarjeta con botón (caso Auxiliares) */
+.inc-cat > button{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  font-weight:900;
+}
+.inc-cat > button:active{ transform:translateY(1px) }
 </style>
 </head>
 <body>
@@ -310,19 +352,12 @@ h1::before,h2::before,h3::before{
   </div>
 </header>
 
-<!-- =======================================================
-     SIDENAV (se rellena por JS)
-======================================================= -->
 <aside id="sidenav" aria-hidden="true" aria-label="Navegación principal">
   <div class="sidenav__head">
     <button id="closeNav" aria-label="Cerrar menú">✕</button>
-  </div>
-
-  <div class="sidenav__search">
     <input id="globalSearch" placeholder="Buscar en la app…" aria-label="Buscar">
     <button id="goSearch" class="btn btn--ghost">Ir</button>
   </div>
-
   <nav class="navlist" id="navList">
     <!-- Se llena en runtime -->
   </nav>
@@ -551,94 +586,94 @@ h1::before,h2::before,h3::before{
     });
   })();
 
-  /* ========= Panel usuario: login / logout / cambiar pass ========= */
-  (function(){
-    const roleChip  = document.getElementById('roleChip');
-    const userPanel = document.getElementById('userPanel');
-    const moreBtn   = document.getElementById('moreBtn');
-    const closeUser = document.getElementById('closeUser');
-    const roleSel   = document.getElementById('roleSelect');
-    const userPass  = document.getElementById('userPass');
-    const loginBtn  = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const eyeMain   = document.getElementById('eyeMain');
+ /* ========= Panel usuario: login / logout / cambiar pass ========= */
+(function(){
+  const roleChip  = document.getElementById('roleChip');
+  const userPanel = document.getElementById('userPanel');
+  const moreBtn   = document.getElementById('moreBtn');
+  const closeUser = document.getElementById('closeUser');
+  const roleSel   = document.getElementById('roleSelect');
+  const userPass  = document.getElementById('userPass');
+  const loginBtn  = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const eyeMain   = document.getElementById('eyeMain');
 
-    const togglePwdLink = document.getElementById('togglePwdLink');
-    const chgWrap  = document.getElementById('chgWrap');
-    const chgBtn   = document.getElementById('chgBtn');
-    const chgOld   = document.getElementById('chgOld');
-    const chgNew   = document.getElementById('chgNew');
-    const eyeOld   = document.getElementById('eyeOld');
-    const eyeNew   = document.getElementById('eyeNew');
+  const togglePwdLink = document.getElementById('togglePwdLink');
+  const chgWrap  = document.getElementById('chgWrap');
+  const chgBtn   = document.getElementById('chgBtn');
+  const chgOld   = document.getElementById('chgOld');
+  const chgNew   = document.getElementById('chgNew');
+  const eyeOld   = document.getElementById('eyeOld');
+  const eyeNew   = document.getElementById('eyeNew');
 
-    roleSel.innerHTML = ROLES.map(r => `<option value="${r.slug}">${r.label}</option>`).join('');
+  roleSel.innerHTML = ROLES.map(r => `<option value="${r.slug}">${r.label}</option>`).join('');
 
-    function ucFirst(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g,' ') : s; }
+  function ucFirst(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g,' ') : s; }
 
-    (function initRoleChip(){
-      const tok = localStorage.getItem(CDL_TOKEN_KEY);
-      const savedRole = localStorage.getItem(CDL_ROLE_KEY);
-      roleChip.textContent = (tok && savedRole) ? ucFirst(savedRole) : 'Invitado';
-    })();
-
-    const togglePanel = (show)=>{
-      userPanel.classList.toggle('show', show);
-      moreBtn.setAttribute('aria-expanded', show ? 'true' : 'false');
-    };
-    moreBtn.addEventListener('click', (e)=>{ e.stopPropagation(); togglePanel(!userPanel.classList.contains('show')); });
-    closeUser.addEventListener('click', ()=> togglePanel(false));
-    document.addEventListener('click', (e)=>{ if (userPanel.classList.contains('show') && !userPanel.contains(e.target) && !moreBtn.contains(e.target)) togglePanel(false); });
-
-    const toggleType = (inp)=> inp.type = (inp.type==='password') ? 'text' : 'password';
-    eyeMain.addEventListener('click', (e)=>{ e.preventDefault(); toggleType(userPass); });
-    eyeOld?.addEventListener('click', (e)=>{ e.preventDefault(); toggleType(chgOld);  });
-    eyeNew?.addEventListener('click', (e)=>{ e.preventDefault(); toggleType(chgNew);  });
-
-    loginBtn.addEventListener('click', async ()=>{
-      const user = roleSel.value;
-      const pass = (userPass.value||'').trim();
-      if(!pass){ alert('Introduce la clave.'); return; }
-      try{
-        const r = await POST({res:'auth', fn:'login', user, pass});
-        if(r.ok && r.token){
-          localStorage.setItem(CDL_TOKEN_KEY, r.token);
-          localStorage.setItem(CDL_ROLE_KEY, user);
-          roleChip.textContent = roleLabel(user);
-          userPass.value = '';
-          togglePanel(false);
-          applyRoleVisibility();
-        }else alert(r.error || 'Contraseña incorrecta.');
-      }catch{ alert('Error de red.'); }
-    });
-
-    logoutBtn.addEventListener('click', ()=>{
-      localStorage.removeItem(CDL_TOKEN_KEY);
-      localStorage.removeItem(CDL_ROLE_KEY);
-      roleChip.textContent = roleLabel('invitado');
-      applyRoleVisibility();
-    });
-
-    togglePwdLink.addEventListener('click', ()=>{
-      const open = chgWrap.hasAttribute('hidden');
-      if(open){ chgWrap.removeAttribute('hidden'); } else { chgWrap.setAttribute('hidden',''); }
-      mtogglePwdLink.setAttribute('aria-expanded', String(open));
-    });
-
-    chgBtn.addEventListener('click', async ()=>{
-      const tok  = localStorage.getItem(CDL_TOKEN_KEY)||'';
-      const oldP = (chgOld.value||'').trim();
-      const newP = (chgNew.value||'').trim();
-      if(!oldP || !newP){ alert('Rellena Actual y Nueva.'); return; }
-      try{
-        const r = await POST({res:'auth', fn:'change', token:tok, old:oldP, neu:newP});
-        if(r.ok){
-          alert('Contraseña cambiada.');
-          chgOld.value=''; chgNew.value='';
-          chgWrap.setAttribute('hidden',''); togglePwdLink.setAttribute('aria-expanded','false');
-        }else alert(r.error || 'No se pudo cambiar.');
-      }catch{ alert('Error de red.'); }
-    });
+  (function initRoleChip(){
+    const tok = localStorage.getItem(CDL_TOKEN_KEY);
+    const savedRole = localStorage.getItem(CDL_ROLE_KEY);
+    roleChip.textContent = (tok && savedRole) ? ucFirst(savedRole) : 'Invitado';
   })();
+
+  const togglePanel = (show)=>{
+    userPanel.classList.toggle('show', show);
+    moreBtn.setAttribute('aria-expanded', show ? 'true' : 'false');
+  };
+  moreBtn.addEventListener('click', (e)=>{ e.stopPropagation(); togglePanel(!userPanel.classList.contains('show')); });
+  closeUser.addEventListener('click', ()=> togglePanel(false));
+  document.addEventListener('click', (e)=>{ if (userPanel.classList.contains('show') && !userPanel.contains(e.target) && !moreBtn.contains(e.target)) togglePanel(false); });
+
+  const toggleType = (inp)=> inp.type = (inp.type==='password') ? 'text' : 'password';
+  eyeMain.addEventListener('click', (e)=>{ e.preventDefault(); toggleType(userPass); });
+  eyeOld?.addEventListener('click', (e)=>{ e.preventDefault(); toggleType(chgOld);  });
+  eyeNew?.addEventListener('click', (e)=>{ e.preventDefault(); toggleType(chgNew);  });
+
+  loginBtn.addEventListener('click', async ()=>{
+    const user = roleSel.value;
+    const pass = (userPass.value||'').trim();
+    if(!pass){ alert('Introduce la clave.'); return; }
+    try{
+      const r = await POST({res:'auth', fn:'login', user, pass});
+      if(r.ok && r.token){
+        localStorage.setItem(CDL_TOKEN_KEY, r.token);
+        localStorage.setItem(CDL_ROLE_KEY, user);
+        roleChip.textContent = roleLabel(user);
+        userPass.value = '';
+        togglePanel(false);
+        applyRoleVisibility();
+      }else alert(r.error || 'Contraseña incorrecta.');
+    }catch{ alert('Error de red.'); }
+  });
+
+  logoutBtn.addEventListener('click', ()=>{
+    localStorage.removeItem(CDL_TOKEN_KEY);
+    localStorage.removeItem(CDL_ROLE_KEY);
+    roleChip.textContent = roleLabel('invitado');
+    applyRoleVisibility();
+  });
+
+  togglePwdLink.addEventListener('click', ()=>{
+    const open = chgWrap.hasAttribute('hidden');
+    if(open){ chgWrap.removeAttribute('hidden'); } else { chgWrap.setAttribute('hidden',''); }
+    togglePwdLink.setAttribute('aria-expanded', String(open)); // <- FIX
+  });
+
+  chgBtn.addEventListener('click', async ()=>{
+    const tok  = localStorage.getItem(CDL_TOKEN_KEY)||'';
+    const oldP = (chgOld.value||'').trim();
+    const newP = (chgNew.value||'').trim();
+    if(!oldP || !newP){ alert('Rellena Actual y Nueva.'); return; }
+    try{
+      const r = await POST({res:'auth', fn:'change', token:tok, old:oldP, neu:newP});
+      if(r.ok){
+        alert('Contraseña cambiada.');
+        chgOld.value=''; chgNew.value='';
+        chgWrap.setAttribute('hidden',''); togglePwdLink.setAttribute('aria-expanded','false');
+      }else alert(r.error || 'No se pudo cambiar.');
+    }catch{ alert('Error de red.'); }
+  });
+})();
 
   /* ========= Service Worker (PWA) ========= */
   if ('serviceWorker' in navigator) {
@@ -965,6 +1000,18 @@ h1::before,h2::before,h3::before{
       el.style.display = (localStorage.getItem(CDL_ROLE_KEY) === 'admin') ? '' : 'none';
     });
   }
+  // Toggle buscador en Incidencias
+(function(){
+  const btn  = document.getElementById('incSearchToggle');
+  const card = document.getElementById('incSearchCard');
+  if(!btn || !card) return;
+  btn.addEventListener('click', ()=>{
+    const willOpen = card.hasAttribute('hidden');
+    if(willOpen) card.removeAttribute('hidden'); else card.setAttribute('hidden','');
+    btn.setAttribute('aria-expanded', String(willOpen));
+    btn.textContent = willOpen ? 'Buscar ▲' : 'Buscar ▼';
+  });
+})();
 </script>
 <!-- =======================================================
      CONTENEDOR PRINCIPAL (páginas por hash)
@@ -1049,54 +1096,94 @@ h1::before,h2::before,h3::before{
     <div class="grid grid-eq" id="auxList"></div>
   </section>
 
-  <!-- ==================== PÁG. 4.0 INCIDENCIAS ==================== -->
   <section id="incidencias" class="page" hidden aria-labelledby="incTitle">
-    <h1 id="incTitle">Incidencias</h1>
+  <h1 id="incTitle" style="display:flex;align-items:center;gap:8px">
+    Incidencias
+    <button id="incSearchToggle" class="search-toggle btn btn--ghost" aria-expanded="false">Buscar ▼</button>
+  </h1>
 
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <button class="btn btn--primary" id="btnNewInc">Nueva incidencia</button>
-      <button class="btn btn--ghost" id="btnProgParada">Programar parada</button>
-      <button class="btn btn--ghost" id="btnFinInc">Finalizar incidencia</button>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+    <button class="btn btn--primary" id="btnNewInc">Nueva incidencia</button>
+    <button class="btn btn--ghost" id="btnProgParada">Programar parada</button>
+    <button class="btn btn--ghost" id="btnFinInc">Finalizar incidencia</button>
+  </div>
+
+  <!-- Buscador plegable -->
+  <article class="card" id="incSearchCard" hidden>
+    <form id="incFilterForm" class="form-inline" autocomplete="off">
+      <label for="incEq" class="form-inline__label">Equipo</label>
+      <input id="incEq" type="search" list="eqAll" placeholder="Escribe ID o nombre…">
+
+      <label for="incFecha" class="form-inline__label">Fecha de creación</label>
+      <input id="incFecha" type="date">
+
+      <label for="incTexto" class="form-inline__label">Texto</label>
+      <input id="incTexto" type="search" placeholder="Palabras clave…">
+
+      <button type="submit" class="btn btn--ghost">Aplicar</button>
+      <button type="button" id="incClr" class="btn btn--ghost">Limpiar</button>
+    </form>
+  </article>
+
+  <!-- Cuadrícula de categorías con logos -->
+  <div class="inc-cats" id="incCats">
+    <div class="inc-cat" data-cat="kaltenbach">
+      <img src="./img/Carousel/kaltenbach.webp" alt="Kaltenbach">
+      <div class="inc-sublist" id="sub-kaltenbach"></div>
     </div>
+    <div class="inc-cat" data-cat="trumpf">
+      <img src="./img/Carousel/trumpf.webp" alt="Trumpf">
+      <div class="inc-sublist" id="sub-trumpf"></div>
+    </div>
+    <div class="inc-cat" data-cat="gruas">
+      <img src="./logo-cdl.png" alt="Puentes grúa" style="max-height:36px">
+      <div class="inc-sublist" id="sub-gruas"></div>
+    </div>
+    <div class="inc-cat" data-cat="hgg">
+      <img src="./img/Carousel/hgg.webp" alt="HGG">
+      <div class="inc-sublist" id="sub-hgg"></div>
+    </div>
+    <div class="inc-cat" data-cat="tecoi">
+      <img src="./img/Carousel/tecoi.webp" alt="TECOI">
+      <div class="inc-sublist" id="sub-tecoi"></div>
+    </div>
+    <div class="inc-cat" data-cat="mazak">
+      <img src="./img/Carousel/mazak.webp" alt="Mazak">
+      <div class="inc-sublist" id="sub-mazak"></div>
+    </div>
+    <!-- Auxiliares -->
+    <div class="inc-cat" data-cat="auxiliares" style="grid-column:1/-1">
+      <button class="btn" style="width:100%">Auxiliares</button>
+      <div class="inc-sublist" id="sub-aux"></div>
+    </div>
+  </div>
 
-    <article class="card">
-      <form id="incFilterForm" class="form-inline" autocomplete="off">
-        <label for="incTexto" class="form-inline__label">Texto</label>
-        <input id="incTexto" type="search" placeholder="Palabras clave…">
-        <label for="incFiltroCat" class="form-inline__label">Categoría</label>
-        <select id="incFiltroCat">
-          <option value="">Todas</option>
-          <option value="equipos">Equipos</option>
-          <option value="gruas">Grúas</option>
-          <option value="auxiliares">Auxiliares</option>
-        </select>
-        <label for="incFecha" class="form-inline__label">Fecha</label>
-        <input id="incFecha" type="date">
-        <button type="submit" class="btn btn--ghost">Buscar</button>
-      </form>
-    </article>
+  <!-- Acciones rápidas (añadir restricción / finalizar) -->
+  <article class="card" id="incAddRestr" hidden>
+    <h2>Añadir restricciones</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+      <div><label>Equipo</label><input id="resEq" placeholder="ID equipo"></div>
+      <div><label>Detalle</label><input id="resDet" placeholder="Describe la restricción"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn btn--primary" id="resGuardar">Guardar restricción</button></div>
+  </article>
 
-    <article class="card" id="incAddRestr" hidden>
-      <h2>Añadir restricciones</h2>
-      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
-        <div><label>Equipo</label><input id="resEq" placeholder="ID equipo"></div>
-        <div><label>Detalle</label><input id="resDet" placeholder="Describe la restricción"></div>
-      </div>
-      <div style="margin-top:10px"><button class="btn btn--primary" id="resGuardar">Guardar restricción</button></div>
-    </article>
+  <article class="card" id="incFinalizar" hidden>
+    <h2>Finalizar incidencia</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+      <div><label>Equipo</label><input id="finEq" placeholder="ID equipo"></div>
+      <div><label>Intervenido por</label><input id="finTec" placeholder="Técnico"></div>
+      <div><label>Resumen solución</label><input id="finRes" placeholder="Descripción breve"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn btn--primary" id="finGuardar">Marcar solucionada</button></div>
+  </article>
 
-    <article class="card" id="incFinalizar" hidden>
-      <h2>Finalizar incidencia</h2>
-      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
-        <div><label>Equipo</label><input id="finEq" placeholder="ID equipo"></div>
-        <div><label>Intervenido por</label><input id="finTec" placeholder="Técnico"></div>
-        <div><label>Resumen solución</label><input id="finRes" placeholder="Descripción breve"></div>
-      </div>
-      <div style="margin-top:10px"><button class="btn btn--primary" id="finGuardar">Marcar solucionada</button></div>
-    </article>
+  <!-- Listado principal -->
+  <div id="incList" class="grid" style="grid-template-columns:1fr; margin-top:10px"></div>
 
-    <div id="incList" class="grid" style="grid-template-columns:1fr"></div>
-  </section>
+  <!-- lista auxiliar para autocompletado equipos -->
+  <datalist id="eqAll"></datalist>
+</section>
 
   <!-- ==================== PÁG. 5.0 OT ==================== -->
   <section id="ot" class="page" hidden aria-labelledby="otTitle">
@@ -1307,7 +1394,7 @@ h1::before,h2::before,h3::before{
   </section>
 
   <!-- ==================== MODALES COMPARTIDOS ==================== -->
-  <div id="modalBg"   style="position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);display:none;z-index:900"></div>
+  <div id="modalBg"   style="position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(2px);display:none;z-index:900"></div>
   <div id="modalCard" style="position:fixed;left:50%;top:10dvh;transform:translateX(-50%);width:min(980px,92vw);background:#0f141c;color:#e6eef7;border:1px solid #223046;border-radius:16px;box-shadow:0 20px 36px rgba(0,0,0,.45);padding:14px;display:none;z-index:950">
     <header style="display:flex;justify-content:space-between;align-items:center;gap:10px">
       <h3 id="modalT" style="margin:0">Detalle</h3>
@@ -1499,6 +1586,73 @@ function renderIncList(arr){
     </article>`).join('') || '<div style="color:#64748b">Sin incidencias</div>';
 }
 
+/* ==================== INCIDENCIAS: categorías y sublistas ==================== */
+let _eqIndex = []; // cache simple
+
+async function ensureEqIndex(){
+  if(_eqIndex.length) return _eqIndex;
+  try{
+    const eq   = await GET('equipos')      || [];
+    const gr   = await GET('gruas')        || [];
+    const aux  = await GET('auxiliares')   || [];
+    // normaliza a {id, nombre, grupo}
+    const norm = (arr, grupo)=> (arr||[]).map(x=>({ id:x.id, nombre:x.nombre||x.id, grupo }));
+    _eqIndex = [
+      ...norm(eq,  'kaltenbach'),
+      ...norm(eq.filter(e=>/trumpf|laser|láser/i.test(e.linea||e.nombre||'')),'trumpf'),
+      ...norm(gr,  'gruas'),
+      ...norm(eq.filter(e=>/hgg/i.test(e.fabricante||'')),'hgg'),
+      ...norm(eq.filter(e=>/tecoi/i.test(e.fabricante||'')),'tecoi'),
+      ...norm(eq.filter(e=>/mazak/i.test(e.fabricante||'')),'mazak'),
+      ...norm(aux, 'auxiliares')
+    ];
+  }catch{ _eqIndex = []; }
+  return _eqIndex;
+}
+
+function fillGroupList(groupKey, subId){
+  const host = document.getElementById(subId);
+  if(!host) return;
+  const arr = _eqIndex.filter(x=>x.grupo===groupKey);
+  host.innerHTML = arr.length
+    ? arr.map(x=>`<button class="btn" data-inc-open="${x.id}" style="width:100%;justify-content:flex-start">${x.nombre}</button>`).join('')
+    : '<div style="color:#64748b">Sin elementos</div>';
+  host.dataset.filled = '1';
+}
+
+document.getElementById('incCats')?.addEventListener('click', async (e)=>{
+  const cat = e.target.closest('.inc-cat');
+  if(!cat) return;
+  const key = cat.getAttribute('data-cat');
+  const sub = cat.querySelector('.inc-sublist');
+
+  await ensureEqIndex();
+
+  // Rellena sublistas bajo demanda
+  if (sub && !sub.dataset.filled){
+    if (key==='kaltenbach') fillGroupList('kaltenbach','sub-kaltenbach');
+    else if (key==='trumpf') fillGroupList('trumpf','sub-trumpf');
+    else if (key==='gruas') fillGroupList('gruas','sub-gruas');
+    else if (key==='auxiliares') fillGroupList('auxiliares','sub-aux');
+    else if (key==='tecoi') fillGroupList('tecoi','sub-tecoi');
+    else if (key==='mazak') fillGroupList('mazak','sub-mazak');
+    else if (key==='hgg') fillGroupList('hgg','sub-hgg');
+  }
+
+  // Si hay 1 único equipo en el grupo, abre directa la incidencia
+  const only = _eqIndex.filter(x=>x.grupo===key);
+  if (only.length===1){ openNuevaIncidencia(only[0].id); window.scrollTo({top:0,behavior:'smooth'}); return; }
+
+  // Si hay lista, alterna despliegue
+  if (sub){ sub.classList.toggle('show'); }
+});
+
+// Click en elementos de la sublista para abrir la incidencia
+document.addEventListener('click', (e)=>{
+  const b = e.target.closest('[data-inc-open]');
+  if(!b) return;
+  openNuevaIncidencia(b.getAttribute('data-inc-open'));
+});
 /* ==================== INVENTARIO / CONSUMIBLES ==================== */
 let _invRaw = [];
 async function invLoad(){
