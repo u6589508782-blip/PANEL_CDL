@@ -102,7 +102,7 @@ button{font:inherit; cursor:pointer; background:transparent; border:0}
   content:""; position:absolute; inset:0;
   background:
     linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.05) 60%, rgba(255,255,255,.09) 100%),
-    url("logo_mantenimiento.png") center -65px / clamp(260px, 46vw, 420px) auto no-repeat;
+    url("logo_mantenimiento.png") center 0px / clamp(260px, 46vw, 420px) auto no-repeat;
   opacity:.10; pointer-events:none;
 }
 .brand{display:flex; align-items:flex-end; gap:10px; justify-self:center; margin-top:2px}
@@ -263,38 +263,54 @@ h1::before,h2::before,h3::before{
 .hero .sub{margin:2px 0 0; font-weight:700; color:#64748b; font-size:.95rem}
 
 /* =========================================================
-   TARJETA “Semáforo” compacta
+   TARJETA “Semáforo” horizontal y compacta
+   - 1/3 del tamaño aprox. (padding, fuentes y lámparas reducidos)
+   - Luces tumbadas (en fila)
+   - Totalmente responsive y con buena UX
 ========================================================= */
 .tl{
-  display:grid; grid-template-columns:72px 1fr; gap:10px; align-items:center;
-  border:1px solid var(--line); border-radius:14px; padding:10px; box-shadow:var(--shadow);
+  display:grid; grid-template-columns:1fr; gap:8px;
+  border:1px solid var(--line); border-radius:12px; padding:8px; box-shadow:var(--shadow);
 }
+.tl__head{
+  display:flex; align-items:center; gap:8px; justify-content:space-between; flex-wrap:wrap;
+}
+.tl__id{
+  display:flex; align-items:center; gap:8px; min-width:180px;
+}
+.tl__name{ font-weight:900; font-size:.92rem; line-height:1.1 }
+.tl__badge{ display:inline-block; padding:2px 7px; border-radius:999px; background:#eef2f7; border:1px solid #e2e8f0; font-weight:900; font-size:10px }
+
+/* Semáforo horizontal */
+.tl__pole-wrap{ position:relative; }
 .tl__pole{
-  background:#0b101a; border-radius:10px; padding:8px 6px;
-  display:grid; gap:10px; align-content:space-between; height:100%;
-  min-height:140px; max-height:260px;
+  background:#0b101a; border-radius:10px; padding:6px 8px;
+  display:flex; align-items:center; gap:10px;
 }
 .tl__lamp{
-  width:100%; aspect-ratio:1/1; border-radius:50%;
+  width:14px; height:14px; border-radius:50%;
   border:2px solid #0b101a; outline:2px solid #ffffff; opacity:.45;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), rgba(255,255,255,0) 55%);
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.5), rgba(255,255,255,0) 55%);
 }
 .tl__lamp--g{ background-color:#22c55e }
 .tl__lamp--y{ background-color:#fbbf24 }
 .tl__lamp--r{ background-color:#ef4444 }
-.tl__lamp.active{ opacity:1; box-shadow:0 0 0 2px rgba(255,255,255,.5) inset, 0 0 24px rgba(0,0,0,.22) }
-.tl__pole-wrap{ position:relative }
-.tl__hit{ position:absolute; left:0; right:0; height:33.33%; cursor:pointer }
-.tl__hit--g{ top:0 } .tl__hit--y{ top:33.33% } .tl__hit--r{ top:66.66% }
-.tl__badge{display:inline-block; padding:2px 7px; border-radius:999px; background:#eef2f7; border:1px solid #e2e8f0; font-weight:900; font-size:11px}
-.tl__name{font-weight:900; font-size:1rem}
-.tl__actions{display:flex; gap:6px; flex-wrap:wrap}
+.tl__lamp.active{ opacity:1; box-shadow:0 0 0 2px rgba(255,255,255,.5) inset, 0 0 12px rgba(0,0,0,.22) }
+
+/* Áreas clicables (izq=verde, centro=amarillo, dcha=rojo) */
+.tl__hit{ position:absolute; top:0; bottom:0; cursor:pointer }
+.tl__hit--g{ left:4px; right:66%; }
+.tl__hit--y{ left:33%; right:33%; }
+.tl__hit--r{ left:66%; right:4px; }
+
+/* Acciones */
+.tl__actions{ display:flex; gap:6px; flex-wrap:wrap }
 .tl__actions .btn--danger{ background:var(--brand); color:#fff }
 
 /* Menú “Más opciones” */
 .tl__more{ position:relative; display:inline-block }
 .tl__arrow{
-  cursor:pointer; font-size:16px; line-height:1; padding:4px 7px; border-radius:8px;
+  cursor:pointer; font-size:14px; line-height:1; padding:3px 6px; border-radius:8px;
   border:1px solid var(--line); background:#fff; font-weight:900; user-select:none;
 }
 .tl__arrow:active{ transform:translateY(1px) }
@@ -304,12 +320,6 @@ h1::before,h2::before,h3::before{
 }
 .tl__more.open .tl__menu{ display:grid; gap:6px }
 .tl__menu .btn{ width:100%; justify-content:flex-start }
-
-/* Rejilla para listados */
-.grid-eq{display:grid; gap:10px; grid-template-columns:repeat(1,minmax(0,1fr))}
-@media (min-width:520px){.grid-eq{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (min-width:1100px){.grid-eq{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.grid-eq .card{overflow:hidden}
 
 /* =========================================================
    UTILIDADES
@@ -366,7 +376,7 @@ h1::before,h2::before,h3::before{
   <div class="h__in">
     <button class="hbtn" id="hamb" aria-label="Abrir menú" aria-controls="sidenav" aria-expanded="false"><span class="i"><span></span></span></button>
     <a class="brand" aria-label="Inicio" href="#dashboard">
-  <img src="logo-cdl.png" alt="CDL" style="height:50px; margin-top:2px">
+  <img src="logo-cdl.png" alt="CDL" style="height:40px; margin-top:2px">
 </a>
     <button class="hbtn" id="moreBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="userPanel"><span class="i"></span></button>
   </div>
@@ -1140,52 +1150,55 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-/* ========= Importación automática de repuestos.csv (cola + reintentos) ========= */
+/* ========= Importación automática de repuestos.csv (cola + reintentos) — UNIFICADO ========= */
 (function(){
   const CSV_PATH          = './repuestos.csv';
-  const CSV_IMPORTED_KEY  = 'inv_csv_imported';
-  const CSV_QUEUE_KEY     = 'inv_csv_queue';
+  const CSV_IMPORTED_KEY  = 'inv_csv_imported';  // '1' cuando ya está importado al backend
+  const CSV_QUEUE_KEY     = 'inv_csv_queue';     // items pendientes cuando no hay token
 
-  const hasToken    = ()=> !!(localStorage.getItem(CDL_TOKEN_KEY)||'');
-  const onInventario= ()=> (location.hash||'#dashboard') === '#inventario';
+  const hasToken     = ()=> !!(localStorage.getItem(CDL_TOKEN_KEY)||'');
+  const onInventario = ()=> (location.hash||'#dashboard') === '#inventario';
 
-  function stripBOM(s){ return (s||'').replace(/^\uFEFF/, ''); }
-  function detectDelim(s){
+  /* Utilidades CSV */
+  const stripBOM = (s)=> (s||'').replace(/^\uFEFF/, '');
+  const detectDelim = (s)=>{
     const comma = (s.match(/,/g)||[]).length;
     const semi  = (s.match(/;/g)||[]).length;
     return semi > comma ? ';' : ',';
-  }
+  };
   function parseCSV(txt){
-    const lines = txt.split(/\r?\n/).filter(l => l.trim().length);
+    const lines = (txt||'').split(/\r?\n/).filter(l=>l.trim().length);
     if(!lines.length) return { headers:[], items:[] };
 
     const headLine = stripBOM(lines.shift());
-    const delim    = detectDelim(headLine);
-    const headers  = headLine.split(delim).map(h => stripBOM(h).trim().toLowerCase());
+    const delim = detectDelim(headLine);
+    const headers = headLine.split(delim).map(h=>stripBOM(h).trim().toLowerCase());
+
+    const normNum = v => Number(String(v??'0').replace(',','.')) || 0;
 
     const items = lines.map(line=>{
       const cols = line.split(delim).map(c=>c.trim());
       const o = {}; headers.forEach((h,i)=> o[h] = cols[i] ?? '');
-      const normNum = v => Number(String(v??'0').replace(',','.')) || 0;
       const ref   = o.ref || o.referencia || o.codigo || '';
       const desc  = o.desc || o.descripcion || o.nombre || '';
-      const item = {
+      if(!ref && !desc) return null;
+      return {
         ref,
         codigo: o.codigo || ref,
         desc,
         stock: normNum(o.stock),
         min:   normNum(o.min || o['stock_min']),
         categoria: o.categoria || 'General',
-        subcategoria: o.subcategoria || '',
+        subcategoria: o.subcategoria || 'Sin subcategoría',
         ubicacion: o.ubicacion || '',
         unidad: o.unidad || ''
       };
-      return (item.ref && (item.desc || item.codigo)) ? item : null;
     }).filter(Boolean);
 
     return { headers, items };
   }
 
+  /* Llamada al backend para importar */
   async function importNow(items){
     const token = localStorage.getItem(CDL_TOKEN_KEY) || '';
     try{
@@ -1202,6 +1215,7 @@ if ('serviceWorker' in navigator) {
     }
   }
 
+  /* Vacía cola local si ya hay token */
   async function flushCSVQueue(){
     if(localStorage.getItem(CSV_IMPORTED_KEY) === '1') return;
     const q = JSON.parse(localStorage.getItem(CSV_QUEUE_KEY) || '[]');
@@ -1216,6 +1230,7 @@ if ('serviceWorker' in navigator) {
     }
   }
 
+  /* Auto-import inicial (solo una vez por navegador) */
   async function autoImportCSVInicial(){
     try{
       if (localStorage.getItem(CSV_IMPORTED_KEY) === '1') return;
@@ -1226,7 +1241,7 @@ if ('serviceWorker' in navigator) {
       const { items } = parseCSV(txt);
       if (!items.length) return;
 
-      if(hasToken()){
+      if (hasToken()){
         const n = await importNow(items);
         if(n > 0){
           localStorage.setItem(CSV_IMPORTED_KEY,'1');
@@ -1234,15 +1249,18 @@ if ('serviceWorker' in navigator) {
           return;
         }
       }else{
+        // Sin token: guarda en cola local; se intentará al iniciar sesión
         localStorage.setItem(CSV_QUEUE_KEY, JSON.stringify(items));
       }
     }catch(_err){}
   }
 
+  // Disparadores
   autoImportCSVInicial();
   document.addEventListener('DOMContentLoaded', flushCSVQueue);
   window.addEventListener('hashchange', flushCSVQueue, { passive:true });
 
+  // Reintentos temporizados (máx. ~45s)
   let tries = 0;
   const iv = setInterval(async ()=>{
     if(localStorage.getItem(CSV_IMPORTED_KEY) === '1' || (++tries > 30)){
@@ -1252,6 +1270,7 @@ if ('serviceWorker' in navigator) {
     await flushCSVQueue();
   }, 1500);
 
+  // Si el usuario inicia sesión en otra pestaña
   window.addEventListener('storage', (e)=>{
     if(e.key === CDL_TOKEN_KEY) flushCSVQueue();
   });
@@ -1427,55 +1446,61 @@ function applyRoleVisibility(){
   });
 }
 
-/* ====== ÍNDICE GLOBAL DE EQUIPOS (ID + nombre para búsquedas) ====== */
-let EQ_INDEX = [];  // [{id, nombre, label, marca, tipo}]
-function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
-function buildLabel(id, nombre){
-  const nn = (nombre||'').trim();
-  if(!nn) return String(id);
-  return `${id} ${nn}`;
-}
-async function buildEqIndex(){
-  const [eq, gr, ax] = await Promise.all([
-    GET('equipos').catch(()=>[]),
-    GET('gruas').catch(()=>[]),
-    GET('auxiliares').catch(()=>[])
-  ]);
-  const mapMarca = (e)=>{
-    const t = `${e.linea||''} ${e.fabricante||''} ${e.grupo||''} ${e.nombre||''}`.toLowerCase();
-    if(/kaltenbach|kdp|kdm|kbs|sierras?/.test(t)) return 'kaltenbach';
-    if(/trumpf|láser|laser/.test(t))              return 'trumpf';
-    if(/hgg/.test(t))                              return 'hgg';
-    if(/tecoi/.test(t))                            return 'tecoi';
-    if(/mazak/.test(t))                            return 'mazak';
-    return '';
-  };
-  EQ_INDEX = [
-    ...(eq||[]).map(e=>({id:String(e.id), nombre:e.nombre||'', label:buildLabel(e.id, e.nombre), marca:mapMarca(e), tipo:'equipo'})),
-    ...(gr||[]).map(g=>({id:String(g.id), nombre:g.nombre||g.id, label:buildLabel(g.id, g.nombre||''), marca:'gruas', tipo:'grua'})),
-    ...(ax||[]).map(a=>({id:String(a.id), nombre:a.nombre||'', label:buildLabel(a.id, a.nombre), marca:'auxiliares', tipo:'aux'})),
-  ];
-  EQ_INDEX = EQ_INDEX.map(x=>{
-    const nl = norm(x.label);
-    if(/sierra.*paquete/.test(nl)) return {...x, marca:'kaltenbach'};
-    return x;
+/* =========================================================
+   ÍNDICE DE EQUIPOS (UNIFICADO)
+   - Normaliza el uso de EQ_INDEX y __EQ_INDEX a la MISMA referencia
+   - Incluye utilidades de construcción y búsqueda
+========================================================= */
+(function(){
+  // Referencia única compartida
+  if (!('EQ_INDEX' in window)) window.EQ_INDEX = [];
+  Object.defineProperty(window, '__EQ_INDEX', {
+    get(){ return window.EQ_INDEX; },
+    set(v){ window.EQ_INDEX = Array.isArray(v) ? v : []; }
   });
 
-  const dl = document.getElementById('eqAll');
-  if(dl){
-    dl.innerHTML = EQ_INDEX
-      .map(x=> `<option value="${x.label}"></option>`)
-      .join('');
-  }
-}
-function findEquipoMatch(q){
-  const n = norm(q);
-  if(!n) return null;
-  let f = EQ_INDEX.find(x=> norm(x.id)===n || norm(x.label)===n);
-  if(f) return f;
-  f = EQ_INDEX.find(x=> n===norm(x.id) || norm(x.label).includes(n) || norm(x.nombre).includes(n));
-  return f || null;
-}
+  // Construye el índice a partir de arrays de equipos, grúas y auxiliares (opcionales)
+  window.buildEqIndex = function({equipos=[], gruas=[], auxiliares=[]}={}){
+    const norm = (s)=>String(s??'').trim();
+    const pack = (list,tipo)=> (list||[]).map(e=>({
+      id: norm(e.id||e.codigo||e.ref||''),
+      nombre: norm(e.nombre||e.tag||e.id||''),
+      tipo,
+      grupo: norm(e.grupo||''),
+      nave: norm(e.nave||''),
+      ubicacion: norm(e.ubicacion||''),
+      fabricante: norm(e.fabricante||''),
+      modelo: norm(e.modelo||''),
+    })).filter(x=>x.id || x.nombre);
+
+    const idx = [
+      ...pack(equipos,'equipo'),
+      ...pack(gruas,'grua'),
+      ...pack(auxiliares,'aux')
+    ];
+
+    // Orden alfabético por nombre y, de empate, por id
+    idx.sort((a,b)=>{
+      const n = a.nombre.localeCompare(b.nombre,'es',{sensitivity:'base'});
+      return n!==0 ? n : a.id.localeCompare(b.id,'es',{sensitivity:'base'});
+    });
+
+    window.EQ_INDEX = idx; // actualiza la referencia compartida
+    return window.EQ_INDEX;
+  };
+
+  // Búsqueda rápida por término (para autocompletar/filtros)
+  window.searchEqIndex = function(term){
+    const t = String(term||'').toLowerCase();
+    if(!t) return window.EQ_INDEX.slice(0,100);
+    return window.EQ_INDEX.filter(e=>
+      e.id.toLowerCase().includes(t) ||
+      e.nombre.toLowerCase().includes(t) ||
+      e.tipo.toLowerCase().includes(t) ||
+      e.ubicacion.toLowerCase().includes(t)
+    ).slice(0,200);
+  };
+})();
 
 /* ====== INCIDENCIAS: toggle del buscador + filtros ====== */
 (function(){
@@ -1694,7 +1719,7 @@ function renderIncList(arr){
     </article>`).join('') || '<div style="color:#64748b">Sin incidencias</div>';
 }
 
-// Acciones en tarjetas de incidencias: finalizar
+// Acciones en tarjetas de incidencias: finalizar (unificado)
 document.addEventListener('click', async (e)=>{
   const fin = e.target.closest('[data-inc-fin]');
   if(!fin) return;
@@ -1705,17 +1730,6 @@ document.addEventListener('click', async (e)=>{
   try{
     const r = await POST({res:'incid', fn:'finalizar', token:tok, id});
     if(!r.ok) return alert(r.error||'No se pudo finalizar');
-    loadIncidencias();
-  }catch{ alert('Error de red'); }
-});
-document.addEventListener('click', async (e)=>{
-  const fin = e.target.closest('[data-inc-fin]');
-  if(!fin) return;
-  const id = fin.getAttribute('data-inc-fin');
-  const tok = localStorage.getItem('cdl_token')||'';
-  try{
-    const r = await POST({res:'incid', fn:'finalizar', token:tok, id});
-    if(!r.ok) alert(r.error||'No se pudo finalizar');
     loadIncidencias();
   }catch{ alert('Error de red'); }
 });
@@ -1730,7 +1744,7 @@ function closeModal(){ _bg.style.display=_mc.style.display='none'; }
 document.getElementById('modalX').onclick = closeModal; _bg.onclick = closeModal;
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
 
-/* ==================== TARJETA CON SEMÁFORO ==================== */
+/* ==================== TARJETA CON SEMÁFORO (horizontal) ==================== */
 function uc(s){ return (s||'').toString().toUpperCase(); }
 function semClass(estado){
   const s = String(estado||'ok').toLowerCase();
@@ -1741,36 +1755,37 @@ function semClass(estado){
 function trafficLightCard({id,nombre,estado,tipo='equipo'}){
   const state = semClass(estado);
   const name  = uc(nombre||id);
+  const stateLabel = (state==='g'?'MARCHA':state==='y'?'RESTRICCIÓN':'PARADA');
+
   return `
   <article class="tl" data-card="${tipo}:${id}">
-    <div class="tl__pole-wrap">
-      <div class="tl__pole">
-        <div class="tl__lamp tl__lamp--g ${state==='g'?'active':''}"></div>
-        <div class="tl__lamp tl__lamp--y ${state==='y'?'active':''}"></div>
-        <div class="tl__lamp tl__lamp--r ${state==='r'?'active':''}"></div>
+    <div class="tl__head">
+      <div class="tl__id">
+        <span class="tl__name">${name}</span>
+        <span class="tl__badge" data-badge="${id}">${stateLabel}</span>
       </div>
-      <div class="tl__hit tl__hit--g" data-tl="${id}" data-type="${tipo}" data-newstate="g" title="Marcha (verde)"></div>
-      <div class="tl__hit tl__hit--y" data-type="${tipo}" data-tl="${id}" data-newstate="y" title="Restricciones (amarillo)"></div>
-      <div class="tl__hit tl__hit--r" data-type="${tipo}" data-tl="${id}" data-newstate="r" title="Parada (rojo)"></div>
+
+      <div class="tl__pole-wrap" aria-label="Estado ${stateLabel}">
+        <div class="tl__pole">
+          <div class="tl__lamp tl__lamp--g ${state==='g'?'active':''}"></div>
+          <div class="tl__lamp tl__lamp--y ${state==='y'?'active':''}"></div>
+          <div class="tl__lamp tl__lamp--r ${state==='r'?'active':''}"></div>
+        </div>
+        <div class="tl__hit tl__hit--g" data-tl="${id}" data-type="${tipo}" data-newstate="g" title="Marcha (verde)"></div>
+        <div class="tl__hit tl__hit--y" data-type="${tipo}" data-tl="${id}" data-newstate="y" title="Restricciones (amarillo)"></div>
+        <div class="tl__hit tl__hit--r" data-type="${tipo}" data-tl="${id}" data-newstate="r" title="Parada (rojo)"></div>
+      </div>
     </div>
 
-    <div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="tl__name">${name}</span>
-        <span class="tl__badge" data-badge="${id}">${state==='g'?'MARCHA':state==='y'?'RESTRICCIÓN':'PARADA'}</span>
-      </div>
-
-      <div class="tl__actions" style="margin-top:10px">
-        <button class="btn btn--ghost" data-ficha="${id}" data-type="${tipo}">Ver ficha</button>
-
-        <div class="tl__more">
-          <div class="tl__arrow" data-more-open>▼</div>
-          <div class="tl__menu" role="menu">
-            <button class="btn btn--ghost" data-incidencia="${id}" data-type="${tipo}">Nueva incidencia</button>
-            <button class="btn btn--ghost" data-programar="${id}" data-type="${tipo}">Programar parada</button>
-            <button class="btn btn--ghost" data-parada-programada="${id}" data-type="${tipo}">Parada programada</button>
-            <button class="btn btn--danger" data-parada-prolongada="${id}" data-type="${tipo}">Parada prolongada</button>
-          </div>
+    <div class="tl__actions">
+      <button class="btn btn--ghost" data-ficha="${id}" data-type="${tipo}">Ver ficha</button>
+      <div class="tl__more">
+        <div class="tl__arrow" data-more-open>▼</div>
+        <div class="tl__menu" role="menu">
+          <button class="btn btn--ghost" data-incidencia="${id}" data-type="${tipo}">Nueva incidencia</button>
+          <button class="btn btn--ghost" data-programar="${id}" data-type="${tipo}">Programar parada</button>
+          <button class="btn btn--ghost" data-parada-programada="${id}" data-type="${tipo}">Parada programada</button>
+          <button class="btn btn--danger" data-parada-prolongada="${id}" data-type="${tipo}">Parada prolongada</button>
         </div>
       </div>
     </div>
@@ -1809,7 +1824,7 @@ async function loadAux(){
   document.getElementById('auxList').innerHTML = (data||[]).map(a=>trafficLightCard({...a,tipo:'aux'})).join('') || '<div style="color:#64748b">Sin datos</div>';
 }
 
-/* ==================== FICHA DE EQUIPO/GRÚA/AUX ==================== */
+/* ==================== FICHA DE EQUIPO/GRÚA/AUX (con QR) ==================== */
 async function fichaRender(id){
   let e = (await GET('equipos')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
   if(!e) e = (await GET('gruas')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
@@ -1829,13 +1844,26 @@ async function fichaRender(id){
 
   const pdfName = sanitize(e.nombre||e.id)+'.pdf';
 
+  // URL codificada para el QR (apunta a la ficha dentro de la PWA)
+  const qrData = encodeURIComponent(`${location.origin}${location.pathname}#equipos?eq=${encodeURIComponent(e.id)}`);
+  const qrImg  = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${qrData}`;
+
   const html = `
-    <div style="display:flex;gap:6px;flex-wrap:wrap">${meta}</div>
-    <h4 style="margin:10px 0 6px">Observaciones</h4>
-    <div class="card" style="background:#0b101a;color:#cfe1f7;border:1px solid #243046">${e.observaciones||'—'}</div>
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn--primary" onclick="window.__cdlOpenManual && window.__cdlOpenManual('${pdfName}')">Manual</button>
-      <button class="btn btn--ghost" onclick="window.print()">Imprimir</button>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start">
+      <div style="flex:1 1 380px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${meta}</div>
+        <h4 style="margin:10px 0 6px">Observaciones</h4>
+        <div class="card" style="background:#0b101a;color:#cfe1f7;border:1px solid #243046">${e.observaciones||'—'}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn--primary" onclick="window.__cdlOpenManual && window.__cdlOpenManual('${pdfName}')">Manual</button>
+          <button class="btn btn--ghost" onclick="window.print()">Imprimir</button>
+        </div>
+      </div>
+      <div style="flex:0 0 auto; text-align:center">
+        <div class="badge" style="display:inline-block;margin-bottom:6px">QR equipo</div>
+        <img src="${qrImg}" alt="QR ${e.id}" width="160" height="160" style="border-radius:12px;border:1px solid #e2e8f0">
+        <div style="font-size:12px;color:#64748b;margin-top:4px">${e.id}</div>
+      </div>
     </div>`;
   openModal(`${e.nombre||e.id} — Ficha técnica`, html);
 }
@@ -1843,12 +1871,10 @@ if(!window.__cdlOpenManual){
   window.__cdlOpenManual = async function(pdfName){
     const base = './manuales/';
     const url  = base + pdfName;
-
     try{
       const res = await fetch(url, { method:'HEAD', cache:'no-store' });
       if (res && res.ok) { window.open(url, '_blank'); return; }
     }catch(_e){}
-
     window.open(base + 'manual_no_disponible.pdf', '_blank');
   };
 }
@@ -1856,10 +1882,75 @@ if(!window.__cdlOpenManual){
 /* ==================== INVENTARIO / CONSUMIBLES ==================== */
 let _invRaw = [];
 async function invLoad(){
-  const data = await GET('inventario') || [];
-  _invRaw = data;
   const host = document.getElementById('invCats');
 
+  // 1) Datos por API
+  let data = [];
+  try{
+    const api = await GET('inventario');
+    if (Array.isArray(api)) data = api;
+  }catch(_e){ data = []; }
+
+  // 2) Fallback visible: repuestos.csv local si la API viene vacía
+  if (!Array.isArray(data) || !data.length){
+    try{
+      const res = await fetch('./repuestos.csv', {cache:'no-store'});
+      if(res.ok){
+        const txt = await res.text();
+        const parsed = (function parseLocalCSV(s){
+          const stripBOM = t => (t||'').replace(/^\uFEFF/,'');
+          const raw = stripBOM(s||'').split(/\r?\n/).filter(l=>l.trim());
+          if(!raw.length) return [];
+
+          // Detectar separador , o ;
+          const sep = ((head)=>{
+            const c = (head.match(/,/g)||[]).length;
+            const sc= (head.match(/;/g)||[]).length;
+            return sc>c?';':',';
+          })(raw[0]);
+
+          const headers = raw[0].split(sep).map(h=>stripBOM(h).trim().toLowerCase());
+          const normNum = v => Number(String(v??'0').replace(',','.'))||0;
+
+          const rows = [];
+          for (let i=1;i<raw.length;i++){
+            const cols = raw[i].split(sep).map(c=>c.trim());
+            const o={}; headers.forEach((h,ix)=>o[h]=cols[ix]??'');
+            const ref   = o.ref || o.referencia || o.codigo || '';
+            const desc  = o.desc || o.descripcion || o.nombre || '';
+            if(!ref && !desc) continue;
+            rows.push({
+              ref,
+              codigo: o.codigo || ref,
+              desc,
+              stock: normNum(o.stock),
+              min:   normNum(o.min || o['stock_min']),
+              categoria: o.categoria || 'General',
+              subcategoria: o.subcategoria || 'Sin subcategoría',
+              ubicacion: o.ubicacion || '',
+              unidad: o.unidad || ''
+            });
+          }
+
+          // Agrupar en estructura {categoria, items:[...]}
+          const byCat = {};
+          rows.forEach(it=>{
+            const c = it.categoria||'General';
+            if(!byCat[c]) byCat[c] = [];
+            byCat[c].push(it);
+          });
+          return Object.keys(byCat).sort((a,b)=>a.localeCompare(b,'es')).map(c=>({
+            categoria:c, items: byCat[c]
+          }));
+        })(txt);
+        if (parsed.length) data = parsed;
+      }
+    }catch(_e){}
+  }
+
+  _invRaw = data;
+
+  // Render
   function renderItem(i){
     const ref = i.ref || i.codigo || '';
     return `
@@ -1901,25 +1992,160 @@ async function invLoad(){
 
     return `
       <details>
-        <summary style="font-weight:900">${nombreCat}</summary>
+        <summary style="font-weight:900">${nombreCat}${(!Array.isArray(_invRaw) || !_invRaw.length) ? ' · vista temporal' : ''}</summary>
+        ${subsHtml || '<div style="color:#64748b;margin:.5rem 0 0 1rem">Sin subcategorías</div>'}
+      </details>`;
+  }).join('');
+
+  host.innerHTML = htmlCats || '<div style="color:#64748b">Inventario vacío</div>';
+  /* ==================== INVENTARIO / CONSUMIBLES ==================== */
+let _invRaw = [];
+async function invLoad(){
+  const host = document.getElementById('invCats');
+
+  // 1) Datos por API
+  let data = [];
+  try{
+    const api = await GET('inventario');
+    if (Array.isArray(api)) data = api;
+  }catch(_e){ data = []; }
+
+  // 2) Fallback visible: repuestos.csv local si la API viene vacía
+  if (!Array.isArray(data) || !data.length){
+    try{
+      const res = await fetch('./repuestos.csv', {cache:'no-store'});
+      if(res.ok){
+        const txt = await res.text();
+        const parsed = (function parseLocalCSV(s){
+          const stripBOM = t => (t||'').replace(/^\uFEFF/,'');
+          const raw = stripBOM(s||'').split(/\r?\n/).filter(l=>l.trim());
+          if(!raw.length) return [];
+
+          // Detectar separador , o ;
+          const sep = ((head)=>{
+            const c = (head.match(/,/g)||[]).length;
+            const sc= (head.match(/;/g)||[]).length;
+            return sc>c?';':',';
+          })(raw[0]);
+
+          const headers = raw[0].split(sep).map(h=>stripBOM(h).trim().toLowerCase());
+          const normNum = v => Number(String(v??'0').replace(',','.'))||0;
+
+          const rows = [];
+          for (let i=1;i<raw.length;i++){
+            const cols = raw[i].split(sep).map(c=>c.trim());
+            const o={}; headers.forEach((h,ix)=>o[h]=cols[ix]??'');
+            const ref   = o.ref || o.referencia || o.codigo || '';
+            const desc  = o.desc || o.descripcion || o.nombre || '';
+            if(!ref && !desc) continue;
+            rows.push({
+              ref,
+              codigo: o.codigo || ref,
+              desc,
+              stock: normNum(o.stock),
+              min:   normNum(o.min || o['stock_min']),
+              categoria: o.categoria || 'General',
+              subcategoria: o.subcategoria || 'Sin subcategoría',
+              ubicacion: o.ubicacion || '',
+              unidad: o.unidad || ''
+            });
+          }
+
+          // Agrupar en estructura {categoria, items:[...]}
+          const byCat = {};
+          rows.forEach(it=>{
+            const c = it.categoria||'General';
+            if(!byCat[c]) byCat[c] = [];
+            byCat[c].push(it);
+          });
+          return Object.keys(byCat).sort((a,b)=>a.localeCompare(b,'es')).map(c=>({
+            categoria:c, items: byCat[c]
+          }));
+        })(txt);
+        if (parsed.length) data = parsed;
+      }
+    }catch(_e){}
+  }
+
+  _invRaw = data;
+
+  // Render
+  function renderItem(i){
+    const ref = i.ref || i.codigo || '';
+    return `
+      <article class="card">
+        <header style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <strong>${ref}</strong>
+          <span class="badge" style="font-size:11px">${i.stock ?? '-'}</span>
+        </header>
+        <p style="margin:.5rem 0">${i.desc || ''}</p>
+        <div class="qty" style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn" data-inv="${ref}" data-delta="+1">+1</button>
+          <button class="btn" data-inv="${ref}" data-delta="+10">+10</button>
+          <button class="btn" data-inv="${ref}" data-delta="+100">+100</button>
+          <button class="btn" data-inv="${ref}" data-delta="-1">-1</button>
+          <button class="btn" data-inv="${ref}" data-delta="-10">-10</button>
+          <button class="btn" data-inv="${ref}" data-delta="-100">-100</button>
+        </div>
+      </article>`;
+  }
+
+  const htmlCats = (data||[]).map(cat=>{
+    const nombreCat = cat.categoria || 'Sin categoría';
+    const bySub = {};
+    (cat.items||[]).forEach(it=>{
+      const sc = String(it.subcategoria || 'Sin subcategoría');
+      if(!bySub[sc]) bySub[sc] = [];
+      bySub[sc].push(it);
+    });
+    const subsHtml = Object.keys(bySub)
+      .sort((a,b)=> a.localeCompare(b,'es'))
+      .map(sc=>`
+        <details style="margin-top:8px">
+          <summary style="font-weight:800;color:#334155">${sc}</summary>
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:8px">
+            ${bySub[sc].map(renderItem).join('')}
+          </div>
+        </details>`
+      ).join('');
+
+    return `
+      <details>
+        <summary style="font-weight:900">${nombreCat}${(!Array.isArray(_invRaw) || !_invRaw.length) ? ' · vista temporal' : ''}</summary>
         ${subsHtml || '<div style="color:#64748b;margin:.5rem 0 0 1rem">Sin subcategorías</div>'}
       </details>`;
   }).join('');
 
   host.innerHTML = htmlCats || '<div style="color:#64748b">Inventario vacío</div>';
 
-  const lows = (data||[]).flatMap(c=>(c.items||[]).filter(i=>Number(i.stock)<=Number(i.min)));
+  // 🔁 Actualiza también el banner de alertas cada vez que se recarga inventario
+  if (typeof invRenderAlerts === 'function') invRenderAlerts();
+}
+
+/* =========================================================
+   ALERTAS DE STOCK MÍNIMO + DATALIST EQUIPOS + IMPORT CSV
+   - Usa _invRaw (rellenado por invLoad)
+   - Se ejecuta tras invLoad()
+========================================================= */
+function invRenderAlerts(){
   const alertsEl = document.getElementById('invAlerts');
+  if(!alertsEl) return;
+
+  const lows = (_invRaw||[])
+    .flatMap(c=>(c.items||[]).filter(i=> Number(i.stock) <= Number(i.min)));
+
   alertsEl.innerHTML = lows.length
     ? `<div class="badge" style="background:#fff7ed;border-color:#fed7aa;color:#9a3412">${lows.length} referencias por debajo del mínimo</div>`
     : '<span style="color:#64748b">Sin alertas de stock mínimo</span>';
-
-  const dl = document.getElementById('eqList');
-  if(dl){
-    const eq = await GET('equipos');
-    dl.innerHTML = (eq||[]).map(x=>`<option value="${x.id}">`).join('');
-  }
 }
+
+async function invSetupDatalist(){
+  const dl = document.getElementById('eqList');
+  if(!dl) return;
+  const eq = await GET('equipos').catch(()=>[]);
+  dl.innerHTML = (eq||[]).map(x=>`<option value="${x.id}">`).join('');
+}
+
 document.getElementById('csvUp')?.addEventListener('change', async (e)=>{
   const file = e.target.files?.[0];
   if(!file) return;
@@ -1928,17 +2154,23 @@ document.getElementById('csvUp')?.addEventListener('change', async (e)=>{
   try{
     const txt = await file.text();
     const [headLine, ...lines] = txt.split(/\r?\n/).filter(Boolean);
-    const headers = headLine.split(';').length > 1 ? headLine.split(';') : headLine.split(',');
+
+    // Delimitador flexible ; o ,
+    const headSep = headLine.includes(';') ? ';' : ',';
+    const headers = headLine.split(headSep);
+
     const items = lines.map(line=>{
-      const cols = (line.split(';').length>1 ? line.split(';') : line.split(',')).map(c=>c.trim());
+      const sep  = line.includes(';') ? ';' : ',';
+      const cols = line.split(sep).map(c=>c.trim());
       const o = {};
       headers.forEach((h,i)=> o[h.trim().toLowerCase()] = cols[i] ?? '');
+
       return {
         ref: o.ref || o.codigo || '',
         codigo: o.codigo || '',
         desc: o.desc || o.nombre || '',
-        stock: Number(o.stock||0),
-        min: Number(o.min||o.stock_min||0),
+        stock: Number(String(o.stock||0).replace(',','.'))||0,
+        min:   Number(String(o.min||o.stock_min||0).replace(',','.'))||0,
         categoria: o.categoria || 'General',
         subcategoria: o.subcategoria || '',
         ubicacion: o.ubicacion || '',
@@ -1950,13 +2182,21 @@ document.getElementById('csvUp')?.addEventListener('change', async (e)=>{
     const r = await POST({res:'inv', fn:'import', token:tok, items});
     if(!r.ok) return alert(r.error||'No se pudo importar');
     alert(`Importadas ${r.importados||items.length} referencias`);
-    invLoad();
+    await invLoad();
+    invRenderAlerts();
   }catch(_e){
     alert('No se pudo leer el CSV');
   }finally{
     e.target.value = '';
   }
 });
+
+// Hook de arranque para inventario
+(async ()=>{
+  await invLoad();
+  invRenderAlerts();
+  invSetupDatalist();
+})();
 
 /* ==================== REPUESTOS ==================== */
 async function reqLoad(){
@@ -2177,9 +2417,24 @@ function renderRegistro(){
   });
 })();
 
-document.getElementById('eqForm').addEventListener('submit',(e)=>{ e.preventDefault(); const id=(document.getElementById('eqQuery').value||document.getElementById('eqSelect').value||'').trim(); if(!id) return alert('Escribe o elige un equipo'); fichaRender(id); });
-document.getElementById('grForm').addEventListener('submit',(e)=>{ e.preventDefault(); const id=(document.getElementById('grQuery').value||document.getElementById('grSelect').value||'').trim(); if(!id) return alert('Escribe o elige un puente'); fichaRender(id); });
-document.getElementById('axForm').addEventListener('submit',(e)=>{ e.preventDefault(); const id=(document.getElementById('axQuery').value||document.getElementById('axSelect').value||'').trim(); if(!id) return alert('Escribe o elige un auxiliar'); fichaRender(id); });
+document.getElementById('eqForm').addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const id=(document.getElementById('eqQuery').value||document.getElementById('eqSelect').value||'').trim();
+  if(!id) return alert('Escribe o elige un equipo');
+  fichaRender(id);
+});
+document.getElementById('grForm').addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const id=(document.getElementById('grQuery').value||document.getElementById('grSelect').value||'').trim();
+  if(!id) return alert('Escribe o elige un puente');
+  fichaRender(id);
+});
+document.getElementById('axForm').addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const id=(document.getElementById('axQuery').value||document.getElementById('axSelect').value||'').trim();
+  if(!id) return alert('Escribe o elige un auxiliar');
+  fichaRender(id);
+});
 
 document.addEventListener('click', async (e)=>{
   const tok = localStorage.getItem(CDL_TOKEN_KEY)||'';
@@ -2254,6 +2509,7 @@ document.addEventListener('click', async (e)=>{
   }
 });
 
+// Inventario: botones ±
 document.addEventListener('click', async (e)=>{
   const b = e.target.closest('button[data-inv]');
   if(!b) return;
@@ -2264,6 +2520,7 @@ document.addEventListener('click', async (e)=>{
     const r = await POST({res:'inv', fn:'delta', token, ref, delta});
     if(!r.ok) throw new Error(r.error||'Error');
     invLoad();
+    invRenderAlerts();
   }catch{ alert('No se pudo actualizar inventario'); }
 });
 
@@ -2277,8 +2534,14 @@ async function setSemaforoEstado(tipo, id, newState, token){
     if(newState==='y'){ lamps[1].classList.add('active'); if(badge) badge.textContent='RESTRICCIÓN'; }
     if(newState==='r'){ lamps[2].classList.add('active'); if(badge) badge.textContent='PARADA'; }
   }
-  try{ await POST({res:'state', fn:'set_estado', token, tipo, id, estado: (newState==='g'?'ok':newState==='y'?'restriccion':'parada') }); }catch(_e){}
+  try{
+    await POST({
+      res:'state', fn:'set_estado', token, tipo, id,
+      estado: (newState==='g'?'ok':newState==='y'?'restriccion':'parada')
+    });
+  }catch(_e){}
 }
+
 document.addEventListener('click', async (e)=>{
   const hit = e.target.closest('[data-tl]');
   if(!hit) return;
@@ -2304,6 +2567,15 @@ document.addEventListener('click', async (e)=>{
 });
 
 /* ==================== MODALES: NUEVA INCIDENCIA / PROGRAMAR PARADA ==================== */
+// Mini util: búsqueda aproximada de equipo por id/nombre en EQ_INDEX
+function findEquipoMatch(term){
+  const t = String(term||'').toLowerCase().trim();
+  if(!t) return null;
+  const exact = (window.EQ_INDEX||[]).find(e=> e.id.toLowerCase()===t || e.nombre.toLowerCase()===t);
+  if(exact) return exact;
+  return (window.EQ_INDEX||[]).find(e=> e.id.toLowerCase().includes(t) || e.nombre.toLowerCase().includes(t)) || null;
+}
+
 function openNuevaIncidencia(id){
   const val = id||'';
   openModal('Nueva incidencia', `
@@ -2321,9 +2593,17 @@ function openNuevaIncidencia(id){
     </div>
   `);
   _md.querySelector('#niCrear').onclick = async ()=>{
-    const tok = localStorage.getItem('cdl_token')||'';
+    const tok = localStorage.getItem(CDL_TOKEN_KEY)||'';
     const equipoRaw = (_md.querySelector('#niEq').value||'').trim();
-    if(!EQ_INDEX.length) await buildEqIndex();
+    if(!window.EQ_INDEX?.length && typeof buildEqIndex==='function'){
+      // Intenta construir índice si no existe (carga básica)
+      try{
+        const [equipos,gruas,auxiliares] = await Promise.all([
+          GET('equipos').catch(()=>[]), GET('gruas').catch(()=>[]), GET('auxiliares').catch(()=>[])
+        ]);
+        buildEqIndex({equipos,gruas,auxiliares});
+      }catch(_e){}
+    }
     const m = findEquipoMatch(equipoRaw) || {id:equipoRaw};
     const equipo = m.id;
     const tipo = _md.querySelector('#niTipo').value;
@@ -2335,6 +2615,7 @@ function openNuevaIncidencia(id){
     }catch{ alert('Error de red'); }
   };
 }
+
 function openProgramarParada(id){
   openModal('Programar parada', `
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
@@ -2349,7 +2630,7 @@ function openProgramarParada(id){
     </div>
   `);
   _md.querySelector('#ppCrear').onclick = async ()=>{
-    const tok = localStorage.getItem('cdl_token')||'';
+    const tok = localStorage.getItem(CDL_TOKEN_KEY)||'';
     const equipo = _md.querySelector('#ppEq').value;
     const fecha  = _md.querySelector('#ppFecha').value;
     const motivo = (_md.querySelector('#ppMotivo').value||'').trim();
@@ -2363,44 +2644,37 @@ function openProgramarParada(id){
 
 /* =========================================================
    INCIDENCIAS · CLIC EN LOGOS DE CATEGORÍAS
-   Muestra los equipos asociados a cada marca o grupo
-   y permite seleccionar uno para autocompletar el buscador
+   (Usa EQ_INDEX unificado: id, nombre, grupo, tipo)
 ========================================================= */
-
 document.addEventListener('click', (e)=>{
-  // Si no se ha hecho clic en un botón con atributo data-inc-cat, salimos
   const b = e.target.closest('[data-inc-cat]');
   if(!b) return;
 
-  // Obtenemos la categoría del botón (kaltenbach, trumpf, etc.)
-  const cat = b.getAttribute('data-inc-cat');
+  const cat = b.getAttribute('data-inc-cat');     // p.ej. kaltenbach, trumpf, gruas, aux
   const host = document.getElementById('incCatList');
   if(!host) return;
 
-  // Función de normalización de texto
   const norm = s => (s||'').toString().toLowerCase();
 
-  // Filtramos la lista de equipos en base a la categoría
-  const byCat = __EQ_INDEX.filter(x=>{
-    if(cat === 'aux') return x.grupo === 'auxiliares';
-    if(cat === 'gruas') return x.grupo === 'gruas';
+  const byCat = (window.EQ_INDEX||[]).filter(x=>{
+    if(cat==='aux')   return norm(x.grupo)==='auxiliares' || norm(x.tipo)==='aux';
+    if(cat==='gruas') return norm(x.grupo)==='gruas' || norm(x.tipo)==='grua';
+    // Marcas por nombre
     if(['kaltenbach','trumpf','hgg','tecoi','mazak'].includes(cat))
-      return norm(x.label).includes(cat);
+      return norm(x.nombre).includes(cat) || norm(x.modelo).includes(cat) || norm(x.fabricante).includes(cat);
     return false;
   });
 
-  // Si no hay coincidencias, mostramos mensaje
   if(!byCat.length){
     host.innerHTML = '<div style="color:#64748b;padding:6px">Sin elementos en esta categoría</div>';
     return;
   }
 
-  // Si hay coincidencias, renderizamos listado de botones con los equipos
   host.innerHTML = `
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:8px">
       ${byCat.map(x=>`
-        <button class="btn btn--ghost" data-inc-pick="${x.label}" style="text-align:left;width:100%">
-          ${x.label}
+        <button class="btn btn--ghost" data-inc-pick="${x.id}" style="text-align:left;width:100%">
+          ${x.nombre || x.id}
         </button>
       `).join('')}
     </div>
@@ -2409,9 +2683,7 @@ document.addEventListener('click', (e)=>{
 
 /* =========================================================
    INCIDENCIAS · SELECCIÓN DE EQUIPO DESDE LISTADO
-   Autocompleta el campo "Equipo" y aplica el filtro
 ========================================================= */
-
 document.addEventListener('click', (e)=>{
   const p = e.target.closest('[data-inc-pick]');
   if(!p) return;
@@ -2422,32 +2694,43 @@ document.addEventListener('click', (e)=>{
   if(inp){
     inp.value = val;
     inp.focus();
-    // Desplaza el scroll hacia el título de incidencias
     const title = document.getElementById('incTitle');
     if(title){
       const y = title.offsetTop - 60;
       window.scrollTo({ top: y, behavior:'smooth' });
     }
   }
-
-  // Aplica el filtrado con el nuevo equipo seleccionado
-  renderIncFiltered();
+  if (typeof renderIncFiltered === 'function') renderIncFiltered();
 });
+
+/* ==================== ROUTER: INIT SECTION ==================== */
 function initSection(h){
-  // Si salimos de Dashboard TV, detenemos su carrusel
   if (h !== 'dashboardtv') stopCarousel();
 
   switch(h){
     case 'equipos':      loadEquipos(); break;
     case 'gruas':        loadGruas(); break;
     case 'auxiliares':   loadAux(); break;
-    case 'incidencias':  buildEquipIndex().then(loadIncidencias); break;
-    case 'repuestos':    loadRepuestos(); break;
-    case 'manuales':     loadManuales(); break;
-    case 'dashboard':    initHomeCarousel(); break;
+    case 'incidencias':
+      // Construir índice si no existe
+      (async ()=>{
+        if(!window.EQ_INDEX?.length && typeof buildEqIndex==='function'){
+          try{
+            const [equipos,gruas,auxiliares] = await Promise.all([
+              GET('equipos').catch(()=>[]), GET('gruas').catch(()=>[]), GET('auxiliares').catch(()=>[])
+            ]);
+            buildEqIndex({equipos,gruas,auxiliares});
+          }catch(_e){}
+        }
+        if (typeof loadIncidencias==='function') loadIncidencias();
+      })();
+      break;
+    case 'repuestos':    loadRepuestos?.(); break;
+    case 'manuales':     loadManuales?.(); break;
+    case 'dashboard':    startCarousel(); break;
     case 'dashboardtv':  startCarousel(); break;
-    case 'paradas':      loadParadas(); break;
-    case 'historial':    loadHistorial(); break;
+    case 'paradas':      loadParadas?.(); break;
+    case 'historial':    loadHistorial?.(); break;
     default:             break;
   }
 }
