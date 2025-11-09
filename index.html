@@ -947,67 +947,86 @@ function roleLabel(slug){
   return r ? r.label : slug;
 }
 
-/* ========= NAV (hash routing + menú lateral) ========= */
+/* ========= NAV (hash routing + menú lateral) — blindado contra duplicados ========= */
 (function(){
-  const sidenav   = document.getElementById('sidenav');
-  const hamb      = document.getElementById('hamb');
-  const closeNav  = document.getElementById('closeNav');
-  const navList   = document.getElementById('navList');
-  const gSearch   = document.getElementById('globalSearch');
-  const goSearch  = document.getElementById('goSearch');
+if (window.__cdlNavInited) return;           // evita listeners duplicados
+window.__cdlNavInited = true;
 
-  const items = [
-    ['#equipos','Equipos'],
-    ['#gruas','Puentes grúa'],
-    ['#auxiliares','Auxiliares'],
-    ['#incidencias','Incidencias'],
-    ['#ot','OT · Órdenes de trabajo'],
-    ['#repuestos','Repuestos'],
-    ['#inventario','Inventario'],
-    ['#dashboard','Dashboard'],
-    ['#subcontratas','Subcontratas'],
-    ['#indicadores','Indicadores'],
-    ['#registro','Registro'],
-    ['#dashboardtv','Dashboard TV']
-  ];
-  navList.innerHTML = items.map(([href,label])=> `<a href="${href}">${label}</a>`).join('');
+const sidenav   = document.getElementById(‘sidenav’);
+const hamb      = document.getElementById(‘hamb’);
+const closeNav  = document.getElementById(‘closeNav’);
+const navList   = document.getElementById(‘navList’);
+const gSearch   = document.getElementById(‘globalSearch’);
+const goSearch  = document.getElementById(‘goSearch’);
 
-  const openNavFn = ()=>{
-    sidenav.classList.add('open');
-    document.body.classList.add('menu-open');
-    sidenav.setAttribute('aria-hidden','false');
-    hamb.setAttribute('aria-expanded','true');
-  };
-  const closeNavFn = ()=>{
-    sidenav.classList.remove('open');
-    document.body.classList.remove('menu-open');
-    sidenav.setAttribute('aria-hidden','true');
-    hamb.setAttribute('aria-expanded','false');
-  };
+if (!sidenav || !hamb || !navList) return;
 
-  hamb && hamb.addEventListener('click', openNavFn);
-  closeNav && closeNav.addEventListener('click', closeNavFn);
+// Asegura que no intente enviar formularios si alguna vez cae dentro de uno
+hamb.setAttribute(‘type’,‘button’);  /*  ￼ */
 
-  navList.addEventListener('click', (e)=>{
-    if(e.target.matches('a')) closeNavFn();
-  });
+// Construcción del menú
+const items = [
+[’#equipos’,‘Equipos’],
+[’#gruas’,‘Puentes grúa’],
+[’#auxiliares’,‘Auxiliares’],
+[’#incidencias’,‘Incidencias’],
+[’#ot’,‘OT · Órdenes de trabajo’],
+[’#repuestos’,‘Repuestos’],
+[’#inventario’,‘Inventario’],
+[’#dashboard’,‘Dashboard’],
+[’#subcontratas’,‘Subcontratas’],
+[’#indicadores’,‘Indicadores’],
+[’#registro’,‘Registro’],
+[’#dashboardtv’,‘Dashboard TV’]
+];
+navList.innerHTML = items.map(([href,label])=> <a href="${href}">${label}</a>).join(’’);  /*  ￼ */
 
-  const doSearch = ()=>{
-    const q = (gSearch.value || '').trim();
-    if(!q) return;
-    const target = q.toLowerCase().replace(/\s+/g,'');
-    location.hash = '#'+target;
-    closeNavFn();
-  };
-  goSearch.addEventListener('click', doSearch);
-  gSearch.addEventListener('keypress', (e)=>{
-    if(e.key === 'Enter'){ e.preventDefault(); doSearch(); }
-  });
+// Abrir / cerrar
+const openNavFn = (e)=>{
+if(e){ e.preventDefault(); e.stopPropagation(); }
+sidenav.classList.add(‘open’);
+document.body.classList.add(‘menu-open’);
+sidenav.setAttribute(‘aria-hidden’,‘false’);
+hamb.setAttribute(‘aria-expanded’,‘true’);
+};
+const closeNavFn = (e)=>{
+if(e){ e.preventDefault(); e.stopPropagation(); }
+sidenav.classList.remove(‘open’);
+document.body.classList.remove(‘menu-open’);
+sidenav.setAttribute(‘aria-hidden’,‘true’);
+hamb.setAttribute(‘aria-expanded’,‘false’);
+};
 
-  window.addEventListener('keydown', (e)=>{
-    if(e.key==='Escape' && sidenav.classList.contains('open')) closeNavFn();
-  });
+// Listeners en captura para imponerse si había otros previos
+hamb.addEventListener(‘click’, openNavFn,  { capture:true });     /*  ￼ /
+closeNav?.addEventListener(‘click’, closeNavFn, { capture:true });/  ￼ */
+
+// Cerrar al navegar por el menú
+navList.addEventListener(‘click’, (e)=>{
+if(e.target.matches(‘a’)) closeNavFn(e);
+});
+
+// Buscador del menú lateral → navega por hash
+const doSearch = ()=>{
+const q = (gSearch?.value || ‘’).trim();
+if(!q) return;
+const target = q.toLowerCase().replace(/\s+/g,’’);
+location.hash = ‘#’+target;
+closeNavFn();
+};
+goSearch?.addEventListener(‘click’, doSearch);
+gSearch?.addEventListener(‘keypress’, (e)=>{
+if(e.key === ‘Enter’){ e.preventDefault(); doSearch(); }
+});
+
+// Cerrar con clic fuera y con ESC
+document.addEventListener(‘click’, (ev)=>{
+if (!sidenav.classList.contains(‘open’)) return;
+if (!sidenav.contains(ev.target) && ev.target !== hamb) closeNavFn(ev);
+}, { capture:true });                                                   /*  ￼ /
+document.addEventListener(‘keydown’, (ev)=>{ if(ev.key === ‘Escape’) closeNavFn(ev); }, { passive:true });
 })();
+/ ========= FIN NAV ========= */
 
 /* ========= Panel usuario: login / logout / cambiar pass ========= */
 (function(){
