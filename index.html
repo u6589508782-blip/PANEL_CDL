@@ -364,6 +364,7 @@ h1::before,h2::before,h3::before{
   display:block; width:100%; text-align:left; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:#fff;
 }
 .inc-listado button+button{ margin-top:6px }
+#sidenav.open{ transform:translateX(0)!important; }
 </style>
 </head>
 <body>
@@ -2708,6 +2709,48 @@ window.addEventListener('hashchange', ()=> initSection((location.hash||'#dashboa
 document.addEventListener('DOMContentLoaded', ()=>{
   if (typeof applyRoleVisibility === 'function') applyRoleVisibility();
   initSection((location.hash||'#dashboard').slice(1));
+});
+
+/* Hotfix no intrusivo del menú lateral: NO reemplaza nada */
+document.addEventListener('DOMContentLoaded', () => {
+  const hamb    = document.getElementById('hamb');
+  const sidenav = document.getElementById('sidenav');
+  const closeNav= document.getElementById('closeNav');
+
+  if (!hamb || !sidenav) return;
+
+  // Evita comportamientos raros si alguna vez el botón cae dentro de un <form>
+  hamb.setAttribute('type','button');
+
+  const open = (e)=>{
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    sidenav.classList.add('open');
+    document.body.classList.add('menu-open');
+    hamb.setAttribute('aria-expanded','true');
+    sidenav.setAttribute('aria-hidden','false');
+  };
+  const close = (e)=>{
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    sidenav.classList.remove('open');
+    document.body.classList.remove('menu-open');
+    hamb.setAttribute('aria-expanded','false');
+    sidenav.setAttribute('aria-hidden','true');
+  };
+
+  // Abrir siempre al pulsar el hamburguesa (captura para ganar a otros listeners)
+  hamb.addEventListener('click', open, { capture:true });
+
+  // Cerrar con la X si existe
+  if (closeNav) closeNav.addEventListener('click', close, { capture:true });
+
+  // Cerrar al hacer clic fuera del sidenav
+  document.addEventListener('click', (ev)=>{
+    if (!sidenav.classList.contains('open')) return;
+    if (!sidenav.contains(ev.target) && ev.target !== hamb) close();
+  }, { capture:true });
+
+  // Cerrar con ESC
+  document.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape') close(); });
 });
 </script>
 </body>
