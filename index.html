@@ -1,0 +1,2811 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CDL · Panel de mantenimiento</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- Fuente -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   VARIABLES + RESET (consolidado) · versión compacta
+========================================================= */
+:root{
+  --brand:#E43B3B;
+  --ink:#0f172a;
+  --muted:#475569;
+  --line:#e5e7eb;
+  --bg:#ffffff;
+
+  --hdr-h:84px;
+  --radius:16px;
+  --shadow:0 3px 10px rgba(0,0,0,.05);
+
+  --angular-size:26px;
+  --angular-up:.72em;
+  --angular-gap:20px;
+
+  /* Carrusel algo más compacto para evitar cortes */
+  --carousel-h:clamp(76px,13vw,128px);
+}
+
+*{box-sizing:border-box; min-width:0}
+html{font-size:15px}
+@media (max-width:540px){ html{font-size:14.5px} }
+@media (min-width:1400px){ html{font-size:15.5px} }
+
+html,body{height:100%; background:#fff; overflow-x:hidden; color:var(--ink)}
+body{margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:inherit; text-decoration:none}
+img,svg,canvas,video{display:block; max-width:100%; height:auto}
+button{font:inherit; cursor:pointer; background:transparent; border:0}
+:focus-visible{outline:2px solid #0ea5e9; outline-offset:2px}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+
+/* =========================================================
+   BOTONES BASE
+========================================================= */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:.45rem; padding:.5rem .8rem; border-radius:10px; border:1px solid var(--line);
+  background:#fff; color:var(--ink); font-weight:700; line-height:1.1; font-size:.95rem;
+}
+.btn:hover{ background:#f8fafc }
+.btn:active{ transform:translateY(1px) }
+.btn--primary{ background:var(--brand); color:#fff; border-color:transparent }
+.btn--primary:hover{ filter:brightness(0.95) }
+.btn--ghost{ background:#fff; color:#334155; border:1px solid #e2e8f0 }
+.link{ background:transparent; border:0; color:var(--brand); font-weight:800; padding:0 }
+
+/* Botón negro para "Programar parada" */
+.btn--dark{ background:#000; color:#fff; border:1px solid #000 }
+.btn--dark:hover{ filter:brightness(1.05) }
+
+/* Badge */
+.badge{display:inline-block; padding:2px 9px; border-radius:999px; font-weight:900; font-size:11px; background:#eef2f7; color:#334155; border:1px solid #e2e8f0}
+
+/* Separador fino */
+.sep{height:1px; margin:22px 0; background:linear-gradient(90deg,rgba(15,23,42,0),rgba(15,23,42,.22) 50%,rgba(15,23,42,0))}
+
+/* Inputs */
+.form-inline{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+.form-inline__label{ font-weight:900; font-size:.93rem }
+.form-inline input[type="search"], .form-inline input[type="text"], .form-inline input[type="date"], .form-inline input[type="password"], .form-inline input[type="number"], .form-inline select, .form-inline textarea{
+  padding:7px 10px; border:1px solid #e5e7eb; border-radius:10px; min-width:190px; font:inherit; font-size:.95rem;
+}
+.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* =========================================================
+   CABECERA
+========================================================= */
+.header{
+  position:sticky; top:0; z-index:1000; background:#fff;
+  border-bottom:1px solid #eee; transition:box-shadow .25s ease;
+}
+.header.scrolled{ box-shadow:0 6px 14px rgba(0,0,0,.06) }
+.h__in{
+  height:var(--hdr-h);
+  display:grid; grid-template-columns:auto 1fr auto;
+  align-items:flex-start; gap:10px; padding:6px 12px 8px; position:relative;
+}
+/* Marca de agua mantenimiento (subida y algo más ancha) */
+.header::before{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.05) 60%, rgba(255,255,255,.09) 100%),
+    url("logo_mantenimiento.png") center 0px / clamp(260px, 46vw, 420px) auto no-repeat;
+  opacity:.10; pointer-events:none;
+}
+.brand{display:flex; align-items:flex-end; gap:10px; justify-self:center; margin-top:2px}
+.brand img{height:40px; margin-top:2px}
+
+#roleChip{
+  position:absolute; right:16px; top:8px; font-weight:900; font-size:11px; color:var(--ink)
+}
+/* Iconos header */
+.hbtn{width:42px; height:42px; display:grid; place-items:center}
+#hamb .i{width:20px; height:14px; position:relative; display:inline-block}
+#hamb .i:before,#hamb .i:after,#hamb .i span{
+  content:""; position:absolute; left:0; right:0; height:2px; background:var(--ink); border-radius:2px;
+}
+#hamb .i:before{top:0} #hamb .i span{top:6px} #hamb .i:after{bottom:0}
+#moreBtn .i{display:inline-block; width:16px; text-align:center; letter-spacing:2px; font-weight:900}
+#moreBtn .i::before{content:"···"}
+
+/* Overlay menú */
+body.menu-open::after{
+  content:""; position:fixed; inset:var(--hdr-h) 0 0 0; backdrop-filter:blur(4px); background:rgba(0,0,0,.18); z-index:800;
+}
+
+/* ===== SIDENAV ===== */
+#sidenav{
+  position:fixed;
+  /* arranca justo debajo de la cabecera sticky */
+  inset:var(--hdr-h) 0 0 0;
+  background:#fff; color:var(--ink);
+  transform:translateX(-100%);
+  transition:transform .28s ease;
+  z-index:1100;                 /* > header (1000) y > overlay (1050) */
+  box-shadow:4px 0 24px rgba(0,0,0,.08);
+  will-change:transform;
+  overflow:auto;
+}
+#sidenav.open{ transform:none }
+
+/* Cabecera del menú + buscador */
+.sidenav__head{ display:flex; align-items:center; gap:12px; padding:12px 14px }
+.sidenav__search{
+  padding:10px 14px; display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center
+}
+#closeNav{
+  margin-left:0; width:38px; height:38px; font-size:18px; line-height:1;
+  border-radius:8px; background:#000; color:#fff; border:1px solid #000;
+}
+.sidenav__search input{
+  flex:1 1 auto; padding:10px 12px; border:1px solid var(--line); border-radius:12px; font-weight:600
+}
+
+/* Lista de navegación (acepta #navList o .navlist) */
+#navList,.navlist{ padding:4px 0 }
+#navList a,.navlist a{
+  display:block; padding:12px 14px; border-radius:12px; font-weight:600;
+  text-transform:uppercase; outline:none; position:relative; font-size:.94rem;
+}
+#navList a:not(:last-child)::after,.navlist a:not(:last-child)::after{
+  content:""; position:absolute; left:10%; right:10%; height:1.5px;
+  background:linear-gradient(90deg,rgba(0,0,0,0),rgba(15,23,42,.25) 50%,rgba(0,0,0,0));
+  bottom:-1px;
+}
+#navList a[aria-current="page"],.navlist a[aria-current="page"]{
+  background:#f6f8fb; box-shadow:inset 4px 0 0 var(--brand);
+}
+
+/* Overlay al abrir menú (por encima de todo menos del propio sidenav) */
+body.menu-open{
+  overflow:hidden;               /* bloquea scroll de fondo */
+  touch-action:none;
+}
+body.menu-open::after{
+  content:""; position:fixed; inset:var(--hdr-h) 0 0 0;
+  backdrop-filter:blur(4px); background:rgba(0,0,0,.18);
+  z-index:1050;                  /* < sidenav(1100), > contenido(...) */
+}
+
+/* Accesibilidad / rendimiento */
+@media (prefers-reduced-motion:reduce){
+  #sidenav{ transition:none }
+}
+
+/* =========================================================
+   PANEL USUARIO
+========================================================= */
+#userPanel{
+  position:fixed; left:0; right:0; top:var(--hdr-h);
+  width:100vw; max-width:none;
+  background:#0f141c; color:#e6eef7; border:1px solid #223046; border-radius:0; box-shadow:0 20px 36px rgba(0,0,0,.45);
+  padding:12px; display:none; z-index:950; font-size:.95rem;
+}
+#userPanel.show{ display:block }
+.up__head{ display:flex; align-items:center; justify-content:space-between; gap:10px }
+.up__row{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:10px; margin-top:8px }
+.up__field label{ display:block; font-weight:900; margin-bottom:4px }
+.up__pwdwrap{ position:relative; display:flex; align-items:center }
+.up__pwdwrap input{ flex:1 1 auto }
+/* Botón de ojo SVG (versión actualizada) */
+.eyeBtn{
+  width:36px;
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #223046;
+  border-left:0;
+  background:#0b101a;
+  margin-left:4px;
+  border-radius:0 10px 10px 0;
+  color:#e6eef7;                /* color del icono */
+  cursor:pointer;
+  transition:filter .2s ease;
+}
+.eyeBtn:hover{ filter:brightness(1.2); }
+.eyeBtn svg{
+  width:20px;
+  height:20px;
+  pointer-events:none;
+  fill:currentColor;
+  stroke:currentColor;
+  stroke-width:2;
+}
+
+/* Botones inferiores del panel */
+.up__actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+/* =========================================================
+   TITULARES (con angular)
+========================================================= */
+h1,h2,h3{
+  position:relative; margin:20px 0 12px; padding-left:var(--angular-gap); line-height:1.15; white-space:normal;
+}
+h1{font-size:clamp(1.25rem,3.4vw,1.6rem)}
+h2{font-size:clamp(1.02rem,2.6vw,1.22rem)}
+h3{font-size:clamp(.95rem,2.2vw,1.08rem)}
+h1::before,h2::before,h3::before{
+  content:""; position:absolute; left:0; bottom:var(--angular-up);
+  width:var(--angular-size); height:var(--angular-size);
+  background:url("angular.png") left bottom/contain no-repeat;
+  z-index:1; pointer-events:none;
+}
+/* Quitar angular en subtítulos del DASHBOARD solicitados */
+#dashboard .card h2::before{ display:none }
+
+/* =========================================================
+   CONTENEDOR Y TARJETAS
+========================================================= */
+.main{padding:14px; max-width:1160px; margin:0 auto}
+.card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:10px; box-shadow:var(--shadow)}
+.grid{display:grid; gap:10px}
+.grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 980px){ .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr } }
+
+/* Hero del dashboard */
+.hero{background:transparent; border:0; padding:4px 10px 0;}
+.hero h1{margin:2px 0 0; padding-left:0}
+.hero h1::before{display:none}
+.hero .sub{margin:2px 0 0; font-weight:700; color:#64748b; font-size:.95rem}
+
+/* =========================================================
+   TARJETA “Semáforo” horizontal y compacta
+   - 1/3 del tamaño aprox. (padding, fuentes y lámparas reducidos)
+   - Luces tumbadas (en fila)
+   - Totalmente responsive y con buena UX
+========================================================= */
+.tl{
+  display:grid; grid-template-columns:1fr; gap:8px;
+  border:1px solid var(--line); border-radius:12px; padding:8px; box-shadow:var(--shadow);
+}
+.tl__head{
+  display:flex; align-items:center; gap:8px; justify-content:space-between; flex-wrap:wrap;
+}
+.tl__id{
+  display:flex; align-items:center; gap:8px; min-width:180px;
+}
+.tl__name{ font-weight:900; font-size:.92rem; line-height:1.1 }
+.tl__badge{ display:inline-block; padding:2px 7px; border-radius:999px; background:#eef2f7; border:1px solid #e2e8f0; font-weight:900; font-size:10px }
+
+/* Semáforo horizontal */
+.tl__pole-wrap{ position:relative; }
+.tl__pole{
+  background:#0b101a; border-radius:10px; padding:6px 8px;
+  display:flex; align-items:center; gap:10px;
+}
+.tl__lamp{
+  width:14px; height:14px; border-radius:50%;
+  border:2px solid #0b101a; outline:2px solid #ffffff; opacity:.45;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.5), rgba(255,255,255,0) 55%);
+}
+.tl__lamp--g{ background-color:#22c55e }
+.tl__lamp--y{ background-color:#fbbf24 }
+.tl__lamp--r{ background-color:#ef4444 }
+.tl__lamp.active{ opacity:1; box-shadow:0 0 0 2px rgba(255,255,255,.5) inset, 0 0 12px rgba(0,0,0,.22) }
+
+/* Áreas clicables (izq=verde, centro=amarillo, dcha=rojo) */
+.tl__hit{ position:absolute; top:0; bottom:0; cursor:pointer }
+.tl__hit--g{ left:4px; right:66%; }
+.tl__hit--y{ left:33%; right:33%; }
+.tl__hit--r{ left:66%; right:4px; }
+
+/* Acciones */
+.tl__actions{ display:flex; gap:6px; flex-wrap:wrap }
+.tl__actions .btn--danger{ background:var(--brand); color:#fff }
+
+/* Menú “Más opciones” */
+.tl__more{ position:relative; display:inline-block }
+.tl__arrow{
+  cursor:pointer; font-size:14px; line-height:1; padding:3px 6px; border-radius:8px;
+  border:1px solid var(--line); background:#fff; font-weight:900; user-select:none;
+}
+.tl__arrow:active{ transform:translateY(1px) }
+.tl__menu{
+  display:none; position:absolute; top:calc(100% + 6px); right:0;
+  background:#fff; border:1px solid var(--line); border-radius:12px; padding:8px; z-index:12; min-width:190px; box-shadow:var(--shadow);
+}
+.tl__more.open .tl__menu{ display:grid; gap:6px }
+.tl__menu .btn{ width:100%; justify-content:flex-start }
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+.black{ color:#0f172a; font-weight:900 }
+
+.dbtv-tag{
+  position:sticky;
+  top:calc(var(--hdr-h) + 6px);
+  display:inline-block;
+  margin:6px 0;
+  padding:5px 9px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:#fff;
+  font-weight:900;
+  font-size:.9rem;
+}
+
+/* =================== Dashboard TV: tipografías compactas =================== */
+#dashboardtv{ font-size:.92rem }
+#dashboardtv .card strong{ font-size:.98rem }
+#dashboardtv .badge{ font-size:11px }
+#dashboardtv details summary{ font-size:.98rem }
+
+/* =========================================================
+   GRID LOGOS INCIDENCIAS
+========================================================= */
+.inc-logos{
+  display:grid; gap:10px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+@media (max-width:720px){ .inc-logos{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+.inc-logo{
+  display:grid; place-items:center; border:1px solid var(--line); border-radius:12px; padding:8px;
+  background:#fff; cursor:pointer; transition:transform .08s ease, box-shadow .12s ease;
+}
+.inc-logo:active{ transform:translateY(1px) }
+.inc-logo img{ max-height:54px; width:100%; object-fit:contain }
+.inc-listado{ margin-top:8px }
+.inc-listado button{
+  display:block; width:100%; text-align:left; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:#fff;
+}
+.inc-listado button+button{ margin-top:6px }
+#sidenav.open{ transform:translateX(0)!important; }
+/* ==================== PLANIFICACIÓN PRODUCCIÓN ==================== */
+#planificacionWrap{
+  padding:16px;
+}
+
+#planificacionWrap h2{
+  margin:0 0 12px;
+  font-size:18px;
+}
+
+.tablaprod{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+
+.tablaprod th,
+.tablaprod td{
+  border:1px solid #dde1e7;
+  padding:4px 6px;
+  text-align:center;
+}
+
+.tablaprod thead{
+  background:#f3f4f6;
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+
+.tablaprod tbody tr:nth-child(even){
+  background:#f9fafb;
+}
+
+.tablaprod tbody tr:hover{
+  background:#eef2ff;
+}
+
+/* Pedido terminado (equivalente a línea subrayada entera en fosforito) */
+.tablaprod tr.done-row{
+  background:#bbf7d0 !important;
+}
+
+/* Pedido alimentado (equivalente a subrayar solo la columna MAQUINA) */
+.tablaprod td.cel-maq.cel-alim{
+  background:#fef9c3 !important;
+  font-weight:600;
+}
+</style>
+</head>
+<body>
+
+<!-- =======================================================
+     CABECERA
+======================================================= -->
+<header class="header" id="hdr" role="banner">
+  <span id="roleChip">Invitado</span>
+  <div class="h__in">
+    <button class="hbtn" id="hamb" aria-label="Abrir menú" aria-controls="sidenav" aria-expanded="false"><span class="i"><span></span></span></button>
+    <a class="brand" aria-label="Inicio" href="#dashboard">
+  <img src="logo-cdl.png" alt="CDL" style="height:40px; margin-top:2px">
+</a>
+    <button class="hbtn" id="moreBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="userPanel"><span class="i"></span></button>
+  </div>
+</header>
+
+<aside id="sidenav" aria-hidden="true" aria-label="Navegación principal">
+  <div class="sidenav__search" style="align-items:center">
+    <input id="globalSearch" placeholder="Buscar en la app…" aria-label="Buscar">
+    <button id="goSearch" class="btn btn--ghost">Ir</button>
+    <button id="closeNav" aria-label="Cerrar menú" style="margin-left:auto;color:#000">✕</button>
+  </div>
+
+  <nav class="navlist" id="navList">
+    <!-- Se llena en runtime -->
+  </nav>
+</aside>
+
+<!-- =========================================================
+     PANEL USUARIO
+========================================================= -->
+<section id="userPanel" role="dialog" aria-modal="true" aria-labelledby="upTitle">
+  <div class="up__head">
+    <h3 id="upTitle" style="margin:0">Acceso de usuario</h3>
+    <button id="closeUser" class="btn btn--ghost" aria-label="Cerrar">✕</button>
+  </div>
+
+  <div class="up__row">
+    <div class="up__field">
+      <label for="roleSelect">Usuario / Rol</label>
+      <select id="roleSelect"></select>
+    </div>
+
+    <div class="up__field">
+      <label for="userPass">Contraseña</label>
+      <div class="up__pwdwrap" style="display:flex;gap:8px;align-items:center">
+        <input id="userPass" type="password" placeholder="Contraseña" autocomplete="current-password">
+        <button class="eyeBtn" id="eyeMain" type="button" aria-label="Mostrar/Ocultar contraseña" title="Mostrar/Ocultar">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="12" cy="12" r="3.5" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="up__actions">
+    <button class="btn btn--primary" id="loginBtn">Acceder</button>
+    <button class="btn btn--ghost" id="logoutBtn">Salir</button>
+    <button class="link" id="togglePwdLink" aria-expanded="false" aria-controls="chgWrap">Cambiar contraseña</button>
+  </div>
+
+  <div id="chgWrap" hidden>
+    <div class="up__row">
+      <div class="up__field">
+        <label for="chgOld">Actual</label>
+        <div class="up__pwdwrap" style="display:flex;gap:8px;align-items:center">
+          <input id="chgOld" type="password" placeholder="Contraseña actual" autocomplete="current-password">
+          <button class="eyeBtn" id="eyeOld" type="button" aria-label="Mostrar/Ocultar contraseña actual" title="Mostrar/Ocultar">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="12" r="3.5" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="up__field">
+        <label for="chgNew">Nueva</label>
+        <div class="up__pwdwrap" style="display:flex;gap:8px;align-items:center">
+          <input id="chgNew" type="password" placeholder="Contraseña nueva" autocomplete="new-password">
+          <button class="eyeBtn" id="eyeNew" type="button" aria-label="Mostrar/Ocultar contraseña nueva" title="Mostrar/Ocultar">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="12" r="3.5" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="up__actions">
+      <button class="btn btn--ghost" id="chgBtn">Guardar</button>
+    </div>
+  </div>
+</section>
+<!-- =======================================================
+     CONTENEDOR PRINCIPAL (Dashboard; el resto en Parte 2/3)
+======================================================= -->
+<main class="main" id="appRoot">
+  <section id="dashboard" class="page" aria-labelledby="dashTitle">
+    <article class="hero">
+      <h1 id="dashTitle"><span style="font-weight:900">DASHBOARD</span> <span class="badge">TV</span></h1>
+      <div class="sub">Panel de control</div>
+    </article>
+
+    <div class="grid cols-3" style="margin-top:10px">
+      <article class="card">
+        <h2><span class="black">EQUIPOS EN</span> <span style="color:var(--brand)">PARADA</span> <span class="badge" id="countParadas">0</span></h2>
+        <div id="dash-paradas"></div>
+      </article>
+
+      <article class="card">
+        <h2><span class="black">EQUIPOS CON</span> <span style="color:var(--brand)">RESTRICCIONES</span> <span class="badge" id="countRestr">0</span></h2>
+        <div id="dash-restr"></div>
+      </article>
+
+      <article class="card">
+        <h2><span class="black">ALERTAS</span> <span style="color:var(--brand)">STOCK</span> <span class="black">MÍNIMO</span> <span class="badge" id="countStock">0</span></h2>
+        <div id="dash-stock"></div>
+      </article>
+
+      <article class="card">
+        <h2><span class="black">CONSUMIBLES</span> <span style="color:var(--brand)">BAJO STOCK</span> <span class="badge" id="countConsLow">0</span></h2>
+        <div id="dash-cons"></div>
+      </article>
+
+      <article class="card">
+        <h2><span class="black">AVISOS</span> <span style="color:var(--brand)">SUBCONTRATAS</span> <span class="badge" id="countExt">0</span></h2>
+        <div id="dash-externas"></div>
+      </article>
+
+      <article class="card">
+        <h2><span class="black">SOLICITUDES</span> <span style="color:var(--brand)">PRIORITARIAS</span> <span class="badge" id="countReq">0</span></h2>
+        <div id="dash-req"></div>
+      </article>
+
+      <article class="card" data-role="approveStop">
+        <h2><span class="black">PARADAS</span> <span style="color:var(--brand)">PROGRAMADAS</span> <span class="black">PENDIENTES</span> <span class="badge" id="countPendStops">0</span></h2>
+        <div id="dash-pendientes"></div>
+      </article>
+    </div>
+  </section>
+<!-- =======================================================
+     CONTENEDOR PRINCIPAL (páginas por hash)
+======================================================= -->
+
+  <!-- =========== DASHBOARD (ya cargado en Parte 1) =========== -->
+
+  <!-- ==================== PÁG. 0.5 PLANIFICACIÓN PRODUCCIÓN ==================== -->
+  <section id="planificacion" class="page" hidden aria-labelledby="planTitle">
+    <h1 id="planTitle">Planificación producción</h1>
+
+    <article class="card">
+      <div id="planificacionWrap">
+        <h2>Hoja de planificación (pedidos KDP1)</h2>
+
+        <div style="overflow:auto">
+          <table class="tablaprod">
+            <thead>
+              <tr>
+                <th>MAQUINA</th>
+                <th>INPUT</th>
+                <th>CLIENTE</th>
+                <th>DELEG</th>
+                <th>UDS</th>
+                <th>KGS</th>
+                <th>OUTPUT</th>
+                <th>PICKING</th>
+                <th>PARTE</th>
+                <th>CARGA</th>
+                <th>COMENTARIOS</th>
+              </tr>
+            </thead>
+            <tbody id="planBody">
+              <!-- Se rellena por JS con loadPlanificacion() -->
+            </tbody>
+          </table>
+        </div>
+
+        <p style="font-size:12px;color:#64748b;margin-top:6px">
+          <strong>Leyenda:</strong>
+          pedido <strong>alimentado</strong> = celda <em>MAQUINA</em> en amarillo.
+          pedido <strong>terminado</strong> = fila completa en verde.
+        </p>
+      </div>
+    </article>
+  </section>
+  <!-- ==================== PÁG. 1.0 EQUIPOS ==================== -->
+  <section id="equipos" class="page" hidden aria-labelledby="equipTitle">
+    <h1 id="equipTitle">Equipos
+      <button class="search-toggle" data-search="eq" aria-expanded="false">Buscar ▼</button>
+    </h1>
+
+    <article class="card" id="eqSearchCard" hidden>
+      <form id="eqForm" class="form-inline" autocomplete="off">
+        <label for="eqQuery" class="form-inline__label">Ficha técnica</label>
+        <input id="eqQuery" type="search" placeholder="Escribe ID o nombre… (ej: KDP-1)">
+        <select id="eqSelect" aria-label="Seleccionar equipo">
+          <option value="">— Selecciona de la lista —</option>
+        </select>
+        <button type="submit" class="btn btn--primary">Ver ficha</button>
+      </form>
+    </article>
+
+    <h3 style="margin-top:10px">Línea Kaltenbach</h3>
+    <div class="grid grid-eq" id="equiposKaltenbach"></div>
+
+    <h3>Láser Trumpf</h3>
+    <div class="grid grid-eq" id="equiposTrumpf"></div>
+
+    <h3>Máquinas independientes</h3>
+    <div class="grid grid-eq" id="equiposIndep"></div>
+  </section>
+
+  <!-- ==================== PÁG. 2.0 GRÚAS ==================== -->
+  <section id="gruas" class="page" hidden aria-labelledby="grTitle">
+    <h1 id="grTitle">Puentes grúa
+      <button class="search-toggle" data-search="gr" aria-expanded="false">Buscar ▼</button>
+    </h1>
+
+    <article class="card" id="grSearchCard" hidden>
+      <form id="grForm" class="form-inline" autocomplete="off">
+        <label for="grQuery" class="form-inline__label">Ficha puente</label>
+        <input id="grQuery" type="search" placeholder="Escribe ID… (ej: N2-IMAN)">
+        <select id="grSelect" aria-label="Seleccionar puente">
+          <option value="">— Selecciona —</option>
+        </select>
+        <button type="submit" class="btn btn--primary">Ver ficha</button>
+      </form>
+    </article>
+
+    <h3 style="margin-top:10px">Nave 1</h3>
+    <div class="grid grid-eq" id="grN1"></div>
+
+    <h3>Nave 2</h3>
+    <div class="grid grid-eq" id="grN2"></div>
+
+    <h3>Nave 3</h3>
+    <div class="grid grid-eq" id="grN3"></div>
+
+    <h3>Nave 4</h3>
+    <div class="grid grid-eq" id="grN4"></div>
+  </section>
+
+  <!-- ==================== PÁG. 3.0 AUXILIARES ==================== -->
+  <section id="auxiliares" class="page" hidden aria-labelledby="auxTitle">
+    <h1 id="auxTitle">Auxiliares (Otros)
+      <button class="search-toggle" data-search="ax" aria-expanded="false">Buscar ▼</button>
+    </h1>
+
+    <article class="card" id="axSearchCard" hidden>
+      <form id="axForm" class="form-inline" autocomplete="off">
+        <label for="axQuery" class="form-inline__label">Ficha auxiliar</label>
+        <input id="axQuery" type="search" placeholder="Escribe ID o nombre…">
+        <select id="axSelect" aria-label="Seleccionar auxiliar">
+          <option value="">— Selecciona —</option>
+        </select>
+        <button type="submit" class="btn btn--primary">Ver ficha</button>
+      </form>
+    </article>
+
+    <div class="grid grid-eq" id="auxList"></div>
+  </section>
+
+<section id="incidencias" class="page" hidden aria-labelledby="incTitle">
+  <h1 id="incTitle">Incidencias</h1>
+
+  <!-- Botonera: Nueva (roja) + Programar (negra) + Buscar (toggle) -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+    <button class="btn btn--primary" id="btnNewInc">Nueva incidencia</button>
+    <button class="btn" id="btnProgParada" style="background:#000;color:#fff;border-color:#000">Programar parada</button>
+    <button class="btn btn--ghost" id="incToggleSearch" aria-expanded="false" aria-controls="incSearchCard">Buscar ▼</button>
+  </div>
+
+  <!-- Buscador plegable con filtros: equipo / fecha creación / texto -->
+  <article class="card" id="incSearchCard" hidden>
+    <form id="incFilterForm" class="form-inline" autocomplete="off">
+      <label for="incEquipo" class="form-inline__label">Equipo</label>
+      <input id="incEquipo" list="incEquipList" placeholder="Escribe número o nombre… (ej: 1 Sierra KBS)">
+      <datalist id="incEquipList"></datalist>
+
+      <label for="incFecha" class="form-inline__label">Fecha creación</label>
+      <input id="incFecha" type="date">
+
+      <label for="incTexto" class="form-inline__label">Texto</label>
+      <input id="incTexto" type="search" placeholder="palabras clave" style="text-transform:none">
+
+      <button type="submit" class="btn btn--ghost">Aplicar</button>
+      <button type="button" class="btn btn--ghost" id="incClear">Limpiar</button>
+    </form>
+  </article>
+
+  <article class="card">
+    <div id="incLogosWrap" class="inc-logos">
+      <button type="button" class="inc-logo" data-marca="kaltenbach" title="Kaltenbach">
+        <img src="./img/Carousel/kaltenbach.webp" alt="Kaltenbach">
+      </button>
+      <button type="button" class="inc-logo" data-marca="trumpf" title="Trumpf">
+        <img src="./img/Carousel/trumpf.webp" alt="Trumpf">
+      </button>
+      <button type="button" class="inc-logo" data-marca="gruas" title="Puentes grúa">
+        <img src="logo_mantenimiento.png" alt="Puentes grúa">
+      </button>
+      <button type="button" class="inc-logo" data-marca="hgg" title="HGG">
+        <img src="./img/Carousel/hgg.webp" alt="HGG">
+      </button>
+      <button type="button" class="inc-logo" data-marca="tecoi" title="Tecoi">
+        <img src="./img/Carousel/tecoi.webp" alt="Tecoi">
+      </button>
+      <button type="button" class="inc-logo" data-marca="mazak" title="Mazak">
+        <img src="./img/Carousel/mazak.webp" alt="Mazak">
+      </button>
+      <button type="button" class="inc-logo" id="incShowAux" title="Auxiliares">AUXILIARES</button>
+    </div>
+    <div id="incCatList" class="inc-listado" hidden></div>
+  </article>
+
+  <article class="card" id="incAddRestr" hidden>
+    <h2>Añadir restricciones</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+      <div><label>Equipo</label><input id="resEq" placeholder="ID equipo"></div>
+      <div><label>Detalle</label><input id="resDet" placeholder="Describe la restricción"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn btn--primary" id="resGuardar">Guardar restricción</button></div>
+  </article>
+  <div id="incList" class="grid" style="grid-template-columns:1fr"></div>
+</section>
+  <!-- ==================== PÁG. 5.0 OT ==================== -->
+  <section id="ot" class="page" hidden aria-labelledby="otTitle">
+    <h1 id="otTitle">Órdenes de trabajo</h1>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn btn--primary" id="otCrear">Crear OT</button>
+      <button class="btn btn--ghost" id="otReload">Actualizar</button>
+      <button class="btn btn--ghost" id="otHist">Historial</button>
+    </div>
+
+    <article class="card">
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+        <div><label>Equipo</label><input id="otEq" list="eqList" placeholder="ID equipo"></div>
+        <div><label>Tipo</label>
+          <select id="otTipo"><option>Preventivo</option><option>Correctivo</option><option>Mejora</option></select>
+        </div>
+        <div><label>Fecha</label><input id="otFecha" type="date"></div>
+        <div style="grid-column:1/-1"><label>Tarea</label><input id="otTarea" placeholder="Descripción de la OT"></div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="form-inline">
+        <label for="otFilter" class="form-inline__label">Filtrar</label>
+        <input id="otFilter" type="search" placeholder="Buscar por equipo o tarea…">
+      </div>
+    </article>
+
+    <div id="otList" class="grid" style="grid-template-columns:1fr"></div>
+
+    <datalist id="eqList"></datalist>
+  </section>
+
+  <!-- ==================== PÁG. 6.0 REPUESTOS ==================== -->
+  <section id="repuestos" class="page" hidden aria-labelledby="repTitle">
+    <h1 id="repTitle">Repuestos</h1>
+
+    <article class="card">
+      <h2>Solicitar repuesto</h2>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+        <div><label>Nombre</label><input id="repNombre" placeholder="Ej: Rodamiento 6204"></div>
+        <div><label>Referencia</label><input id="repRef" placeholder="REF/ID"></div>
+        <div><label>Unidades</label><input id="repQty" type="number" value="1" min="1"></div>
+        <div><label>Equipo</label><input id="repEq" placeholder="ID equipo (opcional)"></div>
+        <div><label>Urgencia</label>
+          <select id="repUrg"><option value="">—</option><option value="urgente">Urgente</option><option value="proxima">Necesidad próxima</option></select>
+        </div>
+        <div style="grid-column:1/-1"><label>Observaciones</label><input id="repObs" placeholder="Notas"></div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn--primary" id="repSend">Solicitar</button>
+        <button class="btn btn--ghost" id="repClear">Limpiar</button>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>Listado (estado)</h2>
+      <div id="reqList" class="grid" style="grid-template-columns:1fr"></div>
+    </article>
+  </section>
+
+  <!-- ==================== PÁG. 7.0 INVENTARIO ==================== -->
+  <section id="inventario" class="page" hidden aria-labelledby="invTitle">
+    <h1 id="invTitle">Inventario</h1>
+
+    <article class="card">
+      <form id="invSearchForm" class="form-inline" autocomplete="off">
+        <label for="invQuery" class="form-inline__label">Buscar</label>
+        <input id="invQuery" type="search" placeholder="ref / desc / código">
+        <button class="btn btn--ghost" type="submit">Filtrar</button>
+        <button class="btn btn--ghost" type="button" id="invClear">Limpiar</button>
+        <span style="margin-left:auto" data-role="admin">
+          <label class="form-inline__label" for="csvUp">CSV/QRs</label>
+          <input id="csvUp" type="file" accept=".csv,.txt" style="max-width:240px">
+        </span>
+      </form>
+    </article>
+
+    <article class="card">
+      <h2>Alertas stock mínimo</h2>
+      <div id="invAlerts"></div>
+    </article>
+
+    <div id="invCats" class="grid" style="grid-template-columns:1fr"></div>
+  </section>
+
+  <!-- ==================== PÁG. 8.0 SUBCONTRATAS ==================== -->
+  <section id="subcontratas" class="page" hidden aria-labelledby="subTitle">
+    <h1 id="subTitle">Subcontratas</h1>
+
+    <article class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn--primary" id="subNew">Solicitar subcontrata</button>
+        <button class="btn btn--ghost" id="subDel">Eliminar solicitud</button>
+      </div>
+      <p style="color:#64748b;margin:.5rem 0">* En este prototipo, el flujo se refleja en el Dashboard y en el Registro como avisos.</p>
+    </article>
+
+    <article class="card">
+      <h2>Pendientes</h2>
+      <div id="subPend" class="grid" style="grid-template-columns:1fr"></div>
+    </article>
+
+    <article class="card">
+      <h2>Histórico</h2>
+      <div id="subHist" class="grid" style="grid-template-columns:1fr"></div>
+    </article>
+  </section>
+
+  <!-- ==================== PÁG. 9.0 INDICADORES (KPIs) ==================== -->
+  <section id="indicadores" class="page" hidden aria-labelledby="kpiTitle">
+    <h1 id="kpiTitle">KPIs</h1>
+    <article class="card">
+      <canvas id="chMtbf" width="720" height="320"></canvas>
+      <div style="font-size:12px;color:#64748b;margin-top:6px">MTBF: tiempo medio entre fallos. Escala 0–100.</div>
+    </article>
+    <article class="card">
+      <canvas id="chMttr" width="720" height="320"></canvas>
+      <div style="font-size:12px;color:#64748b;margin-top:6px">MTTR: tiempo medio de reparación. Escala 0–100 (menor es mejor).</div>
+    </article>
+    <article class="card">
+      <canvas id="chDisp" width="720" height="320"></canvas>
+      <div style="font-size:12px;color:#64748b;margin-top:6px">Disponibilidad: % operativo. Escala 0–100.</div>
+    </article>
+  </section>
+
+  <!-- ==================== PÁG. 10.0 DASHBOARD TV ==================== -->
+  <section id="dashboardtv" class="page" hidden aria-labelledby="dbTitle">
+    <div id="carousel" class="card" style="overflow:hidden">
+      <div id="carouselTrack" style="display:flex;gap:0;transition:transform .6s ease">
+        <img src="./img/Carousel/corte.webp"      alt="Corte"      style="width:100%;flex:0 0 100%;object-fit:cover;max-height:340px">
+        <img src="./img/Carousel/kaltenbach.webp"  alt="Kaltenbach" style="width:100%;flex:0 0 100%;object-fit:cover;object-position:center center;max-height:320px">
+        <img src="./img/Carousel/trumpf.webp"      alt="Trumpf"     style="width:100%;flex:0 0 100%;object-fit:cover;max-height:340px">
+        <img src="./img/Carousel/hgg.webp"         alt="HGG"        style="width:100%;flex:0 0 100%;object-fit:cover;max-height:340px">
+        <img src="./img/Carousel/tecoi.webp"       alt="Tecoi"      style="width:100%;flex:0 0 100%;object-fit:cover;max-height:340px">
+        <img src="./img/Carousel/mazak.webp"       alt="Mazak"      style="width:100%;flex:0 0 100%;object-fit:cover;max-height:340px">
+      </div>
+    </div>
+    <div class="dbtv-tag">Dashboard TV</div>
+
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:10px">
+      <article class="card"><strong>Equipos en parada</strong><div id="dbParada" class="badge">0</div></article>
+      <article class="card"><strong>Equipos con restricciones</strong><div id="dbRestr" class="badge">0</div></article>
+      <article class="card"><strong>Repuestos pendientes de llegada</strong><div id="dbPendLleg" class="badge">0</div></article>
+      <article class="card"><strong>Solicitudes de repuesto pendientes</strong><div id="dbRepPend" class="badge">0</div></article>
+      <article class="card"><strong>Consumibles con stock crítico</strong><div id="dbConsCrit" class="badge">0</div></article>
+      <article class="card"><strong>Llegadas de subcontratas</strong><div id="dbSubc" class="badge">0</div></article>
+      <article class="card"><strong>Alertas stock mínimo</strong><div id="dbInvMin" class="badge">0</div></article>
+    </div>
+
+    <details class="card" open>
+      <summary><strong>1) Equipos en parada</strong> <small id="sumParada" style="color:#64748b"></small></summary>
+      <div id="listParada"></div>
+    </details>
+
+    <details class="card">
+      <summary><strong>2) Equipos con restricciones</strong> <small id="sumRestr" style="color:#64748b"></small></summary>
+      <div id="listRestr"></div>
+    </details>
+
+    <details class="card">
+      <summary><strong>3) Repuestos pendientes de llegada</strong> <small id="sumPendLleg" style="color:#64748b"></small></summary>
+      <div id="listPendLleg"></div>
+    </details>
+
+    <details class="card">
+      <summary><strong>4) Solicitudes de repuesto pendientes</strong> <small id="sumRepPend" style="color:#64748b"></small></summary>
+      <div id="listRepPend"></div>
+    </details>
+
+    <details class="card">
+      <summary><strong>5) Consumibles con stock crítico</strong> <small id="sumConsCrit" style="color:#64748b"></small></summary>
+      <div id="listConsCrit"></div>
+    </details>
+
+    <details class="card">
+      <summary><strong>6) Llegadas de subcontratas</strong> <small id="sumSubc" style="color:#64748b"></small></summary>
+      <div id="listSubc"></div>
+    </details>
+
+    <details class="card">
+      <summary><strong>7) Alertas stock mínimo</strong> <small id="sumInvMin" style="color:#64748b"></small></summary>
+      <div id="listInvMin"></div>
+    </details>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn btn--ghost" id="dbRefresh">Actualizar</button>
+    </div>
+  </section>
+
+  <!-- ==================== REGISTRO (LOGS) ==================== -->
+  <section id="registro" class="page" hidden aria-labelledby="regTitle">
+    <h1 id="regTitle">Registro</h1>
+
+    <article class="card">
+      <form id="regForm" class="form-inline" autocomplete="off">
+        <label class="form-inline__label" for="regQ">Buscar</label>
+        <input id="regQ" type="search" placeholder="por acción, objeto, usuario…">
+        <label class="form-inline__label" for="regF">Fecha</label>
+        <input id="regF" type="date">
+        <button class="btn btn--ghost" type="submit">Filtrar</button>
+        <button class="btn btn--ghost" type="button" id="regClr">Limpiar</button>
+      </form>
+    </article>
+
+    <div id="regList" class="grid" style="grid-template-columns:1fr"></div>
+  </section>
+
+  <!-- ==================== MODALES COMPARTIDOS ==================== -->
+  <div id="modalBg"   style="position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(2px);display:none;z-index:900"></div>
+  <div id="modalCard" style="position:fixed;left:50%;top:10dvh;transform:translateX(-50%);width:min(980px,92vw);background:#0f141c;color:#e6eef7;border:1px solid #223046;border-radius:16px;box-shadow:0 20px 36px rgba(0,0,0,.45);padding:14px;display:none;z-index:950">
+    <header style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <h3 id="modalT" style="margin:0">Detalle</h3>
+      <button id="modalX" class="btn btn--ghost">Cerrar</button>
+    </header>
+    <div id="modalC" style="max-height:min(68dvh,620px);overflow:auto;margin-top:8px"></div>
+  </div>
+<datalist id="eqAll"></datalist>
+</main>
+<section class="hero-carousel" aria-label="Fotos de producción" id="dashCarousel">
+  <div class="carousel-track" id="hcTrack">
+    <div class="carousel-slide"><img src="./img/Carousel/corte.webp" alt="Corte"></div>
+    <div class="carousel-slide"><img src="./img/Carousel/kaltenbach.webp" alt="Kaltenbach"></div>
+    <div class="carousel-slide"><img src="./img/Carousel/trumpf.webp" alt="Trumpf"></div>
+    <div class="carousel-slide"><img src="./img/Carousel/hgg.webp" alt="HGG"></div>
+    <div class="carousel-slide"><img src="./img/Carousel/tecoi.webp" alt="Tecoi"></div>
+    <div class="carousel-slide"><img src="./img/Carousel/mazak.webp" alt="Mazak"></div>
+  </div>
+  <button class="carousel-ctrl carousel-prev" id="hcPrev" aria-label="Anterior" aria-controls="hcTrack">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="carousel-ctrl carousel-next" id="hcNext" aria-label="Siguiente" aria-controls="hcTrack">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6"/></svg>
+  </button>
+  <div class="carousel-dots" id="hcDots" aria-label="Indicadores"></div>
+</section>
+
+<footer style="text-align:center;color:#64748b;font-size:12px;margin:2rem 0 1rem">
+  © CDL — Sistema de Mantenimiento · PWA
+</footer>
+<script>
+/* ========= API base ========= */
+window.API_BASE = "https://script.google.com/macros/s/AKfycbylcSwPb9mVmIAvwJUJMPPp1Dy-Z8YeQoiaFluwrkEIN2HnegOoet0hJq4X_SAH0FZM/exec";
+const API_BASE      = window.API_BASE;
+const CDL_TOKEN_KEY = "cdl_token";
+const CDL_ROLE_KEY  = "cdl_role";
+
+const GET  = async (p)=>{
+  const r = await fetch(`${API_BASE}?path=${encodeURIComponent(p)}`, { cache:"no-store" });
+  try{ return await r.json(); }catch{ return []; }
+};
+const POST = async (body)=>{
+  const r = await fetch(API_BASE, {
+    method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body), cache:"no-store"
+  });
+  try{ return await r.json(); }catch{ return {ok:false}; }
+};
+
+/* ========= ROLES + PERMISOS ========= */
+const ROLES = [
+  { slug:'gerente',          label:'Gerente',                 canKPIs:true,  approveStop:true,  crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:true },
+  { slug:'admin',            label:'Administrador',           canKPIs:true,  approveStop:true,  crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:true },
+  { slug:'produccion',       label:'Producción',              canKPIs:false, approveStop:true,  crearOT:false, verInventario:true, verRepuestos:true, verRegistro:false },
+  { slug:'encargado',        label:'Encargado',               canKPIs:false, approveStop:true,  crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:true },
+  { slug:'rt11',             label:'Responsable 1 · Turno 1', canKPIs:false, approveStop:false, crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:false },
+  { slug:'rt12',             label:'Responsable 2 · Turno 1', canKPIs:false, approveStop:false, crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:false },
+  { slug:'rt21',             label:'Responsable 1 · Turno 2', canKPIs:false, approveStop:false, crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:false },
+  { slug:'rt22',             label:'Responsable 2 · Turno 2', canKPIs:false, approveStop:false, crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:false },
+  { slug:'rt31',             label:'Responsable 1 · Turno 3', canKPIs:false, approveStop:false, crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:false },
+  { slug:'rt32',             label:'Responsable 2 · Turno 3', canKPIs:false, approveStop:false, crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:false },
+  { slug:'tecnico',          label:'Técnico Interno',         canKPIs:false, approveStop:false, crearOT:true,  verInventario:true, verRepuestos:true, verRegistro:false },
+  { slug:'subcontratas',     label:'Subcontratas',            canKPIs:false, approveStop:false, crearOT:false, verInventario:false,verRepuestos:false,verRegistro:false },
+  { slug:'invitado',         label:'Invitado',                canKPIs:false, approveStop:false, crearOT:false, verInventario:false,verRepuestos:false,verRegistro:false },
+];
+function getRoleObj(){
+  const slug = (localStorage.getItem(CDL_ROLE_KEY)||'invitado').toLowerCase();
+  return ROLES.find(r=>r.slug===slug) || ROLES.at(-1);
+}
+function roleCan(cap){
+  const r = getRoleObj();
+  if(cap==='verKPIs') return !!r.canKPIs;
+  return !!r[cap];
+}
+function roleLabel(slug){
+  const r = ROLES.find(x=>x.slug===slug);
+  return r ? r.label : slug;
+}
+
+(function(){
+  if (window.__cdlNavInited) return;
+  window.__cdlNavInited = true;
+
+  const $ = (sel)=>document.querySelector(sel);
+
+  const sidenav  = $('#sidenav');
+  const hamb     = $('#hamb');
+  const closeNav = $('#closeNav');
+  // Soporta id="navList" o class="navlist"
+  const navList  = document.getElementById('navList') || $('.navlist');
+  const gSearch  = $('#globalSearch');
+  const goSearch = $('#goSearch');
+
+  // Si faltan nodos clave, no bloqueamos el resto del JS
+  if (!sidenav || !hamb) return;
+
+  // Evita submit accidental si alguna vez el botón cae dentro de un <form>
+  hamb.setAttribute('type','button');
+
+  // Construcción del menú sólo si existe contenedor
+  if (navList){
+    const items = [
+      ['#dashboard','Dashboard'],
+      ['#planificacion','Planificación producción'],
+      ['#equipos','Equipos'],
+      ['#gruas','Puentes grúa'],
+      ['#auxiliares','Auxiliares'],
+      ['#incidencias','Incidencias'],
+      ['#ot','OT · Órdenes de trabajo'],
+      ['#repuestos','Repuestos'],
+      ['#inventario','Inventario'],
+      ['#subcontratas','Subcontratas'],
+      ['#indicadores','Indicadores'],
+      ['#registro','Registro'],
+      ['#dashboardtv','Dashboard TV']
+    ];
+    navList.innerHTML = items
+      .map(([href,label])=> `<a href="${href}">${label}</a>`)
+      .join('');
+  }
+
+  // Abrir / cerrar con ARIA + clase en body
+  const openNavFn = (e)=>{
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    sidenav.classList.add('open');
+    document.body.classList.add('menu-open');
+    sidenav.setAttribute('aria-hidden','false');
+    hamb.setAttribute('aria-expanded','true');
+  };
+
+  const closeNavFn = (e)=>{
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    sidenav.classList.remove('open');
+    document.body.classList.remove('menu-open');
+    sidenav.setAttribute('aria-hidden','true');
+    hamb.setAttribute('aria-expanded','false');
+  };
+
+  // Exponer para depuración rápida
+  window.__openNav  = openNavFn;
+  window.__closeNav = closeNavFn;
+
+  // Listeners (captura para imponerse a handlers previos)
+  hamb.addEventListener('click', openNavFn, { capture:true });
+  if (closeNav) closeNav.addEventListener('click', closeNavFn, { capture:true });
+
+  // Cerrar al hacer clic en un enlace del menú
+  if (navList){
+    navList.addEventListener('click', (e)=>{
+      const a = e.target.closest('a');
+      if (!a) return;
+      // Dejamos que el enlace cambie el hash y SOLO cerramos el menú
+      closeNavFn();   // <- aquí ya NO pasamos el evento, así no hay preventDefault
+    });
+  }
+
+  // Buscador → navega por hash
+  const doSearch = ()=>{
+    const q = (gSearch?.value || '').trim();
+    if(!q) return;
+    const target = q.toLowerCase().replace(/\s+/g,'');
+    location.hash = '#'+target;
+    closeNavFn();
+  };
+  if (goSearch) goSearch.addEventListener('click', doSearch);
+  if (gSearch)  gSearch.addEventListener('keypress', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); doSearch(); }
+  });
+
+  // Cerrar con clic fuera + ESC
+  document.addEventListener('click', (ev)=>{
+    if (!sidenav.classList.contains('open')) return;
+    if (!sidenav.contains(ev.target) && ev.target !== hamb) closeNavFn(ev);
+  }, { capture:true });
+  document.addEventListener('keydown', (ev)=>{
+    if(ev.key === 'Escape') closeNavFn(ev);
+  }, { passive:true });
+})();
+
+/* ========= Panel usuario: login / logout / cambiar pass ========= */
+(function(){
+  const roleChip  = document.getElementById('roleChip');
+  const userPanel = document.getElementById('userPanel');
+  const moreBtn   = document.getElementById('moreBtn');
+  const closeUser = document.getElementById('closeUser');
+  const roleSel   = document.getElementById('roleSelect');
+  const userPass  = document.getElementById('userPass');
+  const loginBtn  = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const eyeMain   = document.getElementById('eyeMain');
+
+  const togglePwdLink = document.getElementById('togglePwdLink');
+  const chgWrap  = document.getElementById('chgWrap');
+  const chgBtn   = document.getElementById('chgBtn');
+  const chgOld   = document.getElementById('chgOld');
+  const chgNew   = document.getElementById('chgNew');
+  const eyeOld   = document.getElementById('eyeOld');
+  const eyeNew   = document.getElementById('eyeNew');
+
+  roleSel.innerHTML = ROLES.map(r => `<option value="${r.slug}">${r.label}</option>`).join('');
+
+  function ucFirst(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g,' ') : s; }
+
+  (function initRoleChip(){
+    const tok = localStorage.getItem(CDL_TOKEN_KEY);
+    const savedRole = localStorage.getItem(CDL_ROLE_KEY);
+    roleChip.textContent = (tok && savedRole) ? ucFirst(savedRole) : 'Invitado';
+  })();
+
+  const togglePanel = (show)=>{
+    userPanel.classList.toggle('show', show);
+    moreBtn.setAttribute('aria-expanded', show ? 'true' : 'false');
+  };
+  moreBtn.addEventListener('click', (e)=>{ e.stopPropagation(); togglePanel(!userPanel.classList.contains('show')); });
+  closeUser.addEventListener('click', ()=> togglePanel(false));
+  document.addEventListener('click', (e)=>{ if (userPanel.classList.contains('show') && !userPanel.contains(e.target) && !moreBtn.contains(e.target)) togglePanel(false); });
+
+  const toggleType = (inp)=> inp.type = (inp.type==='password') ? 'text' : 'password';
+  eyeMain.addEventListener('click', (e)=>{ e.preventDefault(); toggleType(userPass); });
+  eyeOld?.addEventListener('click', (e)=>{ e.preventDefault(); toggleType(chgOld);  });
+  eyeNew?.addEventListener('click', (e)=>{ e.preventDefault(); toggleType(chgNew);  });
+
+  loginBtn.addEventListener('click', async ()=>{
+    const user = roleSel.value;
+    const pass = (userPass.value||'').trim();
+    if(!pass){ alert('Introduce la clave.'); return; }
+    try{
+      const r = await POST({res:'auth', fn:'login', user, pass});
+      if(r.ok && r.token){
+        localStorage.setItem(CDL_TOKEN_KEY, r.token);
+        localStorage.setItem(CDL_ROLE_KEY, user);
+        roleChip.textContent = roleLabel(user);
+        userPass.value = '';
+        togglePanel(false);
+        applyRoleVisibility();
+      }else alert(r.error || 'Contraseña incorrecta.');
+    }catch{ alert('Error de red.'); }
+  });
+
+  logoutBtn.addEventListener('click', ()=>{
+    localStorage.removeItem(CDL_TOKEN_KEY);
+    localStorage.removeItem(CDL_ROLE_KEY);
+    roleChip.textContent = roleLabel('invitado');
+    applyRoleVisibility();
+  });
+
+  togglePwdLink.addEventListener('click', ()=>{
+    const open = chgWrap.hasAttribute('hidden');
+    if(open){ chgWrap.removeAttribute('hidden'); } else { chgWrap.setAttribute('hidden',''); }
+    togglePwdLink.setAttribute('aria-expanded', String(open));
+  });
+
+  chgBtn.addEventListener('click', async ()=>{
+    const tok  = localStorage.getItem(CDL_TOKEN_KEY)||'';
+    const oldP = (chgOld.value||'').trim();
+    const newP = (chgNew.value||'').trim();
+    if(!oldP || !newP){ alert('Rellena Actual y Nueva.'); return; }
+    try{
+      const r = await POST({res:'auth', fn:'change', token:tok, old:oldP, neu:newP});
+      if(r.ok){
+        alert('Contraseña cambiada.');
+        chgOld.value=''; chgNew.value='';
+        chgWrap.setAttribute('hidden',''); togglePwdLink.setAttribute('aria-expanded','false');
+      }else alert(r.error || 'No se pudo cambiar.');
+    }catch{ alert('Error de red.'); }
+  });
+})();
+
+/* ========= Service Worker (PWA) ========= */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+  navigator.serviceWorker.ready.then(reg => {
+    if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
+    });
+  });
+  let refreshed = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshed) return;
+    refreshed = true;
+    location.reload();
+  });
+}
+
+/* ========= Importación automática de repuestos.csv (cola + reintentos) — UNIFICADO ========= */
+(function(){
+  const CSV_PATH          = './repuestos.csv';
+  const CSV_IMPORTED_KEY  = 'inv_csv_imported';  // '1' cuando ya está importado al backend
+  const CSV_QUEUE_KEY     = 'inv_csv_queue';     // items pendientes cuando no hay token
+
+  const hasToken     = ()=> !!(localStorage.getItem(CDL_TOKEN_KEY)||'');
+  const onInventario = ()=> (location.hash||'#dashboard') === '#inventario';
+
+  /* Utilidades CSV */
+  const stripBOM = (s)=> (s||'').replace(/^\uFEFF/, '');
+  const detectDelim = (s)=>{
+    const comma = (s.match(/,/g)||[]).length;
+    const semi  = (s.match(/;/g)||[]).length;
+    return semi > comma ? ';' : ',';
+  };
+  function parseCSV(txt){
+    const lines = (txt||'').split(/\r?\n/).filter(l=>l.trim().length);
+    if(!lines.length) return { headers:[], items:[] };
+
+    const headLine = stripBOM(lines.shift());
+    const delim = detectDelim(headLine);
+    const headers = headLine.split(delim).map(h=>stripBOM(h).trim().toLowerCase());
+
+    const normNum = v => Number(String(v??'0').replace(',','.')) || 0;
+
+    const items = lines.map(line=>{
+      const cols = line.split(delim).map(c=>c.trim());
+      const o = {}; headers.forEach((h,i)=> o[h] = cols[i] ?? '');
+      const ref   = o.ref || o.referencia || o.codigo || '';
+      const desc  = o.desc || o.descripcion || o.nombre || '';
+      if(!ref && !desc) return null;
+      return {
+        ref,
+        codigo: o.codigo || ref,
+        desc,
+        stock: normNum(o.stock),
+        min:   normNum(o.min || o['stock_min']),
+        categoria: o.categoria || 'General',
+        subcategoria: o.subcategoria || 'Sin subcategoría',
+        ubicacion: o.ubicacion || '',
+        unidad: o.unidad || ''
+      };
+    }).filter(Boolean);
+
+    return { headers, items };
+  }
+
+  /* Llamada al backend para importar */
+  async function importNow(items){
+    const token = localStorage.getItem(CDL_TOKEN_KEY) || '';
+    try{
+      const r = await fetch(API_BASE, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        cache:'no-store',
+        body: JSON.stringify({ res:'inv', fn:'import', token, items })
+      }).then(x=>x.json()).catch(()=>({ok:false}));
+
+      return (r && r.ok) ? (r.importados ?? items.length) : 0;
+    }catch{
+      return 0;
+    }
+  }
+
+  /* Vacía cola local si ya hay token */
+  async function flushCSVQueue(){
+    if(localStorage.getItem(CSV_IMPORTED_KEY) === '1') return;
+    const q = JSON.parse(localStorage.getItem(CSV_QUEUE_KEY) || '[]');
+    if(!q.length) return;
+    if(!hasToken()) return;
+
+    const n = await importNow(q);
+    if(n > 0){
+      localStorage.setItem(CSV_IMPORTED_KEY, '1');
+      localStorage.removeItem(CSV_QUEUE_KEY);
+      if(onInventario() && typeof invLoad === 'function') invLoad();
+    }
+  }
+
+  /* Auto-import inicial (solo una vez por navegador) */
+  async function autoImportCSVInicial(){
+    try{
+      if (localStorage.getItem(CSV_IMPORTED_KEY) === '1') return;
+
+      const res = await fetch(CSV_PATH, { cache:'no-store' });
+      if (!res.ok) return;
+      const txt = await res.text();
+      const { items } = parseCSV(txt);
+      if (!items.length) return;
+
+      if (hasToken()){
+        const n = await importNow(items);
+        if(n > 0){
+          localStorage.setItem(CSV_IMPORTED_KEY,'1');
+          if (onInventario() && typeof invLoad === 'function') invLoad();
+          return;
+        }
+      }else{
+        // Sin token: guarda en cola local; se intentará al iniciar sesión
+        localStorage.setItem(CSV_QUEUE_KEY, JSON.stringify(items));
+      }
+    }catch(_err){}
+  }
+
+  // Disparadores
+  autoImportCSVInicial();
+  document.addEventListener('DOMContentLoaded', flushCSVQueue);
+  window.addEventListener('hashchange', flushCSVQueue, { passive:true });
+
+  // Reintentos temporizados (máx. ~45s)
+  let tries = 0;
+  const iv = setInterval(async ()=>{
+    if(localStorage.getItem(CSV_IMPORTED_KEY) === '1' || (++tries > 30)){
+      clearInterval(iv);
+      return;
+    }
+    await flushCSVQueue();
+  }, 1500);
+
+  // Si el usuario inicia sesión en otra pestaña
+  window.addEventListener('storage', (e)=>{
+    if(e.key === CDL_TOKEN_KEY) flushCSVQueue();
+  });
+})();
+
+/* ========= Carga mínima del Dashboard ========= */
+async function loadDashboardMain(){
+  try{
+    const cons = await GET('consumibles');
+    const lows = (cons||[]).filter(i=>Number(i.stock)<=Number(i.min));
+    document.getElementById('countConsLow').textContent = lows.length;
+    document.getElementById('dash-cons').innerHTML = lows.slice(0,5).map(i=>`<div class="badge">${i.ref||i.nombre} · Stock ${i.stock}</div>`).join('');
+
+    const reqs = await GET('repuestos');
+    document.getElementById('countReq').textContent = (reqs||[]).filter(r=>String(r.estado||'').toLowerCase()==='pendiente').length;
+
+    const pend = await GET('paradas_programadas_pendientes');
+    const cont = document.getElementById('dash-pendientes');
+    const cnt  = document.getElementById('countPendStops');
+    if(Array.isArray(pend) && pend.length){
+      cont.innerHTML = pend.map(p=>`
+        <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;margin:6px 0;padding:10px;border:1px dashed var(--line);border-radius:12px">
+          <div><strong>${p.equipo||'-'}</strong><div style="color:#64748b;font-size:12px">${p.fecha||''} · ${p.motivo||''}</div></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn--ghost" data-pp-aceptar="${p.id}">Aprobar</button>
+            <button class="btn btn--ghost" data-pp-rechazar="${p.id}">Rechazar</button>
+          </div>
+        </div>`).join('');
+      cnt.textContent = pend.length;
+    }else{
+      cont.innerHTML = '<div style="color:#64748b">No hay solicitudes pendientes.</div>';
+      cnt.textContent = 0;
+    }
+  }catch(_e){}
+}
+document.addEventListener('DOMContentLoaded', loadDashboardMain);
+
+document.addEventListener('click', async (e)=>{
+  const tok = localStorage.getItem(CDL_TOKEN_KEY)||'';
+  const ap = e.target.closest('[data-pp-aceptar]');
+  const rc = e.target.closest('[data-pp-rechazar]');
+  if(ap && roleCan('approveStop')){
+    const id = ap.getAttribute('data-pp-aceptar');
+    await POST({res:'stop', fn:'set', token:tok, id, estado:'Aprobada', comentario:''});
+    loadDashboardMain();
+  }
+  if(rc && roleCan('approveStop')){
+    const id = rc.getAttribute('data-pp-rechazar');
+    await POST({res:'stop', fn:'set', token:tok, id, estado:'Rechazada', comentario:''});
+    loadDashboardMain();
+  }
+});
+
+/* ========= Carrusel portada (autoplay control) ========= */
+let __hc = { start:()=>{}, stop:()=>{} };
+function initHomeCarousel(){
+  const track = document.getElementById('hcTrack'); if(!track) return;
+  if (track.__inited) return;
+  track.__inited = true;
+
+  const prev  = document.getElementById('hcPrev');
+  const next  = document.getElementById('hcNext');
+  const dotsWrap = document.getElementById('hcDots');
+
+  const slides = [...track.children];
+  let idx = 0, timer=null, startX=0, dx=0, dragging=false;
+  const AUTO_MS = 1800;
+
+  if (dotsWrap){
+    dotsWrap.innerHTML = slides.map((_,i)=>`<button aria-label="Ir a ${i+1}" ${i===0?'aria-current="true"':''}></button>`).join('');
+  }
+  const dots = dotsWrap ? [...dotsWrap.children] : [];
+
+  function cueFade(){
+    track.classList.add('is-fading');
+    window.clearTimeout(track._fadeT);
+    track._fadeT = window.setTimeout(()=> track.classList.remove('is-fading'), 320);
+  }
+  function goTo(i){
+    idx=(i+slides.length)%slides.length;
+    track.style.transition='transform .25s ease';
+    track.style.transform=`translateX(${-100*idx}%)`;
+    dots.forEach((d,k)=> d.setAttribute('aria-current', k===idx ? 'true':'false'));
+    cueFade();
+  }
+  function start(){ stop(); timer=setInterval(()=>{ goTo(idx+1); }, AUTO_MS); }
+  function stop(){ if(timer){clearInterval(timer); timer=null;} }
+
+  track.addEventListener('pointerdown', e=>{
+    if(e.button!==0) return;
+    dragging=true; startX=e.clientX; dx=0; track.style.transition='none'; stop();
+  });
+  track.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    dx=e.clientX-startX;
+    track.style.transform=`translateX(calc(${-100*idx}% + ${dx}px))`;
+  });
+  window.addEventListener('pointerup', ()=>{
+    if(!dragging) return;
+    dragging=false;
+    const w=track.clientWidth;
+    Math.abs(dx)>w*0.15 ? goTo(idx+(dx<0?1:-1)) : goTo(idx);
+  });
+
+  prev?.addEventListener('click', ()=>{ goTo(idx-1); });
+  next?.addEventListener('click', ()=>{ goTo(idx+1); });
+
+  document.addEventListener('visibilitychange', ()=>{ document.hidden ? stop() : (isOnDashboard() ? start() : stop()); });
+
+  goTo(0);
+  __hc.start = start;
+  __hc.stop  = stop;
+}
+
+/* ========= Routing simple + visibilidad de carrusel ========= */
+(function(){
+  const car = document.getElementById('dashCarousel');
+
+  window.isOnDashboard = function(){
+    const hash = location.hash || '#dashboard';
+    return hash === '#dashboard';
+  };
+
+  function show(el){ if(el) el.style.display=''; }
+  function hide(el){ if(el) el.style.display='none'; }
+
+  function markCurrent(){
+    const hash = location.hash || '#dashboard';
+
+    document.querySelectorAll('.navlist a').forEach(a=>{
+      a.setAttribute('aria-current', a.getAttribute('href')===hash ? 'page' : 'false');
+    });
+    document.querySelectorAll('.page').forEach(sec=>{
+      sec.hidden = ('#'+sec.id) !== hash;
+    });
+
+    if (car){
+      if (isOnDashboard()){
+        show(car);
+        __hc.start();
+      } else {
+        __hc.stop();
+        hide(car);
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    initHomeCarousel();
+    markCurrent();
+  });
+  window.addEventListener('hashchange', markCurrent, { passive:true });
+})();
+
+/* ========= Sombra en header al hacer scroll ========= */
+window.addEventListener('scroll', ()=>{
+  const hdr = document.getElementById('hdr');
+  if (hdr) hdr.classList.toggle('scrolled', window.scrollY > 6);
+}, { passive:true });
+
+/* ========= Visibilidad por rol ========= */
+function applyRoleVisibility(){
+  const showApproveStops = roleCan('approveStop');
+
+  document.querySelectorAll('[data-role="approveStop"]').forEach(el=>{
+    el.style.display = showApproveStops ? '' : 'none';
+  });
+  document.querySelectorAll('#navList a[href="#indicadores"]').forEach(a=>{
+    a.style.display = roleCan('verKPIs') ? '' : 'none';
+  });
+  document.querySelectorAll('[data-role="admin"]').forEach(el=>{
+    el.style.display = (localStorage.getItem(CDL_ROLE_KEY) === 'admin') ? '' : 'none';
+  });
+}
+
+/* =========================================================
+   ÍNDICE DE EQUIPOS (UNIFICADO)
+   - Normaliza el uso de EQ_INDEX y __EQ_INDEX a la MISMA referencia
+   - Incluye utilidades de construcción y búsqueda
+========================================================= */
+(function(){
+  // Referencia única compartida
+  if (!('EQ_INDEX' in window)) window.EQ_INDEX = [];
+  Object.defineProperty(window, '__EQ_INDEX', {
+    get(){ return window.EQ_INDEX; },
+    set(v){ window.EQ_INDEX = Array.isArray(v) ? v : []; }
+  });
+
+  // Construye el índice a partir de arrays de equipos, grúas y auxiliares (opcionales)
+  window.buildEqIndex = function({equipos=[], gruas=[], auxiliares=[]}={}){
+    const norm = (s)=>String(s??'').trim();
+    const pack = (list,tipo)=> (list||[]).map(e=>({
+      id: norm(e.id||e.codigo||e.ref||''),
+      nombre: norm(e.nombre||e.tag||e.id||''),
+      tipo,
+      grupo: norm(e.grupo||''),
+      nave: norm(e.nave||''),
+      ubicacion: norm(e.ubicacion||''),
+      fabricante: norm(e.fabricante||''),
+      modelo: norm(e.modelo||''),
+    })).filter(x=>x.id || x.nombre);
+
+    const idx = [
+      ...pack(equipos,'equipo'),
+      ...pack(gruas,'grua'),
+      ...pack(auxiliares,'aux')
+    ];
+
+    // Orden alfabético por nombre y, de empate, por id
+    idx.sort((a,b)=>{
+      const n = a.nombre.localeCompare(b.nombre,'es',{sensitivity:'base'});
+      return n!==0 ? n : a.id.localeCompare(b.id,'es',{sensitivity:'base'});
+    });
+
+    window.EQ_INDEX = idx; // actualiza la referencia compartida
+    return window.EQ_INDEX;
+  };
+
+  // Búsqueda rápida por término (para autocompletar/filtros)
+  window.searchEqIndex = function(term){
+    const t = String(term||'').toLowerCase();
+    if(!t) return window.EQ_INDEX.slice(0,100);
+    return window.EQ_INDEX.filter(e=>
+      e.id.toLowerCase().includes(t) ||
+      e.nombre.toLowerCase().includes(t) ||
+      e.tipo.toLowerCase().includes(t) ||
+      e.ubicacion.toLowerCase().includes(t)
+    ).slice(0,200);
+  };
+})();
+
+/* ====== INCIDENCIAS: toggle del buscador + filtros ====== */
+(function(){
+  const toggleBtn = document.getElementById('incSearchToggle');
+  const card      = document.getElementById('incSearchCard');
+  const form      = document.getElementById('incSearchForm');
+  const eqInp     = document.getElementById('incEq');
+  const fechaInp  = document.getElementById('incFecha');
+  const textInp   = document.getElementById('incTexto');
+  const clearBtn  = document.getElementById('incClear');
+
+  if(toggleBtn && card){
+    toggleBtn.addEventListener('click', ()=>{
+      const willOpen = card.hasAttribute('hidden');
+      if(willOpen) card.removeAttribute('hidden'); else card.setAttribute('hidden','');
+      toggleBtn.setAttribute('aria-expanded', String(willOpen));
+      toggleBtn.textContent = willOpen ? 'Buscar ▲' : 'Buscar ▼';
+      if(willOpen) eqInp?.focus();
+    });
+  }
+
+  eqInp?.addEventListener('focus', ()=>{});
+
+  form?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const all = await GET('incidencias').catch(()=>[]);
+    const qText  = norm(textInp.value||'');
+    const qDate  = (fechaInp.value||'').trim();
+    const qEqRaw = (eqInp.value||'').trim();
+    if(!EQ_INDEX.length) await buildEqIndex();
+    const match  = qEqRaw ? findEquipoMatch(qEqRaw) : null;
+
+    const fil = all.filter(i=>{
+      const okEq   = !match || norm(i.equipo||'').includes(norm(match.id)) || norm(i.equipo||'').includes(norm(match.nombre));
+      const okText = !qText || norm(`${i.resumen||''} ${i.desc||''}`).includes(qText);
+      const okDate = !qDate || (i.created && String(i.created).slice(0,10)===qDate);
+      return okEq && okText && okDate;
+    });
+
+    renderIncList(fil);
+    if(match){ location.hash = '#incidencias'; window.scrollTo({top:document.getElementById('incTitle').offsetTop - 70, behavior:'smooth'}); }
+  });
+
+  clearBtn?.addEventListener('click', async ()=>{
+    eqInp.value=''; fechaInp.value=''; textInp.value='';
+    loadIncidencias();
+  });
+})();
+
+/* ====== INCIDENCIAS: grid de logos → listado por categoría o abrir modal directa ====== */
+(function(){
+  const wrap = document.getElementById('incLogosWrap');
+  const list = document.getElementById('incCatList');
+  const auxBtn = document.getElementById('incShowAux');
+
+  async function ensureIndex(){ if(!EQ_INDEX.length) await buildEqIndex(); }
+
+  function renderCat(marca){
+    const multi = ['kaltenbach','trumpf','gruas','auxiliares'];
+    if(!multi.includes(marca)){
+      const one = EQ_INDEX.find(x=> x.marca===marca);
+      if(one){ openNuevaIncidencia(one.id); }
+      return;
+    }
+    const items = EQ_INDEX.filter(x=> x.marca===marca);
+    if(!items.length){ list.hidden = true; list.innerHTML=''; return; }
+    list.hidden = false;
+    list.innerHTML = items
+      .sort((a,b)=> a.label.localeCompare(b.label,'es'))
+      .map(x=> `<button type="button" data-eq="${x.id}">${x.label}</button>`)
+      .join('');
+  }
+
+  wrap?.addEventListener('click', async (e)=>{
+    const card = e.target.closest('.inc-logo');
+    if(card){
+      await ensureIndex();
+      const marca = card.getAttribute('data-marca');
+      renderCat(marca);
+      return;
+    }
+    const pick = e.target.closest('[data-eq]');
+    if(pick){
+      const id = pick.getAttribute('data-eq');
+      openNuevaIncidencia(id);
+      return;
+    }
+  });
+
+  auxBtn?.addEventListener('click', async ()=>{
+    await ensureIndex();
+    renderCat('auxiliares');
+  });
+})();
+
+/* ======= Índice de equipos para incidencias: "número + nombre" y búsqueda flexible ======= */
+let __INC_ALL = [];       // cache de incidencias
+let __EQ_INDEX = [];      // [{id,label,grupo}] id numérico/textual + nombre
+let __EQ_LABELS = [];     // para datalist
+
+async function buildEquipIndex(){
+  const eq  = await GET('equipos')    || [];
+  const gr  = await GET('gruas')      || [];
+  const aux = await GET('auxiliares') || [];
+
+  function mkLabel(x){
+    const id  = String(x.id??'').trim();
+    const nm  = String(x.nombre??'').trim();
+    // Etiqueta combinada: "ID Nombre" (busca por cualquiera de las dos)
+    return (nm && !new RegExp('^'+id+'$', 'i').test(nm)) ? `${id} ${nm}` : id;
+  }
+  const norm = s => (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+
+  __EQ_INDEX = [
+    ...eq.map(e => ({ id:String(e.id), label:mkLabel(e), grupo:'kaltenbach' })),
+    ...gr.map(g => ({ id:String(g.id), label:mkLabel(g), grupo:'gruas' })),
+    ...aux.map(a => ({ id:String(a.id), label:mkLabel(a), grupo:'auxiliares' })),
+  ];
+
+  __EQ_LABELS = __EQ_INDEX
+    .map(o => o.label)
+    .sort((a,b)=> a.localeCompare(b,'es'));
+
+  // Datalist (incidencias)
+  const dl = document.getElementById('incEquipList');
+  if(dl) dl.innerHTML = __EQ_LABELS.map(v=>`<option value="${v}">`).join('');
+}
+
+function matchEquipo(q){
+  if(!q) return null;
+  const n = (s)=> (s||'').toString().replace(/\s+/g,'').toLowerCase();
+  const tgt = n(q);
+  // Coincidencia por número exacto, por etiqueta completa o por fragmentos (case-insensitive)
+  return __EQ_INDEX.find(e => n(e.id)===tgt || n(e.label)===tgt || n(e.label).includes(tgt)) || null;
+}
+
+async function loadIncidencias(){
+  if(!__EQ_INDEX.length) await buildEquipIndex();
+
+  try{ __INC_ALL = await GET('incidencias') || []; }
+  catch{ __INC_ALL = []; }
+
+  // Al abrir, si el usuario hace foco en "Equipo", muestra el listado en el dropdown del datalist (navegador)
+  const equipoInp = document.getElementById('incEquipo');
+  if(equipoInp){
+    equipoInp.addEventListener('focus', ()=>{
+      // Sugerencia: autocompletar mostrando todas (datalist hace el trabajo)
+      equipoInp.setSelectionRange(0, equipoInp.value.length);
+    }, { once:true });
+  }
+
+  renderIncFiltered();
+}
+
+function renderIncFiltered(){
+  const t = (document.getElementById('incTexto')?.value||'').trim().toLowerCase();
+  const f = (document.getElementById('incFecha')?.value||'').trim(); // YYYY-MM-DD
+  const e = (document.getElementById('incEquipo')?.value||'').trim();
+
+  const eqSel = matchEquipo(e);
+  let list = __INC_ALL.slice();
+
+  if (eqSel){
+    list = list.filter(x => String(x.equipo||'').toLowerCase().includes(String(eqSel.id).toLowerCase())
+                         || String(x.equipo||'').toLowerCase().includes(String(eqSel.label||'').toLowerCase()));
+  }
+  if (f){
+    list = list.filter(x => x.created && String(x.created).slice(0,10)===f);
+  }
+  if (t){
+    list = list.filter(x => (`${x.equipo||''} ${x.resumen||''} ${x.desc||''}`).toLowerCase().includes(t));
+  }
+
+  renderIncList(list);
+}
+
+/* Toggle de buscador (plegable) */
+(function(){
+  const btn = document.getElementById('incToggleSearch');
+  const card = document.getElementById('incSearchCard');
+  if(!btn || !card) return;
+  btn.addEventListener('click', ()=>{
+    const open = card.hasAttribute('hidden');
+    if(open) card.removeAttribute('hidden'); else card.setAttribute('hidden','');
+    btn.setAttribute('aria-expanded', String(open));
+    btn.textContent = open ? 'Buscar ▲' : 'Buscar ▼';
+    if(open) document.getElementById('incEquipo')?.focus();
+  });
+})();
+
+/* Envío filtros + limpiar */
+document.getElementById('incFilterForm')?.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  renderIncFiltered();
+});
+document.getElementById('incClear')?.addEventListener('click', ()=>{
+  (document.getElementById('incEquipo')||{}).value = '';
+  (document.getElementById('incFecha') ||{}).value = '';
+  (document.getElementById('incTexto') ||{}).value = '';
+  renderIncFiltered();
+});
+function renderIncList(arr){
+  const list = document.getElementById('incList');
+  const data = (arr||[]).slice().sort((a,b)=> new Date(b.created||0) - new Date(a.created||0));
+  list.innerHTML = data.map(it=>`
+    <article class="card" data-incid-id="${it.id||''}">
+      <header style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
+        <strong>${it.equipo||'-'}</strong>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:12px;color:#64748b">${it.created ? new Date(it.created).toLocaleString() : ''}</span>
+          <button class="btn" data-inc-fin style="background:#16a34a;color:#fff;border-color:#16a34a">Finalizar incidencia</button>
+        </div>
+      </header>
+      <p style="margin:.5rem 0">${it.resumen||it.desc||'-'}</p>
+      <div style="font-size:12px;color:#64748b">Estado: ${it.estado||'-'}</div>
+    </article>`).join('') || '<div style="color:#64748b">Sin incidencias</div>';
+}
+
+// Acciones en tarjetas de incidencias: finalizar (unificado)
+document.addEventListener('click', async (e)=>{
+  const fin = e.target.closest('[data-inc-fin]');
+  if(!fin) return;
+  const card = fin.closest('[data-incid-id]');
+  const id   = card?.getAttribute('data-incid-id');
+  const tok  = localStorage.getItem(CDL_TOKEN_KEY)||'';
+  if(!id){ alert('Incidencia sin ID'); return; }
+  try{
+    const r = await POST({res:'incid', fn:'finalizar', token:tok, id});
+    if(!r.ok) return alert(r.error||'No se pudo finalizar');
+    loadIncidencias();
+  }catch{ alert('Error de red'); }
+});
+
+/* ==================== HELPERS UI / MODAL ==================== */
+const _bg = document.getElementById('modalBg');
+const _mc = document.getElementById('modalCard');
+const _mt = document.getElementById('modalT');
+const _md = document.getElementById('modalC');
+function openModal(t, html){ _mt.textContent=t||'Detalle'; _md.innerHTML=html||''; _bg.style.display=_mc.style.display='block'; }
+function closeModal(){ _bg.style.display=_mc.style.display='none'; }
+document.getElementById('modalX').onclick = closeModal; _bg.onclick = closeModal;
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+
+/* ==================== TARJETA CON SEMÁFORO (horizontal) ==================== */
+function uc(s){ return (s||'').toString().toUpperCase(); }
+function semClass(estado){
+  const s = String(estado||'ok').toLowerCase();
+  if(/stop|parada|rojo|crit/.test(s)) return 'r';
+  if(/warn|restr|amar/.test(s))      return 'y';
+  return 'g';
+}
+function trafficLightCard({id,nombre,estado,tipo='equipo'}){
+  const state = semClass(estado);
+  const name  = uc(nombre||id);
+  const stateLabel = (state==='g'?'MARCHA':state==='y'?'RESTRICCIÓN':'PARADA');
+
+  return `
+  <article class="tl" data-card="${tipo}:${id}">
+    <div class="tl__head">
+      <div class="tl__id">
+        <span class="tl__name">${name}</span>
+        <span class="tl__badge" data-badge="${id}">${stateLabel}</span>
+      </div>
+
+      <div class="tl__pole-wrap" aria-label="Estado ${stateLabel}">
+        <div class="tl__pole">
+          <div class="tl__lamp tl__lamp--g ${state==='g'?'active':''}"></div>
+          <div class="tl__lamp tl__lamp--y ${state==='y'?'active':''}"></div>
+          <div class="tl__lamp tl__lamp--r ${state==='r'?'active':''}"></div>
+        </div>
+        <div class="tl__hit tl__hit--g" data-tl="${id}" data-type="${tipo}" data-newstate="g" title="Marcha (verde)"></div>
+        <div class="tl__hit tl__hit--y" data-type="${tipo}" data-tl="${id}" data-newstate="y" title="Restricciones (amarillo)"></div>
+        <div class="tl__hit tl__hit--r" data-type="${tipo}" data-tl="${id}" data-newstate="r" title="Parada (rojo)"></div>
+      </div>
+    </div>
+
+    <div class="tl__actions">
+      <button class="btn btn--ghost" data-ficha="${id}" data-type="${tipo}">Ver ficha</button>
+      <div class="tl__more">
+        <div class="tl__arrow" data-more-open>▼</div>
+        <div class="tl__menu" role="menu">
+          <button class="btn btn--ghost" data-incidencia="${id}" data-type="${tipo}">Nueva incidencia</button>
+          <button class="btn btn--ghost" data-programar="${id}" data-type="${tipo}">Programar parada</button>
+          <button class="btn btn--ghost" data-parada-programada="${id}" data-type="${tipo}">Parada programada</button>
+          <button class="btn btn--danger" data-parada-prolongada="${id}" data-type="${tipo}">Parada prolongada</button>
+        </div>
+      </div>
+    </div>
+  </article>`;
+}
+
+/* ==================== EQUIPOS / GRÚAS / AUXILIARES ==================== */
+async function loadEquipos(){
+  const data = await GET('equipos');
+  document.getElementById('eqSelect').innerHTML =
+    '<option value="">— Selecciona de la lista —</option>' +
+    (data||[]).map(e=>`<option value="${e.id}">${e.nombre||e.id}</option>`).join('');
+
+  const kal = (data||[]).filter(e=> /kaltenbach/i.test(e.linea||''));
+  const tru = (data||[]).filter(e=> /trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
+  const ind = (data||[]).filter(e=> !/kaltenbach/i.test(e.linea||'') && !/trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
+
+  document.getElementById('equiposKaltenbach').innerHTML = kal.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') || '<div style="color:#64748b">Sin datos</div>';
+  document.getElementById('equiposTrumpf').innerHTML     = tru.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') || '<div style="color:#64748b">Sin datos</div>';
+  document.getElementById('equiposIndep').innerHTML      = ind.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') || '<div style="color:#64748b">Sin datos</div>';
+}
+async function loadGruas(){
+  const data = await GET('gruas');
+  document.getElementById('grSelect').innerHTML =
+    '<option value="">— Selecciona —</option>' + (data||[]).map(g=>`<option value="${g.id}">${g.id}</option>`).join('');
+  for(const n of [1,2,3,4]){
+    const cont = document.getElementById('grN'+n);
+    const arr = (data||[]).filter(g=> String(g.nave)==String(n));
+    cont.innerHTML = arr.length ? arr.map(g=>trafficLightCard({...g,tipo:'grua'})).join('') : '<div style="color:#64748b">Sin puentes en esta nave.</div>';
+  }
+}
+async function loadAux(){
+  const data = await GET('auxiliares');
+  document.getElementById('axSelect').innerHTML =
+    '<option value="">— Selecciona —</option>' + (data||[]).map(a=>`<option value="${a.id}">${a.nombre||a.id}</option>`).join('');
+  document.getElementById('auxList').innerHTML = (data||[]).map(a=>trafficLightCard({...a,tipo:'aux'})).join('') || '<div style="color:#64748b">Sin datos</div>';
+}
+
+/* ==================== FICHA DE EQUIPO/GRÚA/AUX (con QR) ==================== */
+async function fichaRender(id){
+  let e = (await GET('equipos')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
+  if(!e) e = (await GET('gruas')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
+  if(!e) e = (await GET('auxiliares')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
+  if(!e) return openModal('Ficha', '<div class="badge">No encontrado</div>');
+
+  const kv = (k,v)=>`<span class="badge" style="margin:2px 6px 2px 0"><strong>${k}:</strong> ${v ?? '—'}</span>`;
+  const meta = [
+    kv('Ubicación',e.ubicacion), kv('Nave',e.nave), kv('Grupo',e.grupo),
+    kv('Fabricante',e.fabricante), kv('Modelo',e.modelo), kv('Año',e.anno),
+    kv('Nº serie',e.numero_serie)
+  ].join('');
+
+  const sanitize = (t)=> String(t||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_');
+
+  const pdfName = sanitize(e.nombre||e.id)+'.pdf';
+
+  // URL codificada para el QR (apunta a la ficha dentro de la PWA)
+  const qrData = encodeURIComponent(`${location.origin}${location.pathname}#equipos?eq=${encodeURIComponent(e.id)}`);
+  const qrImg  = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${qrData}`;
+
+  const html = `
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start">
+      <div style="flex:1 1 380px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${meta}</div>
+        <h4 style="margin:10px 0 6px">Observaciones</h4>
+        <div class="card" style="background:#0b101a;color:#cfe1f7;border:1px solid #243046">${e.observaciones||'—'}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn--primary" onclick="window.__cdlOpenManual && window.__cdlOpenManual('${pdfName}')">Manual</button>
+          <button class="btn btn--ghost" onclick="window.print()">Imprimir</button>
+        </div>
+      </div>
+      <div style="flex:0 0 auto; text-align:center">
+        <div class="badge" style="display:inline-block;margin-bottom:6px">QR equipo</div>
+        <img src="${qrImg}" alt="QR ${e.id}" width="160" height="160" style="border-radius:12px;border:1px solid #e2e8f0">
+        <div style="font-size:12px;color:#64748b;margin-top:4px">${e.id}</div>
+      </div>
+    </div>`;
+  openModal(`${e.nombre||e.id} — Ficha técnica`, html);
+}
+if(!window.__cdlOpenManual){
+  window.__cdlOpenManual = async function(pdfName){
+    const base = './manuales/';
+    const url  = base + pdfName;
+    try{
+      const res = await fetch(url, { method:'HEAD', cache:'no-store' });
+      if (res && res.ok) { window.open(url, '_blank'); return; }
+    }catch(_e){}
+    window.open(base + 'manual_no_disponible.pdf', '_blank');
+  };
+}
+
+/* ==================== INVENTARIO / CONSUMIBLES (ÚNICO) ==================== */
+let _invRaw = [];
+
+async function invLoad(){
+  const host = document.getElementById('invCats');
+
+  // 1) Datos por API
+  let data = [];
+  try{
+    const api = await GET('inventario');
+    if (Array.isArray(api)) data = api;
+  }catch(_e){ data = []; }
+
+  // 2) Fallback visible: repuestos.csv local si la API viene vacía
+  if (!Array.isArray(data) || !data.length){
+    try{
+      const res = await fetch('./repuestos.csv', {cache:'no-store'});
+      if(res.ok){
+        const txt = await res.text();
+        const parsed = (function parseLocalCSV(s){
+          const stripBOM = t => (t||'').replace(/^\uFEFF/,'');
+          const raw = stripBOM(s||'').split(/\r?\n/).filter(l=>l.trim());
+          if(!raw.length) return [];
+
+          // Detectar separador , o ;
+          const sep = ((head)=>{
+            const c = (head.match(/,/g)||[]).length;
+            const sc= (head.match(/;/g)||[]).length;
+            return sc>c?';':',';
+          })(raw[0]);
+
+          const headers = raw[0].split(sep).map(h=>stripBOM(h).trim().toLowerCase());
+          const normNum = v => Number(String(v??'0').replace(',','.'))||0;
+
+          const rows = [];
+          for (let i=1;i<raw.length;i++){
+            const cols = raw[i].split(sep).map(c=>c.trim());
+            const o={}; headers.forEach((h,ix)=>o[h]=cols[ix]??'');
+            const ref   = o.ref || o.referencia || o.codigo || '';
+            const desc  = o.desc || o.descripcion || o.nombre || '';
+            if(!ref && !desc) continue;
+            rows.push({
+              ref,
+              codigo: o.codigo || ref,
+              desc,
+              stock: normNum(o.stock),
+              min:   normNum(o.min || o['stock_min']),
+              categoria: o.categoria || 'General',
+              subcategoria: o.subcategoria || 'Sin subcategoría',
+              ubicacion: o.ubicacion || '',
+              unidad: o.unidad || ''
+            });
+          }
+
+          // Agrupar en estructura {categoria, items:[...]}
+          const byCat = {};
+          rows.forEach(it=>{
+            const c = it.categoria||'General';
+            if(!byCat[c]) byCat[c] = [];
+            byCat[c].push(it);
+          });
+          return Object.keys(byCat).sort((a,b)=>a.localeCompare(b,'es')).map(c=>({
+            categoria:c, items: byCat[c]
+          }));
+        })(txt);
+        if (parsed.length) data = parsed;
+      }
+    }catch(_e){}
+  }
+
+  _invRaw = data;
+
+  // Render
+  function renderItem(i){
+    const ref = i.ref || i.codigo || '';
+    return `
+      <article class="card">
+        <header style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <strong>${ref}</strong>
+          <span class="badge" style="font-size:11px">${i.stock ?? '-'}</span>
+        </header>
+        <p style="margin:.5rem 0">${i.desc || ''}</p>
+        <div class="qty" style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn" data-inv="${ref}" data-delta="+1">+1</button>
+          <button class="btn" data-inv="${ref}" data-delta="+10">+10</button>
+          <button class="btn" data-inv="${ref}" data-delta="+100">+100</button>
+          <button class="btn" data-inv="${ref}" data-delta="-1">-1</button>
+          <button class="btn" data-inv="${ref}" data-delta="-10">-10</button>
+          <button class="btn" data-inv="${ref}" data-delta="-100">-100</button>
+        </div>
+      </article>`;
+  }
+
+  const htmlCats = (data||[]).map(cat=>{
+    const nombreCat = cat.categoria || 'Sin categoría';
+    const bySub = {};
+    (cat.items||[]).forEach(it=>{
+      const sc = String(it.subcategoria || 'Sin subcategoría');
+      if(!bySub[sc]) bySub[sc] = [];
+      bySub[sc].push(it);
+    });
+    const subsHtml = Object.keys(bySub)
+      .sort((a,b)=> a.localeCompare(b,'es'))
+      .map(sc=>`
+        <details style="margin-top:8px">
+          <summary style="font-weight:800;color:#334155">${sc}</summary>
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:8px">
+            ${bySub[sc].map(renderItem).join('')}
+          </div>
+        </details>`
+      ).join('');
+
+    return `
+      <details>
+        <summary style="font-weight:900">${nombreCat}${(!Array.isArray(_invRaw) || !_invRaw.length) ? ' · vista temporal' : ''}</summary>
+        ${subsHtml || '<div style="color:#64748b;margin:.5rem 0 0 1rem">Sin subcategorías</div>'}
+      </details>`;
+  }).join('');
+
+  host.innerHTML = htmlCats || '<div style="color:#64748b">Inventario vacío</div>';
+
+  // 🔁 Actualiza también el banner de alertas cada vez que se recarga inventario
+  if (typeof invRenderAlerts === 'function') invRenderAlerts();
+}
+
+/* =========================================================
+   ALERTAS DE STOCK MÍNIMO + DATALIST EQUIPOS + IMPORT CSV
+========================================================= */
+function invRenderAlerts(){
+  const alertsEl = document.getElementById('invAlerts');
+  if(!alertsEl) return;
+
+  const lows = (_invRaw||[])
+    .flatMap(c=>(c.items||[]).filter(i=> Number(i.stock) <= Number(i.min)));
+
+  alertsEl.innerHTML = lows.length
+    ? `<div class="badge" style="background:#fff7ed;border-color:#fed7aa;color:#9a3412">${lows.length} referencias por debajo del mínimo</div>`
+    : '<span style="color:#64748b">Sin alertas de stock mínimo</span>';
+}
+
+async function invSetupDatalist(){
+  const dl = document.getElementById('eqList');
+  if(!dl) return;
+  const eq = await GET('equipos').catch(()=>[]);
+  dl.innerHTML = (eq||[]).map(x=>`<option value="${x.id}">`).join('');
+}
+
+document.getElementById('csvUp')?.addEventListener('change', async (e)=>{
+  const file = e.target.files?.[0];
+  if(!file) return;
+  const tok = localStorage.getItem(CDL_TOKEN_KEY)||'';
+
+  try{
+    const txt = await file.text();
+    const [headLine, ...lines] = txt.split(/\r?\n/).filter(Boolean);
+
+    // Delimitador flexible ; o ,
+    const headSep = headLine.includes(';') ? ';' : ',';
+    const headers = headLine.split(headSep);
+
+    const items = lines.map(line=>{
+      const sep  = line.includes(';') ? ';' : ',';
+      const cols = line.split(sep).map(c=>c.trim());
+      const o = {};
+      headers.forEach((h,i)=> o[h.trim().toLowerCase()] = cols[i] ?? '');
+
+      return {
+        ref: o.ref || o.codigo || '',
+        codigo: o.codigo || '',
+        desc: o.desc || o.nombre || '',
+        stock: Number(String(o.stock||0).replace(',','.'))||0,
+        min:   Number(String(o.min||o.stock_min||0).replace(',','.'))||0,
+        categoria: o.categoria || 'General',
+        subcategoria: o.subcategoria || '',
+        ubicacion: o.ubicacion || '',
+        unidad: o.unidad || ''
+      };
+    }).filter(x=> x.ref && (x.desc||x.codigo));
+
+    if(!items.length){ alert('CSV vacío o sin columnas reconocibles.'); return; }
+    const r = await POST({res:'inv', fn:'import', token:tok, items});
+    if(!r.ok) return alert(r.error||'No se pudo importar');
+    alert(`Importadas ${r.importados||items.length} referencias`);
+    await invLoad();
+    invRenderAlerts();
+  }catch(_e){
+    alert('No se pudo leer el CSV');
+  }finally{
+    e.target.value = '';
+  }
+});
+
+// Hook de arranque para inventario
+(async ()=>{
+  await invLoad();
+  invRenderAlerts();
+  invSetupDatalist();
+})();
+
+/* ==================== REPUESTOS ==================== */
+async function reqLoad(){
+  const list = await GET('repuestos') || [];
+  document.getElementById('reqList').innerHTML = list.map(r=>{
+    const estado = (r.estado||'pendiente').toLowerCase();
+    return `
+      <article class="card" data-req="${r.id||''}">
+        <header style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <strong>${r.ref||'-'} × ${r.qty||1}</strong>
+          <span class="badge">${estado}</span>
+        </header>
+        <div style="font-size:12px;color:#64748b;margin:.25rem 0">
+          ${r.nombre?`${r.nombre} · `:''}${r.equipo?`Equipo: ${r.equipo} · `:''}${r.urgencia?`Urgencia: ${r.urgencia}`:''}
+        </div>
+        <p style="margin:.5rem 0">${r.comentario||''}</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn--ghost" data-req-acc="aprobar">Aceptar</button>
+          <button class="btn btn--ghost" data-req-acc="rechazar">Rechazar</button>
+          <button class="btn btn--ghost" data-req-acc="planificar">Planificar</button>
+          <button class="btn btn--ghost" data-req-acc="marcar_pedido">Marcar PEDIDO</button>
+          <button class="btn btn--ghost" data-req-acc="marcar_recibido">Marcar RECIBIDO</button>
+          <button class="btn btn--ghost" data-req-acc="comentar">Comentario</button>
+        </div>
+      </article>`;
+  }).join('') || '<div style="color:#64748b">Sin solicitudes</div>';
+}
+
+/* ==================== ÓRDENES DE TRABAJO ==================== */
+async function otLoad(){
+  const list = await GET('ot') || [];
+  const q = (document.getElementById('otFilter')?.value||'').toLowerCase();
+  const fil = list.filter(o=>!q || `${o.id||''} ${o.equipo||''} ${o.tarea||''}`.toLowerCase().includes(q));
+  document.getElementById('otList').innerHTML = fil.map(o=>`
+    <article class="card" data-ot="${o.id}">
+      <header style="display:flex;justify-content:space-between;align-items:center">
+        <strong>${o.id||''} — ${o.equipo||''}</strong>
+        <span class="badge">${o.estado||'abierta'}</span>
+      </header>
+      <p style="margin:.5rem 0">${o.tarea||''}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn--ghost" data-ot-fin="${o.id}">Finalizar</button>
+      </div>
+    </article>`).join('') || '<div style="color:#64748b">Sin OTs</div>';
+}
+
+/* ==================== KPI (gráficas canvas nativas) ==================== */
+function drawChart(canvasId, series=[], label=''){
+  const cv = document.getElementById(canvasId); if(!cv) return;
+  const ctx = cv.getContext('2d'); const W = cv.width, H = cv.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40,10); ctx.lineTo(40,H-30); ctx.lineTo(W-10,H-30); ctx.stroke();
+  ctx.fillStyle = '#64748b'; ctx.font = '12px Inter, sans-serif';
+  [0,50,100].forEach(v=>{ const y = (H-30) - (v/100)*(H-40); ctx.beginPath(); ctx.moveTo(38,y); ctx.lineTo(W-10,y); ctx.stroke(); ctx.fillText(String(v), 10, y+4); });
+  const n = Math.max(1, series.length); const x0 = 45, x1 = W-15, plotW = x1-x0, plotH = H-40;
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const x = x0 + (i/(n-1||1))*plotW;
+    const y = (H-30) - (Math.max(0,Math.min(100, Number(series[i]||0)))/100)*plotH;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#0f172a'; ctx.font = 'bold 13px Inter, sans-serif'; ctx.fillText(label, 50, 20);
+}
+async function loadKPI(){
+  let mtbf=[], mttr=[], disp=[];
+  try{ const k = await GET('kpi'); mtbf = k?.mtbf||[]; mttr = k?.mttr||[]; disp = k?.disp||[]; }catch(_e){}
+  if(!mtbf.length) mtbf = Array(12).fill(0);
+  if(!mttr.length) mttr = Array(12).fill(0);
+  if(!disp.length) disp = Array(12).fill(0);
+  drawChart('chMtbf', mtbf, 'MTBF (0–100)');
+  drawChart('chMttr', mttr, 'MTTR (0–100)');
+  drawChart('chDisp', disp, 'Disponibilidad (0–100)');
+}
+
+/* ==================== DASHBOARD TV ==================== */
+let _carIdx = 0, _carTimer = null;
+function startCarousel(){
+  clearInterval(_carTimer);
+  const track = document.getElementById('carouselTrack');
+  const slides = track?.children?.length||0;
+  if(!slides) return;
+  _carTimer = setInterval(()=>{
+    _carIdx = (_carIdx+1)%slides;
+    track.style.transform = `translateX(-${_carIdx*100}%)`;
+  }, 1500);
+}
+function stopCarousel(){
+  clearInterval(_carTimer);
+  _carTimer = null;
+}
+async function loadDashboard(){
+  let base = {};
+  try{ base = await GET('dashboard') || {}; }catch(_e){}
+
+  const paradas = await GET('paradas') || [];
+  const enParada = paradas
+    .filter(p => String(p.tipo||'').toLowerCase()==='prolongada' && /notificada|activa|abierta/i.test(String(p.estado||'')))
+    .map(p => `• ${p.equipo} — ${p.estado||''} (${p.created||''})`);
+
+  let restrCount = 0; let restrList = [];
+  try{
+    const incs = await GET('incidencias') || [];
+    restrList = incs.filter(i=>/restric/i.test(String(i.estado||''))).map(i=>`• ${i.equipo||'-'} — ${i.resumen||i.desc||''}`);
+    restrCount = restrList.length;
+  }catch(_e){}
+
+  const rep = await GET('repuestos') || [];
+  const repLleg = rep.filter(r=>/pedido|planificado/i.test(String(r.estado||'')));
+  const repPend = rep.filter(r=>/pendiente/i.test(String(r.estado||'')));
+
+  const invCats = await GET('inventario') || [];
+  const allInv = invCats.flatMap(c => (c.items||[]));
+  const invMin = allInv.filter(x => Number(x.stock)<=Number(x.min));
+
+  let consCrit = [];
+  try{
+    const cons = await GET('consumibles') || [];
+    consCrit = cons.filter(x => Number(x.stock)<=Number(x.min))
+                   .map(x => `• ${x.ref||x.nombre||'-'} — Stock ${x.stock} / Min ${x.min}`);
+  }catch(_e){}
+
+  let subcLleg = [];
+  try{
+    const logs = await GET('registro') || [];
+    subcLleg = logs.filter(l => /subcontrata/i.test(String(l.accion||'')))
+                   .map(l => `• ${l.detalle||l.obj||''} — ${l.ts||''}`);
+  }catch(_e){}
+
+  document.getElementById('dbParada').textContent   = String(enParada.length || base.paradas || 0);
+  document.getElementById('dbRestr').textContent    = String(restrCount || base.restricciones || 0);
+  document.getElementById('dbPendLleg').textContent = String(repLleg.length);
+  document.getElementById('dbRepPend').textContent  = String(repPend.length || base.repuestos_prior || 0);
+  document.getElementById('dbConsCrit').textContent = String(consCrit.length);
+  document.getElementById('dbSubc').textContent     = String(subcLleg.length || base.subcontratas || 0);
+  document.getElementById('dbInvMin').textContent   = String(invMin.length || base.stock_min || 0);
+
+  const mk = (arr, empty='Sin elementos') => arr.length ? `<ul style="padding-left:1rem;margin:.5rem 0">${arr.map(x=>`<li>${x}</li>`).join('')}</ul>` : `<div style="color:#64748b">${empty}</div>`;
+
+  document.getElementById('sumParada').textContent   = `(${enParada.length})`;
+  document.getElementById('listParada').innerHTML    = mk(enParada, 'Ningún equipo en parada prolongada');
+
+  document.getElementById('sumRestr').textContent    = `(${restrCount})`;
+  document.getElementById('listRestr').innerHTML     = mk(restrList, 'Sin restricciones registradas');
+
+  document.getElementById('sumPendLleg').textContent = `(${repLleg.length})`;
+  document.getElementById('listPendLleg').innerHTML  = mk(repLleg.map(r=>`• ${r.ref||r.nombre||'-'} × ${r.qty||1}${r.fecha_prevista?` — ETA ${r.fecha_prevista}`:''}`), 'Sin compras en tránsito');
+
+  document.getElementById('sumRepPend').textContent  = `(${repPend.length})`;
+  document.getElementById('listRepPend').innerHTML   = mk(repPend.map(r=>`• ${r.ref||r.nombre||'-'} × ${r.qty||1} (por ${r.solicitante||'-'})`), 'Sin solicitudes pendientes');
+
+  document.getElementById('sumConsCrit').textContent = `(${consCrit.length})`;
+  document.getElementById('listConsCrit').innerHTML  = mk(consCrit, 'Sin consumibles críticos');
+
+  document.getElementById('sumSubc').textContent     = `(${subcLleg.length})`;
+  document.getElementById('listSubc').innerHTML      = mk(subcLleg, 'Sin llegadas registradas');
+
+  document.getElementById('sumInvMin').textContent   = `(${invMin.length})`;
+  document.getElementById('listInvMin').innerHTML    = mk(invMin.map(i=>`• ${i.ref||i.codigo||'-'} — Stock ${i.stock} / Min ${i.min} (${i.desc||''})`), 'Inventario sin alertas');
+}
+
+/* ==================== REGISTRO (LOGS) ==================== */
+let _regRaw = [];
+async function loadRegistro(){
+  try{ _regRaw = await GET('registro') || []; }catch(_e){ _regRaw = []; }
+  renderRegistro();
+}
+function renderRegistro(){
+  const q = (document.getElementById('regQ')?.value||'').toLowerCase().trim();
+  const f = document.getElementById('regF')?.value||'';
+  const data = _regRaw.filter(r=>{
+    const t = `${r.accion||''} ${r.obj||''} ${r.detalle||''} ${r.user||''}`.toLowerCase();
+    const okQ = !q || t.includes(q);
+    const okF = !f || (r.ts && String(r.ts).slice(0,10)===f);
+    return okQ && okF;
+  }).sort((a,b)=> (new Date(b.ts||0)) - (new Date(a.ts||0)));
+
+  document.getElementById('regList').innerHTML = data.map(l=>`
+    <article class="card">
+      <header style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <strong>${l.accion||'-'}</strong>
+        <span style="font-size:12px;color:#64748b">${l.ts||''}</span>
+      </header>
+      <div style="color:#0f172a;background:#e2e8f0;border-radius:10px;padding:6px;margin:.5rem 0">
+        ${l.obj||''}
+      </div>
+      <div style="font-size:12px;color:#64748b">${l.detalle||''}</div>
+    </article>
+  `).join('') || '<div style="color:#64748b">Sin registros</div>';
+}
+
+/* ==================== EVENTOS GLOBALES ==================== */
+(function(){
+  const MAP = { eq:'eqSearchCard', gr:'grSearchCard', ax:'axSearchCard' };
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.search-toggle');
+    if(!btn) return;
+
+    const key = btn.getAttribute('data-search');
+    const id  = MAP[key];
+    const card = id ? document.getElementById(id) : null;
+    if(!card) return;
+
+    Object.values(MAP).forEach(cid=>{
+      const el = document.getElementById(cid);
+      if(el && el!==card && !el.hasAttribute('hidden')){
+        el.setAttribute('hidden','');
+      }
+    });
+    document.querySelectorAll('.search-toggle[aria-expanded="true"]')
+      .forEach(b=> b.setAttribute('aria-expanded','false'));
+
+    const willOpen = card.hasAttribute('hidden');
+    if(willOpen) card.removeAttribute('hidden'); else card.setAttribute('hidden','');
+    btn.setAttribute('aria-expanded', String(willOpen));
+    btn.textContent = willOpen ? 'Buscar ▲' : 'Buscar ▼';
+  });
+})();
+
+document.getElementById('eqForm').addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const id=(document.getElementById('eqQuery').value||document.getElementById('eqSelect').value||'').trim();
+  if(!id) return alert('Escribe o elige un equipo');
+  fichaRender(id);
+});
+document.getElementById('grForm').addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const id=(document.getElementById('grQuery').value||document.getElementById('grSelect').value||'').trim();
+  if(!id) return alert('Escribe o elige un puente');
+  fichaRender(id);
+});
+document.getElementById('axForm').addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const id=(document.getElementById('axQuery').value||document.getElementById('axSelect').value||'').trim();
+  if(!id) return alert('Escribe o elige un auxiliar');
+  fichaRender(id);
+});
+
+document.addEventListener('click', async (e)=>{
+  const tok = localStorage.getItem(CDL_TOKEN_KEY)||'';
+
+  const f = e.target.closest('[data-ficha]');
+  if(f){ fichaRender(f.getAttribute('data-ficha')); }
+
+  const opener = e.target.closest('[data-more-open]');
+  if (opener) {
+    e.stopPropagation();
+    const wrap = opener.closest('.tl__more');
+    document.querySelectorAll('.tl__more.open').forEach(w=>{ if (w !== wrap) w.classList.remove('open'); });
+    wrap.classList.toggle('open');
+  } else if (!e.target.closest('.tl__more')) {
+    document.querySelectorAll('.tl__more.open').forEach(w=> w.classList.remove('open'));
+  }
+
+  const ni = e.target.closest('[data-incidencia]');
+  if(ni){
+    const id = ni.getAttribute('data-incidencia');
+    await setSemaforoEstado(ni.getAttribute('data-type'), id, 'r', tok);
+    openNuevaIncidencia(id);
+  }
+
+  const pr = e.target.closest('[data-programar]');
+  if(pr){ openProgramarParada(pr.getAttribute('data-programar')); }
+
+  const pg = e.target.closest('[data-parada-programada]');
+  if(pg){
+    const id = pg.getAttribute('data-parada-programada');
+    await setSemaforoEstado(pg.getAttribute('data-type'), id, 'r', tok);
+    openProgramarParada(id);
+  }
+
+  const pp = e.target.closest('[data-parada-prolongada]');
+  if(pp){
+    const id = pp.getAttribute('data-parada-prolongada');
+    try{
+      await setSemaforoEstado(pp.getAttribute('data-type'), id, 'r', tok);
+      const r = await POST({res:'alert', fn:'parada', token:tok, equipo:id});
+      if(!r.ok) alert(r.error||'No se pudo notificar');
+      openNuevaIncidencia(id);
+    }catch{ alert('Error de red'); }
+  }
+
+  const ra = e.target.closest('[data-req-acc]');
+  if(ra){
+    const card = ra.closest('[data-req]'); const id = card?.getAttribute('data-req'); const acc = ra.getAttribute('data-req-acc');
+    try{
+      if(acc==='aprobar'){ await POST({res:'rep', fn:'aprobar', token:tok, id}); }
+      else if(acc==='rechazar'){ const motivo=prompt('Motivo del rechazo',''); if(motivo===null) return; await POST({res:'rep', fn:'rechazar', token:tok, id, motivo}); }
+      else if(acc==='planificar'){ const fp=prompt('Fecha prevista (YYYY-MM-DD)',''); if(!fp) return; await POST({res:'rep', fn:'planificar', token:tok, id, fecha_prevista:fp}); }
+      else if(acc==='marcar_pedido'){ await POST({res:'rep', fn:'marcar_pedido', token:tok, id}); }
+      else if(acc==='marcar_recibido'){ await POST({res:'rep', fn:'marcar_recibido', token:tok, id}); }
+      else if(acc==='comentar'){ const comentario=prompt('Comentario / Nota interna',''); if(!comentario) return; await POST({res:'rep', fn:'comentar', token:tok, id, comentario}); }
+      await reqLoad();
+    }catch{ alert('No se pudo ejecutar la acción'); }
+  }
+
+  const otf = e.target.closest('[data-ot-fin]');
+  if (otf) {
+    const id  = otf.getAttribute('data-ot-fin');
+    const tec = prompt('Intervenido por','') || 'PENDIENTE';
+    const desc= prompt('Resumen final','OT finalizada') || 'OT finalizada';
+    try {
+      const r = await POST({ res:'ot', fn:'complete', token: tok, id, intervenido_por: tec, descripcion: desc });
+      if (!r.ok) { alert(r.error || 'No se pudo finalizar'); return; }
+      otLoad();
+    } catch {
+      alert('No se pudo finalizar');
+    }
+  }
+});
+
+// Inventario: botones ±
+document.addEventListener('click', async (e)=>{
+  const b = e.target.closest('button[data-inv]');
+  if(!b) return;
+  const token = localStorage.getItem(CDL_TOKEN_KEY)||'';
+  const ref = b.getAttribute('data-inv');
+  const delta = Number(b.getAttribute('data-delta'));
+  try{
+    const r = await POST({res:'inv', fn:'delta', token, ref, delta});
+    if(!r.ok) throw new Error(r.error||'Error');
+    invLoad();
+    invRenderAlerts();
+  }catch{ alert('No se pudo actualizar inventario'); }
+});
+
+/* ==================== SEMÁFORO ==================== */
+async function setSemaforoEstado(tipo, id, newState, token){
+  const card = document.querySelector(`[data-card="${tipo}:${CSS.escape(id)}"]`);
+  if(card){
+    const lamps = card.querySelectorAll('.tl__lamp'); lamps.forEach(l=>l.classList.remove('active'));
+    const badge = card.querySelector(`[data-badge="${CSS.escape(id)}"]`);
+    if(newState==='g'){ lamps[0].classList.add('active'); if(badge) badge.textContent='MARCHA'; }
+    if(newState==='y'){ lamps[1].classList.add('active'); if(badge) badge.textContent='RESTRICCIÓN'; }
+    if(newState==='r'){ lamps[2].classList.add('active'); if(badge) badge.textContent='PARADA'; }
+  }
+  try{
+    await POST({
+      res:'state', fn:'set_estado', token, tipo, id,
+      estado: (newState==='g'?'ok':newState==='y'?'restriccion':'parada')
+    });
+  }catch(_e){}
+}
+
+document.addEventListener('click', async (e)=>{
+  const hit = e.target.closest('[data-tl]');
+  if(!hit) return;
+  const id = hit.getAttribute('data-tl');
+  const tipo = hit.getAttribute('data-type');
+  const newState = hit.getAttribute('data-newstate');
+  const tok = localStorage.getItem(CDL_TOKEN_KEY)||'';
+  await setSemaforoEstado(tipo, id, newState, tok);
+
+  if(newState==='g'){
+    location.hash = '#incidencias';
+    document.getElementById('incAddRestr').hidden = true;
+    document.getElementById('incFinalizar').hidden = false;
+    document.getElementById('finEq').value = id;
+  }else if(newState==='y'){
+    location.hash = '#incidencias';
+    document.getElementById('incFinalizar').hidden = true;
+    document.getElementById('incAddRestr').hidden = false;
+    document.getElementById('resEq').value = id;
+  }else{
+    openNuevaIncidencia(id);
+  }
+});
+
+/* ==================== MODALES: NUEVA INCIDENCIA / PROGRAMAR PARADA ==================== */
+// Mini util: búsqueda aproximada de equipo por id/nombre en EQ_INDEX
+function findEquipoMatch(term){
+  const t = String(term||'').toLowerCase().trim();
+  if(!t) return null;
+  const exact = (window.EQ_INDEX||[]).find(e=> e.id.toLowerCase()===t || e.nombre.toLowerCase()===t);
+  if(exact) return exact;
+  return (window.EQ_INDEX||[]).find(e=> e.id.toLowerCase().includes(t) || e.nombre.toLowerCase().includes(t)) || null;
+}
+
+function openNuevaIncidencia(id){
+  const val = id||'';
+  openModal('Nueva incidencia', `
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+      <div><label>Equipo</label><input id="niEq" value="${val}" placeholder="ID equipo o escribe nombre" list="eqAll"></div>
+      <div><label>Tipo</label>
+        <select id="niTipo"><option>Eléctrica</option><option>Mecánica</option><option>Software</option></select>
+      </div>
+    </div>
+    <label style="margin-top:8px;display:block">Descripción</label>
+    <textarea id="niDesc" rows="4" style="width:100%;border-radius:12px;border:1px solid #243046;background:#0b101a;color:#e6eef7"></textarea>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn--primary" id="niCrear">Crear</button>
+      <button class="btn btn--ghost" onclick="(${closeModal.toString()})()">Cancelar</button>
+    </div>
+  `);
+  _md.querySelector('#niCrear').onclick = async ()=>{
+    const tok = localStorage.getItem(CDL_TOKEN_KEY)||'';
+    const equipoRaw = (_md.querySelector('#niEq').value||'').trim();
+    if(!window.EQ_INDEX?.length && typeof buildEqIndex==='function'){
+      // Intenta construir índice si no existe (carga básica)
+      try{
+        const [equipos,gruas,auxiliares] = await Promise.all([
+          GET('equipos').catch(()=>[]), GET('gruas').catch(()=>[]), GET('auxiliares').catch(()=>[])
+        ]);
+        buildEqIndex({equipos,gruas,auxiliares});
+      }catch(_e){}
+    }
+    const m = findEquipoMatch(equipoRaw) || {id:equipoRaw};
+    const equipo = m.id;
+    const tipo = _md.querySelector('#niTipo').value;
+    const desc = (_md.querySelector('#niDesc').value||'').trim();
+    if(!equipo || !desc) return alert('Equipo y descripción');
+    try{
+      const r = await POST({res:'incid', fn:'crear', token:tok, equipo, tipo, desc});
+      if(!r.ok) alert(r.error||'No se pudo crear'); else { closeModal(); loadIncidencias(); }
+    }catch{ alert('Error de red'); }
+  };
+}
+
+function openProgramarParada(id){
+  openModal('Programar parada', `
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+      <div><label>Equipo</label><input id="ppEq" value="${id||''}" placeholder="ID equipo"></div>
+      <div><label>Fecha</label><input id="ppFecha" type="datetime-local"></div>
+    </div>
+    <label style="margin-top:8px;display:block">Motivo</label>
+    <input id="ppMotivo" placeholder="Mantenimiento, cambio consumibles, etc.">
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn--primary" id="ppCrear">Crear</button>
+      <button class="btn btn--ghost" onclick="(${closeModal.toString()})()">Cancelar</button>
+    </div>
+  `);
+  _md.querySelector('#ppCrear').onclick = async ()=>{
+    const tok = localStorage.getItem(CDL_TOKEN_KEY)||'';
+    const equipo = _md.querySelector('#ppEq').value;
+    const fecha  = _md.querySelector('#ppFecha').value;
+    const motivo = (_md.querySelector('#ppMotivo').value||'').trim();
+    if(!equipo || !fecha || !motivo) return alert('Equipo, fecha y motivo');
+    try{
+      const r = await POST({res:'stop', fn:'programar', token:tok, equipo, fecha, motivo});
+      if(!r.ok) alert(r.error||'No se pudo crear'); else { closeModal(); alert('Solicitud enviada. Queda pendiente de aprobación.'); }
+    }catch{ alert('Error de red'); }
+  };
+}
+
+/* =========================================================
+   INCIDENCIAS · CLIC EN LOGOS DE CATEGORÍAS
+   (Usa EQ_INDEX unificado: id, nombre, grupo, tipo)
+========================================================= */
+document.addEventListener('click', (e)=>{
+  const b = e.target.closest('[data-inc-cat]');
+  if(!b) return;
+
+  const cat = b.getAttribute('data-inc-cat');     // p.ej. kaltenbach, trumpf, gruas, aux
+  const host = document.getElementById('incCatList');
+  if(!host) return;
+
+  const norm = s => (s||'').toString().toLowerCase();
+
+  const byCat = (window.EQ_INDEX||[]).filter(x=>{
+    if(cat==='aux')   return norm(x.grupo)==='auxiliares' || norm(x.tipo)==='aux';
+    if(cat==='gruas') return norm(x.grupo)==='gruas' || norm(x.tipo)==='grua';
+    // Marcas por nombre
+    if(['kaltenbach','trumpf','hgg','tecoi','mazak'].includes(cat))
+      return norm(x.nombre).includes(cat) || norm(x.modelo).includes(cat) || norm(x.fabricante).includes(cat);
+    return false;
+  });
+
+  if(!byCat.length){
+    host.innerHTML = '<div style="color:#64748b;padding:6px">Sin elementos en esta categoría</div>';
+    return;
+  }
+
+  host.innerHTML = `
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:8px">
+      ${byCat.map(x=>`
+        <button class="btn btn--ghost" data-inc-pick="${x.id}" style="text-align:left;width:100%">
+          ${x.nombre || x.id}
+        </button>
+      `).join('')}
+    </div>
+  `;
+});
+
+/* =========================================================
+   INCIDENCIAS · SELECCIÓN DE EQUIPO DESDE LISTADO
+========================================================= */
+document.addEventListener('click', (e)=>{
+  const p = e.target.closest('[data-inc-pick]');
+  if(!p) return;
+
+  const val = p.getAttribute('data-inc-pick');
+  const inp = document.getElementById('incEquipo');
+
+  if(inp){
+    inp.value = val;
+    inp.focus();
+    const title = document.getElementById('incTitle');
+    if(title){
+      const y = title.offsetTop - 60;
+      window.scrollTo({ top: y, behavior:'smooth' });
+    }
+  }
+  if (typeof renderIncFiltered === 'function') renderIncFiltered();
+});
+
+/* ==================== ROUTER: INIT SECTION ==================== */
+function initSection(h){
+  if (h !== 'dashboardtv') stopCarousel();
+
+  switch(h){
+    case 'planificacion': loadPlanificacion(); break;
+    case 'equipos':       loadEquipos(); break;
+    case 'gruas':         loadGruas(); break;
+    case 'auxiliares':    loadAux(); break;
+    case 'incidencias':
+      // Construir índice si no existe
+      (async ()=>{
+        if(!window.EQ_INDEX?.length && typeof buildEqIndex==='function'){
+          try{
+            const [equipos,gruas,auxiliares] = await Promise.all([
+              GET('equipos').catch(()=>[]), GET('gruas').catch(()=>[]), GET('auxiliares').catch(()=>[])
+            ]);
+            buildEqIndex({equipos,gruas,auxiliares});
+          }catch(_e){}
+        }
+        if (typeof loadIncidencias==='function') loadIncidencias();
+      })();
+      break;
+    case 'repuestos':     loadRepuestos?.(); break;
+    case 'manuales':      loadManuales?.(); break;
+    case 'dashboard':     startCarousel(); break;
+    case 'dashboardtv':   startCarousel(); break;
+    case 'paradas':       loadParadas?.(); break;
+    case 'historial':     loadHistorial?.(); break;
+    default:              break;
+  }
+}
+window.addEventListener('hashchange', ()=> initSection((location.hash||'#dashboard').slice(1)));
+document.addEventListener('DOMContentLoaded', ()=>{
+  if (typeof applyRoleVisibility === 'function') applyRoleVisibility();
+  initSection((location.hash||'#dashboard').slice(1));
+});
+
+/* Hotfix no intrusivo del menú lateral: NO reemplaza nada */
+document.addEventListener('DOMContentLoaded', () => {
+  const hamb    = document.getElementById('hamb');
+  const sidenav = document.getElementById('sidenav');
+  const closeNav= document.getElementById('closeNav');
+
+  if (!hamb || !sidenav) return;
+
+  // Evita comportamientos raros si alguna vez el botón cae dentro de un <form>
+  hamb.setAttribute('type','button');
+
+  const open = (e)=>{
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    sidenav.classList.add('open');
+    document.body.classList.add('menu-open');
+    hamb.setAttribute('aria-expanded','true');
+    sidenav.setAttribute('aria-hidden','false');
+  };
+  const close = (e)=>{
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    sidenav.classList.remove('open');
+    document.body.classList.remove('menu-open');
+    hamb.setAttribute('aria-expanded','false');
+    sidenav.setAttribute('aria-hidden','true');
+  };
+
+  // Abrir siempre al pulsar el hamburguesa (captura para ganar a otros listeners)
+  hamb.addEventListener('click', open, { capture:true });
+
+  // Cerrar con la X si existe
+  if (closeNav) closeNav.addEventListener('click', close, { capture:true });
+
+  // Cerrar al hacer clic fuera del sidenav
+  document.addEventListener('click', (ev)=>{
+    if (!sidenav.classList.contains('open')) return;
+    if (!sidenav.contains(ev.target) && ev.target !== hamb) close();
+  }, { capture:true });
+
+  // Cerrar con ESC
+  document.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape') close(); });
+});
+/* ==================== PLANIFICACIÓN PRODUCCIÓN ==================== */
+async function loadPlanificacion(){
+  const tbody = document.getElementById('planBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  let data = [];
+  try{
+    const api = await GET('planificacion');   // Endpoint de tu Apps Script
+    if (Array.isArray(api)) data = api;
+  }catch(_e){
+    data = [];
+  }
+
+  data.forEach(r=>{
+    const tr = document.createElement('tr');
+
+    // Si la hoja tiene TERMINADO = TRUE → fila completa en verde
+    if (String(r.terminado).toLowerCase() === "true"){
+      tr.classList.add('done-row');
+    }
+
+    // Si la hoja tiene ALIMENTADO = TRUE → solo la celda MAQUINA en fosforito
+    const alimClass = (String(r.alimentado).toLowerCase() === "true") ? "cel-alim" : "";
+
+    tr.innerHTML = `
+      <td class="cel-maq ${alimClass}">${r.maquina || ""}</td>
+      <td>${r.input || ""}</td>
+      <td>${r.cliente || ""}</td>
+      <td>${r.deleg || ""}</td>
+      <td>${r.uds || ""}</td>
+      <td>${r.kgs || ""}</td>
+      <td>${r.output || ""}</td>
+      <td>${r.picking || ""}</td>
+      <td>${r.parte || ""}</td>
+      <td>${r.carga || ""}</td>
+      <td>${r.comentarios || ""}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+</script>
+</body>
+</html>
