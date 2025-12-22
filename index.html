@@ -2746,15 +2746,35 @@ async function loadEquipos(){
 
 async function loadGruas(){
   const data = await GET('gruas');
-  document.getElementById('grSelect').innerHTML =
-    '<option value="">— Selecciona —</option>' + (data||[]).map(g=>`<option value="${g.id}">${g.id}</option>`).join('');
-  for(const n of [1,2,3,4]){
-    const cont = document.getElementById('grN'+n);
-    const arr = (data||[]).filter(g=> String(g.nave)==String(n));
-    cont.innerHTML = arr.length ? arr.map(g=>trafficLightCard({...g,tipo:'grua'})).join('') : '<div style="color:#64748b">Sin puentes en esta nave.</div>';
+  const gruas = Array.isArray(data) ? data : [];
+
+  // Select
+  const sel = document.getElementById('grSelect');
+  if (sel){
+    sel.innerHTML =
+      '<option value="">— Selecciona —</option>' +
+      gruas.map(g => `<option value="${g.id}">${g.id}</option>`).join('');
+  }
+
+  // Detecta si realmente viene "nave" con valores 1..4
+  const hasNave = gruas.some(g => ['1','2','3','4'].includes(String(g.nave ?? '').trim()));
+
+  for (const n of [1,2,3,4]){
+    const cont = document.getElementById('grN' + n);
+    if (!cont) continue;
+
+    let arr = gruas.filter(g => String(g.nave ?? '').trim() === String(n));
+
+    // Fallback: si no existe/usa "nave", metemos todas en Nave 1 para que al menos se vean
+    if (!hasNave){
+      arr = (n === 1) ? gruas : [];
+    }
+
+    cont.innerHTML = arr.length
+      ? arr.map(g => trafficLightCard({ ...g, tipo:'gruas' })).join('')
+      : '<div style="color:#64748b">Sin puentes en esta nave.</div>';
   }
 }
-
 async function loadAux(){
   const data = await GET('auxiliares');
   document.getElementById('axSelect').innerHTML =
