@@ -2993,6 +2993,51 @@ async function loadPlanificacion(){
     </table>
   `;
 }
+/* =========================================================
+   MENÚ HAMBURGUESA · SIDENAV
+========================================================= */
+(function(){
+  const hamb     = document.getElementById("hamb");
+  const sidenav  = document.getElementById("sidenav");
+  const closeBtn = document.getElementById("closeNav");
+
+  if(!hamb || !sidenav) return;
+
+  const openNav = ()=>{
+    sidenav.classList.add("open");
+    document.body.classList.add("menu-open");
+    hamb.setAttribute("aria-expanded","true");
+    sidenav.setAttribute("aria-hidden","false");
+  };
+
+  const closeNav = ()=>{
+    sidenav.classList.remove("open");
+    document.body.classList.remove("menu-open");
+    hamb.setAttribute("aria-expanded","false");
+    sidenav.setAttribute("aria-hidden","true");
+  };
+
+  hamb.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    sidenav.classList.contains("open") ? closeNav() : openNav();
+  });
+
+  closeBtn?.addEventListener("click", closeNav);
+
+  // Cerrar al hacer click fuera
+  document.addEventListener("click", (e)=>{
+    if(
+      sidenav.classList.contains("open") &&
+      !sidenav.contains(e.target) &&
+      !hamb.contains(e.target)
+    ){
+      closeNav();
+    }
+  });
+
+  // Cerrar al navegar por hash
+  window.addEventListener("hashchange", closeNav);
+})();
 </script>
 </body>
 </html>

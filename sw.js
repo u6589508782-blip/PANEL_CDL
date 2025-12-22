@@ -1,5 +1,5 @@
- /* CDL · PWA Service Worker — v29 (scope-aware + precache ajustado) */
-const SW_VERSION = 'v29';
+ /* CDL · PWA Service Worker — v30 (scope-aware + precache ajustado) */
+const SW_VERSION = 'v30';
 const CACHE_STATIC = `cdl-static-${SW_VERSION}`;
 const CACHE_PAGES  = `cdl-pages-${SW_VERSION}`;
 
