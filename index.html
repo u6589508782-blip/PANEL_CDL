@@ -3038,6 +3038,90 @@ async function loadPlanificacion(){
   // Cerrar al navegar por hash
   window.addEventListener("hashchange", closeNav);
 })();
+/* ==================== ROUTER/INIT (recupera llamadas de carga) ==================== */
+(function(){
+  function getHash(){
+    return (location.hash || "#dashboard").replace("#", "");
+  }
+
+  function enforceDefaultByRole(){
+    const slug = (typeof currentRoleSlug === "function") ? currentRoleSlug() : "invitado";
+    const h = location.hash || "";
+
+    // Invitado: no debe ver nada “operativo”
+    if (slug === "invitado"){
+      if (h && h !== "#dashboard") location.hash = "#dashboard";
+      return;
+    }
+
+    // Producción: al entrar, que vaya a planificación (tu “home real”)
+    if (slug === "produccion"){
+      if (!h || h === "#dashboard") location.hash = "#planificacion";
+      return;
+    }
+
+    // Otros roles: si no hay hash, dashboard
+    if (!h) location.hash = "#dashboard";
+  }
+
+  async function initSection(h){
+    // IMPORTANTE: llamamos solo a lo que exista, así no rompe si faltan módulos
+    try{
+      switch(h){
+        case "planificacion":
+          if (typeof loadPlanificacion === "function") await loadPlanificacion();
+          break;
+
+        case "equipos":
+          if (typeof loadEquipos === "function") await loadEquipos();
+          break;
+
+        case "gruas":
+          if (typeof loadGruas === "function") await loadGruas();
+          break;
+
+        case "auxiliares":
+          if (typeof loadAux === "function") await loadAux();
+          break;
+
+        case "inventario":
+          if (typeof invLoad === "function") await invLoad();
+          break;
+
+        case "repuestos":
+          if (typeof reqLoad === "function") await reqLoad();
+          if (typeof loadRepuestos === "function") await loadRepuestos();
+          break;
+
+        case "incidencias":
+          if (typeof loadIncidencias === "function") await loadIncidencias();
+          break;
+
+        case "dashboard":
+        default:
+          if (typeof loadDashboardMain === "function") await loadDashboardMain();
+          break;
+      }
+    }catch(_e){
+      // Si algo falla, que no reviente toda la app
+      console.error("initSection error:", _e);
+    }
+  }
+
+  async function boot(){
+    // 1) Aplica visibilidad/menú
+    try{ if (typeof applyRoleVisibility === "function") applyRoleVisibility(); }catch(_e){}
+
+    // 2) Ajusta hash por rol (producción -> planificación / invitado -> dashboard)
+    enforceDefaultByRole();
+
+    // 3) Carga la sección actual
+    await initSection(getHash());
+  }
+
+  window.addEventListener("hashchange", ()=> initSection(getHash()), { passive:true });
+  document.addEventListener("DOMContentLoaded", boot);
+})();
 </script>
 </body>
 </html>
