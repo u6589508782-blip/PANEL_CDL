@@ -2693,7 +2693,7 @@ async function loadEquipos(){
   }
 }
 
-async function loadGruasasync function loadGruas(){
+async function loadGruas(){
   const data = await GET('gruas');
   document.getElementById('grSelect').innerHTML =
     '<option value="">— Selecciona —</option>' + (data||[]).map(g=>`<option value="${g.id}">${g.id}</option>`).join('');
@@ -3991,7 +3991,6 @@ async function loadPlanificacion(){
       };
     });
   }
-})();
-</script>
+})();</script>
 </body>
 </html>
