@@ -94,7 +94,8 @@ button{font:inherit; cursor:pointer; background:transparent; border:0}
   height:var(--hdr-h);
   display:grid; grid-template-columns:auto 1fr auto;
   align-items:flex-start; gap:10px; padding:6px 12px 8px; position:relative;
-}
+  position:relative; z-index:2;}
+
 /* Marca de agua mantenimiento (subida y algo más ancha) */
 .header::before{
   content:""; position:absolute; inset:0;
@@ -108,6 +109,8 @@ button{font:inherit; cursor:pointer; background:transparent; border:0}
 
 #roleChip{
   position:absolute; right:16px; top:8px; font-weight:900; font-size:11px; color:var(--ink)
+}  pointer-events:none;
+  z-index:0;
 }
 /* Iconos header */
 .hbtn{width:42px; height:42px; display:grid; place-items:center}
