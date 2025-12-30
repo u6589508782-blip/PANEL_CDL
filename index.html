@@ -86,7 +86,7 @@ button{font:inherit; cursor:pointer; background:transparent; border:0}
    CABECERA
 ========================================================= */
 .header{
-  position:sticky; top:0; z-index:1300; background:#fff;
+  position:sticky; top:0; z-index:1000; background:#fff;
   border-bottom:1px solid #eee; transition:box-shadow .25s ease;
 }
 .header.scrolled{ box-shadow:0 6px 14px rgba(0,0,0,.06) }
@@ -94,8 +94,7 @@ button{font:inherit; cursor:pointer; background:transparent; border:0}
   height:var(--hdr-h);
   display:grid; grid-template-columns:auto 1fr auto;
   align-items:flex-start; gap:10px; padding:6px 12px 8px; position:relative;
-  position:relative; z-index:2;}
-
+}
 /* Marca de agua mantenimiento (subida y algo más ancha) */
 .header::before{
   content:""; position:absolute; inset:0;
@@ -109,8 +108,6 @@ button{font:inherit; cursor:pointer; background:transparent; border:0}
 
 #roleChip{
   position:absolute; right:16px; top:8px; font-weight:900; font-size:11px; color:var(--ink)
-}  pointer-events:none;
-  z-index:0;
 }
 /* Iconos header */
 .hbtn{width:42px; height:42px; display:grid; place-items:center}
@@ -188,7 +185,7 @@ body.menu-open::after{
   position:fixed; left:0; right:0; top:var(--hdr-h);
   width:100vw; max-width:none;
   background:#0f141c; color:#e6eef7; border:1px solid #223046; border-radius:0; box-shadow:0 20px 36px rgba(0,0,0,.45);
-  padding:12px; display:none; z-index:1400; font-size:.95rem;
+  padding:12px; display:none; z-index:950; font-size:.95rem;
 }
 #userPanel.show{ display:block }
 .up__head{ display:flex; align-items:center; justify-content:space-between; gap:10px }
@@ -857,6 +854,7 @@ h1::before,h2::before,h3::before{
 <form autocomplete="off" class="form-inline" id="eqForm">
 <label class="form-inline__label" for="eqQuery">Ficha técnica / QR</label>
 <input id="eqQuery" placeholder="Escribe ID o nombre… (ej: KDP-1)" type="search"/>
+<div class="matchbox" id="eqMatches" style="margin-top:6px"></div>
 <select aria-label="Seleccionar equipo" id="eqSelect">
 <option value="">— Selecciona de la lista —</option>
 </select>
@@ -1038,6 +1036,7 @@ h1::before,h2::before,h3::before{
 <span data-role="admin" style="margin-left:auto">
 <label class="form-inline__label" for="csvUp">CSV/QRs</label>
 <input accept=".csv,.txt" id="csvUp" style="max-width:240px" type="file"/>
+<button class="btn btn--ghost" id="invImportBtn" type="button" disabled style="margin-left:8px">Importar al backend</button>
 </span>
 </form>
 </article>
@@ -1257,8 +1256,6 @@ window.API_BASE = "https://script.google.com/macros/s/AKfycbylcSwPb9mVmIAvwJUJMP
 const API_BASE      = window.API_BASE;
 const CDL_TOKEN_KEY = "cdl_token";
 const CDL_ROLE_KEY  = "cdl_role";
-const CDL_TOKEN_TS_KEY = "cdl_token_ts";
-const CDL_UNLOCK_KEY   = "cdl_unlocked";
 
 /* =========================================================
    ROLES SIMPLIFICADOS
@@ -1276,39 +1273,9 @@ const ROLES = [
 function roleLabel(slug){
   const r = ROLES.find(x=>x.slug === slug);
   return r ? r.label : "Invitado";
-
-
-function tokenIsValid(){
-  const tok = localStorage.getItem(CDL_TOKEN_KEY) || "";
-  const ts  = Number(localStorage.getItem(CDL_TOKEN_TS_KEY) || 0);
-  const unlocked = (localStorage.getItem(CDL_UNLOCK_KEY) === "1");
-  if(!tok || !ts) return false;
-  if(!unlocked) return false; // sin clave en esta carga => invitado
-  const TTL = 24*3600*1000; // 24h
-  if(Date.now() - ts > TTL) return false;
-  return true;
 }
-
-function ensureValidSession(){
-  if(tokenIsValid()) return true;
-  // Limpia residuos para que nunca “se quede” en Producción sin clave
-  localStorage.removeItem(CDL_TOKEN_KEY);
-  localStorage.removeItem(CDL_ROLE_KEY);
-  localStorage.removeItem(CDL_TOKEN_TS_KEY);
-  localStorage.removeItem(CDL_UNLOCK_KEY);
-  return false;
-}
-
-// Boot: en cada carga, exige clave (desbloqueo) para mostrar roles superiores
-(function sessionBootGuard(){
-  // Si quieres permitir “recordar sesión”, aquí se podría respetar un flag.
-  localStorage.removeItem(CDL_UNLOCK_KEY);
-  ensureValidSession();
-})();
 
 function currentRoleSlug(){
-  const ok = ensureValidSession();
-  if(!ok) return "invitado";
   const saved = localStorage.getItem(CDL_ROLE_KEY) || "invitado";
   return ROLES.some(r=>r.slug === saved) ? saved : "invitado";
 }
@@ -1326,19 +1293,63 @@ function roleCan(perm){
   return r.perms.includes(perm);
 }
 
-const GET  = async (p)=>{
-  const r = await fetch(`${API_BASE}?path=${encodeURIComponent(p)}`, { cache:"no-store" });
-  try{ return await r.json(); }catch{ return []; }
+const __CDL_CACHE = new Map(); // key -> {ts,data}
+const __CDL_TTL_MS = 30_000; // 30s (sube/baja si quieres)
+
+function __withTimeout(promise, ms){
+  return Promise.race([
+    promise,
+    new Promise((_,rej)=> setTimeout(()=>rej(new Error("timeout")), ms))
+  ]);
+}
+
+async function __fetchJson(url, opts){
+  const r = await __withTimeout(fetch(url, opts), 12_000);
+  const txt = await r.text();
+  try{ return JSON.parse(txt); }catch{ return Array.isArray(txt) ? txt : (txt ? txt : null); }
+}
+
+const GET = async (p, {cache=true} = {})=>{
+  const key = String(p||"");
+  const now = Date.now();
+
+  if(cache && __CDL_CACHE.has(key)){
+    const hit = __CDL_CACHE.get(key);
+    if(hit && (now - hit.ts) < __CDL_TTL_MS) return hit.data;
+  }
+
+  try{
+    const data = await __fetchJson(`${API_BASE}?path=${encodeURIComponent(key)}`, { cache:"no-store" });
+    const safe = (data === null || data === undefined) ? [] : data;
+    if(cache) __CDL_CACHE.set(key, {ts:now, data:safe});
+    return safe;
+  }catch(_e){
+    // fallback cache si existe
+    if(__CDL_CACHE.has(key)) return __CDL_CACHE.get(key).data;
+    return [];
+  }
 };
+
 const POST = async (body)=>{
-  const r = await fetch(API_BASE, {
-    method:"POST",
-    headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(body),
-    cache:"no-store"
-  });
-  try{ return await r.json(); }catch{ return {ok:false}; }
+  try{
+    const data = await __fetchJson(API_BASE, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(body||{}),
+      cache:"no-store"
+    });
+    return (data === null || data === undefined) ? {ok:false} : data;
+  }catch(_e){
+    return {ok:false, error:"Error de red/timeout"};
+  }
 };
+
+
+/* ========= FIX anti-recarga: evita submits que refrescan la SPA ========= */
+document.addEventListener("submit", (e)=>{
+  // En GitHub Pages, un submit sin preventDefault recarga la app y “parece que no hace nada”.
+  e.preventDefault();
+}, true);
 
 /* ========= Panel usuario: login / logout / cambiar pass ========= */
 (function(){
@@ -1365,9 +1376,9 @@ const POST = async (body)=>{
   function ucFirst(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g," ") : s; }
 
   (function initRoleChip(){
-    const ok = (typeof ensureValidSession === "function") ? ensureValidSession() : false;
-    const savedRole = localStorage.getItem(CDL_ROLE_KEY) || "invitado";
-    roleChip.textContent = ok ? roleLabel(savedRole) : "Invitado";
+    const tok = localStorage.getItem(CDL_TOKEN_KEY);
+    const savedRole = localStorage.getItem(CDL_ROLE_KEY);
+    roleChip.textContent = (tok && savedRole) ? ucFirst(savedRole) : "Invitado";
   })();
 
   const togglePanel = (show)=>{
@@ -1394,8 +1405,6 @@ const POST = async (body)=>{
       const r = await POST({res:"auth", fn:"login", user, pass});
       if(r.ok && r.token){
         localStorage.setItem(CDL_TOKEN_KEY, r.token);
-        localStorage.setItem(CDL_TOKEN_TS_KEY, String(Date.now()));
-        localStorage.setItem(CDL_UNLOCK_KEY, "1");
         localStorage.setItem(CDL_ROLE_KEY, user);
         roleChip.textContent = roleLabel(user);
         userPass.value = "";
@@ -1408,8 +1417,6 @@ const POST = async (body)=>{
   logoutBtn.addEventListener("click", ()=>{
     localStorage.removeItem(CDL_TOKEN_KEY);
     localStorage.removeItem(CDL_ROLE_KEY);
-    localStorage.removeItem(CDL_TOKEN_TS_KEY);
-    localStorage.removeItem(CDL_UNLOCK_KEY);
     roleChip.textContent = roleLabel("invitado");
     applyRoleVisibility();
   });
@@ -1802,19 +1809,6 @@ function applyRoleVisibility(){
   if (typeof buildNav === "function") buildNav();
 }
 
-function syncAuthUI(){
-  const ok = (typeof ensureValidSession === "function") ? ensureValidSession() : false;
-  const chip = document.getElementById("roleChip");
-  if(chip){
-    const slug = ok ? (localStorage.getItem(CDL_ROLE_KEY) || "invitado") : "invitado";
-    chip.textContent = ok ? roleLabel(slug) : "Invitado";
-  }
-  if(typeof applyRoleVisibility === "function") applyRoleVisibility();
-}
-
-try{ syncAuthUI(); }catch(_e){}
-
-
 /* =========================================================
    ÍNDICE DE EQUIPOS (UNIFICADO)
    - Referencia única compartida: EQ_INDEX y __EQ_INDEX
@@ -2058,6 +2052,13 @@ document.getElementById("incClear")?.addEventListener("click", ()=>{
   renderIncFiltered();
 });
 
+// Filtro en vivo mientras escribes (sin botón)
+["incEquipo","incFecha","incTexto"].forEach(id=>{
+  document.getElementById(id)?.addEventListener("input", ()=> renderIncFiltered());
+  document.getElementById(id)?.addEventListener("change", ()=> renderIncFiltered());
+});
+
+
 function renderIncList(arr){
   const list = document.getElementById("incList");
   const data = (arr||[]).slice().sort((a,b)=> new Date(b.created||0) - new Date(a.created||0));
@@ -2084,7 +2085,7 @@ document.addEventListener("click", async (e)=>{
   const tok  = localStorage.getItem(CDL_TOKEN_KEY)||"";
   if(!id){ alert("Incidencia sin ID"); return; }
   try{
-    const r = await POST({res:"incid", fn:"finalizar", token:tok, id});
+    const r = await POST({res:"incid", fn:"update", token:tok, id, estado:"finalizada", fin:(new Date()).toISOString()});
     if(!r.ok) return alert(r.error||"No se pudo finalizar");
     loadIncidencias();
   }catch{ alert("Error de red"); }
@@ -2659,18 +2660,37 @@ document.addEventListener('click', (e)=>{
 
 /* ==================== EQUIPOS / GRÚAS / AUXILIARES ==================== */
 async function loadEquipos(){
-  const data = await GET('equipos');
-  document.getElementById('eqSelect').innerHTML =
-    '<option value="">— Selecciona de la lista —</option>' +
-    (data||[]).map(e=>`<option value="${e.id}">${e.nombre||e.id}</option>`).join('');
+  const sel = document.getElementById('eqSelect');
+  const kCont = document.getElementById('equiposKaltenbach');
+  const tCont = document.getElementById('equiposTrumpf');
+  const iCont = document.getElementById('equiposIndep');
 
-  const kal = (data||[]).filter(e=> /kaltenbach/i.test(e.linea||''));
-  const tru = (data||[]).filter(e=> /trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
-  const ind = (data||[]).filter(e=> !/kaltenbach/i.test(e.linea||'') && !/trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
+  try{
+    const data = await GET('equipos', {cache:false});
+    window.__EQUIPOS_ALL = Array.isArray(data) ? data : [];
 
-  document.getElementById('equiposKaltenbach').innerHTML = kal.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') || '<div style="color:#64748b">Sin datos</div>';
-  document.getElementById('equiposTrumpf').innerHTML     = tru.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') || '<div style="color:#64748b">Sin datos</div>';
-  document.getElementById('equiposIndep').innerHTML      = ind.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') || '<div style="color:#64748b">Sin datos</div>';
+    if(sel){
+      sel.innerHTML =
+        '<option value="">— Selecciona de la lista —</option>' +
+        window.__EQUIPOS_ALL.map(e=>`<option value="${e.id}">${e.nombre||e.id}</option>`).join('');
+    }
+
+    const kal = window.__EQUIPOS_ALL.filter(e=> /kaltenbach/i.test(e.linea||''));
+    const tru = window.__EQUIPOS_ALL.filter(e=> /trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
+    const ind = window.__EQUIPOS_ALL.filter(e=> !/kaltenbach/i.test(e.linea||'') && !/trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
+
+    if(kCont) kCont.innerHTML = kal.length ? kal.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') : '<div style="color:#64748b">Sin datos</div>';
+    if(tCont) tCont.innerHTML = tru.length ? tru.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') : '<div style="color:#64748b">Sin datos</div>';
+    if(iCont) iCont.innerHTML = ind.length ? ind.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') : '<div style="color:#64748b">Sin datos</div>';
+
+    // refresca sugerencias si hay texto en el buscador
+    if(typeof updateEqMatches === 'function') updateEqMatches();
+  }catch(e){
+    window.__EQUIPOS_ALL = [];
+    if(kCont) kCont.innerHTML = '<div class="badge">Error cargando equipos</div>';
+    if(tCont) tCont.innerHTML = '<div class="badge">Error cargando equipos</div>';
+    if(iCont) iCont.innerHTML = '<div class="badge">Error cargando equipos</div>';
+  }
 }
 
 async function loadGruas(){
@@ -2692,10 +2712,74 @@ async function loadAux(){
 }
 
 /* ==================== FICHA DE EQUIPO/GRÚA/AUX (con QR) ==================== */
-async function fichaRender(id){
-  let e = (await GET('equipos')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
-  if(!e) e = (await GET('gruas')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
-  if(!e) e = (await GET('auxiliares')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
+async function fichaRender(idOrQuery){
+  const qRaw = String(idOrQuery||"").trim();
+  const q = qRaw.toLowerCase();
+
+  const ensureLists = async ()=>{
+    if(!Array.isArray(window.__EQUIPOS_ALL) || !window.__EQUIPOS_ALL.length){
+      try{ window.__EQUIPOS_ALL = await GET('equipos'); }catch{ window.__EQUIPOS_ALL = []; }
+    }
+    if(!Array.isArray(window.__GRUAS_ALL) || !window.__GRUAS_ALL.length){
+      try{ window.__GRUAS_ALL = await GET('gruas'); }catch{ window.__GRUAS_ALL = []; }
+    }
+    if(!Array.isArray(window.__AUX_ALL) || !window.__AUX_ALL.length){
+      try{ window.__AUX_ALL = await GET('auxiliares'); }catch{ window.__AUX_ALL = []; }
+    }
+  };
+
+  const norm = (s)=> String(s||"").toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .trim();
+
+  const score = (query, item)=>{
+    const qq = norm(query);
+    if(!qq) return 0;
+    const id  = norm(item.id);
+    const nom = norm(item.nombre);
+    if(id === qq) return 1000;
+    if(id.startsWith(qq)) return 850;
+    if(nom && nom.startsWith(qq)) return 800;
+    const hay = `${id} ${nom}`.trim();
+    if(hay.includes(qq)) return 650;
+    return 0;
+  };
+
+  await ensureLists();
+
+  const all = [
+    ...(window.__EQUIPOS_ALL||[]).map(x=>({...x,__tipo:'equipos'})),
+    ...(window.__GRUAS_ALL||[]).map(x=>({...x,__tipo:'gruas'})),
+    ...(window.__AUX_ALL||[]).map(x=>({...x,__tipo:'auxiliares'}))
+  ];
+
+  // Si nos pasan un ID exacto, abre directo
+  let e = all.find(x=>String(x.id||"").toLowerCase()===q);
+  if(!e && q){
+    const ranked = all
+      .map(x=>({x, s: score(qRaw, x)}))
+      .filter(o=>o.s>0)
+      .sort((a,b)=>b.s-a.s)
+      .slice(0,10)
+      .map(o=>o.x);
+
+    if(ranked.length === 1){
+      e = ranked[0];
+    }else if(ranked.length > 1){
+      // muestra selector rápido
+      const html = `
+        <div class="badge" style="margin-bottom:10px">Coincidencias (${ranked.length})</div>
+        <div style="display:grid;gap:8px">
+          ${ranked.map(it=>`
+            <button class="btn btn--ghost" type="button" style="justify-content:flex-start" onclick="fichaRender('${String(it.id).replace(/'/g,'\'')}')">
+              <strong style="min-width:92px;text-align:left">${it.id}</strong>
+              <span style="color:#64748b">${it.nombre||""}</span>
+            </button>`).join('')}
+        </div>`;
+      return openModal('Ficha', html);
+    }
+  }
+
   if(!e) return openModal('Ficha', '<div class="badge">No encontrado</div>');
 
   const kv = (k,v)=>`<span class="badge" style="margin:2px 6px 2px 0"><strong>${k}:</strong> ${v ?? '—'}</span>`;
@@ -2734,6 +2818,7 @@ async function fichaRender(id){
   openModal(`${e.nombre||e.id} — Ficha técnica`, html);
 }
 
+if(!window.__cdlOpenManual)
 if(!window.__cdlOpenManual){
   window.__cdlOpenManual = async function(pdfName){
     const base = './manuales/';
@@ -2751,121 +2836,115 @@ let _invRaw = [];
 
 async function invLoad(){
   const host = document.getElementById('invCats');
+  if(!host) return;
+
+  const tok = localStorage.getItem(CDL_TOKEN_KEY)||"";
+
+  const parseCSV = (csvText)=>{
+    const lines = String(csvText||"").split(/\r?\n/).filter(l=>l.trim()!=="");
+    if(lines.length<2) return [];
+    const split = (line)=>{
+      const out=[]; let cur=""; let q=false;
+      for(let i=0;i<line.length;i++){
+        const ch=line[i];
+        if(ch === '"'){ q=!q; continue; }
+        if(ch === ',' && !q){ out.push(cur); cur=""; continue; }
+        cur += ch;
+      }
+      out.push(cur);
+      return out.map(s=>s.trim());
+    };
+    const headers = split(lines[0]).map(h=>h.trim().toLowerCase());
+    return lines.slice(1).map(l=>{
+      const c = split(l);
+      const o = {};
+      headers.forEach((h,i)=> o[h] = c[i] ?? "");
+      return o;
+    });
+  };
+
+  const normItem = (r)=>({
+    ref: String(r.ref||r.referencia||r.codigo||r.id||"").trim(),
+    desc: String(r.desc||r.nombre||r.descripcion||r.producto||"").trim(),
+    stock: Number(r.stock||0),
+    min: Number(r.min||r.minimo||0),
+    categoria: String(r.categoria||r.cat||"General").trim(),
+    ubicacion: String(r.ubicacion||"").trim(),
+    unidad: String(r.unidad||"").trim()
+  });
 
   let data = [];
   try{
-    const api = await GET('inventario');
-    if (Array.isArray(api)) data = api;
-  }catch(_e){
-    data = [];
-  }
+    const api = await GET('inventario', {cache:false});
+    if(Array.isArray(api) && api.length){
+      data = api.map(normItem).filter(x=>x.ref || x.desc);
+    }
+  }catch(_e){}
 
-  if (!Array.isArray(data) || !data.length){
+  // Fallback: CSV del repo (repuestos.csv) si la hoja está vacía
+  if(!data.length){
     try{
-      const res = await fetch('./repuestos.csv', {cache:'no-store'});
+      const res = await fetch('./repuestos.csv', {cache:"no-store"});
       if(res.ok){
         const txt = await res.text();
-        const parsed = (function parseLocalCSV(s){
-          const stripBOM = t => (t||'').replace(/^\uFEFF/,'');
-          const raw = stripBOM(s||'').split(/\r?\n/).filter(l=>l.trim());
-          if(!raw.length) return [];
-
-          const sep = ((head)=>{
-            const c = (head.match(/,/g)||[]).length;
-            const sc= (head.match(/;/g)||[]).length;
-            return sc>c?';':',';
-          })(raw[0]);
-
-          const headers = raw[0].split(sep).map(h=>stripBOM(h).trim().toLowerCase());
-          const normNum = v => Number(String(v??'0').replace(',','.'))||0;
-
-          const rows = [];
-          for (let i=1;i<raw.length;i++){
-            const cols = raw[i].split(sep).map(c=>c.trim());
-            const o={}; headers.forEach((h,ix)=>o[h]=cols[ix]??'');
-            const ref   = o.ref || o.referencia || o.codigo || '';
-            const desc  = o.desc || o.descripcion || o.nombre || '';
-            if(!ref && !desc) continue;
-            rows.push({
-              ref,
-              codigo: o.codigo || ref,
-              desc,
-              stock: normNum(o.stock),
-              min:   normNum(o.min || o['stock_min']),
-              categoria: o.categoria || 'General',
-              subcategoria: o.subcategoria || 'Sin subcategoría',
-              ubicacion: o.ubicacion || '',
-              unidad: o.unidad || ''
-            });
-          }
-
-          const byCat = {};
-          rows.forEach(it=>{
-            const c = it.categoria||'General';
-            if(!byCat[c]) byCat[c] = [];
-            byCat[c].push(it);
-          });
-          return Object.keys(byCat).sort((a,b)=>a.localeCompare(b,'es')).map(c=>({
-            categoria:c, items: byCat[c]
-          }));
-        })(txt);
-        if (parsed.length) data = parsed;
+        const rows = parseCSV(txt).map(normItem).filter(x=>x.ref || x.desc);
+        if(rows.length) data = rows;
       }
     }catch(_e){}
   }
 
-  _invRaw = data;
+  // Render plano por categorías (pero sin “píldoras raras”)
+  const byCat = {};
+  data.forEach(it=>{
+    const cat = it.categoria || "General";
+    if(!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(it);
+  });
 
-  function renderItem(i){
-    const ref = i.ref || i.codigo || '';
+  const cats = Object.keys(byCat).sort((a,b)=> a.localeCompare(b,'es'));
+  host.innerHTML = cats.map(cat=>{
+    const items = byCat[cat];
     return `
-      <article class="card">
-        <header style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <strong>${ref}</strong>
-          <span class="badge" style="font-size:11px">${i.stock ?? '-'}</span>
+      <article class="card" style="margin-bottom:10px">
+        <header style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap">
+          <strong>${cat}</strong>
+          <span class="badge">${items.length}</span>
         </header>
-        <p style="margin:.5rem 0">${i.desc || ''}</p>
-        <div class="qty" style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn" type="button" data-inv="${ref}" data-delta="+1">+1</button>
-          <button class="btn" type="button" data-inv="${ref}" data-delta="+10">+10</button>
-          <button class="btn" type="button" data-inv="${ref}" data-delta="+100">+100</button>
-          <button class="btn" type="button" data-inv="${ref}" data-delta="-1">-1</button>
-          <button class="btn" type="button" data-inv="${ref}" data-delta="-10">-10</button>
-          <button class="btn" type="button" data-inv="${ref}" data-delta="-100">-100</button>
+        <div style="margin-top:8px;display:grid;gap:8px">
+          ${items.slice(0,60).map(it=>`
+            <div class="row">
+              <div style="min-width:92px"><strong>${it.ref||"-"}</strong></div>
+              <div style="flex:1;color:#64748b">${it.desc||""}</div>
+              <div style="min-width:72px;text-align:right"><span class="badge">Stock ${Number(it.stock||0)}</span></div>
+            </div>
+          `).join('')}
+          ${items.length>60 ? `<div style="color:#64748b;font-size:12px">Mostrando 60 / ${items.length}. Usa el buscador para afinar.</div>` : ``}
         </div>
       </article>`;
+  }).join('') || '<div style="color:#64748b">Inventario vacío</div>';
+
+  // Guarda raw para el buscador inteligente de repuestos
+  window._invRaw = data;
+
+  // Si hay token (mantenimiento/compras) y la hoja está vacía, ofrecemos importar al backend (1 click)
+  const canImport = !!tok && hasPerm('viewRepuestos'); // permiso amplio
+  if(canImport && data.length){
+    const btn = document.getElementById("invImportBtn");
+    if(btn){
+      btn.disabled = false;
+      btn.onclick = async ()=>{
+        btn.disabled = true;
+        try{
+          const r = await POST({res:"inv", fn:"import", token:tok, items:data});
+          if(!r.ok) alert(r.error||"No se pudo importar");
+          else alert(`Importados: ${r.importados||0}`);
+        }catch{ alert("Error de red"); }
+        btn.disabled = false;
+      };
+    }
   }
-
-  const htmlCats = (data||[]).map(cat=>{
-    const nombreCat = cat.categoria || 'Sin categoría';
-    const bySub = {};
-    (cat.items||[]).forEach(it=>{
-      const sc = String(it.subcategoria || 'Sin subcategoría');
-      if(!bySub[sc]) bySub[sc] = [];
-      bySub[sc].push(it);
-    });
-    const subsHtml = Object.keys(bySub)
-      .sort((a,b)=> a.localeCompare(b,'es'))
-      .map(sc=>`
-        <details style="margin-top:8px">
-          <summary style="font-weight:800;color:#334155">${sc}</summary>
-          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:8px">
-            ${bySub[sc].map(renderItem).join('')}
-          </div>
-        </details>`
-      ).join('');
-
-    return `
-      <details>
-        <summary style="font-weight:900">${nombreCat}${(!Array.isArray(_invRaw) || !_invRaw.length) ? ' · vista temporal' : ''}</summary>
-        ${subsHtml || '<div style="color:#64748b;margin:.5rem 0 0 1rem">Sin subcategorías</div>'}
-      </details>`;
-  }).join('');
-
-  host.innerHTML = htmlCats || '<div style="color:#64748b">Inventario vacío</div>';
-
-  if (typeof invRenderAlerts === 'function') invRenderAlerts();
 }
+
 
 /* =========================================================
    ALERTAS DE STOCK MÍNIMO + DATALIST EQUIPOS + IMPORT CSV
@@ -2968,6 +3047,47 @@ async function reqLoad(){
 }
 
 // alias para el router
+
+/* ==================== INVENTARIO · BUSCADOR (sin recarga) ==================== */
+function invFilterAndRender(q){
+  const host = document.getElementById('invCats');
+  if(!host) return;
+  const all = Array.isArray(window._invRaw) ? window._invRaw : [];
+  const norm = (s)=> String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+  const qq = norm(q);
+  const list = !qq ? all : all.filter(it=>{
+    const hay = norm(`${it.ref} ${it.desc} ${it.categoria} ${it.ubicacion}`);
+    return hay.includes(qq);
+  });
+
+  // Re-render simple (sin agrupar si hay búsqueda)
+  if(qq){
+    host.innerHTML = list.map(it=>`
+      <article class="card">
+        <div class="row" style="align-items:flex-start">
+          <div style="min-width:92px"><strong>${it.ref||"-"}</strong></div>
+          <div style="flex:1">
+            <div>${it.desc||""}</div>
+            <div style="font-size:12px;color:#64748b">${it.categoria||"General"} ${it.ubicacion?("· "+it.ubicacion):""}</div>
+          </div>
+          <div style="min-width:72px;text-align:right"><span class="badge">Stock ${Number(it.stock||0)}</span></div>
+        </div>
+      </article>
+    `).join('') || '<div style="color:#64748b">Sin coincidencias</div>';
+  }else{
+    // si no hay búsqueda, vuelve a cargar agrupado
+    invLoad();
+  }
+}
+
+document.getElementById("invSearchForm")?.addEventListener("submit", (e)=>{
+  e.preventDefault();
+  invFilterAndRender(document.getElementById("invSearch")?.value || "");
+});
+document.getElementById("invSearch")?.addEventListener("input", (e)=>{
+  invFilterAndRender(e.target.value || "");
+});
+
 function loadRepuestos(){ return reqLoad(); }
 
 /* ==================== ÓRDENES DE TRABAJO ==================== */
@@ -3324,6 +3444,75 @@ document.getElementById('eqForm')?.addEventListener('submit',(e)=>{
   if(!id) return alert('Escribe o elige un equipo');
   fichaRender(id);
 });
+
+/* ==================== BUSCADOR VIVO · PRODUCCIÓN (EQUIPOS) ==================== */
+function updateEqMatches(){
+  const box = document.getElementById("eqMatches");
+  const q = (document.getElementById("eqQuery")?.value || "").trim();
+  if(!box) return;
+
+  const norm = (s)=> String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+  const qq = norm(q);
+
+  if(!qq){
+    box.style.display = "none";
+    box.innerHTML = "";
+    return;
+  }
+
+  const data = Array.isArray(window.__EQUIPOS_ALL) ? window.__EQUIPOS_ALL : [];
+  const ranked = data
+    .map(it=>{
+      const id = norm(it.id);
+      const nm = norm(it.nombre);
+      let s = 0;
+      if(id === qq) s = 1000;
+      else if(id.startsWith(qq)) s = 850;
+      else if(nm && nm.startsWith(qq)) s = 800;
+      else if((id+" "+nm).includes(qq)) s = 650;
+      return {it, s};
+    })
+    .filter(o=>o.s>0)
+    .sort((a,b)=>b.s-a.s)
+    .slice(0,8)
+    .map(o=>o.it);
+
+  if(!ranked.length){
+    box.style.display = "block";
+    box.innerHTML = '<div style="color:#64748b;font-size:12px">Sin coincidencias</div>';
+    return;
+  }
+
+  box.style.display = "block";
+  box.innerHTML = ranked.map(it=>`
+    <button class="btn btn--ghost" type="button" style="width:100%;justify-content:flex-start;margin:6px 0"
+      data-eq-pick="${it.id}">
+      <strong style="min-width:92px;text-align:left">${it.id}</strong>
+      <span style="color:#64748b">${it.nombre||""}</span>
+    </button>
+  `).join("");
+}
+
+document.getElementById("eqQuery")?.addEventListener("input", updateEqMatches);
+document.getElementById("eqQuery")?.addEventListener("focus", updateEqMatches);
+document.getElementById("eqSelect")?.addEventListener("change", ()=>{
+  const v = document.getElementById("eqSelect")?.value || "";
+  if(v) document.getElementById("eqQuery").value = v;
+  updateEqMatches();
+});
+
+document.addEventListener("click", (e)=>{
+  const b = e.target.closest("[data-eq-pick]");
+  if(!b) return;
+  const id = b.getAttribute("data-eq-pick");
+  const q = document.getElementById("eqQuery"); 
+  if(q) q.value = id;
+  const s = document.getElementById("eqSelect");
+  if(s) s.value = id;
+  const box = document.getElementById("eqMatches");
+  if(box){ box.style.display="none"; box.innerHTML=""; }
+  fichaRender(id);
+});
 document.getElementById('grForm')?.addEventListener('submit',(e)=>{
   e.preventDefault();
   const id=(document.getElementById('grQuery')?.value||document.getElementById('grSelect')?.value||'').trim();
@@ -3568,7 +3757,7 @@ document.addEventListener('click', (e)=>{
 });
 
 /* ==================== ROUTER: INIT SECTION ==================== */
-function initSection(h){
+async function initSection(h){
   if (h !== 'dashboardtv') stopCarousel();
 
   switch(h){
