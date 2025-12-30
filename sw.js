@@ -1,12 +1,12 @@
- /* CDL · PWA Service Worker — v37 (scope-aware + precache ajustado) */
-const SW_VERSION = 'v37';
+/* CDL · PWA Service Worker — v40 (scope-aware + HTML network-first fix) */
+const SW_VERSION = 'v40';
 const CACHE_STATIC = `cdl-static-${SW_VERSION}`;
 const CACHE_PAGES  = `cdl-pages-${SW_VERSION}`;
 
 /* Precache SOLO de ficheros que están en la raíz (ajusta según tu repo) */
 const CORE_ASSETS = [
   './',
-  './index.html', 
+  './index.html',
   './offline.html',
   './manifest.webmanifest',
   './favicon.ico',
@@ -28,12 +28,15 @@ const CORE_ASSETS = [
 ];
 
 /* Extensiones estáticas genéricas */
-const STATIC_EXT = /\.(?:png|jpg|jpeg|webp|gif|svg|ico|css|js|json|webmanifest|ttf|woff2?|pdf|csv|html)$/i;
+const STATIC_EXT = /\.(?:png|jpg|jpeg|webp|gif|svg|ico|css|js|json|webmanifest|ttf|woff2?|pdf|csv)$/i;
+/* HTML: lo tratamos aparte (network-first) */
+const HTML_EXT = /\.html$/i;
+
 /* Heurística de endpoints de Apps Script */
-const API_HINT   = /script\.google\.com\/macros\/s\/.+\/exec/i;
+const API_HINT = /script\.google\.com\/macros\/s\/.+\/exec/i;
 
 /* Helpers: path relativo al scope de registro (soporta GitHub Pages en subcarpeta) */
-const SCOPE_PATH = new URL(self.registration.scope).pathname;  // p.ej. "/usuario/repositorio/"
+const SCOPE_PATH = new URL(self.registration.scope).pathname;
 function pathRelativeToScope(url) {
   const p = new URL(url).pathname;
   return p.startsWith(SCOPE_PATH) ? p.slice(SCOPE_PATH.length) : p;
@@ -43,12 +46,9 @@ self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil((async () => {
     const cache = await caches.open(CACHE_STATIC);
-    // Si alguno de estos assets no existe en tu raíz, addAll puede fallar el install.
-    // Por eso: intentamos addAll, y si falla, lo reintentamos sin bloquear el SW entero.
     try {
       await cache.addAll(CORE_ASSETS);
     } catch (err) {
-      // Fallback: precache mínimo para no “matar” la instalación por un archivo ausente
       await cache.addAll(['./', './offline.html', './manifest.webmanifest']);
     }
   })());
@@ -73,13 +73,17 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
-  const rel = pathRelativeToScope(req.url); // p.ej. "manuales/loquesea.pdf"
+  const rel = pathRelativeToScope(req.url);
 
-  // 1) Navegación: network-first con fallback offline
-  if (req.mode === 'navigate') {
+  /* 0) HTML (incluido index.html) -> NETWORK FIRST SIEMPRE
+        Evita que se te quede un index antiguo “pegado” por cache-first. */
+  const accept = req.headers.get('accept') || '';
+  const isHTML = req.mode === 'navigate' || accept.includes('text/html') || HTML_EXT.test(url.pathname);
+
+  if (isHTML) {
     e.respondWith((async () => {
       try {
-        const fresh = await fetch(req);
+        const fresh = await fetch(req, { cache: 'no-store' });
         const cache = await caches.open(CACHE_PAGES);
         cache.put(req, fresh.clone());
         return fresh;
@@ -92,11 +96,11 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 2) API Apps Script (GET): network-first, copia de emergencia
+  /* 1) API Apps Script (GET): network-first, copia de emergencia */
   if (API_HINT.test(req.url)) {
     e.respondWith((async () => {
       try {
-        const net = await fetch(req, { cache:'no-store' });
+        const net = await fetch(req, { cache: 'no-store' });
         const cache = await caches.open(CACHE_PAGES);
         cache.put(req, net.clone());
         return net;
@@ -104,15 +108,15 @@ self.addEventListener('fetch', (e) => {
         const cache = await caches.open(CACHE_PAGES);
         const old = await cache.match(req);
         if (old) return old;
-        return new Response(JSON.stringify({ ok:false, error:'offline' }), {
-          status: 503, headers: { 'Content-Type':'application/json' }
+        return new Response(JSON.stringify({ ok: false, error: 'offline' }), {
+          status: 503, headers: { 'Content-Type': 'application/json' }
         });
       }
     })());
     return;
   }
 
-  // 3) Manuales dentro del scope: cache-first, fallback a offline
+  /* 2) Manuales dentro del scope: cache-first, fallback a offline */
   if (rel.startsWith('manuales/') && /\.pdf$/i.test(rel)) {
     e.respondWith((async () => {
       const cache = await caches.open(CACHE_STATIC);
@@ -120,7 +124,7 @@ self.addEventListener('fetch', (e) => {
       if (cached) return cached;
 
       try {
-        const net = await fetch(req, { cache:'no-store' });
+        const net = await fetch(req, { cache: 'no-store' });
         if (net && net.ok) { cache.put(req, net.clone()); return net; }
       } catch { /* ignore */ }
 
@@ -129,7 +133,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 4) Estáticos genéricos: cache-first
+  /* 3) Estáticos genéricos: cache-first */
   if (STATIC_EXT.test(url.pathname)) {
     e.respondWith((async () => {
       const cache = await caches.open(CACHE_STATIC);
@@ -141,7 +145,6 @@ self.addEventListener('fetch', (e) => {
         if (net && net.ok) cache.put(req, net.clone());
         return net;
       } catch {
-        // PDFs fuera de /manuales → también a offline si falla
         if (/\.pdf$/i.test(url.pathname)) return caches.match('./offline.html');
         return caches.match('./offline.html');
       }
@@ -149,10 +152,10 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 5) Resto GET: network con fallback liviano
+  /* 4) Resto GET: network con fallback liviano */
   e.respondWith((async () => {
     try {
-      return await fetch(req, { cache:'no-store' });
+      return await fetch(req, { cache: 'no-store' });
     } catch {
       const cache = await caches.open(CACHE_PAGES);
       const alt = await cache.match(req);

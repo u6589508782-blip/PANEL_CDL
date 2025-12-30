@@ -1254,6 +1254,8 @@ window.API_BASE = "https://script.google.com/macros/s/AKfycbylcSwPb9mVmIAvwJUJMP
 const API_BASE      = window.API_BASE;
 const CDL_TOKEN_KEY = "cdl_token";
 const CDL_ROLE_KEY  = "cdl_role";
+const CDL_TOKEN_TS_KEY = "cdl_token_ts";
+const CDL_UNLOCK_KEY   = "cdl_unlocked";
 
 /* =========================================================
    ROLES SIMPLIFICADOS
@@ -1271,16 +1273,41 @@ const ROLES = [
 function roleLabel(slug){
   const r = ROLES.find(x=>x.slug === slug);
   return r ? r.label : "Invitado";
+
+
+function tokenIsValid(){
+  const tok = localStorage.getItem(CDL_TOKEN_KEY) || "";
+  const ts  = Number(localStorage.getItem(CDL_TOKEN_TS_KEY) || 0);
+  const unlocked = (localStorage.getItem(CDL_UNLOCK_KEY) === "1");
+  if(!tok || !ts) return false;
+  if(!unlocked) return false; // sin clave en esta carga => invitado
+  const TTL = 24*3600*1000; // 24h
+  if(Date.now() - ts > TTL) return false;
+  return true;
 }
 
+function ensureValidSession(){
+  if(tokenIsValid()) return true;
+  // Limpia residuos para que nunca “se quede” en Producción sin clave
+  localStorage.removeItem(CDL_TOKEN_KEY);
+  localStorage.removeItem(CDL_ROLE_KEY);
+  localStorage.removeItem(CDL_TOKEN_TS_KEY);
+  localStorage.removeItem(CDL_UNLOCK_KEY);
+  return false;
+}
+
+// Boot: en cada carga, exige clave (desbloqueo) para mostrar roles superiores
+(function sessionBootGuard(){
+  // Si quieres permitir “recordar sesión”, aquí se podría respetar un flag.
+  localStorage.removeItem(CDL_UNLOCK_KEY);
+  ensureValidSession();
+})();
+
 function currentRoleSlug(){
-  const tok = (localStorage.getItem(CDL_TOKEN_KEY)||'').trim();
-  if(!tok){
-    localStorage.removeItem(CDL_ROLE_KEY);
-    return 'invitado';
-  }
-  const saved = (localStorage.getItem(CDL_ROLE_KEY)||'').trim().toLowerCase();
-  return ROLES.some(r=>r.slug === saved) ? saved : 'invitado';
+  const ok = ensureValidSession();
+  if(!ok) return "invitado";
+  const saved = localStorage.getItem(CDL_ROLE_KEY) || "invitado";
+  return ROLES.some(r=>r.slug === saved) ? saved : "invitado";
 }
 
 /**
@@ -1335,9 +1362,9 @@ const POST = async (body)=>{
   function ucFirst(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g," ") : s; }
 
   (function initRoleChip(){
-    const tok = localStorage.getItem(CDL_TOKEN_KEY);
-    const savedRole = localStorage.getItem(CDL_ROLE_KEY);
-    roleChip.textContent = (tok && savedRole) ? ucFirst(savedRole) : "Invitado";
+    const ok = (typeof ensureValidSession === "function") ? ensureValidSession() : false;
+    const savedRole = localStorage.getItem(CDL_ROLE_KEY) || "invitado";
+    roleChip.textContent = ok ? roleLabel(savedRole) : "Invitado";
   })();
 
   const togglePanel = (show)=>{
@@ -1364,12 +1391,13 @@ const POST = async (body)=>{
       const r = await POST({res:"auth", fn:"login", user, pass});
       if(r.ok && r.token){
         localStorage.setItem(CDL_TOKEN_KEY, r.token);
+        localStorage.setItem(CDL_TOKEN_TS_KEY, String(Date.now()));
+        localStorage.setItem(CDL_UNLOCK_KEY, "1");
         localStorage.setItem(CDL_ROLE_KEY, user);
         roleChip.textContent = roleLabel(user);
         userPass.value = "";
         togglePanel(false);
         applyRoleVisibility();
-  try{ __setupLiveSearch(); }catch(_e){}
       }else alert(r.error || "Contraseña incorrecta.");
     }catch{ alert("Error de red."); }
   });
@@ -1377,6 +1405,8 @@ const POST = async (body)=>{
   logoutBtn.addEventListener("click", ()=>{
     localStorage.removeItem(CDL_TOKEN_KEY);
     localStorage.removeItem(CDL_ROLE_KEY);
+    localStorage.removeItem(CDL_TOKEN_TS_KEY);
+    localStorage.removeItem(CDL_UNLOCK_KEY);
     roleChip.textContent = roleLabel("invitado");
     applyRoleVisibility();
   });
@@ -1769,6 +1799,19 @@ function applyRoleVisibility(){
   if (typeof buildNav === "function") buildNav();
 }
 
+function syncAuthUI(){
+  const ok = (typeof ensureValidSession === "function") ? ensureValidSession() : false;
+  const chip = document.getElementById("roleChip");
+  if(chip){
+    const slug = ok ? (localStorage.getItem(CDL_ROLE_KEY) || "invitado") : "invitado";
+    chip.textContent = ok ? roleLabel(slug) : "Invitado";
+  }
+  if(typeof applyRoleVisibility === "function") applyRoleVisibility();
+}
+
+try{ syncAuthUI(); }catch(_e){}
+
+
 /* =========================================================
    ÍNDICE DE EQUIPOS (UNIFICADO)
    - Referencia única compartida: EQ_INDEX y __EQ_INDEX
@@ -1947,14 +1990,6 @@ async function loadIncidencias(){
   }
 
   renderIncFiltered();
-
-  ['incTexto','incFecha','incEquipo'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(!el || el.__liveBound) return;
-    const ev = (id==='incFecha') ? 'change' : 'input';
-    el.addEventListener(ev, ()=>renderIncFiltered(), {passive:true});
-    el.__liveBound = true;
-  });
 }
 
 /* ==================== INCIDENCIAS · FILTRADO ==================== */
@@ -2046,7 +2081,7 @@ document.addEventListener("click", async (e)=>{
   const tok  = localStorage.getItem(CDL_TOKEN_KEY)||"";
   if(!id){ alert("Incidencia sin ID"); return; }
   try{
-    const r = await POST({res:"incid", fn:"update", token:tok, id, estado:"cerrada", fin:new Date().toISOString()});
+    const r = await POST({res:"incid", fn:"finalizar", token:tok, id});
     if(!r.ok) return alert(r.error||"No se pudo finalizar");
     loadIncidencias();
   }catch{ alert("Error de red"); }
@@ -2620,53 +2655,8 @@ document.addEventListener('click', (e)=>{
 });
 
 /* ==================== EQUIPOS / GRÚAS / AUXILIARES ==================== */
-let __EQ_CACHE = [];
-let __GR_CACHE = [];
-let __AX_CACHE = [];
-
-function __fillSelect(selectId, items, placeholder){
-  const sel = document.getElementById(selectId);
-  if(!sel) return;
-  sel.innerHTML =
-    `<option value="">${placeholder||'— Selecciona —'}</option>` +
-    (items||[]).map(x=>{
-      const id = x.id ?? x;
-      const label = x.nombre ? `${x.id} — ${x.nombre}` : String(id);
-      return `<option value="${String(id).replace(/"/g,'&quot;')}">${label}</option>`;
-    }).join('');
-}
-
-function __setupLiveSearch(){
-  const mk = (cfg)=>{
-    const inp = document.getElementById(cfg.input);
-    const sel = document.getElementById(cfg.select);
-    if(!inp || !sel) return;
-    const update = ()=>{
-      const q = (inp.value||'').trim().toLowerCase();
-      const src = cfg.src();
-      const matches = (src||[]).filter(x=>{
-        const id = String(x.id||'').toLowerCase();
-        const nm = String(x.nombre||'').toLowerCase();
-        return !q || id.includes(q) || nm.includes(q);
-      }).slice(0,80);
-      __fillSelect(cfg.select, matches, '— Coincidencias —');
-      if(matches.length===1) sel.value = matches[0].id;
-    };
-    inp.addEventListener('input', update, {passive:true});
-    sel.addEventListener('change', ()=>{
-      const v = (sel.value||'').trim();
-      if(v) inp.value = v;
-    });
-  };
-
-  mk({ input:'eqQuery', select:'eqSelect', src:()=>__EQ_CACHE });
-  mk({ input:'grQuery', select:'grSelect', src:()=>__GR_CACHE });
-  mk({ input:'axQuery', select:'axSelect', src:()=>__AX_CACHE });
-}
-
 async function loadEquipos(){
   const data = await GET('equipos');
-  __EQ_CACHE = Array.isArray(data) ? data : [];
   document.getElementById('eqSelect').innerHTML =
     '<option value="">— Selecciona de la lista —</option>' +
     (data||[]).map(e=>`<option value="${e.id}">${e.nombre||e.id}</option>`).join('');
@@ -2682,7 +2672,6 @@ async function loadEquipos(){
 
 async function loadGruas(){
   const data = await GET('gruas');
-  __GR_CACHE = Array.isArray(data) ? data : [];
   document.getElementById('grSelect').innerHTML =
     '<option value="">— Selecciona —</option>' + (data||[]).map(g=>`<option value="${g.id}">${g.id}</option>`).join('');
   for(const n of [1,2,3,4]){
@@ -2694,7 +2683,6 @@ async function loadGruas(){
 
 async function loadAux(){
   const data = await GET('auxiliares');
-  __AX_CACHE = Array.isArray(data) ? data : [];
   document.getElementById('axSelect').innerHTML =
     '<option value="">— Selecciona —</option>' + (data||[]).map(a=>`<option value="${a.id}">${a.nombre||a.id}</option>`).join('');
   document.getElementById('auxList').innerHTML = (data||[]).map(a=>trafficLightCard({...a,tipo:'aux'})).join('') || '<div style="color:#64748b">Sin datos</div>';
@@ -2764,19 +2752,7 @@ async function invLoad(){
   let data = [];
   try{
     const api = await GET('inventario');
-    if (Array.isArray(api)) {
-    if(api[0] && Array.isArray(api[0].items)){
-      data = api;
-    } else {
-      const byCat = {};
-      api.forEach(it=>{
-        const cat = String(it.categoria||'General');
-        if(!byCat[cat]) byCat[cat]=[];
-        byCat[cat].push(it);
-      });
-      data = Object.keys(byCat).sort((a,b)=>a.localeCompare(b,'es')).map(c=>({categoria:c, items:byCat[c]}));
-    }
-  }
+    if (Array.isArray(api)) data = api;
   }catch(_e){
     data = [];
   }
