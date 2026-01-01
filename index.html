@@ -661,6 +661,23 @@ h1::before,h2::before,h3::before{
 .mt-restr{ color:#fbbf24; }
 .mt-stop{ color:#ef4444; }
 .mt-rep{ color:#3b82f6; }
+
+/* ====== SUGERENCIAS (buscadores en vivo) ====== */
+.suggest{margin-top:8px;border:1px solid rgba(148,163,184,.35);border-radius:12px;overflow:hidden;background:rgba(15,23,42,.55);backdrop-filter:blur(10px)}
+.suggest .s-item{padding:10px 12px;border-bottom:1px solid rgba(148,163,184,.18);cursor:pointer}
+.suggest .s-item:last-child{border-bottom:none}
+.suggest .s-item:hover{background:rgba(148,163,184,.12)}
+.suggest .s-title{font-weight:700}
+.suggest .s-sub{opacity:.8;font-size:.9em;margin-top:2px}
+
+/* ====== PLANIFICACIÓN: pestañas ====== */
+.plan-tabs{margin:10px 0 12px}
+.tabs-row{display:flex;gap:8px;flex-wrap:wrap}
+.tabbtn{border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.35);color:inherit;padding:8px 10px;border-radius:999px;font-weight:700;cursor:pointer}
+.tabbtn[aria-selected="true"]{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.55)}
+.tabs-row--sub .tabbtn{font-weight:600}
+.plan-hint{opacity:.85;font-size:.92em;margin-bottom:6px}
+
 </style>
 </head>
 <body>
@@ -807,6 +824,12 @@ h1::before,h2::before,h3::before{
 <div class="plan-title-strip">
 <span>PLANIFICACIÓN</span>
 </div>
+<div class="plan-tabs">
+  <div class="tabs-row" id="planMainTabs"></div>
+  <div class="tabs-row tabs-row--sub" id="planSubTabs"></div>
+</div>
+<div class="plan-hint" id="planHint"></div>
+
 <div class="plan-table-wrap">
 <table class="plan-table">
 <thead>
@@ -854,7 +877,7 @@ h1::before,h2::before,h3::before{
 <form autocomplete="off" class="form-inline" id="eqForm">
 <label class="form-inline__label" for="eqQuery">Ficha técnica / QR</label>
 <input id="eqQuery" placeholder="Escribe ID o nombre… (ej: KDP-1)" type="search"/>
-<div class="matchbox" id="eqMatches" style="margin-top:6px"></div>
+<div id="eqSuggest" class="suggest" hidden></div>
 <select aria-label="Seleccionar equipo" id="eqSelect">
 <option value="">— Selecciona de la lista —</option>
 </select>
@@ -1031,12 +1054,12 @@ h1::before,h2::before,h3::before{
 <form autocomplete="off" class="form-inline" id="invSearchForm">
 <label class="form-inline__label" for="invQuery">Buscar</label>
 <input id="invQuery" placeholder="ref / desc / código" type="search"/>
+<div id="invSuggest" class="suggest" hidden></div>
 <button class="btn btn--ghost" type="submit">Filtrar</button>
 <button class="btn btn--ghost" id="invClear" type="button">Limpiar</button>
 <span data-role="admin" style="margin-left:auto">
 <label class="form-inline__label" for="csvUp">CSV/QRs</label>
 <input accept=".csv,.txt" id="csvUp" style="max-width:240px" type="file"/>
-<button class="btn btn--ghost" id="invImportBtn" type="button" disabled style="margin-left:8px">Importar al backend</button>
 </span>
 </form>
 </article>
@@ -1256,6 +1279,8 @@ window.API_BASE = "https://script.google.com/macros/s/AKfycbylcSwPb9mVmIAvwJUJMP
 const API_BASE      = window.API_BASE;
 const CDL_TOKEN_KEY = "cdl_token";
 const CDL_ROLE_KEY  = "cdl_role";
+const CDL_TOKEN_TS_KEY = "cdl_token_ts";
+const CDL_UNLOCK_KEY   = "cdl_unlocked";
 
 /* =========================================================
    ROLES SIMPLIFICADOS
@@ -1275,15 +1300,45 @@ function roleLabel(slug){
   return r ? r.label : "Invitado";
 }
 
-function currentRoleSlug(){
-  const saved = localStorage.getItem(CDL_ROLE_KEY) || "invitado";
-  return ROLES.some(r=>r.slug === saved) ? saved : "invitado";
+function tokenIsFresh(){
+  const tok = localStorage.getItem(CDL_TOKEN_KEY) || '';
+  const ts  = Number(localStorage.getItem(CDL_TOKEN_TS_KEY) || 0);
+  if(!tok || !ts) return false;
+  return (Date.now() - ts) < TOKEN_TTL_MS;
 }
 
-/**
- * roleCan('approveStop') → solo mantenimiento
- * roleCan('verKPIs')     → solo mantenimiento
- */
+function isUnlocked(){
+  // La sesión desbloqueada SOLO vive en esta pestaña (si cierras/reabres, vuelve a invitado)
+  return sessionStorage.getItem(CDL_UNLOCK_KEY) === '1';
+}
+
+function clearAuth(reason){
+  localStorage.removeItem(CDL_TOKEN_KEY);
+  localStorage.removeItem(CDL_ROLE_KEY);
+  localStorage.removeItem(CDL_TOKEN_TS_KEY);
+  sessionStorage.removeItem(CDL_UNLOCK_KEY);
+  if(reason) toast(String(reason));
+}
+
+function ensureValidSession(){
+  // Si el token ha caducado, lo limpiamos. Si no, lo dejamos guardado pero bloqueado.
+  if(!tokenIsFresh()){
+    // OJO: si no hay token/ts, no hace falta mostrar nada; simplemente invitado.
+    localStorage.removeItem(CDL_TOKEN_KEY);
+    localStorage.removeItem(CDL_ROLE_KEY);
+    localStorage.removeItem(CDL_TOKEN_TS_KEY);
+  }
+  // Siempre arrancamos bloqueados (aunque el token exista). Para entrar, hay que meter clave.
+  sessionStorage.removeItem(CDL_UNLOCK_KEY);
+}
+
+function currentRoleSlug(){
+  // Sin desbloqueo activo -> invitado SIEMPRE
+  if(!isUnlocked()) return 'invitado';
+  // Desbloqueado, pero token caducado -> invitado
+  if(!tokenIsFresh()) return 'invitado';
+  return (localStorage.getItem(CDL_ROLE_KEY) || 'invitado').toLowerCase();
+}
 function roleCan(perm){
   const slug = currentRoleSlug();
   const r = ROLES.find(x=>x.slug === slug);
@@ -1293,63 +1348,25 @@ function roleCan(perm){
   return r.perms.includes(perm);
 }
 
-const __CDL_CACHE = new Map(); // key -> {ts,data}
-const __CDL_TTL_MS = 30_000; // 30s (sube/baja si quieres)
-
-function __withTimeout(promise, ms){
-  return Promise.race([
-    promise,
-    new Promise((_,rej)=> setTimeout(()=>rej(new Error("timeout")), ms))
-  ]);
-}
-
-async function __fetchJson(url, opts){
-  const r = await __withTimeout(fetch(url, opts), 12_000);
-  const txt = await r.text();
-  try{ return JSON.parse(txt); }catch{ return Array.isArray(txt) ? txt : (txt ? txt : null); }
-}
-
-const GET = async (p, {cache=true} = {})=>{
-  const key = String(p||"");
-  const now = Date.now();
-
-  if(cache && __CDL_CACHE.has(key)){
-    const hit = __CDL_CACHE.get(key);
-    if(hit && (now - hit.ts) < __CDL_TTL_MS) return hit.data;
-  }
-
-  try{
-    const data = await __fetchJson(`${API_BASE}?path=${encodeURIComponent(key)}`, { cache:"no-store" });
-    const safe = (data === null || data === undefined) ? [] : data;
-    if(cache) __CDL_CACHE.set(key, {ts:now, data:safe});
-    return safe;
-  }catch(_e){
-    // fallback cache si existe
-    if(__CDL_CACHE.has(key)) return __CDL_CACHE.get(key).data;
-    return [];
-  }
+const GET  = async (p)=>{
+  const r = await fetch(`${API_BASE}?path=${encodeURIComponent(p)}`, { cache:"no-store" });
+  try{ return await r.json(); }catch{ return []; }
 };
-
 const POST = async (body)=>{
+  const r = await fetch(API_BASE, {
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body),
+    cache:"no-store"
+  });
   try{
-    const data = await __fetchJson(API_BASE, {
-      method:"POST",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify(body||{}),
-      cache:"no-store"
-    });
-    return (data === null || data === undefined) ? {ok:false} : data;
-  }catch(_e){
-    return {ok:false, error:"Error de red/timeout"};
-  }
+    const data = await r.json();
+    if(data && data.ok===false && String(data.error||'').toLowerCase().includes('no autorizado')){
+      clearAuth('Sesión caducada. Entra de nuevo.');
+    }
+    return data;
+  }catch{ return {ok:false}; }
 };
-
-
-/* ========= FIX anti-recarga: evita submits que refrescan la SPA ========= */
-document.addEventListener("submit", (e)=>{
-  // En GitHub Pages, un submit sin preventDefault recarga la app y “parece que no hace nada”.
-  e.preventDefault();
-}, true);
 
 /* ========= Panel usuario: login / logout / cambiar pass ========= */
 (function(){
@@ -1376,9 +1393,9 @@ document.addEventListener("submit", (e)=>{
   function ucFirst(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g," ") : s; }
 
   (function initRoleChip(){
-    const tok = localStorage.getItem(CDL_TOKEN_KEY);
-    const savedRole = localStorage.getItem(CDL_ROLE_KEY);
-    roleChip.textContent = (tok && savedRole) ? ucFirst(savedRole) : "Invitado";
+    const ok = (typeof ensureValidSession === "function") ? ensureValidSession() : false;
+    const savedRole = localStorage.getItem(CDL_ROLE_KEY) || "invitado";
+    roleChip.textContent = ok ? roleLabel(savedRole) : "Invitado";
   })();
 
   const togglePanel = (show)=>{
@@ -1405,6 +1422,8 @@ document.addEventListener("submit", (e)=>{
       const r = await POST({res:"auth", fn:"login", user, pass});
       if(r.ok && r.token){
         localStorage.setItem(CDL_TOKEN_KEY, r.token);
+        localStorage.setItem(CDL_TOKEN_TS_KEY, String(Date.now()));
+        sessionStorage.setItem(CDL_UNLOCK_KEY, "1");
         localStorage.setItem(CDL_ROLE_KEY, user);
         roleChip.textContent = roleLabel(user);
         userPass.value = "";
@@ -1417,6 +1436,8 @@ document.addEventListener("submit", (e)=>{
   logoutBtn.addEventListener("click", ()=>{
     localStorage.removeItem(CDL_TOKEN_KEY);
     localStorage.removeItem(CDL_ROLE_KEY);
+    localStorage.removeItem(CDL_TOKEN_TS_KEY);
+    sessionStorage.removeItem(CDL_UNLOCK_KEY);
     roleChip.textContent = roleLabel("invitado");
     applyRoleVisibility();
   });
@@ -1466,6 +1487,148 @@ if ("serviceWorker" in navigator) {
     if (refreshed) return;
     refreshed = true;
     location.reload();
+  });
+}
+
+
+/* ==================== BUSCADOR EN VIVO · EQUIPOS ==================== */
+function setupEquipSearch(){
+  const input = document.getElementById('eqQuery');
+  const sel   = document.getElementById('eqSelect');
+  const sug   = document.getElementById('eqSuggest');
+  const form  = document.getElementById('eqForm');
+  if(!input || !sel || !form || !sug) return;
+
+  const list = Array.isArray(window.__EQ_ALL) ? window.__EQ_ALL : [];
+
+  function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  function pickLabel(e){
+    const id = String(e.id||'').trim();
+    const n  = String(e.nombre||e.name||'').trim();
+    return n ? `${id} — ${n}` : id;
+  }
+
+  function renderSuggest(items){
+    if(!items.length){ sug.hidden = true; sug.innerHTML=''; return; }
+    sug.innerHTML = items.slice(0,8).map(e=>`
+      <div class="s-item" data-eqid="${escapeHtml(String(e.id||''))}">
+        <div class="s-title">${escapeHtml(String(e.id||''))}</div>
+        <div class="s-sub">${escapeHtml(String(e.nombre||e.name||''))}</div>
+      </div>`).join('');
+    sug.hidden = false;
+  }
+
+  function syncSelect(items){
+    // rellena select con coincidencias (pero sin romper la lista completa si input vacío)
+    if(!sel) return;
+    if(!items.length){
+      // si input vacío, dejamos toda la lista tal cual (ya está montada por loadEquipos)
+      return;
+    }
+    sel.innerHTML = '<option value="">— Coincidencias —</option>' + items.slice(0,50).map(e=>`<option value="${escapeHtml(String(e.id||''))}">${escapeHtml(pickLabel(e))}</option>`).join('');
+  }
+
+  function findByIdOrName(q){
+    const nq = norm(q);
+    if(!nq) return [];
+    return list.filter(e=>{
+      const hay = norm(`${e.id||''} ${e.nombre||''} ${e.linea||''}`);
+      return hay.includes(nq);
+    });
+  }
+
+  input.addEventListener('input', ()=>{
+    const q = input.value.trim();
+    const items = findByIdOrName(q);
+    renderSuggest(items);
+    syncSelect(items);
+  });
+
+  input.addEventListener('focus', ()=>{
+    if(input.value.trim()){
+      const items = findByIdOrName(input.value.trim());
+      renderSuggest(items);
+    }
+  });
+
+  document.addEventListener('click', (e)=>{
+    if(e.target.closest('#eqSuggest')) return;
+    if(e.target === input) return;
+    sug.hidden = true;
+  });
+
+  sug.addEventListener('click', (e)=>{
+    const row = e.target.closest('[data-eqid]');
+    if(!row) return;
+    const id = row.getAttribute('data-eqid');
+    sug.hidden = true;
+    input.value = id;
+    sel.value = id;
+    openFichaEquipo(id);
+  });
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const id = (sel.value || input.value || '').trim();
+    if(!id){ toast('Escribe algo (ej: KDP)'); return; }
+    // si han puesto "KDP", cogemos primera coincidencia
+    const items = findByIdOrName(id);
+    const finalId = (items[0]?.id ? String(items[0].id) : id);
+    openFichaEquipo(finalId);
+  });
+
+  // Botón “Ver listado” o similares no deben refrescar
+  document.querySelectorAll('button[type="submit"]').forEach(b=>{
+    // nada, pero evita que algún click raro provoque reload
+  });
+}
+
+function openFichaEquipo(id){
+  // Esta función existe en tu base como showFicha / openModal; si no, usamos la actual de la app
+  const q = String(id||'').trim();
+  if(!q) return;
+  // reutiliza handler existente: simulamos submit ya corregido
+  if (typeof showFicha === 'function'){ showFicha(q); return; }
+  if (typeof openFicha === 'function'){ openFicha(q); return; }
+  if (typeof openModalFicha === 'function'){ openModalFicha(q); return; }
+  // fallback: busca por data-eq
+  const btn = document.querySelector(`[data-open-ficha="${CSS.escape(q)}"]`);
+  if(btn) btn.click();
+}
+
+/* ==================== BUSCADOR EN VIVO · INVENTARIO ==================== */
+function setupInvSuggest(){
+  const input = document.getElementById('invQuery');
+  const sug   = document.getElementById('invSuggest');
+  if(!input || !sug) return;
+
+  function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+  input.addEventListener('input', ()=>{
+    const q = norm(input.value.trim());
+    if(!q){ sug.hidden=true; sug.innerHTML=''; invRender?.(); return; }
+    const list = Array.isArray(window.__INV_ALL) ? window.__INV_ALL : [];
+    const hits = list.filter(it=> norm(`${it.ref||''} ${it.codigo||''} ${it.desc||''}`).includes(q)).slice(0,8);
+    if(!hits.length){ sug.hidden=true; sug.innerHTML=''; invRender?.(); return; }
+    sug.innerHTML = hits.map(it=>`
+      <div class="s-item" data-invref="${escapeHtml(String(it.ref||it.codigo||''))}">
+        <div class="s-title">${escapeHtml(String(it.ref||it.codigo||''))}</div>
+        <div class="s-sub">${escapeHtml(String(it.desc||''))}</div>
+      </div>`).join('');
+    sug.hidden=false;
+    invRender?.(); // mantiene filtrado live
+  });
+
+  sug.addEventListener('click', (e)=>{
+    const row = e.target.closest('[data-invref]');
+    if(!row) return;
+    sug.hidden=true;
+  });
+
+  document.addEventListener('click', (e)=>{
+    if(e.target.closest('#invSuggest')) return;
+    if(e.target === input) return;
+    sug.hidden = true;
   });
 }
 
@@ -1705,7 +1868,7 @@ function initHomeCarousel(){
   const appRoot = document.getElementById("appRoot");
 
   const NAV_ITEMS = [
-    { hash:"#dashboard",     label:"Dashboard",            perm:"viewEquipos" },
+    { hash:"#dashboard", label:"Dashboard", perm:null },
     { hash:"#planificacion", label:"Planificación",        perm:"viewPlanificacion" },
 
     { hash:"#equipos",       label:"Producción",           perm:"viewEquipos" },
@@ -1738,7 +1901,7 @@ function initHomeCarousel(){
   }
 
   window.isOnDashboard = function(){
-    const hash = location.hash || "#equipos";
+    const hash = location.hash || '#dashboard';
     return hash === "#dashboard";
   };
 
@@ -1746,18 +1909,26 @@ function initHomeCarousel(){
   function hide(el){ if(el) el.style.display="none"; }
 
   function markCurrent(){
-    const hash = location.hash || "#equipos";
+    const defaultHash = (currentRoleSlug() === 'invitado') ? '#dashboard' : '#planificacion';
+    let hash = location.hash || defaultHash;
 
-    document.querySelectorAll(".navlist a").forEach(a=>{
-      a.setAttribute("aria-current", a.getAttribute("href") === hash ? "page" : "false");
+    // Si el hash apunta a una sección sin permiso, redirige al default.
+    const item = NAV_ITEMS.find(i => i.hash === hash);
+    if (item && item.perm && !roleCan(item.perm)) {
+      hash = defaultHash;
+      if (location.hash !== hash) { location.hash = hash; return; }
+    }
+
+    document.querySelectorAll('.navlist a').forEach(a=>{
+      a.setAttribute('aria-current', a.getAttribute('href') === hash ? 'page' : 'false');
     });
 
-    document.querySelectorAll(".page").forEach(sec=>{
-      sec.hidden = ("#" + sec.id) !== hash;
+    document.querySelectorAll('.page').forEach(sec=>{
+      sec.hidden = ('#' + sec.id) !== hash;
     });
 
     if (car){
-      if (isOnDashboard()){
+      if (hash === '#dashboard'){
         show(car);
         __hc.start();
       } else {
@@ -1808,6 +1979,19 @@ function applyRoleVisibility(){
   // Construye el menú según permisos
   if (typeof buildNav === "function") buildNav();
 }
+
+function syncAuthUI(){
+  const ok = (typeof ensureValidSession === "function") ? ensureValidSession() : false;
+  const chip = document.getElementById("roleChip");
+  if(chip){
+    const slug = ok ? (localStorage.getItem(CDL_ROLE_KEY) || "invitado") : "invitado";
+    chip.textContent = ok ? roleLabel(slug) : "Invitado";
+  }
+  if(typeof applyRoleVisibility === "function") applyRoleVisibility();
+}
+
+try{ syncAuthUI(); }catch(_e){}
+
 
 /* =========================================================
    ÍNDICE DE EQUIPOS (UNIFICADO)
@@ -2052,13 +2236,6 @@ document.getElementById("incClear")?.addEventListener("click", ()=>{
   renderIncFiltered();
 });
 
-// Filtro en vivo mientras escribes (sin botón)
-["incEquipo","incFecha","incTexto"].forEach(id=>{
-  document.getElementById(id)?.addEventListener("input", ()=> renderIncFiltered());
-  document.getElementById(id)?.addEventListener("change", ()=> renderIncFiltered());
-});
-
-
 function renderIncList(arr){
   const list = document.getElementById("incList");
   const data = (arr||[]).slice().sort((a,b)=> new Date(b.created||0) - new Date(a.created||0));
@@ -2085,7 +2262,7 @@ document.addEventListener("click", async (e)=>{
   const tok  = localStorage.getItem(CDL_TOKEN_KEY)||"";
   if(!id){ alert("Incidencia sin ID"); return; }
   try{
-    const r = await POST({res:"incid", fn:"update", token:tok, id, estado:"finalizada", fin:(new Date()).toISOString()});
+    const r = await POST({res:"incid", fn:"finalizar", token:tok, id});
     if(!r.ok) return alert(r.error||"No se pudo finalizar");
     loadIncidencias();
   }catch{ alert("Error de red"); }
@@ -2660,37 +2837,20 @@ document.addEventListener('click', (e)=>{
 
 /* ==================== EQUIPOS / GRÚAS / AUXILIARES ==================== */
 async function loadEquipos(){
-  const sel = document.getElementById('eqSelect');
-  const kCont = document.getElementById('equiposKaltenbach');
-  const tCont = document.getElementById('equiposTrumpf');
-  const iCont = document.getElementById('equiposIndep');
+  const data = await GET('equipos');
+  window.__EQ_ALL = Array.isArray(data) ? data : [];
+  document.getElementById('eqSelect').innerHTML =
+    '<option value="">— Selecciona de la lista —</option>' +
+    (data||[]).map(e=>`<option value="${e.id}">${e.nombre||e.id}</option>`).join('');
 
-  try{
-    const data = await GET('equipos', {cache:false});
-    window.__EQUIPOS_ALL = Array.isArray(data) ? data : [];
+  const kal = (data||[]).filter(e=> /kaltenbach/i.test(e.linea||''));
+  const tru = (data||[]).filter(e=> /trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
+  const ind = (data||[]).filter(e=> !/kaltenbach/i.test(e.linea||'') && !/trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
 
-    if(sel){
-      sel.innerHTML =
-        '<option value="">— Selecciona de la lista —</option>' +
-        window.__EQUIPOS_ALL.map(e=>`<option value="${e.id}">${e.nombre||e.id}</option>`).join('');
-    }
-
-    const kal = window.__EQUIPOS_ALL.filter(e=> /kaltenbach/i.test(e.linea||''));
-    const tru = window.__EQUIPOS_ALL.filter(e=> /trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
-    const ind = window.__EQUIPOS_ALL.filter(e=> !/kaltenbach/i.test(e.linea||'') && !/trumpf|láser|laser/i.test((e.linea||e.nombre||'')));
-
-    if(kCont) kCont.innerHTML = kal.length ? kal.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') : '<div style="color:#64748b">Sin datos</div>';
-    if(tCont) tCont.innerHTML = tru.length ? tru.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') : '<div style="color:#64748b">Sin datos</div>';
-    if(iCont) iCont.innerHTML = ind.length ? ind.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') : '<div style="color:#64748b">Sin datos</div>';
-
-    // refresca sugerencias si hay texto en el buscador
-    if(typeof updateEqMatches === 'function') updateEqMatches();
-  }catch(e){
-    window.__EQUIPOS_ALL = [];
-    if(kCont) kCont.innerHTML = '<div class="badge">Error cargando equipos</div>';
-    if(tCont) tCont.innerHTML = '<div class="badge">Error cargando equipos</div>';
-    if(iCont) iCont.innerHTML = '<div class="badge">Error cargando equipos</div>';
-  }
+  document.getElementById('equiposKaltenbach').innerHTML = kal.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') || '<div style="color:#64748b">Sin datos</div>';
+  document.getElementById('equiposTrumpf').innerHTML     = tru.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') || '<div style="color:#64748b">Sin datos</div>';
+  document.getElementById('equiposIndep').innerHTML      = ind.map(e=>trafficLightCard({...e,tipo:'equipo'})).join('') || '<div style="color:#64748b">Sin datos</div>';
+  setupEquipSearch();
 }
 
 async function loadGruas(){
@@ -2712,74 +2872,10 @@ async function loadAux(){
 }
 
 /* ==================== FICHA DE EQUIPO/GRÚA/AUX (con QR) ==================== */
-async function fichaRender(idOrQuery){
-  const qRaw = String(idOrQuery||"").trim();
-  const q = qRaw.toLowerCase();
-
-  const ensureLists = async ()=>{
-    if(!Array.isArray(window.__EQUIPOS_ALL) || !window.__EQUIPOS_ALL.length){
-      try{ window.__EQUIPOS_ALL = await GET('equipos'); }catch{ window.__EQUIPOS_ALL = []; }
-    }
-    if(!Array.isArray(window.__GRUAS_ALL) || !window.__GRUAS_ALL.length){
-      try{ window.__GRUAS_ALL = await GET('gruas'); }catch{ window.__GRUAS_ALL = []; }
-    }
-    if(!Array.isArray(window.__AUX_ALL) || !window.__AUX_ALL.length){
-      try{ window.__AUX_ALL = await GET('auxiliares'); }catch{ window.__AUX_ALL = []; }
-    }
-  };
-
-  const norm = (s)=> String(s||"").toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .trim();
-
-  const score = (query, item)=>{
-    const qq = norm(query);
-    if(!qq) return 0;
-    const id  = norm(item.id);
-    const nom = norm(item.nombre);
-    if(id === qq) return 1000;
-    if(id.startsWith(qq)) return 850;
-    if(nom && nom.startsWith(qq)) return 800;
-    const hay = `${id} ${nom}`.trim();
-    if(hay.includes(qq)) return 650;
-    return 0;
-  };
-
-  await ensureLists();
-
-  const all = [
-    ...(window.__EQUIPOS_ALL||[]).map(x=>({...x,__tipo:'equipos'})),
-    ...(window.__GRUAS_ALL||[]).map(x=>({...x,__tipo:'gruas'})),
-    ...(window.__AUX_ALL||[]).map(x=>({...x,__tipo:'auxiliares'}))
-  ];
-
-  // Si nos pasan un ID exacto, abre directo
-  let e = all.find(x=>String(x.id||"").toLowerCase()===q);
-  if(!e && q){
-    const ranked = all
-      .map(x=>({x, s: score(qRaw, x)}))
-      .filter(o=>o.s>0)
-      .sort((a,b)=>b.s-a.s)
-      .slice(0,10)
-      .map(o=>o.x);
-
-    if(ranked.length === 1){
-      e = ranked[0];
-    }else if(ranked.length > 1){
-      // muestra selector rápido
-      const html = `
-        <div class="badge" style="margin-bottom:10px">Coincidencias (${ranked.length})</div>
-        <div style="display:grid;gap:8px">
-          ${ranked.map(it=>`
-            <button class="btn btn--ghost" type="button" style="justify-content:flex-start" onclick="fichaRender('${String(it.id).replace(/'/g,'\'')}')">
-              <strong style="min-width:92px;text-align:left">${it.id}</strong>
-              <span style="color:#64748b">${it.nombre||""}</span>
-            </button>`).join('')}
-        </div>`;
-      return openModal('Ficha', html);
-    }
-  }
-
+async function fichaRender(id){
+  let e = (await GET('equipos')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
+  if(!e) e = (await GET('gruas')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
+  if(!e) e = (await GET('auxiliares')).find(x=>String(x.id).toLowerCase()===String(id).toLowerCase());
   if(!e) return openModal('Ficha', '<div class="badge">No encontrado</div>');
 
   const kv = (k,v)=>`<span class="badge" style="margin:2px 6px 2px 0"><strong>${k}:</strong> ${v ?? '—'}</span>`;
@@ -2818,7 +2914,6 @@ async function fichaRender(idOrQuery){
   openModal(`${e.nombre||e.id} — Ficha técnica`, html);
 }
 
-if(!window.__cdlOpenManual)
 if(!window.__cdlOpenManual){
   window.__cdlOpenManual = async function(pdfName){
     const base = './manuales/';
@@ -2836,115 +2931,123 @@ let _invRaw = [];
 
 async function invLoad(){
   const host = document.getElementById('invCats');
-  if(!host) return;
-
-  const tok = localStorage.getItem(CDL_TOKEN_KEY)||"";
-
-  const parseCSV = (csvText)=>{
-    const lines = String(csvText||"").split(/\r?\n/).filter(l=>l.trim()!=="");
-    if(lines.length<2) return [];
-    const split = (line)=>{
-      const out=[]; let cur=""; let q=false;
-      for(let i=0;i<line.length;i++){
-        const ch=line[i];
-        if(ch === '"'){ q=!q; continue; }
-        if(ch === ',' && !q){ out.push(cur); cur=""; continue; }
-        cur += ch;
-      }
-      out.push(cur);
-      return out.map(s=>s.trim());
-    };
-    const headers = split(lines[0]).map(h=>h.trim().toLowerCase());
-    return lines.slice(1).map(l=>{
-      const c = split(l);
-      const o = {};
-      headers.forEach((h,i)=> o[h] = c[i] ?? "");
-      return o;
-    });
-  };
-
-  const normItem = (r)=>({
-    ref: String(r.ref||r.referencia||r.codigo||r.id||"").trim(),
-    desc: String(r.desc||r.nombre||r.descripcion||r.producto||"").trim(),
-    stock: Number(r.stock||0),
-    min: Number(r.min||r.minimo||0),
-    categoria: String(r.categoria||r.cat||"General").trim(),
-    ubicacion: String(r.ubicacion||"").trim(),
-    unidad: String(r.unidad||"").trim()
-  });
 
   let data = [];
   try{
-    const api = await GET('inventario', {cache:false});
-    if(Array.isArray(api) && api.length){
-      data = api.map(normItem).filter(x=>x.ref || x.desc);
-    }
-  }catch(_e){}
+    const api = await GET('inventario');
+    if (Array.isArray(api)) data = api;
+  }catch(_e){
+    data = [];
+  }
 
-  // Fallback: CSV del repo (repuestos.csv) si la hoja está vacía
-  if(!data.length){
+  if (!Array.isArray(data) || !data.length){
     try{
-      const res = await fetch('./repuestos.csv', {cache:"no-store"});
+      const res = await fetch('./repuestos.csv', {cache:'no-store'});
       if(res.ok){
         const txt = await res.text();
-        const rows = parseCSV(txt).map(normItem).filter(x=>x.ref || x.desc);
-        if(rows.length) data = rows;
+        const parsed = (function parseLocalCSV(s){
+          const stripBOM = t => (t||'').replace(/^\uFEFF/,'');
+          const raw = stripBOM(s||'').split(/\r?\n/).filter(l=>l.trim());
+          if(!raw.length) return [];
+
+          const sep = ((head)=>{
+            const c = (head.match(/,/g)||[]).length;
+            const sc= (head.match(/;/g)||[]).length;
+            return sc>c?';':',';
+          })(raw[0]);
+
+          const headers = raw[0].split(sep).map(h=>stripBOM(h).trim().toLowerCase());
+          const normNum = v => Number(String(v??'0').replace(',','.'))||0;
+
+          const rows = [];
+          for (let i=1;i<raw.length;i++){
+            const cols = raw[i].split(sep).map(c=>c.trim());
+            const o={}; headers.forEach((h,ix)=>o[h]=cols[ix]??'');
+            const ref   = o.ref || o.referencia || o.codigo || '';
+            const desc  = o.desc || o.descripcion || o.nombre || '';
+            if(!ref && !desc) continue;
+            rows.push({
+              ref,
+              codigo: o.codigo || ref,
+              desc,
+              stock: normNum(o.stock),
+              min:   normNum(o.min || o['stock_min']),
+              categoria: o.categoria || 'General',
+              subcategoria: o.subcategoria || 'Sin subcategoría',
+              ubicacion: o.ubicacion || '',
+              unidad: o.unidad || ''
+            });
+          }
+
+          const byCat = {};
+          rows.forEach(it=>{
+            const c = it.categoria||'General';
+            if(!byCat[c]) byCat[c] = [];
+            byCat[c].push(it);
+          });
+          return Object.keys(byCat).sort((a,b)=>a.localeCompare(b,'es')).map(c=>({
+            categoria:c, items: byCat[c]
+          }));
+        })(txt);
+        if (parsed.length) data = parsed;
       }
     }catch(_e){}
   }
 
-  // Render plano por categorías (pero sin “píldoras raras”)
-  const byCat = {};
-  data.forEach(it=>{
-    const cat = it.categoria || "General";
-    if(!byCat[cat]) byCat[cat] = [];
-    byCat[cat].push(it);
-  });
+  _invRaw = data;
 
-  const cats = Object.keys(byCat).sort((a,b)=> a.localeCompare(b,'es'));
-  host.innerHTML = cats.map(cat=>{
-    const items = byCat[cat];
+  function renderItem(i){
+    const ref = i.ref || i.codigo || '';
     return `
-      <article class="card" style="margin-bottom:10px">
-        <header style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap">
-          <strong>${cat}</strong>
-          <span class="badge">${items.length}</span>
+      <article class="card">
+        <header style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <strong>${ref}</strong>
+          <span class="badge" style="font-size:11px">${i.stock ?? '-'}</span>
         </header>
-        <div style="margin-top:8px;display:grid;gap:8px">
-          ${items.slice(0,60).map(it=>`
-            <div class="row">
-              <div style="min-width:92px"><strong>${it.ref||"-"}</strong></div>
-              <div style="flex:1;color:#64748b">${it.desc||""}</div>
-              <div style="min-width:72px;text-align:right"><span class="badge">Stock ${Number(it.stock||0)}</span></div>
-            </div>
-          `).join('')}
-          ${items.length>60 ? `<div style="color:#64748b;font-size:12px">Mostrando 60 / ${items.length}. Usa el buscador para afinar.</div>` : ``}
+        <p style="margin:.5rem 0">${i.desc || ''}</p>
+        <div class="qty" style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn" type="button" data-inv="${ref}" data-delta="+1">+1</button>
+          <button class="btn" type="button" data-inv="${ref}" data-delta="+10">+10</button>
+          <button class="btn" type="button" data-inv="${ref}" data-delta="+100">+100</button>
+          <button class="btn" type="button" data-inv="${ref}" data-delta="-1">-1</button>
+          <button class="btn" type="button" data-inv="${ref}" data-delta="-10">-10</button>
+          <button class="btn" type="button" data-inv="${ref}" data-delta="-100">-100</button>
         </div>
       </article>`;
-  }).join('') || '<div style="color:#64748b">Inventario vacío</div>';
-
-  // Guarda raw para el buscador inteligente de repuestos
-  window._invRaw = data;
-
-  // Si hay token (mantenimiento/compras) y la hoja está vacía, ofrecemos importar al backend (1 click)
-  const canImport = !!tok && hasPerm('viewRepuestos'); // permiso amplio
-  if(canImport && data.length){
-    const btn = document.getElementById("invImportBtn");
-    if(btn){
-      btn.disabled = false;
-      btn.onclick = async ()=>{
-        btn.disabled = true;
-        try{
-          const r = await POST({res:"inv", fn:"import", token:tok, items:data});
-          if(!r.ok) alert(r.error||"No se pudo importar");
-          else alert(`Importados: ${r.importados||0}`);
-        }catch{ alert("Error de red"); }
-        btn.disabled = false;
-      };
-    }
   }
-}
 
+  const htmlCats = (data||[]).map(cat=>{
+    const nombreCat = cat.categoria || 'Sin categoría';
+    const bySub = {};
+    (cat.items||[]).forEach(it=>{
+      const sc = String(it.subcategoria || 'Sin subcategoría');
+      if(!bySub[sc]) bySub[sc] = [];
+      bySub[sc].push(it);
+    });
+    const subsHtml = Object.keys(bySub)
+      .sort((a,b)=> a.localeCompare(b,'es'))
+      .map(sc=>`
+        <details style="margin-top:8px">
+          <summary style="font-weight:800;color:#334155">${sc}</summary>
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:8px">
+            ${bySub[sc].map(renderItem).join('')}
+          </div>
+        </details>`
+      ).join('');
+
+    return `
+      <details>
+        <summary style="font-weight:900">${nombreCat}${(!Array.isArray(_invRaw) || !_invRaw.length) ? ' · vista temporal' : ''}</summary>
+        ${subsHtml || '<div style="color:#64748b;margin:.5rem 0 0 1rem">Sin subcategorías</div>'}
+      </details>`;
+  }).join('');
+
+  host.innerHTML = htmlCats || '<div style="color:#64748b">Inventario vacío</div>';
+
+  if (typeof invRenderAlerts === 'function') invRenderAlerts();
+  try{ window.__INV_ALL = Array.isArray(data) ? data : []; }catch(_e){}
+  setupInvSuggest();
+}
 
 /* =========================================================
    ALERTAS DE STOCK MÍNIMO + DATALIST EQUIPOS + IMPORT CSV
@@ -3047,47 +3150,6 @@ async function reqLoad(){
 }
 
 // alias para el router
-
-/* ==================== INVENTARIO · BUSCADOR (sin recarga) ==================== */
-function invFilterAndRender(q){
-  const host = document.getElementById('invCats');
-  if(!host) return;
-  const all = Array.isArray(window._invRaw) ? window._invRaw : [];
-  const norm = (s)=> String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
-  const qq = norm(q);
-  const list = !qq ? all : all.filter(it=>{
-    const hay = norm(`${it.ref} ${it.desc} ${it.categoria} ${it.ubicacion}`);
-    return hay.includes(qq);
-  });
-
-  // Re-render simple (sin agrupar si hay búsqueda)
-  if(qq){
-    host.innerHTML = list.map(it=>`
-      <article class="card">
-        <div class="row" style="align-items:flex-start">
-          <div style="min-width:92px"><strong>${it.ref||"-"}</strong></div>
-          <div style="flex:1">
-            <div>${it.desc||""}</div>
-            <div style="font-size:12px;color:#64748b">${it.categoria||"General"} ${it.ubicacion?("· "+it.ubicacion):""}</div>
-          </div>
-          <div style="min-width:72px;text-align:right"><span class="badge">Stock ${Number(it.stock||0)}</span></div>
-        </div>
-      </article>
-    `).join('') || '<div style="color:#64748b">Sin coincidencias</div>';
-  }else{
-    // si no hay búsqueda, vuelve a cargar agrupado
-    invLoad();
-  }
-}
-
-document.getElementById("invSearchForm")?.addEventListener("submit", (e)=>{
-  e.preventDefault();
-  invFilterAndRender(document.getElementById("invSearch")?.value || "");
-});
-document.getElementById("invSearch")?.addEventListener("input", (e)=>{
-  invFilterAndRender(e.target.value || "");
-});
-
 function loadRepuestos(){ return reqLoad(); }
 
 /* ==================== ÓRDENES DE TRABAJO ==================== */
@@ -3444,75 +3506,6 @@ document.getElementById('eqForm')?.addEventListener('submit',(e)=>{
   if(!id) return alert('Escribe o elige un equipo');
   fichaRender(id);
 });
-
-/* ==================== BUSCADOR VIVO · PRODUCCIÓN (EQUIPOS) ==================== */
-function updateEqMatches(){
-  const box = document.getElementById("eqMatches");
-  const q = (document.getElementById("eqQuery")?.value || "").trim();
-  if(!box) return;
-
-  const norm = (s)=> String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
-  const qq = norm(q);
-
-  if(!qq){
-    box.style.display = "none";
-    box.innerHTML = "";
-    return;
-  }
-
-  const data = Array.isArray(window.__EQUIPOS_ALL) ? window.__EQUIPOS_ALL : [];
-  const ranked = data
-    .map(it=>{
-      const id = norm(it.id);
-      const nm = norm(it.nombre);
-      let s = 0;
-      if(id === qq) s = 1000;
-      else if(id.startsWith(qq)) s = 850;
-      else if(nm && nm.startsWith(qq)) s = 800;
-      else if((id+" "+nm).includes(qq)) s = 650;
-      return {it, s};
-    })
-    .filter(o=>o.s>0)
-    .sort((a,b)=>b.s-a.s)
-    .slice(0,8)
-    .map(o=>o.it);
-
-  if(!ranked.length){
-    box.style.display = "block";
-    box.innerHTML = '<div style="color:#64748b;font-size:12px">Sin coincidencias</div>';
-    return;
-  }
-
-  box.style.display = "block";
-  box.innerHTML = ranked.map(it=>`
-    <button class="btn btn--ghost" type="button" style="width:100%;justify-content:flex-start;margin:6px 0"
-      data-eq-pick="${it.id}">
-      <strong style="min-width:92px;text-align:left">${it.id}</strong>
-      <span style="color:#64748b">${it.nombre||""}</span>
-    </button>
-  `).join("");
-}
-
-document.getElementById("eqQuery")?.addEventListener("input", updateEqMatches);
-document.getElementById("eqQuery")?.addEventListener("focus", updateEqMatches);
-document.getElementById("eqSelect")?.addEventListener("change", ()=>{
-  const v = document.getElementById("eqSelect")?.value || "";
-  if(v) document.getElementById("eqQuery").value = v;
-  updateEqMatches();
-});
-
-document.addEventListener("click", (e)=>{
-  const b = e.target.closest("[data-eq-pick]");
-  if(!b) return;
-  const id = b.getAttribute("data-eq-pick");
-  const q = document.getElementById("eqQuery"); 
-  if(q) q.value = id;
-  const s = document.getElementById("eqSelect");
-  if(s) s.value = id;
-  const box = document.getElementById("eqMatches");
-  if(box){ box.style.display="none"; box.innerHTML=""; }
-  fichaRender(id);
-});
 document.getElementById('grForm')?.addEventListener('submit',(e)=>{
   e.preventDefault();
   const id=(document.getElementById('grQuery')?.value||document.getElementById('grSelect')?.value||'').trim();
@@ -3757,7 +3750,31 @@ document.addEventListener('click', (e)=>{
 });
 
 /* ==================== ROUTER: INIT SECTION ==================== */
-async function initSection(h){
+function initSection(h){
+  // Si no está permitido entrar en una sección, forzamos a Dashboard (Invitado/Login)
+  const PERM_BY_HASH = {
+    equipos:"viewEquipos",
+    gruas:"viewEquipos",
+    auxiliares:"viewEquipos",
+    planificacion:"viewPlanificacion",
+    inventario:"viewInventario",
+    repuestos:"viewRepuestos",
+    incidencias:"viewIncidencias",
+    ot:"viewOT",
+    subcontratas:"viewSubcontratas",
+    mastertime:"verKPIs",
+    registro:"full",
+    paradas:"viewParadas",
+    historial:"viewHistorial"
+  };
+
+  const needed = PERM_BY_HASH[h] || null;
+  if (needed && !roleCan(needed)){
+    // invitado o rol sin permiso => no carga datos ni muestra páginas internas
+    if ((location.hash||"") !== "#dashboard") location.hash = "#dashboard";
+    h = "dashboard";
+  }
+
   if (h !== 'dashboardtv') stopCarousel();
 
   switch(h){
@@ -3774,31 +3791,27 @@ async function initSection(h){
       break;
 
     case 'auxiliares':
-      loadAux();
+      loadAuxiliares();
       break;
 
-    case 'incidencias':
-      (async ()=>{
-        if(!window.EQ_INDEX?.length && typeof buildEqIndex==='function'){
-          try{
-            const [equipos,gruas,auxiliares] = await Promise.all([
-              GET('equipos').catch(()=>[]),
-              GET('gruas').catch(()=>[]),
-              GET('auxiliares').catch(()=>[])
-            ]);
-            buildEqIndex({equipos,gruas,auxiliares});
-          }catch(_e){}
-        }
-        if (typeof loadIncidencias === 'function') loadIncidencias();
-      })();
+    case 'inventario':
+      invLoad();
       break;
 
     case 'repuestos':
-      loadRepuestos?.();
+      loadRepuestos();
       break;
 
-    case 'indicadores':
-      loadKPI();
+    case 'incidencias':
+      loadIncidencias();
+      break;
+
+    case 'ot':
+      otLoad();
+      break;
+
+    case 'subcontratas':
+      loadSubcontratas();
       break;
 
     case 'mastertime':
@@ -3825,13 +3838,13 @@ async function initSection(h){
 }
 
 window.addEventListener('hashchange', ()=> {
-  const h = (location.hash || '#equipos').slice(1);
+  const h = (location.hash || '#dashboard').slice(1);
   initSection(h);
 });
 
 document.addEventListener('DOMContentLoaded', ()=>{
   if (typeof applyRoleVisibility === 'function') applyRoleVisibility();
-  const h = (location.hash || '#equipos').slice(1);
+  const h = (location.hash || '#dashboard').slice(1);
   initSection(h);
 });
 
@@ -3889,7 +3902,7 @@ async function loadPlanificacion(){
   const tbody = document.getElementById('planBody');
   if (!tbody) return;
 
-  tbody.innerHTML = '';
+  tbody.innerHTML = '<tr><td colspan="7" style="opacity:.7;padding:12px">Cargando…</td></tr>';
 
   let data = [];
   try{
@@ -3899,40 +3912,144 @@ async function loadPlanificacion(){
     data = [];
   }
 
-  data.forEach(r=>{
-    const tr = document.createElement('tr');
+  // Normaliza campo máquina
+  data = (data||[]).map(r=>{
+    const maquina = (r.maquina ?? r.maq ?? r.MAQUINA ?? r.Maquina ?? '');
+    return { ...r, maquina };
+  });
 
-    const isDone = (String(r.terminado).toUpperCase() === "TRUE");
-    if (isDone){
-      tr.classList.add('done-row');
+  // Clasificación por pestañas principales
+  const norm = s => String(s||'').toLowerCase();
+  function planGroup(maquina){
+    const m = norm(maquina);
+    if (/trumpf|trump|laser|láser/.test(m)) return 'LÁSER TRUMP';
+    if (/mazak/.test(m)) return 'MÁQUINAS INDEPENDIENTES';
+    if (/kalt|kaltenbach|kdp|kdm|pintura|granall|sierra|hgg|tecoi|seguridad|vallad|autosorter|spg/.test(m)) return 'LINEA KALTENBACH';
+    return 'MÁQUINAS INDEPENDIENTES';
+  }
+
+  const groups = ['LINEA KALTENBACH','LÁSER TRUMP','MÁQUINAS INDEPENDIENTES'];
+  const byGroup = {};
+  groups.forEach(g=> byGroup[g]=[]);
+  data.forEach(r=> byGroup[planGroup(r.maquina)].push(r));
+
+  // Subpestañas (máquinas) por grupo
+  const machinesByGroup = {};
+  groups.forEach(g=>{
+    const set = new Map();
+    byGroup[g].forEach(r=>{
+      const k = String(r.maquina||'').trim();
+      if(k) set.set(k, true);
+    });
+    machinesByGroup[g] = [...set.keys()];
+  });
+
+  // Selección por defecto
+  const DEFAULT_MAIN = 'LINEA KALTENBACH';
+  const DEFAULT_SUB  = (() => {
+    const subs = machinesByGroup[DEFAULT_MAIN] || [];
+    const hit = subs.find(x => /pintura/i.test(x));
+    return hit || subs[0] || '';
+  })();
+
+  let mainSel = (sessionStorage.getItem('plan_main') || DEFAULT_MAIN);
+  if(!groups.includes(mainSel)) mainSel = DEFAULT_MAIN;
+
+  let subSel  = (sessionStorage.getItem('plan_sub') || DEFAULT_SUB);
+  if(subSel && !(machinesByGroup[mainSel]||[]).includes(subSel)) subSel = DEFAULT_SUB;
+
+  // Render tabs UI
+  const mainWrap = document.getElementById('planMainTabs');
+  const subWrap  = document.getElementById('planSubTabs');
+  const hint     = document.getElementById('planHint');
+
+  function renderTabs(){
+    if(mainWrap){
+      mainWrap.innerHTML = groups.map(g=>`<button class="tabbtn" type="button" data-plan-main="${escapeHtml(g)}" aria-selected="${g===mainSel}">${escapeHtml(g)}</button>`).join('');
+    }
+    if(subWrap){
+      const subs = machinesByGroup[mainSel] || [];
+      subWrap.innerHTML = subs.map(s=>`<button class="tabbtn" type="button" data-plan-sub="${escapeHtml(s)}" aria-selected="${s===subSel}">${escapeHtml(s)}</button>`).join('') || '<span style="opacity:.7">Sin subpestañas</span>';
+    }
+    if(hint){
+      const total = (byGroup[mainSel]||[]).length;
+      hint.textContent = subSel ? `${mainSel} · ${subSel} · ${total} filas` : `${mainSel} · ${total} filas`;
+    }
+  }
+
+  function renderTable(){
+    const list = (byGroup[mainSel]||[]).filter(r=> !subSel || String(r.maquina||'').trim()===subSel);
+
+    if(!list.length){
+      tbody.innerHTML = '<tr><td colspan="7" style="opacity:.7;padding:12px">Sin datos para la selección</td></tr>';
+      return;
     }
 
-    const isInProcess = !isDone && (
-      String(r.en_proceso ?? r.enproceso ?? r.proceso ?? "").toUpperCase() === "TRUE" ||
-      String(r.en_proceso ?? r.enproceso ?? r.proceso ?? "") === "1" ||
-      String(r.en_proceso ?? r.enproceso ?? r.proceso ?? "").toUpperCase() === "SI"
-    );
-    if (isInProcess){
-      tr.classList.add('inprocess-row');
-    }
+    tbody.innerHTML = '';
+    list.forEach(r=>{
+      const tr = document.createElement('tr');
 
-    const alimClass = (String(r.alimentado).toUpperCase() === "TRUE") ? "cel-alim" : "";
+      const isDone = (String(r.terminado).toUpperCase() === "TRUE");
+      if (isDone) tr.classList.add('done-row');
 
-    tr.innerHTML = `
-      <td class="cel-maq ${alimClass}">${r.maquina || ""}</td>
-      <td>${r.input || ""}</td>
-      <td>${r.cliente || ""}</td>
-      <td>${r.deleg || ""}</td>
-      <td>${r.uds || ""}</td>
-      <td>${r.kgs || ""}</td>
-      <td>${r.output || ""}</td>
-      <td>${r.picking || ""}</td>
-      <td>${r.parte || ""}</td>
-      <td>${r.carga || ""}</td>
-      <td>${r.comentarios || ""}</td>
-    `;
+      const inProcFlag = (r.en_proceso ?? r.enproceso ?? r.proceso ?? "");
+      const isInProcess = !isDone && (
+        String(inProcFlag).toUpperCase() === "TRUE" ||
+        String(inProcFlag) === "1" ||
+        String(inProcFlag).toUpperCase() === "SI"
+      );
+      if (isInProcess) tr.classList.add('inprocess-row');
 
-    tbody.appendChild(tr);
+      const alimFlag = String(r.alimentado ?? r.alim ?? r.alimentado_ok ?? "");
+      if (String(alimFlag).toUpperCase() === "TRUE" || String(alimFlag)==="1" || String(alimFlag).toUpperCase()==="SI"){
+        tr.classList.add('fed-row');
+      }
+
+      const cols = [
+        r.maquina,
+        r.input ?? r.INPUT ?? '',
+        r.cliente ?? r.CLIENTE ?? '',
+        r.deleg ?? r.DELEG ?? '',
+        r.uds ?? r.UDS ?? '',
+        r.kgs ?? r.KGS ?? '',
+        r.output ?? r.OUTPUT ?? ''
+      ];
+
+      cols.forEach((c)=>{
+        const td = document.createElement('td');
+        td.textContent = (c ?? '').toString();
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  renderTabs();
+  renderTable();
+
+  // Click handlers
+  mainWrap?.addEventListener('click', (e)=>{
+    const b = e.target.closest('[data-plan-main]');
+    if(!b) return;
+    mainSel = b.getAttribute('data-plan-main');
+    sessionStorage.setItem('plan_main', mainSel);
+    subSel = '';
+    // auto default sub
+    const subs = machinesByGroup[mainSel] || [];
+    subSel = subs.find(x=>/pintura/i.test(x)) || subs[0] || '';
+    sessionStorage.setItem('plan_sub', subSel);
+    renderTabs();
+    renderTable();
+  });
+
+  subWrap?.addEventListener('click', (e)=>{
+    const b = e.target.closest('[data-plan-sub]');
+    if(!b) return;
+    subSel = b.getAttribute('data-plan-sub');
+    sessionStorage.setItem('plan_sub', subSel);
+    renderTabs();
+    renderTable();
   });
 }
 
