@@ -1340,11 +1340,12 @@ function currentRoleSlug(){
   return (localStorage.getItem(CDL_ROLE_KEY) || 'invitado').toLowerCase();
 }
 function roleCan(perm){
+  // Permiso vacío = público
+  if(!perm) return true;
   const slug = currentRoleSlug();
-  const r = ROLES.find(x=>x.slug === slug);
-  if (!r || !Array.isArray(r.perms)) return false;
-  // Permiso total (solo mantenimiento)
-  if (r.perms.includes("full")) return true;
+  const r = ROLE_PERMS[slug] || ROLE_PERMS.invitado;
+  if(!r || !Array.isArray(r.perms)) return false;
+  if(r.perms.includes("full")) return true;
   return r.perms.includes(perm);
 }
 
@@ -1469,7 +1470,7 @@ const POST = async (body)=>{
 
 /* ========= Service Worker (PWA) ========= */
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js");
+  navigator.serviceWorker.register("./sw.js?v=38");
   navigator.serviceWorker.ready.then(reg => {
     if (reg && reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
     reg.addEventListener("updatefound", () => {
@@ -1941,6 +1942,12 @@ function initHomeCarousel(){
   }
 
   document.addEventListener("DOMContentLoaded", ()=>{
+    // FASE 0: si NO hay token, el rol SIEMPRE es invitado (evita residuos)
+    const tok = localStorage.getItem(CDL_TOKEN_KEY) || "";
+    if(!tok){
+      localStorage.removeItem(CDL_TOKEN_KEY);
+      localStorage.setItem(CDL_ROLE_KEY, "invitado");
+    }
     buildNav();
     initHomeCarousel();
     markCurrent();
@@ -1957,27 +1964,26 @@ window.addEventListener("scroll", ()=>{
 
 /* ========= Visibilidad por rol ========= */
 function applyRoleVisibility(){
-  const showApproveStops = roleCan("approveStop");
-  const canSeeKPIs       = roleCan("verKPIs");
-  const rSlug            = currentRoleSlug();
+  const role = currentRoleSlug();
+  // Etiqueta de rol en cabecera
+  const roleChip = document.getElementById("roleChip");
+  if(roleChip) roleChip.textContent = roleLabel(role);
 
-  // Botones de aprobar paradas
-  document.querySelectorAll('[data-role="approveStop"]').forEach(el=>{
-    el.style.display = showApproveStops ? "" : "none";
-  });
+  // Menú lateral: oculto en invitado
+  const hamb = document.getElementById("hamb") || document.getElementById("btnBurger");
+  if(hamb) hamb.style.display = (role==="invitado") ? "none" : "";
 
-  // Indicadores (si existe en nav)
-  document.querySelectorAll('#navList a[href="#indicadores"]').forEach(a=>{
-    a.style.display = canSeeKPIs ? "" : "none";
-  });
+  // Render del menú según permisos
+  renderNav();
 
-  // Elementos admin (solo mantenimiento)
-  document.querySelectorAll('[data-role="admin"]').forEach(el=>{
-    el.style.display = roleCan("full") ? "" : "none";
-  });
-
-  // Construye el menú según permisos
-  if (typeof buildNav === "function") buildNav();
+  // Invitado: siempre Dashboard
+  if(role==="invitado"){
+    if(!location.hash || location.hash==="#") location.hash="#dashboard";
+    const h = (location.hash || "#dashboard").slice(1);
+    if(h && h!=="dashboard" && h!=="dashboardtv"){
+      location.hash = "#dashboard";
+    }
+  }
 }
 
 function syncAuthUI(){
@@ -3843,6 +3849,12 @@ window.addEventListener('hashchange', ()=> {
 });
 
 document.addEventListener('DOMContentLoaded', ()=>{
+  // FASE 0: si NO hay token, el rol SIEMPRE es invitado
+  const tok = localStorage.getItem(CDL_TOKEN_KEY) || "";
+  if(!tok){
+    localStorage.removeItem(CDL_TOKEN_KEY);
+    localStorage.setItem(CDL_ROLE_KEY, "invitado");
+  }
   if (typeof applyRoleVisibility === 'function') applyRoleVisibility();
   const h = (location.hash || '#dashboard').slice(1);
   initSection(h);
