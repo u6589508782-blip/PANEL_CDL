@@ -1,0 +1,115 @@
+<div class="row g-3">
+  <div class="col-12">
+    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+      <div>
+        <h4 class="mb-0">OT (Órdenes de trabajo)</h4>
+        <div class="text-muted small">Solo Mantenimiento/Admin</div>
+      </div>
+
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <input id="otSearch" class="form-control" style="min-width:260px" placeholder="Buscar OT (equipo / tarea / estado)..." />
+        <select id="otEstado" class="form-select" style="min-width:180px">
+          <option value="">Todos</option>
+          <option value="abierta">Abierta</option>
+          <option value="finalizada">Finalizada</option>
+        </select>
+        <button id="btnOtNew" class="btn btn-primary">Nueva OT</button>
+        <button id="btnOtRefresh" class="btn btn-outline-secondary">Actualizar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th style="width:1px;"></th>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Equipo</th>
+                <th>Tipo</th>
+                <th>Tarea</th>
+                <th>Estado</th>
+                <th style="width:1px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="otTbody">
+              <tr><td colspan="8" class="text-muted p-3">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="small text-muted mt-2">
+          • Crear OT: equipo y tarea obligatorios.<br/>
+          • Finalizar OT: marca estado “finalizada” y guarda intervenido_por + descripción (si existen columnas en tu hoja).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nueva OT -->
+<div class="modal fade" id="modalOtNew" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nueva OT</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-12 col-md-6">
+            <label class="form-label">Equipo (obligatorio)</label>
+            <input id="otEquipo" class="form-control" placeholder="Equipo..." />
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Tipo</label>
+            <select id="otTipo" class="form-select">
+              <option value="">—</option>
+              <option value="mecánica">Mecánica</option>
+              <option value="hidráulica">Hidráulica</option>
+              <option value="neumática">Neumática</option>
+              <option value="electricidad">Electricidad</option>
+              <option value="proceso">Proceso</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Tarea (obligatorio)</label>
+            <textarea id="otTarea" class="form-control" rows="4" placeholder="Describe la intervención..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnOtCreate" class="btn btn-primary">Crear OT</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal finalizar OT -->
+<div class="modal fade" id="modalOtDone" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Finalizar OT</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2 text-muted small" id="otDoneInfo">—</div>
+        <label class="form-label">Intervenido por</label>
+        <input id="otDoneTec" class="form-control" placeholder="Nombre..." />
+        <label class="form-label mt-2">Descripción</label>
+        <textarea id="otDoneDesc" class="form-control" rows="3" placeholder="Qué se hizo..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="btnOtDoDone" class="btn btn-success">Finalizar</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>

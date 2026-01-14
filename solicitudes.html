@@ -1,0 +1,91 @@
+<div class="row g-3">
+  <div class="col-12">
+    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+      <div>
+        <h4 class="mb-0">Nuevas solicitudes</h4>
+        <div class="text-muted small">Crear solicitudes de repuestos y consumibles (para que Compras las apruebe/rechace)</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap align-items-center">
+        <button id="btnSolClear" class="btn btn-outline-secondary">Limpiar</button>
+        <button id="btnSolSend" class="btn btn-primary">Crear solicitud</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-12 col-md-4">
+            <label class="form-label">Tipo</label>
+            <select id="solTipo" class="form-select">
+              <option value="repuesto">Repuesto</option>
+              <option value="consumible">Consumible</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Cantidad</label>
+            <input id="solQty" type="number" min="1" step="1" class="form-control" value="1" />
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Urgencia</label>
+            <select id="solUrg" class="form-select">
+              <option value="">Normal</option>
+              <option value="alta">Alta</option>
+              <option value="muy alta">Muy alta</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-5">
+            <label class="form-label">Referencia / Código (obligatorio)</label>
+            <input id="solRef" class="form-control" placeholder="Ej.: SMPS-24V-10A / 12345" />
+          </div>
+          <div class="col-12 col-md-7">
+            <label class="form-label">Nombre / Descripción</label>
+            <input id="solNombre" class="form-control" placeholder="Ej.: Fuente 24V 10A / Aceite corte..." />
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Equipo / Zona</label>
+            <input id="solEquipo" class="form-control" placeholder="Ej.: Kaltenbach - Pintura / Mazak FG-400..." />
+            <div class="form-text">Opcional pero recomendable para priorizar y entender el uso.</div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Comentario (opcional)</label>
+            <textarea id="solObs" class="form-control" rows="4" placeholder="Motivo, detalle técnico, enlace, etc."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="mb-2">Cómo funciona</h6>
+        <div class="small text-muted">
+          • Esto crea una solicitud en la hoja <b>repuestos</b> (backend) con el campo <b>tipo</b> = repuesto o consumible.<br/>
+          • Compras/Admin verá la solicitud en la página “Repuestos” y podrá <b>aprobar/rechazar/planificar</b>.<br/>
+          • Si quieres, luego hacemos una hoja “solicitudes” separada y endpoints específicos, pero ahora ya queda todo registrado y operativo.
+        </div>
+
+        <hr/>
+
+        <div class="small">
+          <div class="fw-semibold mb-1">Atajos</div>
+          <ul class="mb-0">
+            <li>Enter en “Referencia” → intenta crear si lo básico está relleno</li>
+            <li>“Limpiar” deja el formulario listo para otra solicitud</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-info mt-3 mb-0">
+      <div class="small">
+        Permisos: Producción/Mantenimiento/Compras/Admin pueden crear solicitudes.
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,142 @@
+
+<div class="row g-3">
+  <div class="col-12">
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <h3 class="m-0">Incidencias</h3>
+      <span class="text-muted small" id="incInfo"></span>
+      <div class="ms-auto d-flex gap-2">
+        <button class="btn btn-primary btn-sm" id="btnIncOpenCreate" type="button">Crear incidencia</button>
+        <button class="btn btn-outline-secondary btn-sm" id="btnIncReload" type="button">Recargar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-12 col-md-3">
+            <label class="form-label small text-muted">Equipo</label>
+            <input class="form-control form-control-sm" id="fEquipo" placeholder="Ej: KDP3, Pintura…">
+          </div>
+          <div class="col-12 col-md-3">
+            <label class="form-label small text-muted">Tipo</label>
+            <select class="form-select form-select-sm" id="fTipo">
+              <option value="">(todos)</option>
+              <option>hidráulica</option>
+              <option>neumática</option>
+              <option>electricidad</option>
+              <option>mecánica</option>
+              <option>proceso de corte</option>
+              <option>fabricación</option>
+              <option>otros</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label small text-muted">Estado</label>
+            <select class="form-select form-select-sm" id="fEstado">
+              <option value="">(todos)</option>
+              <option value="abierta">abierta</option>
+              <option value="cerrada">cerrada</option>
+              <option value="pendiente">pendiente</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label small text-muted">Desde</label>
+            <input class="form-control form-control-sm" id="fDesde" type="date">
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label small text-muted">Hasta</label>
+            <input class="form-control form-control-sm" id="fHasta" type="date">
+          </div>
+
+          <div class="col-12 col-md-8">
+            <label class="form-label small text-muted">Buscar</label>
+            <input class="form-control form-control-sm" id="fQ" placeholder="Texto libre (ID, resumen, descripción…)">
+          </div>
+          <div class="col-12 col-md-4 d-flex align-items-end gap-2">
+            <button class="btn btn-outline-primary btn-sm w-100" id="btnIncSearch" type="button">Aplicar filtros</button>
+            <button class="btn btn-outline-secondary btn-sm" id="btnIncClear" type="button">Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex align-items-center">
+        <b>Resultados</b>
+        <span class="text-muted small ms-2" id="incCount"></span>
+      </div>
+      <div class="card-body">
+        <div class="card-grid" id="incGrid">
+          <div class="text-muted">Cargando…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="incCreateModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Crear incidencia</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-12 col-md-4">
+            <label class="form-label">Tipo de activo</label>
+            <select class="form-select" id="incSemTipo">
+              <option value="equipos">Equipos</option>
+              <option value="gruas">Puentes grúa</option>
+              <option value="auxiliares">Auxiliares</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-8">
+            <label class="form-label">Equipo</label>
+            <select class="form-select" id="incSemId"></select>
+            <div class="form-text">Este equipo se usará para actualizar el semáforo automáticamente.</div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Semáforo</label>
+            <select class="form-select" id="incSemEstado">
+              <option value="verde">Verde (marcha)</option>
+              <option value="amarillo">Amarillo (restricción)</option>
+              <option value="rojo">Rojo (parada)</option>
+              <option value="azul">Azul (reparación)</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-8">
+            <label class="form-label">Tipo de incidencia</label>
+            <select class="form-select" id="incTipo">
+              <option>hidráulica</option>
+              <option>neumática</option>
+              <option>electricidad</option>
+              <option>mecánica</option>
+              <option>proceso de corte</option>
+              <option>fabricación</option>
+              <option>otros</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Descripción (obligatoria)</label>
+            <textarea class="form-control" id="incDesc" rows="3" placeholder="Describe la incidencia…"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Resumen (opcional)</label>
+            <input class="form-control" id="incResumen" placeholder="Si lo dejas vacío, se autogenera con la descripción.">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+        <button class="btn btn-primary" id="btnIncCreate" type="button">Crear</button>
+      </div>
+    </div>
+  </div>
+</div>
