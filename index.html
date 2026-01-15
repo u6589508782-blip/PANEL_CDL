@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>CDL · CMMS</title>
+
+  <!-- Estilos corporativos -->
+  <link rel="stylesheet" href="assets/style.css" />
+
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Iconos (ya existen en tu repo a mismo nivel que index) -->
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+</head>
+
+<body>
+
+  <!-- =========================
+       CABECERA
+       ========================= -->
+  <header class="header">
+    <div class="header-left"></div>
+
+    <div class="header-center">
+      <img src="logo-cdl.png" alt="CDL" class="logo-cdl" />
+    </div>
+
+    <div class="header-right"></div>
+  </header>
+
+  <!-- =========================
+       MENÚ LATERAL
+       ========================= -->
+  <nav id="sideMenu" class="side-menu">
+    <!-- El menú se construye dinámicamente desde app.js según rol -->
+  </nav>
+
+  <!-- =========================
+       CONTENEDOR DE VISTAS
+       ========================= -->
+  <main id="viewHost" class="view-host">
+    <!-- Aquí se cargan las vistas de /views/*.html -->
+  </main>
+
+  <!-- =========================
+       FOOTER (opcional)
+       ========================= -->
+  <footer class="footer">
+    <img src="angular.png" alt="Angular CDL" class="angular-logo" />
+  </footer>
+
+  <!-- =========================
+       SCRIPT PRINCIPAL
+       ========================= -->
+  <script>
+    /* API_BASE DEFINITIVA */
+    window.API_BASE = "https://script.google.com/macros/s/AKfycbznYQB1_g_jrjPo9ryj-MCVL59D2KL_LKm8FO5c_hVokcBI0RDyXYEFPloP1Try3vE/exec";
+  </script>
+
+  <script src="assets/app.js" defer></script>
+
+  <!-- =========================
+       SERVICE WORKER
+       ========================= -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      });
+    }
+  </script>
+
+</body>
+</html>
