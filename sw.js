@@ -1,5 +1,5 @@
-/* CDL · PWA Service Worker — v53 (JS/CSS network-first + HTML network-first) */
-const SW_VERSION = 'v53';
+/* CDL · PWA Service Worker — v54 (JS/CSS network-first + HTML network-first) */
+const SW_VERSION = 'v54';
 const CACHE_STATIC = `cdl-static-${SW_VERSION}`;
 const CACHE_PAGES  = `cdl-pages-${SW_VERSION}`;
 
