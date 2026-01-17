@@ -1,5 +1,5 @@
-/* CDL · PWA Service Worker — v49 (robust precache + assets) */
-const SW_VERSION = 'v49';
+/* CDL · PWA Service Worker — v50 (robust precache + assets) */
+const SW_VERSION = 'v50';
 const CACHE_STATIC = `cdl-static-${SW_VERSION}`;
 const CACHE_PAGES  = `cdl-pages-${SW_VERSION}`;
 
