@@ -28,6 +28,15 @@
     $$("#apiBaseLabel").forEach((el) => (el.textContent = API_BASE || "—"));
   }
 
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
   function showAlert(msg, type = "danger") {
     const host = $("#appAlert");
     if (!host) return;
@@ -42,15 +51,6 @@
   function clearAlert() {
     const host = $("#appAlert");
     if (host) host.innerHTML = "";
-  }
-
-  function escapeHtml(s) {
-    return s
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
   }
 
   function setHeaderUser() {
@@ -73,6 +73,26 @@
   }
 
   // ---------- API ----------
+  function asJsonOrThrow(text, contextLabel) {
+    // Apps Script, cuando algo falla, a veces devuelve HTML (una página).
+    const t = String(text ?? "");
+    const looksHtml = /^\s*</.test(t) && /<html|<!doctype/i.test(t);
+    if (looksHtml) {
+      throw new Error(
+        `${contextLabel}: la API ha devuelto HTML (no JSON). ` +
+        `Esto suele ser token inválido/permisos/implementación errónea.`
+      );
+    }
+
+    try {
+      return JSON.parse(t);
+    } catch {
+      // Si no es HTML pero tampoco es JSON, también lo tratamos como error.
+      const snippet = t.slice(0, 220).replace(/\s+/g, " ").trim();
+      throw new Error(`${contextLabel}: respuesta NO es JSON. Inicio: "${snippet}"`);
+    }
+  }
+
   async function apiGet(path, params = {}) {
     if (!API_BASE) throw new Error("API_BASE vacío en index.html");
 
@@ -88,12 +108,12 @@
     const res = await fetch(url.toString(), { method: "GET", cache: "no-store" });
     const text = await res.text();
 
-    let json;
-    try { json = JSON.parse(text); } catch (_) { json = null; }
+    if (!res.ok) throw new Error(`HTTP ${res.status} en GET ${path}`);
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = asJsonOrThrow(text, `GET ${path}`);
+
     if (json && json.ok === false) throw new Error(json.error || "Error API");
-    return json ?? text;
+    return json;
   }
 
   async function apiPost(bodyObj) {
@@ -106,12 +126,13 @@
     });
 
     const text = await res.text();
-    let json;
-    try { json = JSON.parse(text); } catch (_) { json = null; }
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status} en POST`);
+
+    const json = asJsonOrThrow(text, "POST");
+
     if (json && json.ok === false) throw new Error(json.error || "Error API");
-    return json ?? text;
+    return json;
   }
 
   // ---------- Auth ----------
@@ -149,39 +170,12 @@
     state.boot = null;
     setHeaderUser();
     buildMenu([]);
-    $("#viewHost").innerHTML = "";
+    const host = $("#viewHost");
+    if (host) host.innerHTML = "";
     showAlert("Sesión cerrada.", "secondary");
   }
 
   // ---------- Bootstrap / menu / views ----------
-  async function bootstrapLoad() {
-    clearAlert();
-
-    if (!state.token) throw new Error("No hay token. Inicia sesión.");
-
-    const boot = await apiGet("bootstrap", { token: state.token });
-
-    // Code.gs devuelve: {me:{usuario, rol}, perms:{pages, can}, ...}
-    state.boot = boot;
-    state.me = boot?.me || { usuario: "", rol: "" };
-    state.perms = boot?.perms || null;
-
-    setHeaderUser();
-
-    const pages = (state.perms && state.perms.pages) ? state.perms.pages : [];
-    buildMenu(pages);
-
-    // Abrir vista por defecto: planificacion (si existe)
-    const defaultPage = pages.includes("planificacion") ? "planificacion" : (pages[0] || "");
-    if (defaultPage) await openPage(defaultPage);
-
-    // Cerrar modal si estaba abierto
-    const modal = getLoginModal();
-    if (modal) modal.hide();
-
-    showAlert("Sesión iniciada.", "success");
-  }
-
   function pageLabel(page) {
     const map = {
       planificacion: "Planificación",
@@ -225,9 +219,13 @@
     });
   }
 
+  function viewUrlFor(page) {
+    // Construimos URL absoluta basada en la URL actual (compatible con GitHub Pages en subcarpeta)
+    return new URL(`views/${encodeURIComponent(page)}.html`, window.location.href).toString();
+  }
+
   async function openPage(page) {
     clearAlert();
-
     if (!page) return;
 
     // Marcar activo
@@ -238,16 +236,63 @@
     const host = $("#viewHost");
     if (!host) return;
 
-    // Cargar HTML de la vista
-    const url = `views/${encodeURIComponent(page)}.html`;
+    const url = viewUrlFor(page);
+
     const r = await fetch(url, { cache: "no-store" });
-    if (!r.ok) throw new Error(`Load failed (${page})`);
+    if (!r.ok) {
+      throw new Error(`Load failed (${page}) · HTTP ${r.status} · ${url}`);
+    }
 
     const html = await r.text();
     host.innerHTML = html;
 
-    // Si en el futuro añades inicializadores por vista:
+    // Hook futuro por vista (si lo decides más adelante)
     // if (window.CDL_VIEWS?.[page]?.init) window.CDL_VIEWS[page].init({ state, apiGet, apiPost });
+  }
+
+  function assertBootstrapShape(boot) {
+    const pages = boot?.perms?.pages;
+    if (!boot || typeof boot !== "object") {
+      throw new Error("Bootstrap inválido (no es un objeto).");
+    }
+    if (!boot.me || typeof boot.me !== "object") {
+      throw new Error("Bootstrap inválido (falta 'me').");
+    }
+    if (!boot.perms || typeof boot.perms !== "object") {
+      throw new Error("Bootstrap inválido (falta 'perms').");
+    }
+    if (!Array.isArray(pages)) {
+      throw new Error("Bootstrap inválido (perms.pages no es array).");
+    }
+    return pages;
+  }
+
+  async function bootstrapLoad() {
+    clearAlert();
+
+    if (!state.token) throw new Error("No hay token. Inicia sesión.");
+
+    const boot = await apiGet("bootstrap", { token: state.token });
+
+    // Validación fuerte para no quedarnos “a medias”
+    const pages = assertBootstrapShape(boot);
+
+    state.boot = boot;
+    state.me = boot?.me || { usuario: "", rol: "" };
+    state.perms = boot?.perms || null;
+
+    setHeaderUser();
+    buildMenu(pages);
+
+    // Vista por defecto (siempre que exista)
+    const defaultPage = pages.includes("planificacion") ? "planificacion" : (pages[0] || "");
+    if (defaultPage) await openPage(defaultPage);
+
+    // Cerrar modal si estaba abierto
+    const modal = getLoginModal();
+    if (modal) modal.hide();
+
+    showAlert("Sesión iniciada.", "success");
   }
 
   // ---------- Init ----------
@@ -265,18 +310,16 @@
       });
     }
 
-    // Login modal (botón usuario)
+    // Botón usuario: si no hay token, abrimos modal
     const btnOpenLogin = $("#btnOpenLogin");
     if (btnOpenLogin) {
       btnOpenLogin.addEventListener("click", (ev) => {
-        // Si no hay token -> abrir modal
         if (!state.token) {
           ev.preventDefault();
           ev.stopPropagation();
           const m = getLoginModal();
           if (m) m.show();
         }
-        // Si hay token, dejamos que funcione el dropdown normal
       });
     }
 
@@ -303,13 +346,26 @@
       try {
         await bootstrapLoad();
       } catch (e) {
-        // Token caducado o inválido
+        // Token caducado / inválido / o la API devolvió HTML
         saveToken("");
-        showAlert(`Sesión caducada o inválida: ${e.message || e}`, "warning");
+        state.me = { usuario: "", rol: "" };
+        state.perms = null;
+        state.boot = null;
+        setHeaderUser();
+        buildMenu([]);
+        const host = $("#viewHost");
+        if (host) host.innerHTML = "";
+
+        showAlert(`Sesión no válida o carga fallida: ${e.message || e}`, "warning");
       }
     } else {
-      // Sin token, abre planificación como placeholder si existiera, o no carga nada.
+      // Sin token: cargamos la vista planificacion como “pantalla inicial” (aunque esté vacía/placeholder)
       buildMenu([]);
+      try {
+        await openPage("planificacion");
+      } catch {
+        // Si no existe la vista, no hacemos nada.
+      }
     }
   }
 
