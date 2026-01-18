@@ -31,6 +31,7 @@
       <img src="logo-cdl.png" alt="CDL" class="logo-cdl" />
     </div>
 
+    <!-- Usuario / sesión -->
     <div class="header-right dropdown">
       <button id="btnOpenLogin" class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
         <span id="meUser">Usuario</span>
@@ -40,7 +41,14 @@
           Rol: <strong id="badgeRole">—</strong>
         </li>
         <li><hr class="dropdown-divider"></li>
-        <li>
+
+        <!-- Visible cuando NO hay sesión -->
+        <li id="liLogin">
+          <button id="btnShowLogin" class="dropdown-item" type="button">Entrar</button>
+        </li>
+
+        <!-- Visible cuando SÍ hay sesión -->
+        <li id="liLogout">
           <button id="btnLogout" class="dropdown-item" type="button">Cerrar sesión</button>
         </li>
       </ul>
