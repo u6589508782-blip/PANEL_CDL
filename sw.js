@@ -1,9 +1,9 @@
-/* CDL · PWA Service Worker — v54 (JS/CSS network-first + HTML network-first) */
-const SW_VERSION = 'v54';
+/* CDL · PWA Service Worker — v58 (robusto: precache tolerante + HTML/JS/CSS network-first) */
+const SW_VERSION = 'v58';
 const CACHE_STATIC = `cdl-static-${SW_VERSION}`;
 const CACHE_PAGES  = `cdl-pages-${SW_VERSION}`;
 
-/* Precache SOLO de ficheros que están en la raíz (ajusta según tu repo) */
+/* Precache: lista “deseada”. Si falta algo, NO debe romper la instalación */
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -16,19 +16,16 @@ const CORE_ASSETS = [
   './logo_mantenimiento.png',
   './angular.png',
 
-  // Iconos
+  // Iconos (mínimos)
   './apple-touch-icon.png',
   './icon-32.png',
   './icon-152.png',
   './icon-192.png',
   './icon-512-maskable.png',
 
-  // CSS/JS (IMPORTANTE: para evitar “app.js pegado”)
+  // CSS/JS (network-first para evitar “app.js pegado”, pero precache ayuda al arranque offline)
   './assets/style.css',
-  './assets/app.js',
-
-  // CSV inicial
-  './repuestos.csv'
+  './assets/app.js'
 ];
 
 const STATIC_EXT = /\.(?:png|jpg|jpeg|webp|gif|svg|ico|css|js|json|webmanifest|ttf|woff2?|pdf|csv)$/i;
@@ -42,16 +39,25 @@ function pathRelativeToScope(url) {
   return p.startsWith(SCOPE_PATH) ? p.slice(SCOPE_PATH.length) : p;
 }
 
+async function precacheSafely() {
+  const cache = await caches.open(CACHE_STATIC);
+
+  // Importante: NO usamos addAll() para que un fallo no tumbe todo el precache
+  for (const asset of CORE_ASSETS) {
+    try {
+      await cache.add(asset);
+    } catch {
+      // Ignorar: si un asset no existe, no debe romper la instalación del SW
+    }
+  }
+
+  // Fallback mínimo garantizado
+  await cache.addAll(['./', './offline.html', './manifest.webmanifest']);
+}
+
 self.addEventListener('install', (e) => {
   self.skipWaiting();
-  e.waitUntil((async () => {
-    const cache = await caches.open(CACHE_STATIC);
-    try {
-      await cache.addAll(CORE_ASSETS);
-    } catch (err) {
-      await cache.addAll(['./', './offline.html', './manifest.webmanifest']);
-    }
-  })());
+  e.waitUntil(precacheSafely());
 });
 
 self.addEventListener('activate', (e) => {
