@@ -3,7 +3,10 @@
  * - Login POST: {res:'auth', fn:'login', user, pass}
  * - Bootstrap GET: ?path=bootstrap&token=...
  * - Menú dinámico desde perms.pages
- * - Carga vistas: /views/<page>.html
+ * - Carga vistas: /views/<page>.html (GitHub Pages subcarpeta OK)
+ * - IDs API base separados (Opción B):
+ *   - #apiBaseLabelMenu
+ *   - #apiBaseLabelModal
  * ========================================================= */
 
 (() => {
@@ -13,7 +16,6 @@
   const LS_TOKEN = "cdl_token_v4";
 
   const $ = (sel) => document.querySelector(sel);
-  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
   const state = {
     token: "",
@@ -24,11 +26,11 @@
 
   // ---------- UI helpers ----------
   function setApiBaseLabels() {
-    const a = API_BASE || "—";
-    const elMenu = $("#apiBaseLabelMenu");
-    const elModal = $("#apiBaseLabelModal");
-    if (elMenu) elMenu.textContent = a;
-    if (elModal) elModal.textContent = a;
+    const a = $("#apiBaseLabelMenu");
+    const b = $("#apiBaseLabelModal");
+    const v = API_BASE || "—";
+    if (a) a.textContent = v;
+    if (b) b.textContent = v;
   }
 
   function escapeHtml(s) {
@@ -63,6 +65,15 @@
     if (badgeRole) badgeRole.textContent = state.me.rol || "—";
   }
 
+  function updateAuthUi() {
+    const liLogin = $("#liLogin");
+    const liLogout = $("#liLogout");
+
+    const hasSession = !!state.token;
+    if (liLogin) liLogin.style.display = hasSession ? "none" : "";
+    if (liLogout) liLogout.style.display = hasSession ? "" : "none";
+  }
+
   function getOffcanvas() {
     const el = $("#sideMenu");
     if (!el || !window.bootstrap?.Offcanvas) return null;
@@ -77,20 +88,18 @@
 
   // ---------- API ----------
   function asJsonOrThrow(text, contextLabel) {
-    // Apps Script, cuando algo falla, a veces devuelve HTML (una página).
     const t = String(text ?? "");
     const looksHtml = /^\s*</.test(t) && /<html|<!doctype/i.test(t);
     if (looksHtml) {
       throw new Error(
         `${contextLabel}: la API ha devuelto HTML (no JSON). ` +
-        `Esto suele ser token inválido/permisos/implementación errónea.`
+        `Suele ser token inválido/caducado o URL de API mal puesta.`
       );
     }
 
     try {
       return JSON.parse(t);
     } catch {
-      // Si no es HTML pero tampoco es JSON, también lo tratamos como error.
       const snippet = t.slice(0, 220).replace(/\s+/g, " ").trim();
       throw new Error(`${contextLabel}: respuesta NO es JSON. Inicio: "${snippet}"`);
     }
@@ -114,7 +123,6 @@
     if (!res.ok) throw new Error(`HTTP ${res.status} en GET ${path}`);
 
     const json = asJsonOrThrow(text, `GET ${path}`);
-
     if (json && json.ok === false) throw new Error(json.error || "Error API");
     return json;
   }
@@ -133,7 +141,6 @@
     if (!res.ok) throw new Error(`HTTP ${res.status} en POST`);
 
     const json = asJsonOrThrow(text, "POST");
-
     if (json && json.ok === false) throw new Error(json.error || "Error API");
     return json;
   }
@@ -147,6 +154,7 @@
     state.token = String(t || "").trim();
     if (state.token) localStorage.setItem(LS_TOKEN, state.token);
     else localStorage.removeItem(LS_TOKEN);
+    updateAuthUi();
   }
 
   async function login(user, pass) {
@@ -223,10 +231,8 @@
   }
 
   function viewUrlFor(page) {
-    // GitHub Pages en subcarpeta (/PANEL_CDL/): forzamos base a la carpeta actual
-    // Ej: https://u6589508782-blip.github.io/PANEL_CDL/ + views/planificacion.html
-    const base = window.location.origin + window.location.pathname.replace(/[^/]*$/, "");
-    return base + "views/" + encodeURIComponent(page) + ".html";
+    // URL absoluta basada en la URL actual (GitHub Pages en subcarpeta OK)
+    return new URL(`views/${encodeURIComponent(page)}.html`, window.location.href).toString();
   }
 
   async function openPage(page) {
@@ -234,7 +240,7 @@
     if (!page) return;
 
     // Marcar activo
-    $$("#menuItems .list-group-item").forEach((x) => {
+    document.querySelectorAll("#menuItems .list-group-item").forEach((x) => {
       x.classList.toggle("active", x.dataset.page === page);
     });
 
@@ -250,25 +256,14 @@
 
     const html = await r.text();
     host.innerHTML = html;
-
-    // Hook futuro por vista (si lo decides más adelante)
-    // if (window.CDL_VIEWS?.[page]?.init) window.CDL_VIEWS[page].init({ state, apiGet, apiPost });
   }
 
   function assertBootstrapShape(boot) {
     const pages = boot?.perms?.pages;
-    if (!boot || typeof boot !== "object") {
-      throw new Error("Bootstrap inválido (no es un objeto).");
-    }
-    if (!boot.me || typeof boot.me !== "object") {
-      throw new Error("Bootstrap inválido (falta 'me').");
-    }
-    if (!boot.perms || typeof boot.perms !== "object") {
-      throw new Error("Bootstrap inválido (falta 'perms').");
-    }
-    if (!Array.isArray(pages)) {
-      throw new Error("Bootstrap inválido (perms.pages no es array).");
-    }
+    if (!boot || typeof boot !== "object") throw new Error("Bootstrap inválido (no es un objeto).");
+    if (!boot.me || typeof boot.me !== "object") throw new Error("Bootstrap inválido (falta 'me').");
+    if (!boot.perms || typeof boot.perms !== "object") throw new Error("Bootstrap inválido (falta 'perms').");
+    if (!Array.isArray(pages)) throw new Error("Bootstrap inválido (perms.pages no es array).");
     return pages;
   }
 
@@ -278,8 +273,6 @@
     if (!state.token) throw new Error("No hay token. Inicia sesión.");
 
     const boot = await apiGet("bootstrap", { token: state.token });
-
-    // Validación fuerte para no quedarnos “a medias”
     const pages = assertBootstrapShape(boot);
 
     state.boot = boot;
@@ -287,13 +280,12 @@
     state.perms = boot?.perms || null;
 
     setHeaderUser();
+    updateAuthUi();
     buildMenu(pages);
 
-    // Vista por defecto (siempre que exista)
     const defaultPage = pages.includes("planificacion") ? "planificacion" : (pages[0] || "");
     if (defaultPage) await openPage(defaultPage);
 
-    // Cerrar modal si estaba abierto
     const modal = getLoginModal();
     if (modal) modal.hide();
 
@@ -305,6 +297,7 @@
     setApiBaseLabels();
     loadToken();
     setHeaderUser();
+    updateAuthUi();
 
     // Menú hamburguesa
     const btnMenu = $("#btnMenu");
@@ -315,16 +308,12 @@
       });
     }
 
-    // Botón usuario: si no hay token, abrimos modal
-    const btnOpenLogin = $("#btnOpenLogin");
-    if (btnOpenLogin) {
-      btnOpenLogin.addEventListener("click", (ev) => {
-        if (!state.token) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          const m = getLoginModal();
-          if (m) m.show();
-        }
+    // Abrir modal desde el menú de usuario
+    const btnShowLogin = $("#btnShowLogin");
+    if (btnShowLogin) {
+      btnShowLogin.addEventListener("click", () => {
+        const m = getLoginModal();
+        if (m) m.show();
       });
     }
 
@@ -351,7 +340,6 @@
       try {
         await bootstrapLoad();
       } catch (e) {
-        // Token caducado / inválido / o la API devolvió HTML
         saveToken("");
         state.me = { usuario: "", rol: "" };
         state.perms = null;
@@ -360,16 +348,14 @@
         buildMenu([]);
         const host = $("#viewHost");
         if (host) host.innerHTML = "";
-
         showAlert(`Sesión no válida o carga fallida: ${e.message || e}`, "warning");
       }
     } else {
-      // Sin token: cargamos la vista planificacion como “pantalla inicial” (aunque esté vacía/placeholder)
       buildMenu([]);
       try {
         await openPage("planificacion");
       } catch {
-        // Si no existe la vista, no hacemos nada.
+        // si no existe la vista, nada
       }
     }
   }
