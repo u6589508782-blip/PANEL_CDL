@@ -130,9 +130,12 @@
   async function apiPost(bodyObj) {
     if (!API_BASE) throw new Error("API_BASE vacío en index.html");
 
+    // ✅ FIX CORS/PREFLIGHT:
+    // Apps Script WebApp no soporta OPTIONS (preflight).
+    // application/json dispara preflight; text/plain NO.
     const res = await fetch(API_BASE, {
       method: "POST",
-      headers: { "Content-Type": "application/json;charset=UTF-8" },
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },
       body: JSON.stringify(bodyObj || {})
     });
 
@@ -230,17 +233,12 @@
     });
   }
 
-  // ✅✅✅ FIX: viewUrlFor robusto para GitHub Pages subcarpeta + iOS/PWA
+  // ✅ FIX PATH views robusto para GH Pages + iOS/PWA
   function viewUrlFor(page) {
-    // Robusto para GitHub Pages en subcarpeta + iOS/PWA.
-    // Evita que al abrir /REPO (sin / final) se resuelva como /views/... (perdiendo /REPO/)
     const origin = window.location.origin;
     let basePath = window.location.pathname || "/";
 
-    // Si termina en .html, quitamos el fichero para quedarnos en el directorio.
     if (/\.html$/i.test(basePath)) basePath = basePath.replace(/[^/]+$/i, "");
-
-    // Si no termina en '/', lo forzamos para tratarlo como carpeta.
     if (!basePath.endsWith("/")) basePath += "/";
 
     return `${origin}${basePath}views/${encodeURIComponent(page)}.html`;
@@ -250,7 +248,6 @@
     clearAlert();
     if (!page) return;
 
-    // Marcar activo
     document.querySelectorAll("#menuItems .list-group-item").forEach((x) => {
       x.classList.toggle("active", x.dataset.page === page);
     });
@@ -312,7 +309,6 @@
     setHeaderUser();
     updateAuthUi();
 
-    // Menú hamburguesa
     const btnMenu = $("#btnMenu");
     if (btnMenu) {
       btnMenu.addEventListener("click", () => {
@@ -321,7 +317,6 @@
       });
     }
 
-    // Abrir modal desde el menú de usuario
     const btnShowLogin = $("#btnShowLogin");
     if (btnShowLogin) {
       btnShowLogin.addEventListener("click", () => {
@@ -330,7 +325,6 @@
       });
     }
 
-    // Botón login
     const btnLogin = $("#btnLogin");
     if (btnLogin) {
       btnLogin.addEventListener("click", async () => {
@@ -344,11 +338,9 @@
       });
     }
 
-    // Logout
     const btnLogout = $("#btnLogout");
     if (btnLogout) btnLogout.addEventListener("click", logout);
 
-    // Si ya hay token, intentamos bootstrap
     if (state.token) {
       try {
         await bootstrapLoad();
@@ -365,7 +357,6 @@
       }
     } else {
       buildMenu([]);
-      // opcional: carga inicial sin login (si existe la vista)
       try {
         await openPage("planificacion");
       } catch {
