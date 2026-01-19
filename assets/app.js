@@ -1,12 +1,8 @@
 /* =========================================================
  * CDL · Frontend (assets/app.js) — Compatible con Code.gs V4
- * - Login POST: {res:'auth', fn:'login', user, pass}
- * - Bootstrap GET: ?path=bootstrap&token=...
- * - Menú dinámico desde perms.pages
- * - Carga vistas: /views/<page>.html (GitHub Pages subcarpeta OK)
- * - IDs API base separados (Opción B):
- *   - #apiBaseLabelMenu
- *   - #apiBaseLabelModal
+ * - FIX Safari: POST como text/plain (evita preflight)
+ * - FIX GH Pages subcarpeta: viewUrlFor robusto
+ * - FIX Bootstrap: si falta boot.me, se rellena con datos del login
  * ========================================================= */
 
 (() => {
@@ -93,7 +89,7 @@
     if (looksHtml) {
       throw new Error(
         `${contextLabel}: la API ha devuelto HTML (no JSON). ` +
-          `Suele ser token inválido/caducado o URL de API mal puesta.`
+        `Suele ser token inválido/caducado o URL de API mal puesta.`
       );
     }
 
@@ -130,8 +126,7 @@
   async function apiPost(bodyObj) {
     if (!API_BASE) throw new Error("API_BASE vacío en index.html");
 
-    // ✅ FIX CORS/PREFLIGHT:
-    // Apps Script WebApp no soporta OPTIONS (preflight).
+    // ✅ Safari/CORS: Apps Script no maneja OPTIONS (preflight).
     // application/json dispara preflight; text/plain NO.
     const res = await fetch(API_BASE, {
       method: "POST",
@@ -140,7 +135,6 @@
     });
 
     const text = await res.text();
-
     if (!res.ok) throw new Error(`HTTP ${res.status} en POST`);
 
     const json = asJsonOrThrow(text, "POST");
@@ -163,15 +157,21 @@
   async function login(user, pass) {
     clearAlert();
 
+    const usuario = String(user || "").trim();
     const payload = {
       res: "auth",
       fn: "login",
-      user: String(user || "").trim(),
+      user: usuario,
       pass: String(pass || "")
     };
 
     const out = await apiPost(payload);
     if (!out?.ok || !out?.token) throw new Error(out?.error || "Login fallido");
+
+    // ✅ Guardamos ya quién es el usuario (fallback si bootstrap no trae me)
+    state.me.usuario = usuario || state.me.usuario || "";
+    state.me.rol = String(out.rol || state.me.rol || "").trim();
+    setHeaderUser();
 
     saveToken(out.token);
     await bootstrapLoad();
@@ -233,8 +233,8 @@
     });
   }
 
-  // ✅ FIX PATH views robusto para GH Pages + iOS/PWA
   function viewUrlFor(page) {
+    // ✅ GH Pages subcarpeta + Safari/PWA
     const origin = window.location.origin;
     let basePath = window.location.pathname || "/";
 
@@ -256,8 +256,8 @@
     if (!host) return;
 
     const url = viewUrlFor(page);
-
     const r = await fetch(url, { cache: "no-store" });
+
     if (!r.ok) {
       throw new Error(`Load failed (${page}) · HTTP ${r.status} · ${url}`);
     }
@@ -267,12 +267,11 @@
   }
 
   function assertBootstrapShape(boot) {
-    const pages = boot?.perms?.pages;
     if (!boot || typeof boot !== "object") throw new Error("Bootstrap inválido (no es un objeto).");
-    if (!boot.me || typeof boot.me !== "object") throw new Error("Bootstrap inválido (falta 'me').");
     if (!boot.perms || typeof boot.perms !== "object") throw new Error("Bootstrap inválido (falta 'perms').");
-    if (!Array.isArray(pages)) throw new Error("Bootstrap inválido (perms.pages no es array).");
-    return pages;
+    if (!Array.isArray(boot.perms.pages)) throw new Error("Bootstrap inválido (perms.pages no es array).");
+    // 'me' lo validamos después con fallback
+    return true;
   }
 
   async function bootstrapLoad() {
@@ -281,19 +280,29 @@
     if (!state.token) throw new Error("No hay token. Inicia sesión.");
 
     const boot = await apiGet("bootstrap", { token: state.token });
-    const pages = assertBootstrapShape(boot);
+    assertBootstrapShape(boot);
+
+    // ✅ FIX: si backend no trae boot.me, lo reconstruimos
+    if (!boot.me || typeof boot.me !== "object") {
+      boot.me = {
+        usuario: state.me.usuario || "usuario",
+        rol: state.me.rol || ""
+      };
+    } else {
+      boot.me.usuario = boot.me.usuario || state.me.usuario || "";
+      boot.me.rol = boot.me.rol || state.me.rol || "";
+    }
 
     state.boot = boot;
-    state.me = boot?.me || { usuario: "", rol: "" };
-    state.perms = boot?.perms || null;
+    state.me = boot.me;
+    state.perms = boot.perms;
 
     setHeaderUser();
     updateAuthUi();
-    buildMenu(pages);
+    buildMenu(boot.perms.pages);
 
-    const defaultPage = pages.includes("planificacion")
-      ? "planificacion"
-      : (pages[0] || "");
+    const pages = boot.perms.pages || [];
+    const defaultPage = pages.includes("planificacion") ? "planificacion" : (pages[0] || "");
     if (defaultPage) await openPage(defaultPage);
 
     const modal = getLoginModal();
@@ -357,11 +366,7 @@
       }
     } else {
       buildMenu([]);
-      try {
-        await openPage("planificacion");
-      } catch {
-        // nada
-      }
+      try { await openPage("planificacion"); } catch { /* nada */ }
     }
   }
 
