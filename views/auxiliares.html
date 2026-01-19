@@ -1,47 +1,31 @@
-<div class="row g-3">
-  <div class="col-12">
-    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
-      <div>
-        <h4 class="mb-0">Equipos auxiliares</h4>
-        <div class="text-muted small">Auxiliares + elevación y transporte · semáforo en tiempo real</div>
+<div class="container py-3">
+  <h1 class="h4 mb-2">Auxiliares</h1>
+  <p class="text-muted mb-3">Equipos auxiliares y útiles con estado.</p>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Categoría</label>
+          <select id="axCategoria" class="form-select"></select>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Semáforo</label>
+          <select id="axSemFilter" class="form-select">
+            <option value="">Todos</option>
+            <option value="marcha">Verde</option>
+            <option value="restriccion">Amarillo</option>
+            <option value="parada">Rojo</option>
+            <option value="reparacion">Azul</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4 d-flex gap-2">
+          <input id="axSearch" class="form-control" placeholder="Buscar...">
+          <button id="btnAxRefresh" class="btn btn-outline-secondary">↻</button>
+        </div>
       </div>
-
-      <div class="d-flex gap-2 align-items-center flex-wrap">
-        <input id="axSearch" class="form-control" style="min-width:280px" placeholder="Buscar auxiliar…" />
-        <button id="btnAxRefresh" class="btn btn-outline-secondary">Actualizar</button>
-      </div>
-    </div>
-  </div>
-  <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mt-2">
-  <div class="d-flex align-items-center gap-2 flex-wrap small">
-    <span class="text-muted">Semáforos:</span>
-    <span class="badge bg-success">Verde · Marcha</span>
-    <span class="badge bg-warning text-dark">Amarillo · Restricción</span>
-    <span class="badge bg-danger">Rojo · Parada</span>
-    <span class="badge bg-primary">Azul · Reparación</span>
-  </div>
-  <div class="d-flex align-items-center gap-2 flex-wrap">
-    <select class="form-select form-select-sm" style="min-width:220px" id="axSemFilter">
-      <option value="">Todos los estados</option>
-      <option value="marcha">Verde · Marcha</option>
-      <option value="restriccion">Amarillo · Restricción</option>
-      <option value="parada">Rojo · Parada</option>
-      <option value="reparacion">Azul · Reparación</option>
-    </select>
-  </div>
-</div>
-
-
-  <div class="col-12">
-    <div class="row g-2" id="axGrid">
-      <div class="col-12 text-muted p-3">Cargando…</div>
     </div>
   </div>
 
-  <div class="col-12">
-    <div class="small text-muted">
-      • “Crear incidencia” abre Incidencias con el auxiliar preseleccionado.<br/>
-      • Si tu rol permite modificar estado, verás botones rápidos de semáforo.
-    </div>
-  </div>
+  <div id="axContent"></div>
 </div>

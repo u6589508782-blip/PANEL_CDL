@@ -1,52 +1,31 @@
-<div class="row g-3">
-  <div class="col-12">
-    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
-      <div>
-        <h4 class="mb-0">Puentes grúa</h4>
-        <div class="text-muted small">Organizado por nave · semáforo en tiempo real</div>
-      </div>
+<div class="container py-3">
+  <h1 class="h4 mb-2">Puentes grúa</h1>
+  <p class="text-muted mb-3">Cada tarjeta representa un puente grúa.</p>
 
-      <div class="d-flex gap-2 align-items-center flex-wrap">
-        <select id="grNave" class="form-select" style="min-width:180px">
-          <option value="">Todas las naves</option>
-          <option value="nave 1">Nave 1</option>
-          <option value="nave 2">Nave 2</option>
-          <option value="nave 3">Nave 3</option>
-          <option value="nave 4">Nave 4</option>
-        </select>
-        <input id="grSearch" class="form-control" style="min-width:260px" placeholder="Buscar grúa…" />
-        <button id="btnGrRefresh" class="btn btn-outline-secondary">Actualizar</button>
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Nave</label>
+          <select id="grNave" class="form-select"></select>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Semáforo</label>
+          <select id="grSemFilter" class="form-select">
+            <option value="">Todos</option>
+            <option value="marcha">Verde</option>
+            <option value="restriccion">Amarillo</option>
+            <option value="parada">Rojo</option>
+            <option value="reparacion">Azul</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4 d-flex gap-2">
+          <input id="grSearch" class="form-control" placeholder="Buscar...">
+          <button id="btnGrRefresh" class="btn btn-outline-secondary">↻</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="col-12" id="grContent">
-    <div class="text-muted p-3">Cargando…</div>
-  </div>
-  <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mt-2">
-  <div class="d-flex align-items-center gap-2 flex-wrap small">
-    <span class="text-muted">Semáforos:</span>
-    <span class="badge bg-success">Verde · Marcha</span>
-    <span class="badge bg-warning text-dark">Amarillo · Restricción</span>
-    <span class="badge bg-danger">Rojo · Parada</span>
-    <span class="badge bg-primary">Azul · Reparación</span>
-  </div>
-  <div class="d-flex align-items-center gap-2 flex-wrap">
-    <select class="form-select form-select-sm" style="min-width:220px" id="grSemFilter">
-      <option value="">Todos los estados</option>
-      <option value="marcha">Verde · Marcha</option>
-      <option value="restriccion">Amarillo · Restricción</option>
-      <option value="parada">Rojo · Parada</option>
-      <option value="reparacion">Azul · Reparación</option>
-    </select>
-  </div>
-</div>
-
-
-  <div class="col-12">
-    <div class="small text-muted">
-      • “Crear incidencia” abre Incidencias con el equipo preseleccionado.<br/>
-      • Si tu rol permite modificar estado, verás botones rápidos de semáforo.
-    </div>
-  </div>
+  <div id="grContent"></div>
 </div>
