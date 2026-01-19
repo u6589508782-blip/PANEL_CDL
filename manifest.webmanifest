@@ -1,11 +1,11 @@
 {
   "name": "CDL · CMMS",
   "short_name": "CDL",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "theme_color": "#b80000",
   "icons": [
     {
       "src": "icon-192.png",
@@ -17,24 +17,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Planificación",
-      "url": "./#/planificacion"
-    },
-    {
-      "name": "Inventario",
-      "url": "./#/inventario"
-    },
-    {
-      "name": "Incidencias",
-      "url": "./#/incidencias"
-    },
-    {
-      "name": "Equipos",
-      "url": "./#/equipos"
     }
   ]
 }
