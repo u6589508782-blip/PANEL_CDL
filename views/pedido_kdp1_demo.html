@@ -1,0 +1,112 @@
+<div class="container py-3">
+  <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+    <h1 class="h4 m-0">Hoja de pedido · KDP1 (demo)</h1>
+    <button id="btnBackPedidos" type="button" class="btn btn-sm btn-outline-secondary">Volver a Pedidos</button>
+  </div>
+  <p class="text-muted mb-3">
+    Ejemplo visual de cómo se vería un pedido dentro de la web/app. Los datos son ficticios.
+  </p>
+
+  <div class="pedido-sheet">
+    <div class="pedido-head">
+      <div>
+        <div class="pedido-title">PEDIDO DE FABRICACIÓN</div>
+        <div class="pedido-sub">Máquina: <b>KDP1</b> · Estado: <b>Programado</b></div>
+      </div>
+      <div class="pedido-meta">
+        <div><span class="k">Picking</span> <span class="v">82022062</span></div>
+        <div><span class="k">Parte</span> <span class="v">01/02</span></div>
+        <div><span class="k">Carga</span> <span class="v">Camión 3</span></div>
+      </div>
+    </div>
+
+    <div class="pedido-grid">
+      <div class="blk">
+        <div class="lbl">Cliente</div>
+        <div class="val">ESMETAL</div>
+      </div>
+      <div class="blk">
+        <div class="lbl">Delegación</div>
+        <div class="val">Ciudad Real</div>
+      </div>
+      <div class="blk">
+        <div class="lbl">Pintura</div>
+        <div class="val"><span class="paint-dot paint-rojo"></span> ROJO</div>
+      </div>
+      <div class="blk">
+        <div class="lbl">Kilos totales</div>
+        <div class="val">7.013 kg</div>
+      </div>
+      <div class="blk">
+        <div class="lbl">INPUT</div>
+        <div class="val">ALMACÉN</div>
+      </div>
+      <div class="blk">
+        <div class="lbl">OUTPUT</div>
+        <div class="val">KDP1 → HGG</div>
+      </div>
+      <div class="blk span2">
+        <div class="lbl">Observaciones</div>
+        <div class="val">Taladrar en KDP1 para reducir tiempo. Cortes especiales en HGG.</div>
+      </div>
+    </div>
+
+    <div class="pedido-sign">
+      <div class="sig">
+        <div class="lbl">Alimentado por</div>
+        <div class="line"></div>
+      </div>
+      <div class="sig">
+        <div class="lbl">Maquinista</div>
+        <div class="line"></div>
+      </div>
+      <div class="sig">
+        <div class="lbl">Fecha</div>
+        <div class="line"></div>
+      </div>
+    </div>
+
+    <div class="pedido-table">
+      <div class="table-title">Líneas de pedido (ejemplo)</div>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th style="width:34px">OK</th>
+              <th>Perfil</th>
+              <th style="width:110px">Largo</th>
+              <th style="width:80px">Uds</th>
+              <th>Proceso</th>
+              <th style="width:140px">Lote/Paquete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" /></td>
+              <td>HEB 200 · S275JR</td>
+              <td>12.100</td>
+              <td>10</td>
+              <td>Corte + taladro KDP1</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" /></td>
+              <td>IPE 240 · S275JR</td>
+              <td>6.000</td>
+              <td>14</td>
+              <td>Taladro KDP1 → HGG (corte especial)</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pedido-note">
+        Subrayado manual por línea (simulación):
+        <span class="hl hl-gris"></span>
+        <span class="hl hl-rojo"></span>
+        <span class="hl hl-naranja"></span>
+        <span class="hl hl-verde"></span>
+      </div>
+    </div>
+  </div>
+</div>
