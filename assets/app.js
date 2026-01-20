@@ -19,6 +19,9 @@
     me: { usuario: "", rol: "" },
     perms: null,
     boot: null,
+    ui: {
+      planMachine: ""
+    },
     data: {
       equipos: null,
       gruas: null,
@@ -271,6 +274,8 @@
   function pageLabel(page) {
     const map = {
       planificacion: "Planificación",
+      pedidos: "Pedidos",
+      pedido_kdp1_demo: "Pedido · KDP1 (demo)",
       equipos: "Equipos",
       gruas: "Puentes grúa",
       auxiliares: "Auxiliares",
@@ -915,9 +920,333 @@
   }
 
   // ---------- Init por página ----------
+
+
+  // ---------- Demo · Pedidos (sin datos) ----------
+  function demoEquiposProductivos() {
+    return [
+      { grupo: "Línea Kaltenbach", items: ["Sierra KBS", "KDP1", "KDP3", "Área de granalla y pintura"] },
+      { grupo: "Láser", items: ["Láser T12-2", "Láser T12-1", "Láser T7-1", "Láser T7-2", "Láser T11-1", "Láser T11-2"] },
+      { grupo: "Equipos independientes", items: ["KDM", "Sierra de paquetes", "HGG Perfilado térmico", "TECOI (THOR)", "Mazak FG-400 NEO"] }
+    ];
+  }
+
+  function initPedidos() {
+    const host = document.querySelector('#pedidosHost');
+    if (!host) return;
+
+    const groups = demoEquiposProductivos();
+    host.innerHTML = groups.map(g => {
+      const lis = g.items.map(name => {
+        const isKdp1 = name === 'KDP1';
+        return `
+          <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+            <div class="fw-semibold">${escapeHtml(name)}</div>
+            <button type="button" class="btn btn-sm ${isKdp1 ? 'btn-primary' : 'btn-outline-secondary'}" ${isKdp1 ? '' : 'disabled'} data-demo-kdp1="${isKdp1 ? '1' : '0'}">
+              ${isKdp1 ? 'Abrir demo' : 'Vacío'}
+            </button>
+          </li>
+        `;
+      }).join('');
+      return `
+        <div class="card shadow-sm mb-3">
+          <div class="card-body">
+            <div class="fw-bold mb-2">${escapeHtml(g.grupo)}</div>
+            <ul class="list-group list-group-flush">${lis}</ul>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const btns = document.querySelectorAll('[data-demo-kdp1="1"]');
+    btns.forEach(btn => {
+      if (!once(btn, 'init')) return;
+      btn.addEventListener('click', async () => {
+        try { await openPage('pedido_kdp1_demo'); }
+        catch(e){ showAlert(e.message || e, 'danger'); }
+      });
+    });
+  }
+
+  function initPedidoKdp1Demo() {
+    const back = document.querySelector('#btnBackPedidos');
+    if (back && once(back, 'init')) {
+      back.addEventListener('click', async () => {
+        try { await openPage('pedidos'); }
+        catch(e){ showAlert(e.message || e, 'danger'); }
+      });
+    }
+  }
+
+  // ---------- Planificación (real: lee Sheets) + acciones demo ----------
+  const PLAN_ESTADOS = ["blanco", "azul", "amarillo", "verde", "rojo"];
+  const PLAN_ESTADO_BTN = {
+    blanco: { cls: "btn-light", label: "Programado" },
+    azul: { cls: "btn-primary", label: "Alimentado" },
+    amarillo: { cls: "btn-warning", label: "En prod." },
+    verde: { cls: "btn-success", label: "Completado" },
+    rojo: { cls: "btn-danger", label: "Incidencia" }
+  };
+
+  function planNormEstado(v) {
+    const s = normStr(v);
+    if (!s) return "";
+    if (s === "programado" || s === "blanco") return "blanco";
+    if (s === "alimentado" || s === "azul") return "azul";
+    if (s === "produccion" || s === "en produccion" || s === "en_prod" || s === "amarillo") return "amarillo";
+    if (s === "completado" || s === "terminado" || s === "verde") return "verde";
+    if (s === "incidencia" || s === "parado" || s === "rojo") return "rojo";
+    return "";
+  }
+
+  function planDeriveEstado(row) {
+    const r = safeObj(row);
+    const manual = planNormEstado(r.estado);
+    if (manual) return manual;
+    const terminado = String(r.terminado || "").toLowerCase() === "true" || r.terminado === true;
+    const alimentado = String(r.alimentado || "").toLowerCase() === "true" || r.alimentado === true;
+    if (terminado) return "verde";
+    if (alimentado) return "azul";
+    return "blanco";
+  }
+
+  function planShortTs(ts) {
+    const t = String(ts || "").trim();
+    if (!t) return "—";
+    // ISO -> "YYYY-MM-DD HH:MM"
+    const m = t.replace("T", " ").replace(".000Z", "");
+    return m.slice(0, 16);
+  }
+
+  function planUniqueMachines(rows) {
+    const arr = safeArr(rows).map(safeObj);
+    return uniqSorted(arr.map(r => r.maquina || r.maq || "").filter(Boolean));
+  }
+
+  function planRenderCats(machines) {
+    const host = $("#planCats");
+    if (!host) return;
+    const ms = safeArr(machines);
+    host.innerHTML = ms.map(m => {
+      const active = state.ui.planMachine === m;
+      return `<button type="button" class="btn btn-sm ${active ? "btn-dark" : "btn-outline-secondary"} me-2 mb-2" data-plan-machine="${escapeHtml(m)}">${escapeHtml(m)}</button>`;
+    }).join("");
+
+    host.querySelectorAll("[data-plan-machine]").forEach(btn => {
+      if (!once(btn, "init")) return;
+      btn.addEventListener("click", async () => {
+        state.ui.planMachine = btn.getAttribute("data-plan-machine") || "";
+        planUpdateSelectedLabel();
+        await planLoadAndRender(false);
+      });
+    });
+  }
+
+  function planUpdateSelectedLabel() {
+    const sel = $("#planSelected");
+    if (sel) sel.textContent = state.ui.planMachine || "—";
+  }
+
+  function planRowHtml(r) {
+    const row = safeObj(r);
+    const maq = String(row.maquina || row.maq || "").trim();
+    const picking = String(row.picking || "").trim();
+    const canOpen = normStr(maq) === "kdp1"; // demo: solo KDP1
+
+    const estado = planDeriveEstado(row);
+    const st = PLAN_ESTADO_BTN[estado] || PLAN_ESTADO_BTN.blanco;
+
+    const alimentado = String(row.alimentado || "").toLowerCase() === "true" || row.alimentado === true;
+    const btnAlCls = alimentado ? "btn-outline-secondary" : "btn-outline-primary";
+    const btnAlTxt = alimentado ? "Quitar" : "Alimentado";
+
+    return `
+      <tr data-picking="${escapeHtml(picking)}" data-maquina="${escapeHtml(maq)}" data-estado="${escapeHtml(estado)}" data-alimentado="${alimentado ? "1" : "0"}" data-terminado="${(String(row.terminado||"").toLowerCase()==="true"||row.terminado===true) ? "1" : "0"}">
+        <td class="text-muted">${escapeHtml(planShortTs(row.ts))}</td>
+        <td>
+          <button type="button" class="btn btn-sm btn-primary" ${canOpen ? "" : "disabled"} data-plan-open="1">Abrir</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-sm ${st.cls} w-100" data-plan-estado="1" data-estado="${escapeHtml(estado)}" title="Cambiar estado">${escapeHtml(st.label)}</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-sm ${btnAlCls} w-100" data-plan-alimentado="1" data-alimentado="${alimentado ? "1" : "0"}">${escapeHtml(btnAlTxt)}</button>
+        </td>
+        <td><span class="fw-semibold">${escapeHtml(picking || row.id || "—")}</span></td>
+        <td>${escapeHtml(row.cliente || "—")}</td>
+        <td class="small text-muted">${escapeHtml((row.input || "") + (row.output ? ` → ${row.output}` : ""))}</td>
+        <td>${escapeHtml(row.kgs ?? "—")}</td>
+        <td class="small">${escapeHtml(row.comentarios || "")}</td>
+      </tr>
+    `;
+  }
+
+  function planApplyFilters(rows) {
+    const arr = safeArr(rows).map(safeObj);
+    const q = String($("#planSearch")?.value || "").trim().toLowerCase();
+    let out = arr;
+    if (state.ui.planMachine) {
+      out = out.filter(r => String(r.maquina || r.maq || "").trim() === state.ui.planMachine);
+    }
+    if (q) {
+      out = out.filter(r => {
+        const hay = (
+          String(r.maquina || "") + " " +
+          String(r.input || "") + " " +
+          String(r.output || "") + " " +
+          String(r.cliente || "") + " " +
+          String(r.deleg || "") + " " +
+          String(r.picking || "") + " " +
+          String(r.comentarios || "")
+        ).toLowerCase();
+        return hay.includes(q);
+      });
+    }
+    return out;
+  }
+
+  async function planLoadRows(forceReload = false) {
+    // Preferimos bootstrap (rápido). Si no viene, pedimos GET planificacion.
+    if (!forceReload && state.boot && Array.isArray(state.boot.planificacion)) {
+      return state.boot.planificacion;
+    }
+    const out = await apiGet("planificacion", { token: state.token });
+    // Back devuelve array directamente.
+    return Array.isArray(out) ? out : safeArr(out?.items);
+  }
+
+  async function planLoadAndRender(forceReload = false) {
+    const tbody = $("#planTbody");
+    if (!tbody) return;
+
+    const rows = await planLoadRows(forceReload);
+    const machines = planUniqueMachines(rows);
+
+    // Default machine (si existe): Área de granalla y pintura
+    if (!state.ui.planMachine) {
+      const def = machines.find(m => normStr(m) === normStr("Área de granalla y pintura")) || machines[0] || "";
+      state.ui.planMachine = def;
+    }
+
+    planRenderCats(machines);
+    planUpdateSelectedLabel();
+
+    const filtered = planApplyFilters(rows);
+    const count = $("#planCount");
+    if (count) count.textContent = String(filtered.length);
+
+    tbody.innerHTML = filtered.map(planRowHtml).join("");
+  }
+
+  async function planPostUpdate(picking, patch) {
+    const pk = String(picking || "").trim();
+    if (!pk) throw new Error("PICKING vacío.");
+
+    // Endpoint nuevo: res=plan fn=update
+    const body = { res: "plan", fn: "update", token: state.token, picking: pk, patch: safeObj(patch) };
+    return apiPost(body);
+  }
+
+  function planNextEstado(current) {
+    const cur = PLAN_ESTADOS.includes(current) ? current : "blanco";
+    const i = PLAN_ESTADOS.indexOf(cur);
+    return PLAN_ESTADOS[(i + 1) % PLAN_ESTADOS.length];
+  }
+
+  async function initPlanificacion() {
+    const tbody = $("#planTbody");
+    if (!tbody) return;
+
+    // Events
+    const btnReload = $("#btnPlanReload");
+    if (btnReload && once(btnReload, "init")) {
+      btnReload.addEventListener("click", async () => {
+        try { await planLoadAndRender(true); }
+        catch (e) { showAlert(e.message || e, "danger"); }
+      });
+    }
+
+    const search = $("#planSearch");
+    if (search && once(search, "init")) {
+      search.addEventListener("input", async () => {
+        try { await planLoadAndRender(false); }
+        catch (e) { showAlert(e.message || e, "danger"); }
+      });
+    }
+
+    // Delegación de eventos sobre la tabla
+    if (once(tbody, "init")) {
+      tbody.addEventListener("click", async (ev) => {
+        const tr = ev.target.closest("tr[data-picking]");
+        if (!tr) return;
+        const picking = tr.getAttribute("data-picking") || "";
+        const maq = tr.getAttribute("data-maquina") || "";
+
+        // Abrir demo
+        if (ev.target.closest("[data-plan-open]")) {
+          if (normStr(maq) !== "kdp1") return;
+          try { await openPage("pedido_kdp1_demo"); }
+          catch (e) { showAlert(e.message || e, "danger"); }
+          return;
+        }
+
+        // Cambiar estado (ciclo de colores)
+        if (ev.target.closest("[data-plan-estado]")) {
+          const btn = ev.target.closest("[data-plan-estado]");
+          const cur = planNormEstado(btn?.getAttribute("data-estado") || tr.getAttribute("data-estado") || "blanco") || "blanco";
+          const next = planNextEstado(cur);
+          try {
+            await planPostUpdate(picking, { estado: next });
+            await planLoadAndRender(true);
+          } catch (e) {
+            showAlert(
+              (e.message || e) + "\n\nSi te dice que no existe el endpoint, falta pegar el Code.gs con plan_update.",
+              "danger"
+            );
+          }
+          return;
+        }
+
+        // Alimentado (toggle)
+        if (ev.target.closest("[data-plan-alimentado]")) {
+          const btn = ev.target.closest("[data-plan-alimentado]");
+          const curVal = (btn?.getAttribute("data-alimentado") || tr.getAttribute("data-alimentado") || "0") === "1";
+          const nextVal = !curVal;
+
+          const patch = { alimentado: nextVal, ultima_accion: "almacen" };
+          // Si marcamos alimentado y no hay estado manual, ponemos azul por defecto
+          // Si marcamos alimentado y el estado estaba en blanco, lo ponemos azul (si era rojo/amarillo/verde, lo respetamos)
+          const curEstado = planNormEstado(tr.getAttribute("data-estado") || "") || "blanco";
+          if (nextVal && curEstado === "blanco") patch.estado = "azul";
+          if (!nextVal && (curEstado === "azul")) patch.estado = "blanco";
+
+          try {
+            await planPostUpdate(picking, patch);
+            await planLoadAndRender(true);
+          } catch (e) {
+            showAlert(
+              (e.message || e) + "\n\nSi te dice que no existe el endpoint, falta pegar el Code.gs con plan_update.",
+              "danger"
+            );
+          }
+        }
+      });
+    }
+
+    // First render
+    try {
+      await planLoadAndRender(false);
+    } catch (e) {
+      showAlert(e.message || e, "danger");
+    }
+  }
+
+
+
   async function initPage(page) {
     if (!state.token) return;
 
+    if (page === "planificacion") return initPlanificacion();
     if (page === "equipos") return initEquipos();
     if (page === "gruas") return initGruas();
     if (page === "auxiliares") return initAuxiliares();
@@ -927,6 +1256,8 @@
     if (page === "externas") return initExternas();
     if (page === "ot") return initOT();
     if (page === "kpi") return initKPI();
+    if (page === "pedidos") return initPedidos();
+    if (page === "pedido_kdp1_demo") return initPedidoKdp1Demo();
   }
 
   // ---------- Bootstrap ----------
@@ -951,9 +1282,17 @@
 
     setHeaderUser();
     updateAuthUi();
-    buildMenu(state.perms.pages);
-
     const pages = state.perms.pages || [];
+
+    // Demo visual: añadimos "Pedidos" al menú sin depender del backend
+    const menuPages = Array.isArray(pages) ? pages.slice() : [];
+    if (!menuPages.includes("pedidos")) {
+      const i = menuPages.indexOf("planificacion");
+      if (i >= 0) menuPages.splice(i + 1, 0, "pedidos");
+      else menuPages.push("pedidos");
+    }
+
+    buildMenu(menuPages);
     const defaultPage = pages.includes("planificacion") ? "planificacion" : (pages[0] || "");
     if (defaultPage) await openPage(defaultPage);
 
