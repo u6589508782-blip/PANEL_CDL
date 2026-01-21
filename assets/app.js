@@ -56,23 +56,23 @@
   function normEstado(v) {
     const s = normStr(v);
     if (!s) return "";
-    if (s === "verde" || s === "marcha") return "marcha";
+    if (s === "verde" || s === "marcha" || s === "operativo" || s === "ok") return "marcha";
     if (s === "amarillo" || s === "restriccion") return "restriccion";
-    if (s === "rojo" || s === "parada") return "parada";
-    if (s === "azul" || s === "reparacion") return "reparacion";
+    if (s === "rojo" || s === "parada" || s === "parado" || s === "stop") return "parada";
+    if (s === "azul" || s === "reparacion" || s === "mantenimiento" || s === "averia") return "reparacion";
     return s;
   }
 
   function estadoBadge(estado) {
     const e = normEstado(estado);
     const map = {
-      marcha: { cls: "bg-success", label: "Verde · Marcha" },
-      restriccion: { cls: "bg-warning text-dark", label: "Amarillo · Restricción" },
-      parada: { cls: "bg-danger", label: "Rojo · Parada" },
-      reparacion: { cls: "bg-primary", label: "Azul · Reparación" }
+      marcha: { cls: "estado-chip estado-marcha", label: "Operativo" },
+      restriccion: { cls: "estado-chip estado-restriccion", label: "Restricción" },
+      parada: { cls: "estado-chip estado-parada", label: "Parada" },
+      reparacion: { cls: "estado-chip estado-reparacion", label: "Reparación" }
     };
-    const x = map[e] || { cls: "bg-secondary", label: e ? `Estado · ${e}` : "Sin estado" };
-    return `<span class="badge ${x.cls}">${escapeHtml(x.label)}</span>`;
+    const x = map[e] || { cls: "estado-chip estado-unknown", label: e ? String(e) : "Sin estado" };
+    return `<span class="${x.cls}">${escapeHtml(x.label)}</span>`;
   }
 
   function uniqSorted(arr) {
@@ -382,8 +382,7 @@
                 <div>
                   <div class="fw-semibold">${escapeHtml(x.nombre || x.id || "(sin nombre)")}</div>
                   <div class="small text-muted">ID: ${escapeHtml(x.id || "—")} · Línea: ${escapeHtml(x.linea || "—")}</div>
-                  <div class="small text-muted">Ubicación: ${escapeHtml(x.ubicacion || "—")} · Nave: ${escapeHtml(x.nave || "—")}</div>
-                </div>
+                  </div>
                 <div>${estadoBadge(xSem)}</div>
               </div>
             </div>
@@ -462,88 +461,7 @@
               <div>
                 <div class="fw-semibold">${escapeHtml(x.nombre || x.id || "(sin nombre)")}</div>
                 <div class="small text-muted">ID: ${escapeHtml(x.id || "—")} · Nave: ${escapeHtml(x.nave || "—")}</div>
-                <div class="small text-muted">Ubicación: ${escapeHtml(x.ubicacion || "—")}</div>
-              </div>
-              <div>${estadoBadge(xSem)}</div>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  async function initGruas() {
-    const host = $("#grContent");
-    if (!host) return;
-
-    host.innerHTML = `<div class="text-muted">Cargando...</div>`;
-    const list = await ensureList("gruas");
-
-    const naveSel = $("#grNave");
-    if (naveSel && once(naveSel, "init")) {
-      const naves = uniqSorted(safeArr(list).map((x) => safeObj(x).nave).filter(Boolean));
-      setSelectOptions(naveSel, naves, "Todas las naves");
-      naveSel.addEventListener("change", () => renderGruas(list));
-    }
-
-    const semSel = $("#grSemFilter");
-    if (semSel && once(semSel, "init")) {
-      semSel.addEventListener("change", () => renderGruas(list));
-    }
-
-    const search = $("#grSearch");
-    if (search && once(search, "init")) {
-      search.addEventListener("input", () => renderGruas(list));
-    }
-
-    const btn = $("#btnGrRefresh");
-    if (btn && once(btn, "init")) {
-      btn.addEventListener("click", async () => {
-        try {
-          state.data.gruas = null;
-          await initGruas();
-        } catch (e) {
-          showAlert(e.message || e, "danger");
-        }
-      });
-    }
-
-    renderGruas(list);
-  }
-
-  // Auxiliares
-  function renderAuxiliares(list) {
-    const host = $("#axContent");
-    if (!host) return;
-
-    const catSel = $("#axCategoria");
-    const semSel = $("#axSemFilter");
-    const q = normStr($("#axSearch")?.value || "");
-    const cat = String(catSel?.value || "").trim();
-    const sem = normEstado(semSel?.value || "");
-
-    const arr = safeArr(list).map(safeObj);
-    const filtered = arr.filter((x) => {
-      const xCat = String(x.grupo || x.linea || "").trim();
-      const xSem = normEstado(x.estado || x.Estado || x["Estado "]);
-      const okCat = !cat || xCat === cat;
-      const okSem = !sem || xSem === sem;
-      const okQ = !q || normStr(`${x.id} ${x.nombre} ${xCat} ${x.ubicacion || ""} ${x.nave || ""}`).includes(q);
-      return okCat && okSem && okQ;
-    });
-
-    host.innerHTML = filtered.map((x) => {
-      const xSem = normEstado(x.estado || x.Estado || x["Estado "]);
-      const xCat = String(x.grupo || x.linea || "").trim();
-      return `
-        <div class="card shadow-sm mb-2">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start gap-2">
-              <div>
-                <div class="fw-semibold">${escapeHtml(x.nombre || x.id || "(sin nombre)")}</div>
-                <div class="small text-muted">ID: ${escapeHtml(x.id || "—")} · Categoría: ${escapeHtml(xCat || "—")}</div>
-                <div class="small text-muted">Ubicación: ${escapeHtml(x.ubicacion || "—")} · Nave: ${escapeHtml(x.nave || "—")}</div>
-              </div>
+                </div>
               <div>${estadoBadge(xSem)}</div>
             </div>
           </div>
@@ -1346,6 +1264,22 @@
         if (off) off.show();
       });
     }
+
+    const menuSearch = $("#menuSearch");
+    if (menuSearch && once(menuSearch, "init")) {
+      const applyFilter = () => {
+        const q = normStr(menuSearch.value || "");
+        document.querySelectorAll("#menuItems .list-group-item").forEach((li) => {
+          const txt = normStr(li.textContent || "");
+          li.style.display = (!q || txt.includes(q)) ? "" : "none";
+        });
+      };
+      menuSearch.addEventListener("input", applyFilter);
+      // Limpia al abrir el menú
+      const side = $("#sideMenu");
+      if (side) side.addEventListener("shown.bs.offcanvas", () => { menuSearch.value = ""; applyFilter(); });
+    }
+
 
     const btnShowLogin = $("#btnShowLogin");
     if (btnShowLogin) {
