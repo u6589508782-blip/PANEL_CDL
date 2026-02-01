@@ -1,0 +1,66 @@
+<div class="container py-3">
+  <h1 class="h4 mb-2">Planificación</h1>
+  <p class="text-muted mb-3">Hoja <b>planificacion</b> (datos) + hoja <b>equipos</b> (línea).</p>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div id="planCats" class="mb-3"></div>
+
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Máquina seleccionada</label>
+
+          <!-- OJO: antes era <input>. Ahora es <div> para que app.js (textContent) se vea -->
+          <div id="planSelected" class="form-control" style="min-height: 38px; display:flex; align-items:center;">
+            —
+          </div>
+
+          <div id="planInfo" class="small text-muted mt-2"></div>
+        </div>
+
+        <div class="col-12 col-md-6 text-md-end">
+          <button id="btnPlanReplace" class="btn btn-outline-primary btn-sm me-2">
+            Sustituir planificación completa (admin)
+          </button>
+          <button id="btnPlanReload" class="btn btn-primary btn-sm">
+            Recargar
+          </button>
+          <div id="planReplaceHint" class="small text-muted mt-2"></div>
+        </div>
+      </div>
+
+      <hr class="my-3" />
+
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Buscar</label>
+          <input id="planSearch" class="form-control" placeholder="pedido, cliente, perfil, observaciones..." />
+        </div>
+        <div class="col-12 col-md-6 text-md-end">
+          <div class="small text-muted">Filas: <span id="planCount">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+	            <th>Fecha</th>
+	            <th style="width:80px">Abrir</th>
+	            <th style="width:120px">Estado</th>
+	            <th style="width:140px">Alimentado</th>
+	            <th>Pedido</th>
+	            <th>Cliente</th>
+	            <th>Perfil</th>
+	            <th>Cantidad</th>
+	            <th>Observaciones</th>
+          </tr>
+        </thead>
+        <tbody id="planTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>

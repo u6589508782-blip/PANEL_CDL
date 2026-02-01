@@ -1,0 +1,31 @@
+<div class="container py-3">
+  <h1 class="h4 mb-2">Equipos</h1>
+  <p class="text-muted mb-3">Tarjetas por equipo. El semáforo indica el estado comunicado.</p>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Línea</label>
+          <select id="eqLinea" class="form-select"></select>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Semáforo</label>
+          <select id="eqSemFilter" class="form-select">
+            <option value="">Todos</option>
+            <option value="marcha">Verde</option>
+            <option value="restriccion">Amarillo</option>
+            <option value="parada">Rojo</option>
+            <option value="reparacion">Azul</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4 d-flex gap-2">
+          <input id="eqSearch" class="form-control" placeholder="Buscar...">
+          <button id="btnEqRefresh" class="btn btn-outline-secondary">↻</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="eqGrid" class="row g-3"></div>
+</div>

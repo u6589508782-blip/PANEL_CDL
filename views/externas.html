@@ -1,0 +1,64 @@
+<div class="container py-3">
+  <div class="d-flex align-items-center justify-content-between mb-2">
+    <h1 class="h4 m-0">Externas</h1>
+    <button id="btnExNew" class="btn btn-primary">Nueva solicitud</button>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="d-flex gap-2 align-items-center">
+        <input id="exSearch" class="form-control" placeholder="Buscar por equipo, proveedor, nota...">
+        <select id="exEstado" class="form-select" style="max-width:220px;">
+          <option value="">Todos</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="aprobada">Aprobada</option>
+          <option value="rechazada">Rechazada</option>
+          <option value="cerrada">Cerrada</option>
+        </select>
+        <button id="btnExReload" class="btn btn-outline-secondary">Recargar</button>
+        <span id="exCount" class="badge text-bg-secondary">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="exGrid"></div>
+
+  <div class="modal fade" id="modalExNew" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva externa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2"><label class="form-label">Equipo</label><input id="exEquipo" class="form-control"></div>
+          <div class="mb-2"><label class="form-label">Proveedor</label><input id="exProveedor" class="form-control"></div>
+          <div class="mb-2"><label class="form-label">Fecha</label><input id="exFecha" class="form-control" placeholder="YYYY-MM-DD"></div>
+          <div class="mb-2"><label class="form-label">Estado equipo</label><input id="exEstadoEquipo" class="form-control" placeholder="verde/amarillo/rojo/azul"></div>
+          <div class="mb-2"><label class="form-label">Nota</label><textarea id="exNota" class="form-control" rows="5"></textarea></div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnExCreate" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalExReject" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Rechazar externa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input id="exRejectId" class="form-control mb-2" placeholder="ID" readonly>
+          <textarea id="exRejectMotivo" class="form-control" rows="4" placeholder="Motivo"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button id="btnExReject" class="btn btn-danger">Rechazar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
