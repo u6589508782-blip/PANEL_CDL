@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CDL · CMMS</title>
+
+  <!-- Bootstrap (necesario para Offcanvas y Modal) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+  <!-- Estilos corporativos -->
+  <link rel="stylesheet" href="assets/style.css" />
+
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Iconos -->
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button id="btnMenu" class="header-icon" type="button" aria-label="Menú">☰</button>
+    </div>
+
+    <div class="header-center">
+      <img src="logo-cdl.png" alt="CDL" class="logo-cdl" />
+    </div>
+
+    <!-- Usuario / sesión -->
+    <div class="header-right dropdown">
+      <button id="btnOpenLogin" class="header-user dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <span id="meUser">Usuario</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li class="dropdown-item-text">
+          Rol: <strong id="badgeRole">—</strong>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+
+        <!-- Visible cuando NO hay sesión -->
+        <li id="liLogin">
+          <button id="btnShowLogin" class="dropdown-item" type="button">Entrar</button>
+        </li>
+
+        <!-- Visible cuando SÍ hay sesión -->
+        <li id="liLogout">
+          <button id="btnLogout" class="dropdown-item" type="button">Cerrar sesión</button>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Alertas -->
+  <div id="appAlert" class="container mt-3"></div>
+
+  <!-- Offcanvas menú lateral -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="sideMenu" aria-labelledby="sideMenuLabel">
+    <div class="offcanvas-header">
+      <div class="menu-header">
+        <div class="menu-title" id="sideMenuLabel">Menú</div>
+        <input id="menuSearch" class="form-control form-control-sm menu-search" placeholder="Buscar...">
+      </div>
+      <button type="button" class="btn-close menu-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+      <ul id="menuItems" class="list-group list-group-flush"></ul>
+</div>
+  </div>
+
+  <!-- Contenedor de vistas -->
+  <main id="viewHost" class="view-host"></main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <img src="conjunto.webp" alt="CDL · Equipos" class="footer-conjunto" />
+  </footer>
+
+  <!-- API_BASE (único sitio donde debe estar) -->
+  <script>
+    window.API_BASE = "https://script.google.com/macros/s/AKfycbws1_cbUS2aTKC6sogWXhCzul9aHQzgvNH16L33sUxxB_upasTe5oK3DJHVc-07nDn6/exec";
+  </script>
+
+  <!-- Bootstrap bundle -->
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- App -->
+  <script defer src="assets/app.js"></script>
+
+  <!-- Login modal (requerido por app.js) -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Acceso de usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <label class="form-label">Usuario</label>
+            <input id="loginUser" class="form-control" autocomplete="username" />
+          </div>
+
+          <div class="mb-2 pw-wrap">
+            <label class="form-label">Contraseña</label>
+            <input id="loginPass" class="form-control" type="password" autocomplete="current-password" />
+            <button id="btnTogglePass" class="pw-eye" type="button" aria-label="Ver/ocultar contraseña">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
+
+          <button id="btnToggleChangePass" class="btn btn-cdl w-100 mt-2" type="button">Cambiar contraseña</button>
+
+          <div id="changePassBox" class="pw-change d-none">
+            <div class="mb-2">
+              <label class="form-label">Contraseña antigua</label>
+              <input id="oldPass" class="form-control" type="password" autocomplete="current-password" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Nueva contraseña</label>
+              <input id="newPass" class="form-control" type="password" autocomplete="new-password" />
+            </div>
+            <button id="btnChangePass" class="btn btn-cdl w-100" type="button">Aplicar cambio</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-light" data-bs-dismiss="modal" type="button">Salir</button>
+          <button id="btnLogin" class="btn btn-cdl" type="button">Acceder</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      });
+    }
+  </script>
+
+</body>
+</html>
